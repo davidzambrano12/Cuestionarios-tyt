@@ -1,0 +1,47 @@
+{% load static %}
+<!-- Plantilla independiente, lista para probar. Si ya tienes un base.html
+     en tu proyecto, cámbiala por un extends de tu base y mueve este
+     contenido dentro de tu bloque de contenido. -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Importar preguntas</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 720px; margin: 40px auto; color: #222; }
+        .ayuda { background: #EAF5EA; border: 1px solid #2E7D32; padding: 12px 16px; border-radius: 6px; }
+        button { background: #1F4E78; color: #fff; border: none; padding: 10px 18px; border-radius: 4px; cursor: pointer; }
+        .errores { color: #B00000; }
+    </style>
+</head>
+<body>
+    <h1>Importar preguntas desde Excel</h1>
+
+    <div class="ayuda">
+        <p>Sube el archivo con el formato de la plantilla (hoja <code>preguntas</code>,
+        columnas: categoria, tipo, texto_base, pregunta, opcion_a..d,
+        respuesta_correcta, retroalimentacion, puntaje).</p>
+        <p><a href="{% static 'plantillas/plantilla_preguntas_simulador_tyt.xlsx' %}">
+            Descargar plantilla de Excel
+        </a></p>
+    </div>
+
+    {% if messages %}
+        {% for m in messages %}<p>{{ m }}</p>{% endfor %}
+    {% endif %}
+
+    {% if form.errors %}
+        <ul class="errores">
+            {% for field, errs in form.errors.items %}
+                {% for e in errs %}<li>{{ field }}: {{ e }}</li>{% endfor %}
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Validar archivo</button>
+    </form>
+</body>
+</html>

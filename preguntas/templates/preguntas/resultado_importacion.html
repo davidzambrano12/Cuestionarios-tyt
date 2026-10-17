@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Importación completada</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 720px; margin: 40px auto; color: #222; }
+        .ok { background: #EAF5EA; border: 1px solid #2E7D32; padding: 16px; border-radius: 6px; }
+    </style>
+</head>
+<body>
+    <h1>Importación #{{ resultado.importacion_id }} completada</h1>
+    <div class="ok">
+        <p><strong>Archivo:</strong> {{ resultado.nombre_archivo }}</p>
+        <p><strong>Guardadas:</strong> {{ resultado.validas|length }}</p>
+        <p><strong>Duplicadas (no guardadas):</strong> {{ resultado.duplicadas|length }}</p>
+        <p><strong>Con error (no guardadas):</strong> {{ resultado.con_error|length }}</p>
+        <p><strong>Resultado:</strong> {{ resultado.resultado_global }}</p>
+    </div>
+    <p><a href="{% url 'preguntas:importar' %}">Importar otro archivo</a></p>
+</body>
+</html>
