@@ -118,6 +118,92 @@ def crear_pregunta(request):
 
 @login_required
 @requiere_permiso("preguntas.gestionar")
+def editar_pregunta(request, pregunta_id):
+    """Permite consultar y actualizar una pregunta existente en el banco."""
+    pregunta = get_object_or_404(Pregunta, id=pregunta_id)
+
+    if request.method == "POST":
+        categoria_id = request.POST.get("categoria_id")
+        tipo = request.POST.get("tipo", pregunta.tipo)
+        texto_base = request.POST.get("texto_base", "").strip() or None
+        enunciado = request.POST.get("enunciado", "").strip()
+        puntaje_val = request.POST.get("puntaje", "1.00")
+        retroalimentacion = request.POST.get("retroalimentacion", "").strip() or None
+
+        try:
+            puntaje = Decimal(puntaje_val)
+        except Exception:
+            puntaje = Decimal("1.00")
+
+        opciones_data = []
+        if tipo == Pregunta.TIPO_MULTIPLE:
+            op_a = request.POST.get("opcion_a", "").strip()
+            op_b = request.POST.get("opcion_b", "").strip()
+            op_c = request.POST.get("opcion_c", "").strip()
+            op_d = request.POST.get("opcion_d", "").strip()
+            correcta = request.POST.get("correcta", "A")
+
+            opciones_data = [
+                (op_a, correcta == "A", 1),
+                (op_b, correcta == "B", 2),
+                (op_c, correcta == "C", 3),
+                (op_d, correcta == "D", 4),
+            ]
+        else:
+            correcta_vf = request.POST.get("correcta_vf", "V")
+            opciones_data = [
+                ("Verdadero", correcta_vf == "V", 1),
+                ("Falso", correcta_vf == "F", 2),
+            ]
+
+        # Validar huella de duplicados excluyendo la pregunta actual
+        textos_opciones = [o[0] for o in opciones_data]
+        huella = calcular_huella(enunciado, textos_opciones)
+
+        if Pregunta.objects.filter(huella_contenido=huella).exclude(id=pregunta.id).exists():
+            messages.error(request, "Error de duplicidad: Ya existe otra pregunta con el mismo contenido.")
+            return redirect("/preguntas/")
+
+        with transaction.atomic():
+            categoria = Categoria.objects.get(id=categoria_id)
+            pregunta.categoria = categoria
+            pregunta.tipo = tipo
+            pregunta.texto_base = texto_base
+            pregunta.enunciado = enunciado
+            pregunta.retroalimentacion = retroalimentacion
+            pregunta.puntaje = puntaje
+            pregunta.huella_contenido = huella
+            pregunta.save()
+
+            # Actualizar opciones
+            pregunta.opciones.all().delete()
+            for texto_op, es_corr, ord_num in opciones_data:
+                OpcionRespuesta.objects.create(
+                    pregunta=pregunta,
+                    texto=texto_op,
+                    es_correcta=es_corr,
+                    orden=ord_num,
+                )
+
+        messages.success(request, f"Pregunta #{pregunta.id} actualizada exitosamente.")
+        return redirect("/preguntas/")
+
+    # Respuesta JSON para cargar en modal vía AJAX
+    opciones = list(pregunta.opciones.order_by("orden", "id").values("id", "texto", "es_correcta", "orden"))
+    return JsonResponse({
+        "id": pregunta.id,
+        "categoria_id": pregunta.categoria_id,
+        "tipo": pregunta.tipo,
+        "texto_base": pregunta.texto_base or "",
+        "enunciado": pregunta.enunciado,
+        "puntaje": str(pregunta.puntaje),
+        "retroalimentacion": pregunta.retroalimentacion or "",
+        "opciones": opciones,
+    })
+
+
+@login_required
+@requiere_permiso("preguntas.gestionar")
 def toggle_pregunta_estado(request, pregunta_id):
     """Activa o desactiva un reactivo en el banco."""
     if request.method == "POST":

@@ -251,6 +251,58 @@
   </div>
 </div>
 
+<!-- MODAL: EDITAR USUARIO -->
+<div id="modal-editar-usuario" class="modal-backdrop">
+  <div class="modal-box">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
+      <div>
+        <h3 style="font-size:18px; font-weight:800; color:#0f172a;">Editar Usuario Institucional</h3>
+        <div id="editar-usuario-subtitulo" style="font-size:12px; color:#0284c7; font-weight:600;"></div>
+      </div>
+      <button onclick="closeModal('modal-editar-usuario')" style="background:none; border:none; font-size:20px; cursor:pointer;">&times;</button>
+    </div>
+
+    <form id="form-editar-usuario" method="POST" action="">
+      {% csrf_token %}
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+        <div class="form-group">
+          <label class="form-label">Nombres</label>
+          <input type="text" name="first_name" id="editar-user-nombre" required class="form-input">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Apellidos</label>
+          <input type="text" name="last_name" id="editar-user-apellido" required class="form-input">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Correo Institucional</label>
+        <input type="email" name="email" id="editar-user-email" required class="form-input">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Rol Institucional</label>
+        <select name="rol_id" id="editar-user-rol" required class="form-select">
+          {% for r in roles %}
+          <option value="{{ r.id }}">{{ r.nombre }} ({{ r.codigo }})</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Código Institucional</label>
+        <input type="text" name="codigo_institucional" id="editar-user-codigo" class="form-input">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Cambiar Contraseña (Dejar en blanco para mantener la actual)</label>
+        <input type="password" name="password" class="form-input" placeholder="Nueva contraseña opcional...">
+      </div>
+
+      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:24px;">
+        <button type="button" onclick="closeModal('modal-editar-usuario')" class="btn btn-outline">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Actualizar Usuario</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <!-- MODAL: NUEVO ROL -->
 <div id="modal-nuevo-rol" class="modal-backdrop">
   <div class="modal-box">
@@ -412,8 +464,16 @@
   }
 
   function editarUsuario(id, nombre, apellido, email, rolId, codigo) {
-    // Abrir modal o permitir edición
-    alert(`Editar usuario ID #${id}: ${nombre} ${apellido}`);
+    document.getElementById('form-editar-usuario').action = `/usuarios/${id}/editar/`;
+    document.getElementById('editar-usuario-subtitulo').textContent = `Usuario ID #${id} · ${nombre} ${apellido}`;
+    document.getElementById('editar-user-nombre').value = nombre || '';
+    document.getElementById('editar-user-apellido').value = apellido || '';
+    document.getElementById('editar-user-email').value = email || '';
+    document.getElementById('editar-user-codigo').value = codigo || '';
+    if (rolId) {
+      document.getElementById('editar-user-rol').value = rolId;
+    }
+    openModal('modal-editar-usuario');
   }
 </script>
 {% endblock %}

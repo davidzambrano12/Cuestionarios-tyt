@@ -46,7 +46,7 @@
           <div class="form-group" style="margin-bottom:14px;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
               <label class="form-label" style="margin-bottom:0; font-size:13px; font-weight:600; color:#334155;">Contraseña</label>
-              <a href="#" onclick="alert('Por favor contacte a la Dirección de Sistemas: soporte.sistemas@uniputumayo.edu.co'); return false;" style="font-size:12px; color:#186382; font-weight:600;">¿Olvidó su clave?</a>
+              <a href="#" onclick="mostrarNotificacion('Por favor contacte a la Dirección de Sistemas: soporte.sistemas@uniputumayo.edu.co', 'info', 'Recuperación de Clave'); return false;" style="font-size:12px; color:#186382; font-weight:600;">¿Olvidó su clave?</a>
             </div>
             <div style="position:relative;">
               <span style="position:absolute; left:14px; top:50%; transform:translateY(-50%); color:#94a3b8; font-size:16px;">🔒</span>
@@ -135,7 +135,11 @@
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.detail || data.non_field_errors || 'Credenciales incorrectas o cuenta inactiva.');
+        let msg = data.detail || data.non_field_errors || 'Credenciales incorrectas o cuenta inactiva.';
+        if (typeof msg === 'string' && (msg.includes('No active account') || msg.includes('credentials'))) {
+          msg = 'Credenciales incorrectas: No se encontró ninguna cuenta activa con los datos ingresados.';
+        }
+        throw new Error(msg);
       }
 
       // 2. Guardar tokens JWT en localStorage
@@ -155,6 +159,9 @@
     } catch (err) {
       errorBox.innerText = err.message;
       errorBox.style.display = 'block';
+      if (typeof mostrarNotificacion === 'function') {
+        mostrarNotificacion(err.message, 'error', 'Error de Autenticación');
+      }
       btn.disabled = false;
       btn.innerText = 'Iniciar Sesión →';
     }

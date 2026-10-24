@@ -224,6 +224,36 @@ def crear_usuario_view(request):
 
 
 @login_required
+@requiere_permiso("usuarios.editar")
+def editar_usuario_view(request, user_id):
+    """Actualiza la información institucional y rol de un usuario."""
+    user_obj = get_object_or_404(User, id=user_id)
+    if request.method == "POST":
+        first_name = request.POST.get("first_name", "").strip()
+        last_name = request.POST.get("last_name", "").strip()
+        email = request.POST.get("email", "").strip()
+        rol_id = request.POST.get("rol_id")
+        codigo = request.POST.get("codigo_institucional", "").strip()
+        nueva_password = request.POST.get("password", "").strip()
+
+        user_obj.first_name = first_name
+        user_obj.last_name = last_name
+        user_obj.email = email
+        if nueva_password:
+            user_obj.set_password(nueva_password)
+        user_obj.save()
+
+        perfil, _ = PerfilUsuario.objects.get_or_create(user=user_obj)
+        if rol_id:
+            perfil.rol = Rol.objects.filter(id=rol_id).first()
+        perfil.codigo_institucional = codigo or user_obj.username
+        perfil.save()
+
+        messages.success(request, f"Datos del usuario '{user_obj.get_full_name() or user_obj.username}' actualizados exitosamente.")
+    return redirect("/usuarios/")
+
+
+@login_required
 @requiere_permiso("usuarios.activar_desactivar")
 def toggle_usuario_estado_view(request, user_id):
     """Suspende o reactiva el acceso de un usuario."""

@@ -17,22 +17,30 @@
 </head>
 <body>
 
-  <!-- Mensajes flash de Django -->
-  {% if messages %}
-  <div style="position:fixed; top:20px; right:20px; z-index:9999; display:flex; flex-direction:column; gap:10px; max-width:400px;">
-    {% for message in messages %}
-    <div class="badge {% if message.tags == 'error' %}badge-danger{% elif message.tags == 'success' %}badge-success{% else %}badge-info{% endif %}" 
-         style="padding:12px 18px; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.15); font-size:14px; display:flex; justify-content:space-between; align-items:center;">
-      <span>{{ message }}</span>
-      <button onclick="this.parentElement.remove()" style="background:none; border:none; margin-left:12px; cursor:pointer; font-weight:bold; font-size:16px;">&times;</button>
-    </div>
-    {% endfor %}
+  <!-- Contenedor de Toasts Modernos -->
+  <div id="toast-container">
+    {% if messages %}
+      {% for message in messages %}
+      <div class="toast-item {% if message.tags == 'error' %}toast-error{% elif message.tags == 'success' %}toast-success{% elif message.tags == 'warning' %}toast-warning{% else %}toast-info{% endif %}" id="toast-msg-{{ forloop.counter }}">
+        <div class="toast-icon-box">
+          {% if message.tags == 'error' %}✕{% elif message.tags == 'success' %}✓{% elif message.tags == 'warning' %}⚠{% else %}ℹ{% endif %}
+        </div>
+        <div class="toast-content">
+          <div class="toast-title">
+            {% if message.tags == 'error' %}Error en la operación{% elif message.tags == 'success' %}¡Operación Exitosa!{% elif message.tags == 'warning' %}Advertencia del Sistema{% else %}Aviso Institucional{% endif %}
+          </div>
+          <div class="toast-message">{{ message }}</div>
+        </div>
+        <button class="toast-close-btn" onclick="cerrarToast(this.closest('.toast-item'))" title="Cerrar">&times;</button>
+        <div class="toast-progress" style="animation-duration: 4.5s;"></div>
+      </div>
+      {% endfor %}
+    {% endif %}
   </div>
-  {% endif %}
 
   {% block content %}{% endblock %}
 
-  <!-- Helper scripts para manejo de JWT y navegación -->
+  <!-- Helper scripts para manejo de JWT, notificaciones y navegación -->
   <script>
     // Recuperar tokens JWT
     function getAccessToken() {
@@ -44,28 +52,90 @@
       return match ? match[2] : null;
     }
 
-    // Cerrar sesión con revocación de JWT
+    // Cerrar sesión: Invalida JWT en backend y cierra la sesión Django redirigiendo a /logout/
     async function cerrarSesion() {
-      const refresh = localStorage.getItem('refresh_token');
+      const refresh = localStorage.getItem('refresh_token') || getCookie('refresh_token');
       try {
-        await fetch('/api/auth/logout/', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': '{{ csrf_token }}'
-          },
-          body: JSON.stringify({ refresh: refresh })
-        });
+        if (refresh) {
+          await fetch('/api/auth/logout/', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({ refresh: refresh })
+          });
+        }
       } catch (e) {
-        console.error(e);
+        console.error("Error al revocar JWT:", e);
       }
+      
+      // Limpiar almacenamiento local y cookies en el navegador
       localStorage.removeItem('access_token');
       localStorage.removeItem('refresh_token');
       localStorage.removeItem('user_data');
       document.cookie = "access_token=; path=/; max-age=0;";
       document.cookie = "refresh_token=; path=/; max-age=0;";
-      window.location.href = '/login/';
+      
+      // Redirigir al endpoint de Django /logout/ para destruir la sesión en el servidor y mostrar /login/
+      window.location.href = '/logout/';
     }
+
+    // Sistema de Alertas / Notificaciones Dinámicas
+    function cerrarToast(toastEl) {
+      if (!toastEl) return;
+      toastEl.classList.add('toast-closing');
+      setTimeout(() => {
+        if (toastEl.parentElement) toastEl.remove();
+      }, 300);
+    }
+
+    function mostrarNotificacion(mensaje, tipo = 'info', titulo = '') {
+      const container = document.getElementById('toast-container');
+      if (!container) return;
+
+      const titulosDefault = {
+        success: '¡Operación Exitosa!',
+        error: 'Atención / Error',
+        warning: 'Advertencia del Sistema',
+        info: 'Aviso Institucional'
+      };
+
+      const iconos = {
+        success: '✓',
+        error: '✕',
+        warning: '⚠',
+        info: 'ℹ'
+      };
+
+      const toast = document.createElement('div');
+      toast.className = `toast-item toast-${tipo}`;
+      toast.innerHTML = `
+        <div class="toast-icon-box">${iconos[tipo] || 'ℹ'}</div>
+        <div class="toast-content">
+          <div class="toast-title">${titulo || titulosDefault[tipo] || 'Notificación'}</div>
+          <div class="toast-message">${mensaje}</div>
+        </div>
+        <button class="toast-close-btn" onclick="cerrarToast(this.closest('.toast-item'))" title="Cerrar">&times;</button>
+        <div class="toast-progress" style="animation-duration: 4.5s;"></div>
+      `;
+
+      container.appendChild(toast);
+
+      // Auto-cierre tras 4.5 segundos
+      setTimeout(() => {
+        cerrarToast(toast);
+      }, 4500);
+    }
+
+    // Inicializar auto-cierre de mensajes renderizados por Django
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('#toast-container .toast-item').forEach(toast => {
+        setTimeout(() => {
+          cerrarToast(toast);
+        }, 4500);
+      });
+    });
 
     // Control de modales
     function openModal(id) {

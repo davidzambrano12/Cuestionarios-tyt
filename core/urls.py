@@ -15,6 +15,7 @@ urlpatterns = [
     # Gestión de Usuarios
     path("usuarios/", views.usuarios_roles_view, name="usuarios_roles"),
     path("usuarios/crear/", views.crear_usuario_view, name="crear_usuario"),
+    path("usuarios/<int:user_id>/editar/", views.editar_usuario_view, name="editar_usuario"),
     path("usuarios/<int:user_id>/toggle-estado/", views.toggle_usuario_estado_view, name="toggle_usuario_estado"),
 
     # Gestión de Roles y Permisos configurables

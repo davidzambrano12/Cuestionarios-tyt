@@ -51,9 +51,9 @@
           </div>
           <span style="font-size:14px; font-weight:600;">{{ user.get_full_name|default:user.username }}</span>
         </a>
-        <button onclick="cerrarSesion()" title="Cerrar Sesión" class="btn btn-outline" style="padding:6px 12px; font-size:13px; color:#b91c1c;">
+        <a href="/logout/" onclick="cerrarSesion(); return false;" title="Cerrar Sesión" class="btn btn-outline" style="padding:6px 12px; font-size:13px; color:#b91c1c; text-decoration:none; display:inline-flex; align-items:center; gap:6px;">
           🚪 Salir
-        </button>
+        </a>
       </div>
     </header>
 

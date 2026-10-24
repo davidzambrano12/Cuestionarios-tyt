@@ -98,7 +98,7 @@ DATABASES = {
         "ENGINE": "django.db.backends.mysql",
         "NAME": "simulador_tyt",
         "USER": "root",
-        "PASSWORD": "1234",
+        "PASSWORD": "1030080",
         "HOST": "127.0.0.1",
         "PORT": "3306",
         "OPTIONS": {"charset": "utf8mb4"},
@@ -128,9 +128,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/6.1/topics/i18n/
 
-LANGUAGE_CODE = "en-us"
+LANGUAGE_CODE = "es-co"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = "America/Bogota"
 
 USE_I18N = True
 

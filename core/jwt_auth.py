@@ -15,6 +15,10 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     Permite iniciar sesión con username O email institucional,
     e incluye en el payload JWT el rol y los permisos del usuario.
     """
+    default_error_messages = {
+        "no_active_account": "No se encontró ninguna cuenta activa con las credenciales ingresadas. Verifique su usuario y contraseña."
+    }
+
     def validate(self, attrs):
         username_or_email = attrs.get(self.username_field)
         password = attrs.get("password")

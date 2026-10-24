@@ -113,6 +113,9 @@
         <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid #f1f5f9; padding-top:12px;">
           <span style="font-size:11px; color:#94a3b8;">Huella SHA-256 validada</span>
           <div style="display:flex; gap:8px;">
+            <button type="button" onclick="cargarPreguntaEditar('{{ p.id }}')" class="btn btn-outline" style="padding:4px 10px; font-size:11px; color:#186382; background:#f0f9ff; border-color:#bae6fd;">
+              ✏️ Editar
+            </button>
             <form method="POST" action="/preguntas/{{ p.id }}/toggle-estado/">
               {% csrf_token %}
               {% if p.activa %}
@@ -238,6 +241,108 @@
     </form>
   </div>
 </div>
+<!-- MODAL: EDITAR PREGUNTA -->
+<div id="modal-editar-pregunta" class="modal-backdrop">
+  <div class="modal-box" style="max-width:680px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
+      <div>
+        <h3 style="font-size:18px; font-weight:800; color:#0f172a;">Editar Pregunta</h3>
+        <div id="editar-pregunta-subtitulo" style="font-size:12px; color:#0284c7; font-weight:600;"></div>
+      </div>
+      <button onclick="closeModal('modal-editar-pregunta')" style="background:none; border:none; font-size:20px; cursor:pointer;">&times;</button>
+    </div>
+
+    <form id="form-editar-pregunta" method="POST" action="">
+      {% csrf_token %}
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+        <div class="form-group">
+          <label class="form-label">Competencia / Categoría</label>
+          <select name="categoria_id" id="editar-categoria-id" required class="form-select">
+            {% for cat in categorias %}
+            <option value="{{ cat.id }}">{{ cat.nombre }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tipo de Pregunta</label>
+          <select name="tipo" id="editar-tipo-pregunta" onchange="cambiarTipoFormEditar(this.value)" class="form-select">
+            <option value="MULTIPLE">Selección Múltiple (4 opciones)</option>
+            <option value="V_F">Verdadero / Falso (2 opciones)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Texto de Apoyo / Estímulo (Opcional)</label>
+        <textarea name="texto_base" id="editar-texto-base" class="form-textarea" placeholder="Fragmento de lectura, contexto operativo..."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Enunciado de la Pregunta *</label>
+        <textarea name="enunciado" id="editar-enunciado" required class="form-textarea" style="min-height:90px;"></textarea>
+      </div>
+
+      <!-- Opciones Múltiple Edición -->
+      <div id="editar-opciones-multiple-box">
+        <label class="form-label" style="margin-bottom:8px;">Opciones de Respuesta y Respuesta Correcta:</label>
+        
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <input type="radio" name="correcta" id="edit-radio-a" value="A" style="accent-color:#186382;">
+            <span style="font-weight:700; width:20px;">A:</span>
+            <input type="text" name="opcion_a" id="editar-opcion-a" class="form-input" placeholder="Opción A">
+          </div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <input type="radio" name="correcta" id="edit-radio-b" value="B" style="accent-color:#186382;">
+            <span style="font-weight:700; width:20px;">B:</span>
+            <input type="text" name="opcion_b" id="editar-opcion-b" class="form-input" placeholder="Opción B">
+          </div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <input type="radio" name="correcta" id="edit-radio-c" value="C" style="accent-color:#186382;">
+            <span style="font-weight:700; width:20px;">C:</span>
+            <input type="text" name="opcion_c" id="editar-opcion-c" class="form-input" placeholder="Opción C">
+          </div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <input type="radio" name="correcta" id="edit-radio-d" value="D" style="accent-color:#186382;">
+            <span style="font-weight:700; width:20px;">D:</span>
+            <input type="text" name="opcion_d" id="editar-opcion-d" class="form-input" placeholder="Opción D">
+          </div>
+        </div>
+      </div>
+
+      <!-- Opciones V/F Edición -->
+      <div id="editar-opciones-vf-box" style="display:none;">
+        <label class="form-label" style="margin-bottom:8px;">Seleccione la respuesta correcta:</label>
+        <div style="display:flex; gap:20px; align-items:center; padding:12px; background:#f8fafc; border-radius:8px;">
+          <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+            <input type="radio" name="correcta_vf" id="edit-radio-vf-v" value="V" style="accent-color:#186382;">
+            <span style="font-weight:700;">Verdadero</span>
+          </label>
+          <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+            <input type="radio" name="correcta_vf" id="edit-radio-vf-f" value="F" style="accent-color:#186382;">
+            <span style="font-weight:700;">Falso</span>
+          </label>
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 2fr; gap:12px; margin-top:14px;">
+        <div class="form-group">
+          <label class="form-label">Puntaje</label>
+          <input type="number" step="0.25" min="0.25" name="puntaje" id="editar-puntaje" required class="form-input">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Retroalimentación (Opcional)</label>
+          <input type="text" name="retroalimentacion" id="editar-retroalimentacion" class="form-input" placeholder="Explicación pedagógica...">
+        </div>
+      </div>
+
+      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:24px;">
+        <button type="button" onclick="closeModal('modal-editar-pregunta')" class="btn btn-outline">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Actualizar Cambios</button>
+      </div>
+    </form>
+  </div>
+</div>
 {% endblock %}
 
 {% block extra_scripts %}
@@ -249,6 +354,66 @@
     } else {
       document.getElementById('opciones-multiple-box').style.display = 'block';
       document.getElementById('opciones-vf-box').style.display = 'none';
+    }
+  }
+
+  function cambiarTipoFormEditar(tipo) {
+    if (tipo === 'V_F') {
+      document.getElementById('editar-opciones-multiple-box').style.display = 'none';
+      document.getElementById('editar-opciones-vf-box').style.display = 'block';
+    } else {
+      document.getElementById('editar-opciones-multiple-box').style.display = 'block';
+      document.getElementById('editar-opciones-vf-box').style.display = 'none';
+    }
+  }
+
+  async function cargarPreguntaEditar(id) {
+    try {
+      const resp = await fetch(`/preguntas/${id}/editar/`, {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+      });
+      if (!resp.ok) {
+        mostrarNotificacion("Error al cargar los datos del reactivo.", "error", "Banco de Preguntas");
+        return;
+      }
+      const data = await resp.json();
+      document.getElementById('form-editar-pregunta').action = `/preguntas/${id}/editar/`;
+      document.getElementById('editar-pregunta-subtitulo').textContent = `Reactivo Cód. P-${id}`;
+      document.getElementById('editar-categoria-id').value = data.categoria_id;
+      document.getElementById('editar-tipo-pregunta').value = data.tipo;
+      document.getElementById('editar-texto-base').value = data.texto_base;
+      document.getElementById('editar-enunciado').value = data.enunciado;
+      document.getElementById('editar-puntaje').value = data.puntaje;
+      document.getElementById('editar-retroalimentacion').value = data.retroalimentacion;
+
+      cambiarTipoFormEditar(data.tipo);
+
+      if (data.tipo === 'MULTIPLE') {
+        const letters = ['a', 'b', 'c', 'd'];
+        data.opciones.forEach((op, idx) => {
+          if (idx < 4) {
+            const letter = letters[idx];
+            const inp = document.getElementById(`editar-opcion-${letter}`);
+            if (inp) inp.value = op.texto;
+            if (op.es_correcta) {
+              const rad = document.getElementById(`edit-radio-${letter}`);
+              if (rad) rad.checked = true;
+            }
+          }
+        });
+      } else {
+        const opV = data.opciones.find(o => o.texto.toLowerCase().includes('verdadero'));
+        if (opV && opV.es_correcta) {
+          document.getElementById('edit-radio-vf-v').checked = true;
+        } else {
+          document.getElementById('edit-radio-vf-f').checked = true;
+        }
+      }
+
+      openModal('modal-editar-pregunta');
+    } catch (e) {
+      console.error(e);
+      mostrarNotificacion("Error de conexión al cargar la pregunta.", "error", "Error de Red");
     }
   }
 

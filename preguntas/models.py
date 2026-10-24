@@ -19,7 +19,7 @@ class Categoria(models.Model):
     creado_en = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        managed = False
+       
         db_table = "categorias"
 
     def __str__(self):
@@ -49,7 +49,7 @@ class Pregunta(models.Model):
     activa = models.BooleanField(default=True)
 
     class Meta:
-        managed = False
+       
         db_table = "preguntas"
 
     def __str__(self):
@@ -67,7 +67,7 @@ class OpcionRespuesta(models.Model):
     orden = models.SmallIntegerField(default=0)
 
     class Meta:
-        managed = False
+       
         db_table = "opciones_respuesta"
 
     def __str__(self):
@@ -97,7 +97,7 @@ class Cuestionario(models.Model):
     estado = models.CharField(max_length=12, choices=ESTADO_CHOICES, default="borrador")
 
     class Meta:
-        managed = False
+        
         db_table = "cuestionarios"
 
     def __str__(self):
@@ -119,7 +119,7 @@ class CuestionarioPregunta(models.Model):
     puntaje_asignado = models.DecimalField(max_digits=6, decimal_places=2, blank=True, null=True)
 
     class Meta:
-        managed = False
+     
         db_table = "cuestionario_preguntas"
         unique_together = (("cuestionario", "pregunta"),)
 
@@ -145,7 +145,7 @@ class Importacion(models.Model):
     resultado = models.CharField(max_length=10, choices=RESULTADO_CHOICES)
 
     class Meta:
-        managed = False
+       
         db_table = "importaciones"
 
 
@@ -173,7 +173,7 @@ class Intento(models.Model):
     estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default="en_progreso")
 
     class Meta:
-        managed = False
+      
         db_table = "intentos"
 
     def __str__(self):
@@ -199,7 +199,7 @@ class RespuestaIntento(models.Model):
     marcada_para_revision = models.BooleanField(default=False)
 
     class Meta:
-        managed = False
+       
         db_table = "respuestas_intento"
 
     def __str__(self):

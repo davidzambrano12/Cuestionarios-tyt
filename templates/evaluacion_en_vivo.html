@@ -23,7 +23,7 @@
         <span>⏱️</span>
         <span id="reloj-tiempo">--:--:--</span>
       </div>
-      <button type="button" onclick="alert('El temporizador continúa sincronizado en el servidor.');" style="background:#f1f5f9; border:1px solid #cbd5e1; width:36px; height:36px; border-radius:8px; cursor:pointer;">
+      <button type="button" onclick="mostrarNotificacion('El temporizador continúa sincronizado en el servidor.', 'info', 'Sincronización');" style="background:#f1f5f9; border:1px solid #cbd5e1; width:36px; height:36px; border-radius:8px; cursor:pointer;">
         ⏸️
       </button>
     </div>
@@ -271,8 +271,10 @@
     const intervalo = setInterval(() => {
       if (restantes <= 0) {
         clearInterval(intervalo);
-        alert('El tiempo límite del cuestionario ha finalizado. Se enviará automáticamente tu intento.');
-        document.getElementById('form-evaluacion').submit();
+        mostrarNotificacion('El tiempo límite del cuestionario ha finalizado. Se enviará automáticamente tu intento.', 'warning', 'Tiempo Agotado');
+        setTimeout(() => {
+          document.getElementById('form-evaluacion').submit();
+        }, 1200);
         return;
       }
       restantes--;
