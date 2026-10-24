@@ -1,0 +1,269 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard de Estudiante - Simulador Saber TyT{% endblock %}
+
+{% block content %}
+<div class="app-container">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-title">Simulador Saber TyT</div>
+      <div class="sidebar-subtitle">Dashboard de Estudiante</div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="/dashboard/estudiante/" class="nav-item active">
+        <span>🏠</span> Inicio
+      </a>
+      <a href="/dashboard/estudiante/#cuestionarios" class="nav-item">
+        <span>📋</span> Cuestionarios
+      </a>
+      <a href="/perfil/" class="nav-item">
+        <span>⚙️</span> Ajustes
+      </a>
+    </nav>
+
+    <div style="padding-top:20px; border-top:1px solid #e2e8f0; font-size:12px; color:#64748b;">
+      <div>Estudiante: <strong>{{ user.get_full_name|default:user.username }}</strong></div>
+      <div style="color:#0284c7;">Cód: {{ user.perfil.codigo_institucional|default:user.username }}</div>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    
+    <!-- Topbar -->
+    <header class="top-navbar">
+      <div class="navbar-brand-title">
+        Simulador Saber TyT / <span style="font-weight:400; color:#64748b;">Dashboard de Estudiante</span>
+      </div>
+      <div class="navbar-user-info">
+        <a href="/perfil/" title="Mi Perfil" style="display:flex; align-items:center; gap:8px; color:#0f172a; text-decoration:none;">
+          <div class="user-avatar-circle" style="background:#186382; color:white;">
+            {{ user.first_name|default:user.username|slice:":1"|upper }}
+          </div>
+          <span style="font-size:14px; font-weight:600;">{{ user.get_full_name|default:user.username }}</span>
+        </a>
+        <button onclick="cerrarSesion()" title="Cerrar Sesión" class="btn btn-outline" style="padding:6px 12px; font-size:13px; color:#b91c1c;">
+          🚪 Salir
+        </button>
+      </div>
+    </header>
+
+    <!-- Page Body -->
+    <div class="page-body">
+
+      <!-- Header Banner con datos del estudiante -->
+      <div class="dashboard-banner" style="background:linear-gradient(135deg, #e0f2fe 0%, #ecfdf5 100%);">
+        <div style="display:flex; align-items:center; gap:16px; margin-bottom:20px;">
+          <div style="width:54px; height:54px; border-radius:50%; background:#186382; color:white; display:flex; align-items:center; justify-content:center; font-size:24px;">
+            🎓
+          </div>
+          <div>
+            <h1 class="banner-title" style="font-size:24px; margin:0;">{{ user.get_full_name|default:user.username }}</h1>
+            <p class="banner-subtitle" style="margin-top:2px;">
+              🏛️ {{ user.perfil.semestre|default:"6° Semestre" }} · {{ user.perfil.programa_academico|default:"Ingeniería de Sistemas" }}
+            </p>
+          </div>
+        </div>
+
+        <!-- 3 Stats cards -->
+        <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:16px; background:white; border-radius:16px; padding:20px 24px; box-shadow:0 1px 3px rgba(0,0,0,0.05); text-align:center;">
+          <div>
+            <div style="font-size:32px; font-weight:800; color:#0f172a;">{{ disponibles_count|default:"02" }}</div>
+            <div style="font-size:12px; color:#64748b; font-weight:600;">Disponibles</div>
+          </div>
+          <div style="border-left:1px solid #e2e8f0; border-right:1px solid #e2e8f0;">
+            <div style="font-size:32px; font-weight:800; color:#0f172a;">{{ intentos_estudiante.count|default:"01" }}</div>
+            <div style="font-size:12px; color:#64748b; font-weight:600;">Presentados</div>
+          </div>
+          <div>
+            <div style="font-size:32px; font-weight:800; color:#16a34a;">{{ promedio_global|default:"4.00" }}<span style="font-size:16px; color:#94a3b8;">/5.0</span></div>
+            <div style="font-size:12px; color:#64748b; font-weight:600;">Promedio Global</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cuestionario Destacado Disponible -->
+      {% if cuestionario_destacado %}
+      <div class="card" style="border-top:4px solid #22c55e; margin-bottom:28px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span class="badge badge-success">● DISPONIBLE AHORA</span>
+            <span class="badge" style="background:#f1f5f9; color:#475569;">Saber TyT 2026</span>
+          </div>
+          <span style="color:#f59e0b; font-size:20px;">⚡</span>
+        </div>
+
+        <h2 style="font-size:20px; font-weight:800; color:#0f172a; margin-bottom:6px;">
+          {{ cuestionario_destacado.nombre }}
+        </h2>
+        <div style="font-size:13px; color:#64748b; margin-bottom:16px;">
+          👨‍🏫 Docente responsable: <strong>Prof. Patricia Jaramillo</strong>
+        </div>
+
+        <div style="background:#f8fafc; border-radius:12px; padding:16px; margin-bottom:20px;">
+          <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:12px; font-size:13px; color:#475569; margin-bottom:12px;">
+            <div>📖 {{ cuestionario_destacado.cuestionario_preguntas.count }} preguntas</div>
+            <div>⏱️ {{ cuestionario_destacado.tiempo_limite_minutos }} minutos</div>
+            <div>🔄 Intentos permitidos: {{ cuestionario_destacado.intentos_permitidos }}</div>
+            <div>🎯 Mínimo aprobación: {{ cuestionario_destacado.calificacion_aprobacion }} / {{ cuestionario_destacado.calificacion_maxima }}</div>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid #e2e8f0; padding-top:10px; font-size:12px;">
+            <span style="color:#64748b;">📅 Cierre: {{ cuestionario_destacado.fecha_cierre|date:"d M · H:i" }}</span>
+            <span class="badge badge-danger">Quedan pocos días</span>
+          </div>
+        </div>
+
+        <a href="/evaluacion/iniciar/{{ cuestionario_destacado.id }}/" class="btn btn-primary btn-full" style="padding:14px; font-size:15px; border-radius:12px; background:#186382;">
+          ▶ Iniciar Intento de Examen
+        </a>
+      </div>
+      {% endif %}
+
+      <!-- Pestañas de Cuestionarios: Disponibles / Programados / Historial -->
+      <div id="cuestionarios" style="margin-top:20px;">
+        <div class="tabs-header">
+          <button type="button" class="tab-btn active" onclick="switchEstudianteTab('disp', this)">
+            Disponibles <span class="badge badge-info">{{ cuestionarios_disponibles.count }}</span>
+          </button>
+          <button type="button" class="tab-btn" onclick="switchEstudianteTab('prog', this)">
+            Programados <span class="badge" style="background:#cbd5e1; color:#334155;">1</span>
+          </button>
+          <button type="button" class="tab-btn" onclick="switchEstudianteTab('hist', this)">
+            Historial de Intentos <span class="badge" style="background:#cbd5e1; color:#334155;">{{ intentos_estudiante.count }}</span>
+          </button>
+        </div>
+
+        <!-- Tab 1: Disponibles -->
+        <div id="tab-disp" class="tab-content-box">
+          <div style="display:flex; flex-direction:column; gap:16px;">
+            {% for c in cuestionarios_disponibles %}
+            <div class="card" style="margin-bottom:0; padding:20px;">
+              <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
+                <div>
+                  <span class="badge badge-success" style="margin-bottom:6px;">● DISPONIBLE</span>
+                  <h3 style="font-size:17px; font-weight:800; color:#0f172a;">{{ c.nombre }}</h3>
+                  <div style="font-size:12px; color:#64748b;">🏛️ Uniputumayo · Pruebas Saber TyT</div>
+                </div>
+                <span style="font-size:12px; color:#64748b;">Cierra en {{ c.fecha_cierre|timeuntil }}</span>
+              </div>
+              <div style="display:flex; gap:16px; font-size:13px; color:#475569; margin:12px 0;">
+                <span>📖 {{ c.cuestionario_preguntas.count }} ítems</span>
+                <span>⏱️ {{ c.tiempo_limite_minutos }} min</span>
+                <span>🔄 {{ c.intentos_permitidos }} intentos</span>
+              </div>
+              <a href="/evaluacion/iniciar/{{ c.id }}/" class="btn btn-primary" style="padding:10px; font-size:14px;">
+                ▶ Iniciar Intento
+              </a>
+            </div>
+            {% empty %}
+            <div class="card" style="text-align:center; padding:30px; color:#64748b;">
+              No tienes más cuestionarios pendientes por resolver.
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- Tab 2: Programados -->
+        <div id="tab-prog" class="tab-content-box" style="display:none;">
+          <div class="card" style="border-left:4px solid #0284c7; padding:20px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+              <span class="badge badge-info">PROGRAMADO</span>
+              <span>📅</span>
+            </div>
+            <h3 style="font-size:17px; font-weight:800; color:#0f172a; margin-bottom:8px;">Competencias Ciudadanas e Inglés II</h3>
+            <div style="background:#f0f9ff; border-radius:8px; padding:12px; font-size:13px; color:#0369a1; margin-bottom:16px;">
+              <div>📅 <strong>Apertura:</strong> Próxima semana · 07:00 AM</div>
+              <div>⏱️ 240 minutos (4 hrs) · 25 ítems</div>
+              <div style="margin-top:4px;">⏳ Abre en 8 días</div>
+            </div>
+            <button disabled class="btn btn-outline btn-full" style="opacity:0.6; cursor:not-allowed;">
+              🔒 Aún no disponible (Apertura pendiente)
+            </button>
+          </div>
+        </div>
+
+        <!-- Tab 3: Historial -->
+        <div id="tab-hist" class="tab-content-box" style="display:none;">
+          <div style="display:flex; flex-direction:column; gap:16px;">
+            {% for intento in intentos_estudiante %}
+            <div class="card" style="margin-bottom:0; padding:20px;">
+              <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px;">
+                <div>
+                  <div style="display:flex; gap:8px; margin-bottom:6px;">
+                    <span class="badge badge-info">FINALIZADO</span>
+                    <span class="badge {% if intento.aprobado %}badge-success{% else %}badge-danger{% endif %}">
+                      {% if intento.aprobado %}APROBADO{% else %}NO APROBADO{% endif %}
+                    </span>
+                  </div>
+                  <h3 style="font-size:17px; font-weight:800; color:#0f172a;">{{ intento.cuestionario.nombre }}</h3>
+                </div>
+                <span style="font-size:12px; color:#64748b;">{{ intento.fecha_inicio|date:"d M Y · H:i" }}</span>
+              </div>
+
+              <div style="display:flex; justify-content:space-between; align-items:center; background:#f8fafc; border-radius:10px; padding:12px 18px; margin-bottom:14px;">
+                <div>
+                  <div style="font-size:11px; color:#64748b; text-transform:uppercase;">Calificación Obtenida</div>
+                  <div style="font-size:24px; font-weight:800; color:#0f172a;">
+                    {{ intento.calificacion|default:"0.00" }} <span style="font-size:14px; color:#94a3b8;">/ {{ intento.cuestionario.calificacion_maxima }}</span>
+                  </div>
+                </div>
+                <div>
+                  <div style="font-size:11px; color:#64748b; text-transform:uppercase;">Puntaje</div>
+                  <div style="font-size:18px; font-weight:700; color:#475569;">
+                    {{ intento.puntaje_obtenido|default:"0" }} / {{ intento.puntaje_total_posible|default:"0" }} pts
+                  </div>
+                </div>
+              </div>
+
+              <a href="/evaluacion/{{ intento.id }}/resultado/" class="btn btn-outline btn-full" style="font-size:13px;">
+                📄 Ver Informe de Resultado
+              </a>
+            </div>
+            {% empty %}
+            <div class="card" style="text-align:center; padding:30px; color:#64748b;">
+              Aún no has finalizado ningún cuestionario.
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Normas para el desarrollo del intento -->
+      <div class="card" style="margin-top:28px; background:#f0f9ff; border:1px solid #bae6fd; padding:20px;">
+        <div style="display:flex; gap:12px; align-items:flex-start;">
+          <span style="font-size:22px;">ℹ️</span>
+          <div>
+            <h4 style="font-size:14px; font-weight:800; color:#0369a1; margin-bottom:4px;">Normas para el Desarrollo del Intento</h4>
+            <p style="font-size:13px; color:#0c4a6e; line-height:1.5;">
+              Antes de iniciar un intento asegúrate de contar con una conexión a internet estable. Ten en cuenta que <strong>el temporizador no se detiene</strong> al cerrar la aplicación o cambiar de pestaña. Todas las respuestas guardadas se sincronizan automáticamente en el servidor Django.
+            </p>
+            <div style="margin-top:8px; font-size:12px; color:#0284c7;">
+              🎧 Mesa de Ayuda IUP: <a href="mailto:soporte.sistemas@uniputumayo.edu.co" style="font-weight:600;">soporte.sistemas@uniputumayo.edu.co</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  function switchEstudianteTab(tab, btn) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    document.getElementById('tab-disp').style.display = 'none';
+    document.getElementById('tab-prog').style.display = 'none';
+    document.getElementById('tab-hist').style.display = 'none';
+
+    document.getElementById(`tab-${tab}`).style.display = 'block';
+  }
+</script>
+{% endblock %}

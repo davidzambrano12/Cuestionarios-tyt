@@ -1,0 +1,227 @@
+{% extends 'base.html' %}
+
+{% block title %}Simulador Saber TyT - Uniputumayo{% endblock %}
+
+{% block content %}
+<div style="background-color: #f8fafc; min-height: 100vh;">
+
+  <!-- Header Institucional -->
+  <header style="background:#ffffff; border-bottom:1px solid #e2e8f0; padding:16px 48px; display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; z-index:30;">
+    <div style="display:flex; align-items:center; gap:12px;">
+      <div style="background:#186382; color:white; width:36px; height:36px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:18px;">U</div>
+      <div>
+        <div style="font-size:16px; font-weight:800; color:#186382; line-height:1.1;">Simulador Saber TyT</div>
+        <div style="font-size:11px; color:#64748b;">Institución Universitaria del Putumayo</div>
+      </div>
+    </div>
+    <div style="display:flex; align-items:center; gap:16px;">
+      <a href="mailto:soporte.sistemas@uniputumayo.edu.co" class="btn btn-outline" style="font-size:13px; padding:8px 16px;">
+        🎧 Mesa de Ayuda
+      </a>
+      {% if user.is_authenticated %}
+        <a href="{% if user.is_superuser or user.perfil.rol.codigo == 'admin' %}/dashboard/admin/{% elif user.perfil.rol.codigo == 'docente' %}/dashboard/docente/{% else %}/dashboard/estudiante/{% endif %}" class="btn btn-primary" style="font-size:13px; padding:8px 18px;">
+          Mi Panel ({{ user.username }})
+        </a>
+      {% else %}
+        <a href="/login/" class="btn btn-primary" style="font-size:13px; padding:8px 18px;">
+          🔒 Iniciar sesión
+        </a>
+      {% endif %}
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section style="text-align:center; padding:70px 20px 40px; max-width:900px; margin:0 auto;">
+    <h1 style="font-size:42px; font-weight:800; color:#0f172a; line-height:1.2; margin-bottom:16px;">
+      Entrena y Valida tus <span style="color:#186382;">Competencias</span>
+    </h1>
+    <p style="font-size:18px; color:#64748b; max-width:700px; margin:0 auto 32px;">
+      Plataforma oficial de simulación con preguntas diseñada para la comunidad Uniputumayo.
+    </p>
+    <div style="display:flex; justify-content:center; gap:16px; flex-wrap:wrap;">
+      <a href="#simulacros" class="btn btn-primary" style="padding:14px 28px; font-size:15px; border-radius:10px;">
+        Ver Simulacros Disponibles ↓
+      </a>
+      <a href="#modalidades" class="btn btn-outline" style="padding:14px 28px; font-size:15px; border-radius:10px; background:white;">
+        📖 Conocer Modalidad
+      </a>
+    </div>
+  </section>
+
+  <!-- 4 Feature Cards -->
+  <section style="max-width:1200px; margin:0 auto 60px; padding:0 24px;">
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(250px, 1fr)); gap:20px;">
+      <div class="card" style="margin-bottom:0; padding:24px;">
+        <div style="width:44px; height:44px; border-radius:10px; background:#e0f2fe; color:#0284c7; display:flex; align-items:center; justify-content:center; font-size:22px; margin-bottom:16px;">
+          📚
+        </div>
+        <h3 style="font-size:16px; font-weight:700; margin-bottom:8px;">5 Módulos Saber TyT</h3>
+        <p style="font-size:13px; color:#64748b;">Lectura Crítica, Cuantitativo, Ciudadanas, Inglés y Comunicación Escrita.</p>
+      </div>
+
+      <div class="card" style="margin-bottom:0; padding:24px;">
+        <div style="width:44px; height:44px; border-radius:10px; background:#f0fdf4; color:#16a34a; display:flex; align-items:center; justify-content:center; font-size:22px; margin-bottom:16px;">
+          ⏱️
+        </div>
+        <h3 style="font-size:16px; font-weight:700; margin-bottom:8px;">Temporizador Sincronizado</h3>
+        <p style="font-size:13px; color:#64748b;">Control estricto de tiempo estilo ICFES y plataforma de evaluación continua.</p>
+      </div>
+
+      <div class="card" style="margin-bottom:0; padding:24px;">
+        <div style="width:44px; height:44px; border-radius:10px; background:#fef3c7; color:#d97706; display:flex; align-items:center; justify-content:center; font-size:22px; margin-bottom:16px;">
+          📊
+        </div>
+        <h3 style="font-size:16px; font-weight:700; margin-bottom:8px;">Calificación Determinista</h3>
+        <p style="font-size:13px; color:#64748b;">Escala 0.00 a 5.00 con cálculo automático de puntajes e informe instantáneo.</p>
+      </div>
+
+      <div class="card" style="margin-bottom:0; padding:24px;">
+        <div style="width:44px; height:44px; border-radius:10px; background:#f1f5f9; color:#475569; display:flex; align-items:center; justify-content:center; font-size:22px; margin-bottom:16px;">
+          🛡️
+        </div>
+        <h3 style="font-size:16px; font-weight:700; margin-bottom:8px;">Banco Actualizado 2026</h3>
+        <p style="font-size:13px; color:#64748b;">Reactivos oficiales con huella SHA-256 única para prevenir duplicados.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Portales de Ingreso Diferenciados -->
+  <section id="modalidades" style="max-width:1100px; margin:0 auto 70px; padding:0 24px;">
+    <div style="text-align:center; margin-bottom:36px;">
+      <span style="font-size:12px; font-weight:700; color:#0284c7; text-transform:uppercase; letter-spacing:1px;">Portales de Ingreso Diferenciados</span>
+      <h2 style="font-size:30px; font-weight:800; color:#0f172a; margin-top:6px;">Selecciona tu Modalidad de Acceso Institucional</h2>
+      <p style="font-size:14px; color:#64748b; margin-top:8px;">Diseñado para optimizar el tiempo de los estudiantes de Uniputumayo y brindar control integral al equipo docente.</p>
+    </div>
+
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:24px;">
+      <!-- Tarjeta Estudiante -->
+      <div class="card" style="border:2px solid #bae6fd; position:relative; overflow:hidden;">
+        <div style="position:absolute; top:16px; left:20px;">
+          <span class="badge" style="background:#dcfce7; color:#15803d; font-size:11px;">ACCESO DIRECTO SIN CLAVE</span>
+        </div>
+        <div style="margin-top:36px; margin-bottom:20px;">
+          <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
+            <div style="font-size:28px;">🎓</div>
+            <div>
+              <h3 style="font-size:18px; font-weight:800; color:#0f172a;">Portal Estudiantes - Acceso Rápido</h3>
+              <span style="font-size:12px; color:#0284c7; font-weight:600;">Estudiantes activos Uniputumayo</span>
+            </div>
+          </div>
+          <p style="font-size:13px; color:#475569; line-height:1.6; margin-bottom:18px;">
+            Ingreso ágil: ingresa directamente con tu Nombre Completo y Código Estudiantil activo para iniciar tu simulacro inmediatamente.
+          </p>
+          <div style="background:#f8fafc; border-radius:8px; padding:12px; font-size:12px; color:#64748b; display:flex; flex-direction:column; gap:6px;">
+            <div>🆔 Identificación inmediata con código institucional</div>
+            <div>⚡ Sin demoras de restablecimiento de contraseña</div>
+          </div>
+        </div>
+        <a href="/login/" class="btn btn-primary btn-full" style="padding:12px; font-size:14px;">
+          Ingresar como Estudiante &rarr;
+        </a>
+      </div>
+
+      <!-- Tarjeta Docente y Evaluadores -->
+      <div class="card" style="border:2px solid #cbd5e1; position:relative; overflow:hidden;">
+        <div style="position:absolute; top:16px; left:20px;">
+          <span class="badge" style="background:#f1f5f9; color:#475569; font-size:11px;">CREDENCIALES INSTITUCIONALES</span>
+        </div>
+        <div style="margin-top:36px; margin-bottom:20px;">
+          <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
+            <div style="font-size:28px;">💼</div>
+            <div>
+              <h3 style="font-size:18px; font-weight:800; color:#0f172a;">Portal Docente y Evaluadores</h3>
+              <span style="font-size:12px; color:#64748b; font-weight:600;">Gestión Académica & Analítica</span>
+            </div>
+          </div>
+          <p style="font-size:13px; color:#475569; line-height:1.6; margin-bottom:18px;">
+            Gestión de reactivos, parametrización de cuestionarios, seguimiento de cohortes y reportes pedagógicos con credenciales @uniputumayo.edu.co.
+          </p>
+          <div style="background:#f8fafc; border-radius:8px; padding:12px; font-size:12px; color:#64748b; display:flex; flex-direction:column; gap:6px;">
+            <div>📊 Métricas por cohorte, programa y competencia</div>
+            <div>📥 Exportación de informes consolidados y auditoría</div>
+          </div>
+        </div>
+        <a href="/login/" class="btn btn-outline btn-full" style="padding:12px; font-size:14px;">
+          🔒 Acceso Docente y Directivos &rarr;
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Entorno de Evaluación Abierto / Cuestionarios Oficiales -->
+  <section id="simulacros" style="max-width:1200px; margin:0 auto 80px; padding:0 24px;">
+    <div style="margin-bottom:24px;">
+      <span style="font-size:12px; font-weight:700; color:#186382; text-transform:uppercase;">🏛️ ENTORNO DE EVALUACIÓN ABIERTO</span>
+      <h2 style="font-size:26px; font-weight:800; color:#0f172a; margin-top:4px;">Cuestionarios Oficiales Saber TyT Uniputumayo</h2>
+      <p style="font-size:14px; color:#64748b;">Acceso ágil: los estudiantes ingresan directamente con su Nombre y Código Estudiantil para comenzar la prueba de inmediato.</p>
+    </div>
+
+    <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(340px, 1fr)); gap:20px;">
+      {% for c in cuestionarios %}
+      <div class="card" style="margin-bottom:0; display:flex; flex-direction:column; justify-content:space-between; border-top:4px solid #186382;">
+        <div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <span class="badge badge-success">● DISPONIBLE</span>
+            <span style="font-size:12px; color:#94a3b8; font-weight:600;">Cód: TYT-{{ c.id }}</span>
+          </div>
+          <h3 style="font-size:17px; font-weight:800; color:#0f172a; margin-bottom:8px;">{{ c.nombre }}</h3>
+          <div style="display:flex; gap:12px; font-size:12px; color:#64748b; margin-bottom:12px; flex-wrap:wrap;">
+            <span>📖 {{ c.cuestionario_preguntas.count }} preguntas</span>
+            <span>⏱️ {{ c.tiempo_limite_minutos }} minutos</span>
+            <span>⭐ Escala {{ c.calificacion_maxima }}</span>
+          </div>
+          <p style="font-size:13px; color:#475569; line-height:1.5; margin-bottom:16px;">
+            {{ c.descripcion|default:"Evaluación integral alineada con los lineamientos técnicos del examen de estado Saber TyT." }}
+          </p>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid #f1f5f9; padding-top:14px;">
+          <span style="font-size:12px; color:#64748b;">Estándar Saber TyT</span>
+          <a href="/evaluacion/iniciar/{{ c.id }}/" class="btn btn-primary" style="padding:6px 18px; font-size:13px;">
+            Iniciar ▶
+          </a>
+        </div>
+      </div>
+      {% empty %}
+      <div class="card" style="grid-column: 1 / -1; text-align:center; padding:40px;">
+        <p style="color:#64748b;">No hay cuestionarios disponibles en este momento.</p>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- Banner Azul Acompañamiento Académico -->
+  <section style="max-width:1200px; margin:0 auto 80px; padding:0 24px;">
+    <div style="background:linear-gradient(135deg, #0f3d52 0%, #186382 100%); border-radius:24px; padding:40px 48px; color:white; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:24px;">
+      <div style="max-width:600px;">
+        <span class="badge" style="background:rgba(255,255,255,0.15); color:white; margin-bottom:12px;">🎧 Acompañamiento Académico Permanente</span>
+        <h2 style="font-size:26px; font-weight:800; margin-bottom:10px;">¿Requieres orientación con las pruebas o asistencia en el campus Uniputumayo?</h2>
+        <p style="font-size:14px; opacity:0.85;">Comunícate con la Coordinación TyT de Uniputumayo o acércate a la Dirección Académica en la Sede Principal Mocoa o extensiones Sibundoy y Puerto Asís.</p>
+      </div>
+      <div style="display:flex; gap:12px; flex-wrap:wrap;">
+        <a href="mailto:soporte.sistemas@uniputumayo.edu.co" class="btn" style="background:white; color:#0f3d52; padding:12px 20px; font-weight:700;">
+          ✉️ Contactar Coordinación TyT
+        </a>
+        <a href="/static/plantillas/plantilla_preguntas_simulador_tyt.xlsx" download class="btn" style="background:rgba(255,255,255,0.15); color:white; border:1px solid rgba(255,255,255,0.3); padding:12px 20px;">
+          📥 Guía y Plantilla 2026
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer Oficial -->
+  <footer style="background:#ffffff; border-top:1px solid #e2e8f0; padding:32px 48px; font-size:12px; color:#64748b; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
+    <div>
+      <div style="font-weight:700; color:#0f172a;">© 2026 Institución Universitaria del Putumayo (Uniputumayo).</div>
+      <div>Vigilada Mineducación. Todos los derechos reservados. Mocoa, Putumayo - Colombia • NIT: 800.125.845-1</div>
+    </div>
+    <div style="display:flex; gap:20px;">
+      <a href="#">Reglamento Académico</a>
+      <a href="#">Políticas de Privacidad</a>
+      <a href="#">Soporte Técnico Campus</a>
+      <a href="#">Acreditación Institucional ICFES</a>
+      <a href="mailto:soporte.sistemas@uniputumayo.edu.co" style="font-weight:600; color:#186382;">Mesa de Ayuda</a>
+    </div>
+  </footer>
+
+</div>
+{% endblock %}

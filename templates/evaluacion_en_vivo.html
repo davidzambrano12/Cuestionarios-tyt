@@ -1,0 +1,303 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ cuestionario.nombre }} - Simulador Saber TyT{% endblock %}
+
+{% block content %}
+<div style="background-color:#f8fafc; min-height:100vh; display:flex; flex-direction:column;">
+
+  <!-- Header Superior -->
+  <header style="background:white; border-bottom:1px solid #e2e8f0; padding:12px 32px; display:flex; justify-content:space-between; align-items:center;">
+    <div style="display:flex; align-items:center; gap:16px;">
+      <a href="/dashboard/estudiante/" onclick="return confirm('¿Seguro que deseas salir? El temporizador seguirá corriendo.');" style="display:inline-flex; align-items:center; justify-content:center; width:36px; height:36px; border-radius:50%; background:#f1f5f9; color:#0f172a; text-decoration:none;">
+        &larr;
+      </a>
+      <div>
+        <div style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.5px;">SABER TYT 2026 · SESIÓN OFICIAL</div>
+        <div style="font-size:15px; font-weight:800; color:#0f172a;">{{ cuestionario.nombre }}</div>
+      </div>
+    </div>
+
+    <!-- Temporizador Digital Flotante -->
+    <div style="display:flex; align-items:center; gap:12px;">
+      <div class="eval-timer-box">
+        <span>⏱️</span>
+        <span id="reloj-tiempo">--:--:--</span>
+      </div>
+      <button type="button" onclick="alert('El temporizador continúa sincronizado en el servidor.');" style="background:#f1f5f9; border:1px solid #cbd5e1; width:36px; height:36px; border-radius:8px; cursor:pointer;">
+        ⏸️
+      </button>
+    </div>
+  </header>
+
+  <!-- Barra de Progreso Superior -->
+  <div style="background:white; border-bottom:1px solid #e2e8f0; padding:8px 32px 14px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; font-size:13px; font-weight:700; margin-bottom:8px;">
+      <span style="color:#186382;">Pregunta <span id="idx-pregunta-label">1</span> de {{ total_preguntas }}</span>
+      <span id="porcentaje-progreso" style="color:#16a34a;">0% completado</span>
+    </div>
+    <div class="progress-bar-container">
+      <div id="barra-progreso" class="progress-bar-fill" style="width: 5%;"></div>
+    </div>
+  </div>
+
+  <!-- Formulario que envuelve el examen -->
+  <form id="form-evaluacion" method="POST" action="/evaluacion/{{ intento.id }}/finalizar/" style="flex-grow:1; display:flex; flex-direction:column;">
+    {% csrf_token %}
+
+    <div class="eval-container" style="flex-grow:1; width:100%; padding:24px 32px;">
+      <div class="eval-grid">
+        
+        <!-- ================= COLUMNA 1: CONTEXTO OPERATIVO ================= -->
+        <div>
+          <!-- Badges de la pregunta actual -->
+          <div style="display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap;">
+            <span id="badge-competencia" class="badge badge-info" style="font-size:12px; padding:6px 12px;">Razonamiento Cuantitativo</span>
+            <span id="badge-puntaje" class="badge" style="background:#e2e8f0; color:#334155; font-size:12px; padding:6px 12px;">Valor: 1.00 pt</span>
+          </div>
+
+          <!-- Card Contexto Operativo -->
+          <div class="card" style="padding:20px; border-radius:16px; margin-bottom:16px;">
+            <div style="display:flex; align-items:center; gap:8px; font-size:12px; font-weight:800; color:#186382; margin-bottom:12px; text-transform:uppercase;">
+              <span>📄</span> CONTEXTO OPERATIVO
+            </div>
+            <div id="texto-contexto" style="font-size:13px; color:#334155; line-height:1.6;">
+              Texto descriptivo de apoyo para la formulación del problema y resolución del reactivo.
+            </div>
+          </div>
+
+          <!-- Imagen o Referencia Contextual -->
+          <div style="background:white; border:1px solid #e2e8f0; border-radius:16px; overflow:hidden; box-shadow:var(--shadow-sm);">
+            <div style="background:linear-gradient(135deg, #0f3d52 0%, #186382 100%); height:120px; display:flex; align-items:center; justify-content:center; color:white; font-size:36px;">
+              🌱
+            </div>
+            <div style="padding:10px 14px; font-size:11px; color:#64748b; font-weight:600; text-align:center;">
+              🌿 Unidad de Aplicación Práctica · Uniputumayo
+            </div>
+          </div>
+        </div>
+
+        <!-- ================= COLUMNA 2: ENUNCIADO Y OPCIONES ================= -->
+        <div>
+          <div class="card" style="padding:32px; border-radius:20px; min-height:460px; display:flex; flex-direction:column; justify-content:space-between;">
+            <div>
+              <h2 id="enunciado-pregunta" style="font-size:20px; font-weight:800; color:#0f172a; line-height:1.4; margin-bottom:28px;">
+                Cargando pregunta...
+              </h2>
+
+              <!-- Contenedor dinámico de opciones A, B, C, D -->
+              <div id="contenedor-opciones" style="display:flex; flex-direction:column; gap:12px;">
+                <!-- Rellenado por JS -->
+              </div>
+            </div>
+
+            <!-- Navegación Anterior / Siguiente -->
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:32px; border-top:1px solid #f1f5f9; padding-top:20px;">
+              <button type="button" id="btn-anterior" onclick="cambiarPregunta(preguntaActualIdx - 1)" class="btn btn-outline" style="padding:10px 20px;">
+                &larr; Anterior
+              </button>
+              <button type="button" id="btn-siguiente" onclick="cambiarPregunta(preguntaActualIdx + 1)" class="btn btn-primary" style="padding:10px 24px; background:#186382;">
+                Guardar y Siguiente &rarr;
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ================= COLUMNA 3: MAPEO DE PREGUNTAS ================= -->
+        <div>
+          <div class="card" style="padding:24px; border-radius:20px;">
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+              <span style="font-size:16px;">☷</span>
+              <h3 style="font-size:15px; font-weight:800; color:#0f172a; margin:0;">Mapeo de Preguntas</h3>
+            </div>
+            <div id="resumen-mapeo-label" style="font-size:12px; color:#64748b; margin-bottom:14px;">
+              0 respondidas · {{ total_preguntas }} faltantes
+            </div>
+
+            <!-- Grilla interactiva de botones numéricos -->
+            <div class="question-nav-grid" id="grilla-navegacion">
+              <!-- Rellenado por JS: 1 a N -->
+            </div>
+
+            <!-- Leyenda de colores -->
+            <div style="margin-top:20px; border-top:1px solid #f1f5f9; padding-top:14px; font-size:11px; color:#64748b; display:flex; flex-direction:column; gap:6px;">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span style="width:12px; height:12px; background:#bae6fd; border-radius:3px;"></span> Respondida
+              </div>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span style="width:12px; height:12px; background:#186382; border-radius:3px;"></span> Actual
+              </div>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span style="width:12px; height:12px; background:#f1f5f9; border-radius:3px; border:1px solid #cbd5e1;"></span> Pendiente
+              </div>
+            </div>
+
+            <!-- Botón Finalizar Examen -->
+            <button type="button" onclick="confirmarEntrega()" class="btn btn-full" style="margin-top:24px; background:#16a34a; color:white; font-size:14px; padding:12px; border-radius:10px; font-weight:700;">
+              ✓ Finalizar y Entregar Intento
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </form>
+
+</div>
+
+<!-- Input oculto para respuestas almacenadas en JSON -->
+<input type="hidden" id="datos-respuestas-json" name="respuestas_json" form="form-evaluacion">
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  // Datos del examen inyectados desde Django
+  const preguntasData = {{ preguntas_json|safe }};
+  const tiempoLimiteMinutos = {{ cuestionario.tiempo_limite_minutos }};
+  const intentoId = {{ intento.id }};
+  
+  let preguntaActualIdx = 0;
+  const respuestasUsuario = {}; // { preguntaId: opcionId }
+
+  // Inicialización
+  document.addEventListener('DOMContentLoaded', () => {
+    construirGrillaNavegacion();
+    mostrarPregunta(0);
+    iniciarTemporizador(tiempoLimiteMinutos * 60);
+  });
+
+  function construirGrillaNavegacion() {
+    const grilla = document.getElementById('grilla-navegacion');
+    grilla.innerHTML = '';
+    preguntasData.forEach((p, idx) => {
+      const btn = document.createElement('div');
+      btn.id = `nav-item-${idx}`;
+      btn.className = `q-nav-item ${idx === 0 ? 'current' : ''}`;
+      btn.innerText = idx + 1;
+      btn.onclick = () => cambiarPregunta(idx);
+      grilla.appendChild(btn);
+    });
+  }
+
+  function mostrarPregunta(idx) {
+    if (idx < 0 || idx >= preguntasData.length) return;
+    preguntaActualIdx = idx;
+
+    const p = preguntasData[idx];
+
+    // Actualizar labels superiores
+    document.getElementById('idx-pregunta-label').innerText = idx + 1;
+    document.getElementById('badge-competencia').innerText = p.categoria;
+    document.getElementById('badge-puntaje').innerText = `Valor: ${p.puntaje} pt`;
+    document.getElementById('texto-contexto').innerText = p.texto_base || 'Sin contexto adicional. Lea directamente el enunciado.';
+    document.getElementById('enunciado-pregunta').innerText = p.enunciado;
+
+    // Actualizar botones Anterior / Siguiente
+    document.getElementById('btn-anterior').style.visibility = idx === 0 ? 'hidden' : 'visible';
+    const btnSig = document.getElementById('btn-siguiente');
+    if (idx === preguntasData.length - 1) {
+      btnSig.innerText = 'Guardar y Revisar ✓';
+    } else {
+      btnSig.innerText = 'Guardar y Siguiente →';
+    }
+
+    // Renderizar opciones A, B, C, D
+    const contenedor = document.getElementById('contenedor-opciones');
+    contenedor.innerHTML = '';
+
+    const letras = ['A', 'B', 'C', 'D'];
+    p.opciones.forEach((op, oIdx) => {
+      const letra = letras[oIdx] || `${oIdx + 1}`;
+      const estaSeleccionada = respuestasUsuario[p.id] === op.id;
+
+      const card = document.createElement('div');
+      card.className = `option-card ${estaSeleccionada ? 'selected' : ''}`;
+      card.onclick = () => seleccionarOpcion(p.id, op.id);
+
+      card.innerHTML = `
+        <div class="option-letter-badge">${letra}</div>
+        <div style="flex-grow:1; font-size:14px; color:#0f172a; font-weight:500;">${op.texto}</div>
+        <div style="width:20px; height:20px; border-radius:50%; border:2px solid ${estaSeleccionada ? '#186382' : '#cbd5e1'}; display:flex; align-items:center; justify-content:center; background:${estaSeleccionada ? '#186382' : 'transparent'}; color:white; font-size:12px;">
+          ${estaSeleccionada ? '✓' : ''}
+        </div>
+      `;
+      contenedor.appendChild(card);
+    });
+
+    actualizarEstadosGrilla();
+  }
+
+  function seleccionarOpcion(preguntaId, opcionId) {
+    respuestasUsuario[preguntaId] = opcionId;
+    // Sincronizar en el input oculto
+    document.getElementById('datos-respuestas-json').value = JSON.stringify(respuestasUsuario);
+    mostrarPregunta(preguntaActualIdx);
+  }
+
+  function cambiarPregunta(nuevoIdx) {
+    if (nuevoIdx >= 0 && nuevoIdx < preguntasData.length) {
+      mostrarPregunta(nuevoIdx);
+    }
+  }
+
+  function actualizarEstadosGrilla() {
+    let respondidas = 0;
+    preguntasData.forEach((p, idx) => {
+      const el = document.getElementById(`nav-item-${idx}`);
+      if (!el) return;
+      el.className = 'q-nav-item';
+      if (respuestasUsuario[p.id]) {
+        el.classList.add('answered');
+        respondidas++;
+      }
+      if (idx === preguntaActualIdx) {
+        el.classList.add('current');
+      }
+    });
+
+    const total = preguntasData.length;
+    const faltantes = total - respondidas;
+    document.getElementById('resumen-mapeo-label').innerText = `${respondidas} respondidas · ${faltantes} faltantes`;
+
+    const pct = Math.round((respondidas / total) * 100);
+    document.getElementById('porcentaje-progreso').innerText = `${pct}% completado`;
+    document.getElementById('barra-progreso').style.width = `${Math.max(pct, 5)}%`;
+  }
+
+  // Temporizador regresivo en vivo
+  function iniciarTemporizador(segundosTotales) {
+    let restantes = segundosTotales;
+    const reloj = document.getElementById('reloj-tiempo');
+
+    const intervalo = setInterval(() => {
+      if (restantes <= 0) {
+        clearInterval(intervalo);
+        alert('El tiempo límite del cuestionario ha finalizado. Se enviará automáticamente tu intento.');
+        document.getElementById('form-evaluacion').submit();
+        return;
+      }
+      restantes--;
+
+      const h = String(Math.floor(restantes / 3600)).padStart(2, '0');
+      const m = String(Math.floor((restantes % 3600) / 60)).padStart(2, '0');
+      const s = String(restantes % 60).padStart(2, '0');
+      reloj.innerText = `${h}:${m}:${s}`;
+    }, 1000);
+  }
+
+  function confirmarEntrega() {
+    const respondidas = Object.keys(respuestasUsuario).length;
+    const total = preguntasData.length;
+    const faltantes = total - respondidas;
+
+    let mensaje = `¿Estás seguro de finalizar y entregar tu examen?\n\nHas respondido ${respondidas} de ${total} preguntas.`;
+    if (faltantes > 0) {
+      mensaje += `\n⚠️ Atención: te faltan ${faltantes} preguntas por responder.`;
+    }
+
+    if (confirm(mensaje)) {
+      document.getElementById('datos-respuestas-json').value = JSON.stringify(respuestasUsuario);
+      document.getElementById('form-evaluacion').submit();
+    }
+  }
+</script>
+{% endblock %}

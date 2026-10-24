@@ -1,88 +1,158 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Previsualización de importación</title>
-    <style>
-        body { font-family: Arial, sans-serif; max-width: 960px; margin: 40px auto; color: #222; }
-        table { width: 100%; border-collapse: collapse; margin-bottom: 24px; }
-        th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; font-size: 14px; vertical-align: top; }
-        th { background: #1F4E78; color: #fff; }
-        tr.valida { background: #EAF5EA; }
-        tr.duplicada { background: #FFF2CC; }
-        tr.error { background: #FCEAEA; }
-        .resumen { display: flex; gap: 16px; margin: 16px 0; }
-        .resumen div { padding: 10px 16px; border-radius: 6px; font-weight: bold; }
-        .r-validas { background: #2E7D32; color: #fff; }
-        .r-duplicadas { background: #B38600; color: #fff; }
-        .r-errores { background: #B00000; color: #fff; }
-        button { padding: 10px 18px; border: none; border-radius: 4px; cursor: pointer; margin-right: 8px; }
-        .confirmar { background: #1F4E78; color: #fff; }
-        .cancelar { background: #777; color: #fff; }
-    </style>
-</head>
-<body>
-    <h1>Previsualización — {{ resultado.nombre_archivo }}</h1>
-    <p>Total de filas leídas: {{ resultado.total_filas }}</p>
-    {% if cuestionario %}
-        <p><strong>Cuestionario de destino:</strong> {{ cuestionario.nombre }} (ID #{{ cuestionario.id }})</p>
-    {% else %}
-        <p><strong>Destino:</strong> Solo banco general de preguntas</p>
-    {% endif %}
+{% extends 'base.html' %}
 
-    <div class="resumen">
-        <div class="r-validas">✔ Válidas: {{ resultado.validas|length }}</div>
-        <div class="r-duplicadas">⚠ Duplicadas: {{ resultado.duplicadas|length }}</div>
-        <div class="r-errores">✖ Con error: {{ resultado.con_error|length }}</div>
+{% block title %}Auditoría y Validación de Importación - Simulador Saber TyT{% endblock %}
+
+{% block content %}
+<div style="background:#f8fafc; min-height:100vh; padding:24px 20px;">
+  <div style="max-width:680px; margin:0 auto;">
+
+    <!-- Topbar -->
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+      <a href="/preguntas/importar/" style="display:inline-flex; align-items:center; justify-content:center; width:38px; height:38px; border-radius:50%; background:white; border:1px solid #e2e8f0; color:#0f172a; text-decoration:none;">
+        &larr;
+      </a>
+      <h2 style="font-size:18px; font-weight:800; color:#0f172a;">Validación de Ingesta</h2>
+      <div style="width:38px;"></div>
     </div>
 
-    <table>
-        <thead>
-            <tr>
-                <th>Fila Excel</th>
-                <th>Estado</th>
-                <th>Categoría</th>
-                <th>Tipo</th>
-                <th>Pregunta</th>
-                <th>Detalle</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for fila in resultado.filas %}
-            <tr class="{{ fila.estado }}">
-                <td>{{ fila.fila_excel }}</td>
-                <td>
-                    {% if fila.estado == "valida" %}Válida
-                    {% elif fila.estado == "duplicada" %}Duplicada
-                    {% else %}Error{% endif %}
-                </td>
-                <td>{{ fila.categoria }}</td>
-                <td>{{ fila.tipo }}</td>
-                <td>{{ fila.enunciado }}</td>
-                <td>
-                    {% if fila.errores %}
-                        <ul>{% for e in fila.errores %}<li>{{ e }}</li>{% endfor %}</ul>
-                    {% else %}—{% endif %}
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <!-- Stepper Asistente de Ingesta -->
+    <div class="card" style="padding:14px 20px; margin-bottom:20px; background:#f0f9ff; border-color:#bae6fd;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <span style="font-size:11px; font-weight:800; color:#0369a1; text-transform:uppercase; letter-spacing:0.5px;">ASISTENTE DE INGESTA</span>
+        <span class="badge badge-info" style="font-size:11px;">Paso 2 de 4</span>
+      </div>
+      <div style="display:flex; justify-content:space-between; font-size:12px; color:#0c4a6e; font-weight:600;">
+        <span>1. Carga</span>
+        <span><strong>2. Validación</strong></span>
+        <span style="opacity:0.6;">3. Previa</span>
+        <span style="opacity:0.6;">4. Final</span>
+      </div>
+    </div>
 
-    {% if resultado.validas %}
-        <form method="post" action="{% url 'preguntas:confirmar' %}">
-            {% csrf_token %}
-            <button type="submit" class="confirmar">
-                Confirmar e importar {{ resultado.validas|length }} pregunta(s) válida(s)
-            </button>
-        </form>
-    {% else %}
-        <p><strong>No hay filas válidas para importar.</strong> Corrige el Excel y vuelve a intentarlo.</p>
+    <!-- Cuestionario de destino si se indicó -->
+    {% if cuestionario %}
+    <div class="card" style="padding:14px 20px; margin-bottom:16px; display:flex; align-items:center; gap:12px; background:#ffffff;">
+      <span style="font-size:20px;">📋</span>
+      <div>
+        <div style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase;">Cuestionario de Destino</div>
+        <div style="font-size:14px; font-weight:800; color:#0f172a;">{{ cuestionario.nombre }}</div>
+      </div>
+    </div>
     {% endif %}
 
-    <form method="post" action="{% url 'preguntas:cancelar' %}" style="margin-top: 8px;">
+    <!-- Archivo cargado verificado -->
+    <div class="card" style="padding:16px 20px; margin-bottom:20px; display:flex; justify-content:space-between; align-items:center;">
+      <div style="display:flex; align-items:center; gap:12px;">
+        <span style="font-size:28px;">📊</span>
+        <div>
+          <div style="font-size:14px; font-weight:800; color:#0f172a;">{{ resultado.nombre_archivo }}</div>
+          <div style="font-size:12px; color:#16a34a; font-weight:600;">✓ Verificado con éxito</div>
+        </div>
+      </div>
+      <a href="/preguntas/importar/" class="btn btn-outline" style="font-size:12px; padding:6px 12px;">
+        🔄 Reemplazar Archivo
+      </a>
+    </div>
+
+    <!-- Auditoría de Registros -->
+    <div class="card" style="padding:24px; border-radius:20px; margin-bottom:20px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <h3 style="font-size:16px; font-weight:800; color:#0f172a; margin:0;">Auditoría de Registros</h3>
+        <span style="font-size:12px; color:#64748b;">Total: <strong>{{ resultado.total_filas }}</strong> filas</span>
+      </div>
+
+      <!-- 3 Cajas de conteo -->
+      <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:12px; margin-bottom:20px; text-align:center;">
+        <div style="background:#f0fdf4; border:1px solid #86efac; border-radius:12px; padding:14px;">
+          <div style="font-size:20px; color:#16a34a; margin-bottom:2px;">✔</div>
+          <div style="font-size:24px; font-weight:800; color:#15803d;">{{ resultado.validas|length }}</div>
+          <div style="font-size:11px; font-weight:600; color:#15803d;">Válidas</div>
+        </div>
+
+        <div style="background:#eff6ff; border:1px solid #93c5fd; border-radius:12px; padding:14px;">
+          <div style="font-size:20px; color:#2563eb; margin-bottom:2px;">📄</div>
+          <div style="font-size:24px; font-weight:800; color:#1d4ed8;">{{ resultado.duplicadas|length }}</div>
+          <div style="font-size:11px; font-weight:600; color:#1d4ed8;">Duplicadas</div>
+        </div>
+
+        <div style="background:#fef2f2; border:1px solid #fca5a5; border-radius:12px; padding:14px;">
+          <div style="font-size:20px; color:#dc2626; margin-bottom:2px;">✖</div>
+          <div style="font-size:24px; font-weight:800; color:#b91c1c;">{{ resultado.con_error|length }}</div>
+          <div style="font-size:11px; font-weight:600; color:#b91c1c;">Con Error</div>
+        </div>
+      </div>
+
+      <!-- Alertas de Fila si existen errores o duplicados -->
+      {% if resultado.con_error %}
+      <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:16px;">
+        {% for fila in resultado.con_error %}
+        <div style="background:#fef2f2; border-left:4px solid #dc2626; padding:10px 14px; border-radius:0 8px 8px 0; font-size:12px; color:#991b1b;">
+          <strong>Fila #{{ fila.fila_excel }}:</strong>
+          {% for err in fila.errores %}<span>{{ err }} </span>{% endfor %}
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      {% if resultado.duplicadas %}
+      <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:16px;">
+        {% for fila in resultado.duplicadas %}
+        <div style="background:#eff6ff; border-left:4px solid #3b82f6; padding:10px 14px; border-radius:0 8px 8px 0; font-size:12px; color:#1e40af;">
+          <strong>Fila #{{ fila.fila_excel }}:</strong> Pregunta ya existente en el banco institucional (coincidencia de huella digital SHA-256). Se omitirá para no duplicar reactivos.
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <!-- Esquema Reconocido -->
+      <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:14px; margin-bottom:20px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <span style="font-size:12px; font-weight:700; color:#334155;">Esquema Reconocido</span>
+          <span class="badge badge-success" style="font-size:11px;">11/11 Campos OK</span>
+        </div>
+        <div style="display:flex; flex-wrap:wrap; gap:6px; font-size:11px;">
+          <span class="badge" style="background:#e0f2fe; color:#0369a1;">● categoria</span>
+          <span class="badge" style="background:#e0f2fe; color:#0369a1;">● tipo</span>
+          <span class="badge" style="background:#e0f2fe; color:#0369a1;">● texto_base</span>
+          <span class="badge" style="background:#e0f2fe; color:#0369a1;">● pregunta</span>
+          <span class="badge" style="background:#e0f2fe; color:#0369a1;">● opcion_a</span>
+          <span class="badge" style="background:#e0f2fe; color:#0369a1;">● opcion_b</span>
+          <span class="badge" style="background:#e0f2fe; color:#0369a1;">● opcion_c</span>
+          <span class="badge" style="background:#e0f2fe; color:#0369a1;">● opcion_d</span>
+          <span class="badge" style="background:#e0f2fe; color:#0369a1;">● respuesta_correcta</span>
+          <span class="badge" style="background:#e0f2fe; color:#0369a1;">● retroalimentacion</span>
+          <span class="badge" style="background:#e0f2fe; color:#0369a1;">● puntaje</span>
+        </div>
+      </div>
+
+      <!-- Acciones de Confirmación -->
+      {% if resultado.validas %}
+      <form method="POST" action="{% url 'preguntas:confirmar' %}">
         {% csrf_token %}
-        <button type="submit" class="cancelar">Cancelar</button>
-    </form>
-</body>
-</html>
+        <button type="submit" class="btn btn-primary btn-full" style="padding:14px; font-size:15px; border-radius:12px; margin-bottom:12px; background:#186382;">
+          ✓ Confirmar e Importar {{ resultado.validas|length }} Pregunta(s)
+        </button>
+      </form>
+      {% else %}
+      <div style="background:#fef2f2; color:#991b1b; padding:14px; border-radius:10px; font-size:13px; text-align:center; margin-bottom:12px;">
+        No hay preguntas válidas para importar en este archivo. Corrige los errores señalados y vuelve a subir la plantilla.
+      </div>
+      {% endif %}
+
+      <div style="display:flex; gap:10px;">
+        <a href="/static/plantillas/plantilla_preguntas_simulador_tyt.xlsx" download class="btn btn-outline" style="flex:1; font-size:12px; padding:10px;">
+          📥 Plantilla Oficial
+        </a>
+        <form method="POST" action="{% url 'preguntas:cancelar' %}" style="flex:1;">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-outline btn-full" style="font-size:12px; padding:10px; color:#b91c1c;">
+            Cancelar Ingesta
+          </button>
+        </form>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+{% endblock %}

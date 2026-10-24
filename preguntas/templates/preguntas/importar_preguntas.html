@@ -1,47 +1,111 @@
-{% load static %}
-<!-- Plantilla independiente, lista para probar. Si ya tienes un base.html
-     en tu proyecto, cámbiala por un extends de tu base y mueve este
-     contenido dentro de tu bloque de contenido. -->
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Importar preguntas</title>
-    <style>
-        body { font-family: Arial, sans-serif; max-width: 720px; margin: 40px auto; color: #222; }
-        .ayuda { background: #EAF5EA; border: 1px solid #2E7D32; padding: 12px 16px; border-radius: 6px; }
-        button { background: #1F4E78; color: #fff; border: none; padding: 10px 18px; border-radius: 4px; cursor: pointer; }
-        .errores { color: #B00000; }
-    </style>
-</head>
-<body>
-    <h1>Importar preguntas desde Excel</h1>
+{% extends 'base.html' %}
 
-    <div class="ayuda">
-        <p>Sube el archivo con el formato de la plantilla (hoja <code>preguntas</code>,
-        columnas: categoria, tipo, texto_base, pregunta, opcion_a..d,
-        respuesta_correcta, retroalimentacion, puntaje).</p>
-        <p><a href="{% static 'plantillas/plantilla_preguntas_simulador_tyt.xlsx' %}">
-            Descargar plantilla de Excel
-        </a></p>
+{% block title %}Importar Preguntas - Simulador Saber TyT{% endblock %}
+
+{% block content %}
+<div style="background:#f8fafc; min-height:100vh; padding:24px 20px;">
+  <div style="max-width:640px; margin:0 auto;">
+
+    <!-- Topbar -->
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+      <a href="/preguntas/" style="display:inline-flex; align-items:center; justify-content:center; width:38px; height:38px; border-radius:50%; background:white; border:1px solid #e2e8f0; color:#0f172a; text-decoration:none;">
+        &larr;
+      </a>
+      <h2 style="font-size:18px; font-weight:800; color:#0f172a;">Importar Preguntas</h2>
+      <div style="width:38px;"></div>
     </div>
 
-    {% if messages %}
-        {% for m in messages %}<p>{{ m }}</p>{% endfor %}
-    {% endif %}
+    <!-- Stepper Asistente de Ingesta -->
+    <div class="card" style="padding:14px 20px; margin-bottom:20px; background:#f0f9ff; border-color:#bae6fd;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <span style="font-size:11px; font-weight:800; color:#0369a1; text-transform:uppercase; letter-spacing:0.5px;">ASISTENTE DE INGESTA</span>
+        <span class="badge badge-info" style="font-size:11px;">Paso 1 de 4</span>
+      </div>
+      <div style="display:flex; justify-content:space-between; font-size:12px; color:#0c4a6e; font-weight:600;">
+        <span><strong>1. Carga</strong></span>
+        <span style="opacity:0.6;">2. Validación</span>
+        <span style="opacity:0.6;">3. Previa</span>
+        <span style="opacity:0.6;">4. Final</span>
+      </div>
+    </div>
 
-    {% if form.errors %}
-        <ul class="errores">
-            {% for field, errs in form.errors.items %}
-                {% for e in errs %}<li>{{ field }}: {{ e }}</li>{% endfor %}
-            {% endfor %}
-        </ul>
-    {% endif %}
-
-    <form method="post" enctype="multipart/form-data">
+    <!-- Card Formulario Principal de Subida -->
+    <div class="card" style="padding:28px 24px; border-radius:20px; margin-bottom:20px;">
+      
+      <form method="POST" enctype="multipart/form-data">
         {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Validar archivo</button>
-    </form>
-</body>
-</html>
+
+        <!-- Cuestionario de Destino -->
+        <div class="form-group" style="margin-bottom:20px;">
+          <label class="form-label" style="display:flex; align-items:center; gap:6px;">
+            <span>📋</span> Cuestionario de Destino (Opcional)
+          </label>
+          {{ form.cuestionario }}
+          <div style="font-size:11px; color:#64748b; margin-top:4px;">
+            Si seleccionas un cuestionario, las preguntas válidas se vincularán automáticamente a él además de agregarse al banco general.
+          </div>
+        </div>
+
+        <!-- Dropzone / Input Archivo -->
+        <div class="form-group" style="margin-bottom:24px;">
+          <label class="form-label" style="display:flex; align-items:center; gap:6px;">
+            <span>📥</span> Archivo Excel con Formato Oficial (.xlsx)
+          </label>
+          <div style="border:2px dashed #cbd5e1; border-radius:12px; padding:28px 20px; text-align:center; background:#f8fafc; cursor:pointer;" onclick="document.getElementById('id_archivo').click();">
+            <div style="font-size:36px; margin-bottom:8px;">📊</div>
+            <div style="font-weight:700; color:#0f172a; font-size:14px; margin-bottom:4px;">Haz clic para seleccionar el archivo Excel</div>
+            <div style="font-size:12px; color:#64748b; margin-bottom:12px;">Compatible con Microsoft Excel (.xlsx)</div>
+            <div style="display:none;">{{ form.archivo }}</div>
+            <div id="archivo-seleccionado-nombre" style="font-size:13px; font-weight:700; color:#186382;">Ningún archivo seleccionado</div>
+          </div>
+        </div>
+
+        <!-- Esquema Reconocido Oficial (11/11 Campos) -->
+        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:16px; margin-bottom:24px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <span style="font-size:12px; font-weight:700; color:#334155;">Esquema Reconocido Oficial</span>
+            <span class="badge badge-success" style="font-size:11px;">11/11 Campos OK</span>
+          </div>
+          <div style="display:flex; flex-wrap:wrap; gap:6px; font-size:11px;">
+            <span class="badge" style="background:#e0f2fe; color:#0369a1;">● categoria</span>
+            <span class="badge" style="background:#e0f2fe; color:#0369a1;">● tipo</span>
+            <span class="badge" style="background:#e0f2fe; color:#0369a1;">● texto_base</span>
+            <span class="badge" style="background:#e0f2fe; color:#0369a1;">● pregunta</span>
+            <span class="badge" style="background:#e0f2fe; color:#0369a1;">● opcion_a</span>
+            <span class="badge" style="background:#e0f2fe; color:#0369a1;">● opcion_b</span>
+            <span class="badge" style="background:#e0f2fe; color:#0369a1;">● opcion_c</span>
+            <span class="badge" style="background:#e0f2fe; color:#0369a1;">● opcion_d</span>
+            <span class="badge" style="background:#e0f2fe; color:#0369a1;">● respuesta_correcta</span>
+            <span class="badge" style="background:#e0f2fe; color:#0369a1;">● retroalimentacion</span>
+            <span class="badge" style="background:#e0f2fe; color:#0369a1;">● puntaje</span>
+          </div>
+        </div>
+
+        <!-- Botones de Acción -->
+        <button type="submit" class="btn btn-primary btn-full" style="padding:14px; font-size:15px; border-radius:12px; margin-bottom:12px; background:#186382;">
+          Validar y Previsualizar Archivo &rarr;
+        </button>
+
+        <a href="/static/plantillas/plantilla_preguntas_simulador_tyt.xlsx" download class="btn btn-outline btn-full" style="padding:10px; font-size:13px; color:#186382; border-color:#93c5fd;">
+          📥 Descargar Plantilla Oficial Excel
+        </a>
+      </form>
+
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  const fileInput = document.getElementById('id_archivo');
+  if (fileInput) {
+    fileInput.addEventListener('change', () => {
+      if (fileInput.files.length > 0) {
+        document.getElementById('archivo-seleccionado-nombre').innerText = `📄 ${fileInput.files[0].name} (${(fileInput.files[0].size / 1024).toFixed(1)} KB)`;
+      }
+    });
+  }
+</script>
+{% endblock %}

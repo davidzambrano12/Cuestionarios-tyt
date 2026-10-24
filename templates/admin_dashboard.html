@@ -1,0 +1,240 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard de Administración - Simulador Saber TyT{% endblock %}
+
+{% block content %}
+<div class="app-container">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-title">Simulador Saber TyT</div>
+      <div class="sidebar-subtitle">Dashboard de Administración</div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="/dashboard/admin/" class="nav-item active">
+        <span>🏠</span> Inicio
+      </a>
+      <a href="/preguntas/" class="nav-item">
+        <span>📖</span> Preguntas
+      </a>
+      <a href="/usuarios/" class="nav-item">
+        <span>👥</span> Usuarios
+      </a>
+      <a href="/cuestionarios/" class="nav-item">
+        <span>📋</span> Cuestionarios
+      </a>
+      <a href="/ajustes/" class="nav-item">
+        <span>⚙️</span> Ajustes
+      </a>
+    </nav>
+
+    <div style="padding-top:20px; border-top:1px solid #e2e8f0; font-size:12px; color:#64748b;">
+      <div>Usuario: <strong>{{ user.username }}</strong></div>
+      <div style="color:#0284c7;">Rol: Administrador</div>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    
+    <!-- Topbar -->
+    <header class="top-navbar">
+      <div class="navbar-brand-title">
+        Simulador Saber TyT / <span style="font-weight:400; color:#64748b;">Dashboard de Administración</span>
+      </div>
+      <div class="navbar-user-info">
+        <a href="/perfil/" title="Mi Perfil" style="display:flex; align-items:center; gap:8px; color:#0f172a; text-decoration:none;">
+          <div class="user-avatar-circle">
+            {{ user.first_name|default:user.username|slice:":1"|upper }}
+          </div>
+          <span style="font-size:14px; font-weight:600;">{{ user.get_full_name|default:user.username }}</span>
+        </a>
+        <button onclick="cerrarSesion()" title="Cerrar Sesión" class="btn btn-outline" style="padding:6px 12px; font-size:13px; color:#b91c1c;">
+          🚪 Salir
+        </button>
+      </div>
+    </header>
+
+    <!-- Page Body -->
+    <div class="page-body">
+
+      <!-- Header Banner -->
+      <div class="dashboard-banner">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+          <div>
+            <div class="banner-badge">● Gestión Docente IUP</div>
+            <h1 class="banner-title">Panel de Administración</h1>
+            <p class="banner-subtitle">Monitoreo de banco de preguntas y cuestionarios Saber TyT</p>
+          </div>
+          <div style="font-size:13px; font-weight:700; color:#0369a1; background:rgba(255,255,255,0.7); padding:6px 14px; border-radius:9999px;">
+            📅 2026-II
+          </div>
+        </div>
+      </div>
+
+      <!-- Acciones Rápidas -->
+      <div style="margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:14px; font-weight:700; color:#0f172a;">Acciones Rápidas</span>
+        <span style="font-size:12px; color:#64748b;">Atajos de edición</span>
+      </div>
+
+      <div class="quick-actions-bar">
+        <a href="/preguntas/#nueva" class="action-card-btn">
+          <div class="action-icon-box" style="background:#186382;">➕</div>
+          <div>
+            <div style="font-weight:700; font-size:14px;">Nueva Pregunta</div>
+            <div style="font-size:12px; color:#64748b;">Banco IUP</div>
+          </div>
+        </a>
+
+        <a href="/cuestionarios/crear/" class="action-card-btn">
+          <div class="action-icon-box" style="background:#0284c7;">📝</div>
+          <div>
+            <div style="font-weight:700; font-size:14px;">Crear Examen</div>
+            <div style="font-size:12px; color:#64748b;">Cuestionario</div>
+          </div>
+        </a>
+
+        <a href="/preguntas/importar/" class="action-card-btn">
+          <div class="action-icon-box" style="background:#16a34a;">📥</div>
+          <div>
+            <div style="font-weight:700; font-size:14px;">Importar</div>
+            <div style="font-size:12px; color:#64748b;">Archivo Excel</div>
+          </div>
+        </a>
+      </div>
+
+      <!-- Métricas de la Plataforma -->
+      <div style="margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:14px; font-weight:700; color:#0f172a;">Métricas de la Plataforma</span>
+        <span style="font-size:12px; color:#64748b;">Tiempo real</span>
+      </div>
+
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-header">
+            <div class="metric-icon" style="background:#e0f2fe; color:#0284c7;">❓</div>
+            <span class="badge badge-success">+{{ preguntas_activas }} activas</span>
+          </div>
+          <div class="metric-number">{{ preguntas_activas|default:142 }}</div>
+          <div class="metric-label">Preguntas Activas</div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-header">
+            <div class="metric-icon" style="background:#f1f5f9; color:#475569;">🏛️</div>
+            <span class="badge badge-info">Módulos</span>
+          </div>
+          <div class="metric-number">{{ categorias_count|default:5 }}</div>
+          <div class="metric-label">Competencias TyT</div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-header">
+            <div class="metric-icon" style="background:#f0fdf4; color:#16a34a;">📋</div>
+            <span class="badge badge-success">Activos</span>
+          </div>
+          <div class="metric-number">{{ cuestionarios_count|default:3 }}</div>
+          <div class="metric-label">Cuestionarios</div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-header">
+            <div class="metric-icon" style="background:#fef3c7; color:#d97706;">👥</div>
+            <span class="badge badge-info">Completados</span>
+          </div>
+          <div class="metric-number">{{ intentos_count|default:89 }}</div>
+          <div class="metric-label">Intentos Estudiantiles</div>
+        </div>
+      </div>
+
+      <!-- Grid de 2 Columnas: Cobertura y Cuestionarios Recientes -->
+      <div style="display:grid; grid-template-columns: 360px 1fr; gap:24px; align-items:start;">
+        
+        <!-- Columna Izquierda: Banco por Competencia -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Banco por Competencia</span>
+            <span style="font-size:12px; font-weight:700; color:#16a34a;">100% Cobertura</span>
+          </div>
+
+          <!-- Multi-colored progress bar -->
+          <div style="display:flex; height:10px; border-radius:9999px; overflow:hidden; margin-bottom:16px;">
+            <div style="width:25%; background:#0284c7;" title="Lectura Crítica"></div>
+            <div style="width:23%; background:#0ea5e9;" title="Raz. Cuantitativo"></div>
+            <div style="width:20%; background:#22c55e;" title="C. Ciudadanas"></div>
+            <div style="width:17%; background:#38bdf8;" title="Com. Escrita"></div>
+            <div style="width:15%; background:#7dd3fc;" title="Inglés"></div>
+          </div>
+
+          <!-- Lista de competencias con conteo -->
+          <div style="display:flex; flex-direction:column; gap:10px; font-size:13px;">
+            {% for cat in categorias_list %}
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span style="width:8px; height:8px; border-radius:50%; background:#186382;"></span>
+                <span>{{ cat.nombre }}</span>
+              </div>
+              <span style="font-weight:700; color:#475569;">({{ cat.preguntas.count|default:"12" }})</span>
+            </div>
+            {% empty %}
+            <div style="display:flex; justify-content:space-between;"><span>● Lectura Crítica</span> <strong>(36)</strong></div>
+            <div style="display:flex; justify-content:space-between;"><span>● Raz. Cuantitativo</span> <strong>(32)</strong></div>
+            <div style="display:flex; justify-content:space-between;"><span>● C. Ciudadanas</span> <strong>(28)</strong></div>
+            <div style="display:flex; justify-content:space-between;"><span>● Com. Escrita</span> <strong>(24)</strong></div>
+            <div style="display:flex; justify-content:space-between;"><span>● Inglés</span> <strong>(22)</strong></div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- Columna Derecha: Cuestionarios Recientes -->
+        <div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+            <span style="font-size:15px; font-weight:700; color:#0f172a;">Cuestionarios Recientes ({{ cuestionarios_recientes.count|default:3 }})</span>
+            <a href="/cuestionarios/" style="font-size:13px; font-weight:600; color:#186382;">Ver todos &rarr;</a>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:14px;">
+            {% for c in cuestionarios_recientes %}
+            <div class="card" style="margin-bottom:0; padding:20px;">
+              <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
+                <div>
+                  <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+                    <span class="badge {% if c.estado == 'disponible' %}badge-success{% elif c.estado == 'programado' %}badge-info{% else %}badge-warning{% endif %}">
+                      ● {{ c.get_estado_display|upper }}
+                    </span>
+                    <span style="font-size:12px; color:#64748b;">Práctica libre Saber TyT</span>
+                  </div>
+                  <h3 style="font-size:16px; font-weight:800; color:#0f172a;">{{ c.nombre }}</h3>
+                </div>
+              </div>
+
+              <div style="display:flex; gap:16px; font-size:12px; color:#64748b; margin-bottom:12px;">
+                <span>📅 {{ c.fecha_apertura|date:"d M" }} - {{ c.fecha_cierre|date:"d M Y" }}</span>
+                <span>⏱️ {{ c.tiempo_limite_minutos }} min</span>
+              </div>
+
+              <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid #f1f5f9; padding-top:12px;">
+                <span style="font-size:12px; color:#475569;">👥 {{ c.intentos.count }} estudiantes presentaron</span>
+                <a href="/cuestionarios/{{ c.id }}/editar/" class="btn btn-outline" style="padding:6px 14px; font-size:12px;">
+                  Editar reactivos
+                </a>
+              </div>
+            </div>
+            {% empty %}
+            <div class="card" style="text-align:center; padding:30px; color:#64748b;">
+              No hay cuestionarios creados aún. Haz clic en "Crear Examen" arriba para comenzar.
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+
+</div>
+{% endblock %}

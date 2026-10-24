@@ -1,22 +1,48 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Importación completada</title>
-    <style>
-        body { font-family: Arial, sans-serif; max-width: 720px; margin: 40px auto; color: #222; }
-        .ok { background: #EAF5EA; border: 1px solid #2E7D32; padding: 16px; border-radius: 6px; }
-    </style>
-</head>
-<body>
-    <h1>Importación #{{ resultado.importacion_id }} completada</h1>
-    <div class="ok">
-        <p><strong>Archivo:</strong> {{ resultado.nombre_archivo }}</p>
-        <p><strong>Guardadas:</strong> {{ resultado.validas|length }}</p>
-        <p><strong>Duplicadas (no guardadas):</strong> {{ resultado.duplicadas|length }}</p>
-        <p><strong>Con error (no guardadas):</strong> {{ resultado.con_error|length }}</p>
-        <p><strong>Resultado:</strong> {{ resultado.resultado_global }}</p>
+{% extends 'base.html' %}
+
+{% block title %}Importación Finalizada - Simulador Saber TyT{% endblock %}
+
+{% block content %}
+<div style="background:#f8fafc; min-height:100vh; padding:40px 20px;">
+  <div style="max-width:580px; margin:0 auto;">
+
+    <div class="card" style="padding:40px 32px; border-radius:24px; text-align:center;">
+      <div style="width:64px; height:64px; border-radius:50%; background:#dcfce7; color:#15803d; display:flex; align-items:center; justify-content:center; font-size:32px; margin:0 auto 18px;">
+        ✓
+      </div>
+
+      <span class="badge badge-success" style="font-size:13px; padding:6px 16px; margin-bottom:12px;">
+        ● Ingesta #{{ resultado.importacion_id }} Finalizada
+      </span>
+
+      <h1 style="font-size:22px; font-weight:800; color:#0f172a; margin-bottom:6px;">Importación Completada</h1>
+      <p style="font-size:13px; color:#64748b; margin-bottom:24px;">Archivo: {{ resultado.nombre_archivo }}</p>
+
+      <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:12px; margin-bottom:24px; text-align:center;">
+        <div style="background:#f0fdf4; border:1px solid #86efac; border-radius:12px; padding:14px;">
+          <div style="font-size:22px; font-weight:800; color:#15803d;">{{ resultado.validas|length }}</div>
+          <div style="font-size:11px; color:#15803d; font-weight:600;">Guardadas</div>
+        </div>
+        <div style="background:#eff6ff; border:1px solid #93c5fd; border-radius:12px; padding:14px;">
+          <div style="font-size:22px; font-weight:800; color:#1d4ed8;">{{ resultado.duplicadas|length }}</div>
+          <div style="font-size:11px; color:#1d4ed8; font-weight:600;">Duplicadas</div>
+        </div>
+        <div style="background:#fef2f2; border:1px solid #fca5a5; border-radius:12px; padding:14px;">
+          <div style="font-size:22px; font-weight:800; color:#b91c1c;">{{ resultado.con_error|length }}</div>
+          <div style="font-size:11px; color:#b91c1c; font-weight:600;">Con Error</div>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:12px;">
+        <a href="/preguntas/" class="btn btn-primary" style="flex:1; padding:12px; font-size:14px;">
+          Ver Banco de Preguntas &rarr;
+        </a>
+        <a href="/preguntas/importar/" class="btn btn-outline" style="flex:1; padding:12px; font-size:14px;">
+          Importar Otro Archivo
+        </a>
+      </div>
     </div>
-    <p><a href="{% url 'preguntas:importar' %}">Importar otro archivo</a></p>
-</body>
-</html>
+
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+
+{% block title %}Perfil Institucional - Simulador Saber TyT{% endblock %}
+
+{% block content %}
+<div style="background:#f8fafc; min-height:100vh; padding:24px 20px;">
+  <div style="max-width:540px; margin:0 auto;">
+
+    <!-- Topbar -->
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+      <a href="javascript:history.back()" style="display:inline-flex; align-items:center; justify-content:center; width:38px; height:38px; border-radius:50%; background:white; border:1px solid #e2e8f0; color:#0f172a; text-decoration:none;">
+        &larr;
+      </a>
+      <h2 style="font-size:18px; font-weight:800; color:#0f172a;">Perfil</h2>
+      <div style="width:38px;"></div>
+    </div>
+
+    <!-- Card Perfil Principal -->
+    <div class="card" style="padding:28px 24px; border-radius:20px; margin-bottom:20px;">
+      
+      <!-- Avatar y Nombres -->
+      <div style="text-align:center; margin-bottom:24px;">
+        <div class="user-avatar-circle" style="width:72px; height:72px; font-size:26px; margin:0 auto 12px; background:#186382; color:white;">
+          {{ user.first_name|default:user.username|slice:":2"|upper }}
+        </div>
+        <div style="display:flex; justify-content:center; gap:8px; margin-bottom:6px;">
+          <span class="badge badge-info">{{ user.perfil.rol.nombre|default:"Usuario" }}</span>
+          <span class="badge badge-success">● Cuenta Activa y Verificada</span>
+        </div>
+        <h1 style="font-size:20px; font-weight:800; color:#0f172a; margin-bottom:2px;">{{ user.get_full_name|default:user.username }}</h1>
+        <div style="font-size:12px; color:#64748b;">Institución Universitaria del Putumayo · Mocoa</div>
+      </div>
+
+      <!-- Datos Personales y Programa -->
+      <div style="border-top:1px solid #f1f5f9; padding-top:20px; margin-bottom:24px;">
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:14px;">
+          <span style="font-size:16px;">🎓</span>
+          <h3 style="font-size:14px; font-weight:800; color:#0f172a; margin:0;">Datos Personales y Programa</h3>
+        </div>
+
+        <form method="POST" action="/perfil/actualizar/">
+          {% csrf_token %}
+          <div class="form-group">
+            <label class="form-label">Código Institucional</label>
+            <input type="text" value="{{ user.perfil.codigo_institucional|default:user.username }}" readonly class="form-input" style="background:#f8fafc; color:#64748b;">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Programa Académico & Semestre</label>
+            <input type="text" name="programa" value="{{ user.perfil.programa_academico }} - {{ user.perfil.semestre }}" class="form-input">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Correo Institucional IUP</label>
+            <input type="email" value="{{ user.email }}" readonly class="form-input" style="background:#f8fafc; color:#64748b;">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Teléfono Celular de Contacto</label>
+            <input type="text" name="telefono" value="{{ user.perfil.telefono|default:'+57 312 456 7890' }}" class="form-input">
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-full" style="padding:10px; font-size:13px;">
+            Actualizar Información Personal
+          </button>
+        </form>
+      </div>
+
+      <!-- Seguridad y Credenciales -->
+      <div style="border-top:1px solid #f1f5f9; padding-top:20px; margin-bottom:20px;">
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:14px;">
+          <span style="font-size:16px;">🔒</span>
+          <h3 style="font-size:14px; font-weight:800; color:#0f172a; margin:0;">Seguridad y Credenciales</h3>
+        </div>
+
+        <form method="POST" action="/perfil/cambiar-password/">
+          {% csrf_token %}
+          <div class="form-group">
+            <label class="form-label">Nueva Contraseña</label>
+            <input type="password" name="nueva_password" required class="form-input" placeholder="Mínimo 8 caracteres">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Confirmar Nueva Contraseña</label>
+            <input type="password" name="confirmar_password" required class="form-input" placeholder="Repite la nueva contraseña">
+          </div>
+
+          <button type="submit" class="btn btn-outline btn-full" style="padding:10px; font-size:13px; color:#186382; border-color:#93c5fd;">
+            💾 Guardar Nueva Contraseña
+          </button>
+        </form>
+      </div>
+
+      <!-- Sesión Activa Segura y Logout -->
+      <div style="background:#f8fafc; border-radius:12px; padding:16px; border:1px solid #e2e8f0;">
+        <div style="display:flex; justify-content:space-between; align-items:center; font-size:12px; color:#64748b; margin-bottom:12px;">
+          <span>🌐 Red IUP Campus Mocoa</span>
+          <span style="color:#16a34a; font-weight:700;">● Sesión Activa Segura</span>
+        </div>
+        <button type="button" onclick="cerrarSesion()" class="btn btn-danger btn-full" style="padding:10px; font-size:13px;">
+          🚪 Cerrar Sesión Segura (Revocar JWT)
+        </button>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+{% endblock %}
