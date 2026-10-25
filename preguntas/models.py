@@ -88,7 +88,7 @@ class Cuestionario(models.Model):
     fecha_apertura = models.DateTimeField()
     fecha_cierre = models.DateTimeField()
     tiempo_limite_minutos = models.IntegerField()
-    intentos_permitidos = models.IntegerField()
+    intentos_permitidos = models.IntegerField(default=5)
     calificacion_maxima = models.DecimalField(max_digits=5, decimal_places=2)
     calificacion_aprobacion = models.DecimalField(max_digits=5, decimal_places=2)
     mezclar_preguntas = models.BooleanField(default=False)

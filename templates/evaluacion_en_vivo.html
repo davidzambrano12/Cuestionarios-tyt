@@ -43,6 +43,7 @@
   <!-- Formulario que envuelve el examen -->
   <form id="form-evaluacion" method="POST" action="/evaluacion/{{ intento.id }}/finalizar/" style="flex-grow:1; display:flex; flex-direction:column;">
     {% csrf_token %}
+    <input type="hidden" id="datos-respuestas-json" name="respuestas_json" value="{}">
 
     <div class="eval-container" style="flex-grow:1; width:100%; padding:24px 32px;">
       <div class="eval-grid">
@@ -90,14 +91,20 @@
               </div>
             </div>
 
-            <!-- Navegación Anterior / Siguiente -->
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:32px; border-top:1px solid #f1f5f9; padding-top:20px;">
+            <!-- Navegación Anterior / Siguiente / Terminar -->
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:32px; border-top:1px solid #f1f5f9; padding-top:20px; gap:12px; flex-wrap:wrap;">
               <button type="button" id="btn-anterior" onclick="cambiarPregunta(preguntaActualIdx - 1)" class="btn btn-outline" style="padding:10px 20px;">
                 &larr; Anterior
               </button>
-              <button type="button" id="btn-siguiente" onclick="cambiarPregunta(preguntaActualIdx + 1)" class="btn btn-primary" style="padding:10px 24px; background:#186382;">
-                Guardar y Siguiente &rarr;
-              </button>
+
+              <div style="display:flex; align-items:center; gap:10px;">
+                <button type="button" onclick="confirmarEntrega()" class="btn btn-outline" style="border-color:#cbd5e1; color:#475569; padding:10px 18px; font-size:13px;" title="Terminar examen ahora">
+                  ⏹️ Terminar Examen
+                </button>
+                <button type="button" id="btn-siguiente" onclick="irSiguienteOTerminar()" class="btn btn-primary" style="padding:10px 24px; background:#186382; font-weight:700;">
+                  Guardar y Siguiente &rarr;
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -143,9 +150,6 @@
   </form>
 
 </div>
-
-<!-- Input oculto para respuestas almacenadas en JSON -->
-<input type="hidden" id="datos-respuestas-json" name="respuestas_json" form="form-evaluacion">
 {% endblock %}
 
 {% block extra_scripts %}
@@ -156,10 +160,21 @@
   const intentoId = {{ intento.id }};
   
   let preguntaActualIdx = 0;
-  const respuestasUsuario = {}; // { preguntaId: opcionId }
+  // Cargar respuestas previas si existen (recuperación de sesión)
+  let respuestasUsuario = {};
+  try {
+    respuestasUsuario = {{ respuestas_previas_json|default:"{}"|safe }};
+  } catch(e) {
+    respuestasUsuario = {};
+  }
 
   // Inicialización
   document.addEventListener('DOMContentLoaded', () => {
+    // Sincronizar input oculto inicial
+    const inputHidden = document.getElementById('datos-respuestas-json');
+    if (inputHidden) {
+      inputHidden.value = JSON.stringify(respuestasUsuario);
+    }
     construirGrillaNavegacion();
     mostrarPregunta(0);
     iniciarTemporizador(tiempoLimiteMinutos * 60);
@@ -195,9 +210,13 @@
     document.getElementById('btn-anterior').style.visibility = idx === 0 ? 'hidden' : 'visible';
     const btnSig = document.getElementById('btn-siguiente');
     if (idx === preguntasData.length - 1) {
-      btnSig.innerText = 'Guardar y Revisar ✓';
+      btnSig.innerHTML = '✓ Guardar y Terminar Examen';
+      btnSig.style.background = '#16a34a';
+      btnSig.style.color = '#ffffff';
     } else {
-      btnSig.innerText = 'Guardar y Siguiente →';
+      btnSig.innerHTML = 'Guardar y Siguiente &rarr;';
+      btnSig.style.background = '#186382';
+      btnSig.style.color = '#ffffff';
     }
 
     // Renderizar opciones A, B, C, D
@@ -229,13 +248,26 @@
   function seleccionarOpcion(preguntaId, opcionId) {
     respuestasUsuario[preguntaId] = opcionId;
     // Sincronizar en el input oculto
-    document.getElementById('datos-respuestas-json').value = JSON.stringify(respuestasUsuario);
+    const inputHidden = document.getElementById('datos-respuestas-json');
+    if (inputHidden) {
+      inputHidden.value = JSON.stringify(respuestasUsuario);
+    }
     mostrarPregunta(preguntaActualIdx);
+  }
+
+  function irSiguienteOTerminar() {
+    if (preguntaActualIdx >= preguntasData.length - 1) {
+      confirmarEntrega();
+    } else {
+      cambiarPregunta(preguntaActualIdx + 1);
+    }
   }
 
   function cambiarPregunta(nuevoIdx) {
     if (nuevoIdx >= 0 && nuevoIdx < preguntasData.length) {
       mostrarPregunta(nuevoIdx);
+    } else if (nuevoIdx >= preguntasData.length) {
+      confirmarEntrega();
     }
   }
 
@@ -273,6 +305,10 @@
         clearInterval(intervalo);
         mostrarNotificacion('El tiempo límite del cuestionario ha finalizado. Se enviará automáticamente tu intento.', 'warning', 'Tiempo Agotado');
         setTimeout(() => {
+          const inputHidden = document.getElementById('datos-respuestas-json');
+          if (inputHidden) {
+            inputHidden.value = JSON.stringify(respuestasUsuario);
+          }
           document.getElementById('form-evaluacion').submit();
         }, 1200);
         return;
@@ -291,13 +327,24 @@
     const total = preguntasData.length;
     const faltantes = total - respondidas;
 
-    let mensaje = `¿Estás seguro de finalizar y entregar tu examen?\n\nHas respondido ${respondidas} de ${total} preguntas.`;
+    let mensaje = `¿Estás seguro de finalizar y entregar tu examen?\n\n• Respondidas: ${respondidas} de ${total}\n• Pendientes: ${faltantes}`;
     if (faltantes > 0) {
-      mensaje += `\n⚠️ Atención: te faltan ${faltantes} preguntas por responder.`;
+      mensaje += `\n\n⚠️ Atención: Aún tienes ${faltantes} pregunta(s) sin responder. Se calificarán con 0 puntos.`;
     }
 
     if (confirm(mensaje)) {
-      document.getElementById('datos-respuestas-json').value = JSON.stringify(respuestasUsuario);
+      const inputHidden = document.getElementById('datos-respuestas-json');
+      if (inputHidden) {
+        inputHidden.value = JSON.stringify(respuestasUsuario);
+      }
+
+      // Deshabilitar botones para evitar envíos múltiples
+      const btnSig = document.getElementById('btn-siguiente');
+      if (btnSig) {
+        btnSig.disabled = true;
+        btnSig.innerText = 'Enviando y calificando...';
+      }
+
       document.getElementById('form-evaluacion').submit();
     }
   }

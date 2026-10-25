@@ -1,72 +1,285 @@
 {% extends 'base.html' %}
 
-{% block title %}Resultado de la Evaluación - Simulador Saber TyT{% endblock %}
+{% block title %}Resultado y Revisión: {{ intento.cuestionario.nombre }} - Simulador Saber TyT{% endblock %}
 
 {% block content %}
-<div style="background-color:#f8fafc; min-height:100vh; padding:40px 20px;">
-  <div style="max-width:640px; margin:0 auto;">
+<div style="background-color:#f8fafc; min-height:100vh; padding:32px 20px 60px;">
+  <div style="max-width:880px; margin:0 auto;">
 
-    <!-- Card de Calificación Final -->
-    <div class="card" style="padding:40px 32px; border-radius:24px; text-align:center; box-shadow:var(--shadow-lg);">
+    <!-- Barra de Navegación Superior -->
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+      <a href="/dashboard/estudiante/" class="btn btn-outline" style="font-size:13px; padding:8px 16px; border-radius:10px; display:inline-flex; align-items:center; gap:6px;">
+        &larr; Volver al Panel de Estudiante
+      </a>
+      <div style="font-size:12px; color:#64748b; font-weight:600;">
+        Sesión Finalizada · {{ intento.fecha_fin|date:"d/m/Y H:i" }}
+      </div>
+    </div>
+
+    <!-- ================= HERO DE CALIFICACIÓN ================= -->
+    <div class="card" style="padding:36px; border-radius:24px; text-align:center; box-shadow:var(--shadow-md); margin-bottom:24px; border:1px solid #e2e8f0;">
       
-      <!-- Icono de Estado -->
-      <div style="width:72px; height:72px; border-radius:50%; {% if intento.aprobado %}background:#dcfce7; color:#15803d;{% else %}background:#fee2e2; color:#b91c1c;{% endif %} display:flex; align-items:center; justify-content:center; font-size:36px; margin:0 auto 20px;">
-        {% if intento.aprobado %}🎉{% else %}📝{% endif %}
+      <!-- Icono de Estado Dinámico -->
+      <div style="width:76px; height:76px; border-radius:50%; {% if intento.aprobado %}background:#dcfce7; color:#15803d; border:3px solid #bbf7d0;{% else %}background:#fee2e2; color:#b91c1c; border:3px solid #fecaca;{% endif %} display:flex; align-items:center; justify-content:center; font-size:38px; margin:0 auto 16px; box-shadow:0 8px 16px rgba(0,0,0,0.06);">
+        {% if intento.aprobado %}🏆{% else %}📝{% endif %}
       </div>
 
-      <span class="badge {% if intento.aprobado %}badge-success{% else %}badge-danger{% endif %}" style="font-size:14px; padding:6px 18px; margin-bottom:12px;">
-        ● {% if intento.aprobado %}APROBADO{% else %}NO APROBADO{% endif %}
-      </span>
+      <div style="margin-bottom:8px;">
+        <span class="badge {% if intento.aprobado %}badge-success{% else %}badge-danger{% endif %}" style="font-size:14px; padding:6px 20px; letter-spacing:0.5px;">
+          ● {% if intento.aprobado %}APROBADO{% else %}NO APROBADO{% endif %}
+        </span>
+      </div>
 
-      <h1 style="font-size:24px; font-weight:800; color:#0f172a; margin-bottom:8px;">
+      <h1 style="font-size:24px; font-weight:800; color:#0f172a; margin-bottom:4px;">
         Evaluación Finalizada
       </h1>
-      <p style="font-size:14px; color:#64748b; margin-bottom:28px;">
+      <p style="font-size:15px; color:#475569; margin-bottom:24px;">
         {{ intento.cuestionario.nombre }}
       </p>
 
       <!-- Calificación Destacada -->
-      <div style="background:#f8fafc; border:2px dashed #cbd5e1; border-radius:18px; padding:24px; margin-bottom:28px;">
-        <div style="font-size:12px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;">
-          Calificación Automática Obtenida
+      <div style="background:linear-gradient(180deg, #f0f9ff 0%, #ffffff 100%); border:2px dashed #93c5fd; border-radius:18px; padding:24px; margin-bottom:24px;">
+        <div style="font-size:12px; font-weight:700; color:#0369a1; text-transform:uppercase; letter-spacing:1px; margin-bottom:6px;">
+          Calificación Institucional Obtenida
         </div>
-        <div style="font-size:48px; font-weight:800; color:#186382; line-height:1;">
-          {{ intento.calificacion|default:"0.00" }} <span style="font-size:20px; color:#94a3b8;">/ {{ intento.cuestionario.calificacion_maxima }}</span>
+        <div style="font-size:52px; font-weight:900; color:#186382; line-height:1; margin-bottom:6px;">
+          {{ intento.calificacion|default:"0.00" }} <span style="font-size:22px; color:#94a3b8; font-weight:600;">/ {{ intento.cuestionario.calificacion_maxima }}</span>
         </div>
-        <div style="font-size:13px; color:#475569; margin-top:10px;">
-          Puntaje: <strong>{{ intento.puntaje_obtenido|default:"0" }}</strong> de {{ intento.puntaje_total_posible|default:"0" }} puntos posibles
+        <div style="font-size:13px; color:#475569; font-weight:500;">
+          Puntaje acumulado: <strong>{{ intento.puntaje_obtenido|default:"0" }}</strong> de {{ intento.puntaje_total_posible|default:"0" }} puntos posibles &middot; <span style="color:#0284c7; font-weight:700;">{{ porcentaje_acierto }}% de efectividad</span>
         </div>
       </div>
 
-      <!-- Resumen de Métricas del Intento -->
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; text-align:left; margin-bottom:28px; font-size:13px;">
-        <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:10px; padding:12px;">
-          <div style="color:#64748b;">Participante:</div>
-          <div style="font-weight:700; color:#0f172a;">{{ intento.participante_nombre }}</div>
-          <div style="font-size:11px; color:#94a3b8;">Cód: {{ intento.participante_codigo }}</div>
+      <!-- Cuadrícula de Métricas Clave -->
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(160px, 1fr)); gap:12px; margin-bottom:16px;">
+        
+        <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:14px; padding:16px 12px; text-align:center;">
+          <div style="font-size:24px; font-weight:800; color:#15803d;">{{ total_correctas }}</div>
+          <div style="font-size:12px; color:#166534; font-weight:700; margin-top:2px;">✓ Preguntas Correctas</div>
         </div>
 
-        <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:10px; padding:12px;">
-          <div style="color:#64748b;">Duración:</div>
-          <div style="font-weight:700; color:#0f172a;">
-            {% if intento.duracion_segundos %}{{ intento.duracion_segundos }} segundos{% else %}Calculado en servidor{% endif %}
+        <div style="background:#fef2f2; border:1px solid #fecaca; border-radius:14px; padding:16px 12px; text-align:center;">
+          <div style="font-size:24px; font-weight:800; color:#b91c1c;">{{ total_incorrectas }}</div>
+          <div style="font-size:12px; color:#991b1b; font-weight:700; margin-top:2px;">✗ Preguntas Incorrectas</div>
+        </div>
+
+        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:14px; padding:16px 12px; text-align:center;">
+          <div style="font-size:24px; font-weight:800; color:#64748b;">{{ total_sin_responder }}</div>
+          <div style="font-size:12px; color:#475569; font-weight:700; margin-top:2px;">⚠️ Sin Responder</div>
+        </div>
+
+        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:14px; padding:16px 12px; text-align:center;">
+          <div style="font-size:24px; font-weight:800; color:#0f172a;">
+            {% if intento.duracion_segundos %}{{ intento.duracion_segundos }} s{% else %}Calculado{% endif %}
           </div>
-          <div style="font-size:11px; color:#94a3b8;">Fecha: {{ intento.fecha_fin|date:"d/m/Y H:i" }}</div>
+          <div style="font-size:12px; color:#64748b; font-weight:700; margin-top:2px;">⏱️ Tiempo Empleado</div>
         </div>
+
       </div>
 
-      <!-- Aviso de Seguridad Institucional -->
-      <div style="background:#f0f9ff; border:1px solid #bae6fd; border-radius:12px; padding:14px; font-size:12px; color:#0c4a6e; text-align:left; margin-bottom:28px;">
-        🔒 <strong>Calificación calculada y blindada en Django:</strong> Tu nota y respuestas han sido registradas en la base de datos institucional MariaDB. Para preservar la validez del examen, las respuestas correctas se mantienen reservadas.
+      <div style="display:flex; justify-content:space-between; align-items:center; background:#f8fafc; padding:10px 16px; border-radius:10px; font-size:12px; color:#64748b;">
+        <span>Estudiante: <strong>{{ intento.participante_nombre }}</strong> ({{ intento.participante_codigo }})</span>
+        <span>Aprobación mínima requerida: <strong>{{ intento.cuestionario.calificacion_aprobacion }}</strong></span>
       </div>
 
-      <!-- Botón Volver -->
-      <a href="/dashboard/estudiante/" class="btn btn-primary btn-full" style="padding:14px; font-size:15px; border-radius:12px;">
-        Volver a Mi Panel &rarr;
+    </div>
+
+    <!-- ================= BARRA DE FILTROS INTERACTIVOS ================= -->
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:12px;">
+      <div>
+        <h2 style="font-size:18px; font-weight:800; color:#0f172a; margin:0;">
+          Desglose y Revisión de Preguntas
+        </h2>
+        <p style="font-size:13px; color:#64748b; margin:2px 0 0 0;">
+          Previsualización detallada de tus aciertos, errores y respuestas correctas.
+        </p>
+      </div>
+
+      <!-- Filtros por estado -->
+      <div style="display:inline-flex; background:#e2e8f0; padding:4px; border-radius:12px; gap:4px;" id="contenedor-filtros">
+        <button type="button" class="btn-filtro active" onclick="filtrarPreguntas('todas', this)" style="padding:6px 12px; font-size:12px; font-weight:700; border:none; border-radius:8px; cursor:pointer; background:white; color:#0f172a; box-shadow:0 1px 3px rgba(0,0,0,0.1);">
+          Todas ({{ total_preguntas }})
+        </button>
+        <button type="button" class="btn-filtro" onclick="filtrarPreguntas('correcta', this)" style="padding:6px 12px; font-size:12px; font-weight:700; border:none; border-radius:8px; cursor:pointer; background:transparent; color:#15803d;">
+          ✓ Correctas ({{ total_correctas }})
+        </button>
+        <button type="button" class="btn-filtro" onclick="filtrarPreguntas('incorrecta', this)" style="padding:6px 12px; font-size:12px; font-weight:700; border:none; border-radius:8px; cursor:pointer; background:transparent; color:#b91c1c;">
+          ✗ Incorrectas ({{ total_incorrectas }})
+        </button>
+        {% if total_sin_responder > 0 %}
+        <button type="button" class="btn-filtro" onclick="filtrarPreguntas('sin_responder', this)" style="padding:6px 12px; font-size:12px; font-weight:700; border:none; border-radius:8px; cursor:pointer; background:transparent; color:#64748b;">
+          ⚠️ Omitidas ({{ total_sin_responder }})
+        </button>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- ================= LISTADO DE PREGUNTAS (PREVISUALIZACIÓN) ================= -->
+    <div id="lista-preguntas-revision" style="display:flex; flex-direction:column; gap:20px;">
+      
+      {% for item in detalles_respuestas %}
+      <div class="card card-pregunta-revision" data-estado="{{ item.estado }}" style="padding:24px 28px; border-radius:18px; border-left:6px solid {% if item.estado == 'correcta' %}#22c55e{% elif item.estado == 'incorrecta' %}#ef4444{% else %}#cbd5e1{% endif %}; box-shadow:var(--shadow-sm); transition:all 0.2s ease;">
+        
+        <!-- Header de la Pregunta -->
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:14px; gap:12px; flex-wrap:wrap;">
+          <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+            <span style="font-size:15px; font-weight:800; color:#0f172a;">Pregunta {{ item.numero }}</span>
+            <span class="badge badge-info" style="font-size:11px; padding:4px 10px;">
+              {{ item.pregunta.categoria.nombre|default:"General" }}
+            </span>
+          </div>
+
+          <div style="display:flex; align-items:center; gap:8px;">
+            {% if item.estado == 'correcta' %}
+              <span class="badge badge-success" style="font-size:12px; padding:6px 14px; font-weight:700;">
+                ✓ Respuesta Correcta (+{{ item.puntaje_obtenido }} pts)
+              </span>
+            {% elif item.estado == 'incorrecta' %}
+              <span class="badge badge-danger" style="font-size:12px; padding:6px 14px; font-weight:700;">
+                ✗ Respuesta Incorrecta (0.00 pts de {{ item.peso_total }})
+              </span>
+            {% else %}
+              <span class="badge" style="background:#e2e8f0; color:#475569; font-size:12px; padding:6px 14px; font-weight:700;">
+                ⚠️ No respondida (0.00 pts)
+              </span>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Contexto Operativo si existe -->
+        {% if item.pregunta.texto_base %}
+        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:14px 16px; margin-bottom:16px;">
+          <div style="font-size:11px; font-weight:800; color:#186382; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px; display:flex; align-items:center; gap:6px;">
+            <span>📄</span> CONTEXTO / TEXTO BASE
+          </div>
+          <div style="font-size:13px; color:#334155; line-height:1.5;">
+            {{ item.pregunta.texto_base }}
+          </div>
+        </div>
+        {% endif %}
+
+        <!-- Enunciado de la Pregunta -->
+        <div style="font-size:16px; font-weight:700; color:#0f172a; line-height:1.45; margin-bottom:20px;">
+          {{ item.pregunta.enunciado }}
+        </div>
+
+        <!-- Lista de Opciones A, B, C, D -->
+        <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:16px;">
+          {% for op in item.opciones %}
+          <div style="display:flex; align-items:center; gap:14px; padding:12px 18px; border-radius:12px; font-size:14px; transition:all 0.15s ease;
+            {% if op.es_correcta and op.es_seleccionada %}
+              background:#f0fdf4; border:2px solid #22c55e;
+            {% elif op.es_correcta %}
+              background:#f0fdf4; border:2px solid #86efac;
+            {% elif op.es_seleccionada and not op.es_correcta %}
+              background:#fef2f2; border:2px solid #ef4444;
+            {% else %}
+              background:#ffffff; border:1px solid #e2e8f0; opacity:0.85;
+            {% endif %}">
+            
+            <!-- Badge de Letra (A, B, C, D) -->
+            <div style="width:30px; height:30px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:13px; flex-shrink:0;
+              {% if op.es_correcta %}
+                background:#22c55e; color:white;
+              {% elif op.es_seleccionada and not op.es_correcta %}
+                background:#ef4444; color:white;
+              {% else %}
+                background:#e2e8f0; color:#475569;
+              {% endif %}">
+              {{ op.letra }}
+            </div>
+
+            <!-- Texto de la Opción -->
+            <div style="flex-grow:1; color:#0f172a; font-weight:{% if op.es_seleccionada or op.es_correcta %}600{% else %}400{% endif %};">
+              {{ op.texto }}
+            </div>
+
+            <!-- Indicador de Selección / Corrección -->
+            <div>
+              {% if op.es_correcta and op.es_seleccionada %}
+                <span class="badge badge-success" style="font-size:11px; padding:4px 10px;">
+                  ✓ Tu Respuesta (Correcta)
+                </span>
+              {% elif op.es_correcta %}
+                <span class="badge" style="background:#dcfce7; color:#15803d; border:1px solid #86efac; font-size:11px; padding:4px 10px; font-weight:700;">
+                  ✓ Respuesta Correcta
+                </span>
+              {% elif op.es_seleccionada and not op.es_correcta %}
+                <span class="badge badge-danger" style="font-size:11px; padding:4px 10px;">
+                  ✗ Tu Selección (Incorrecta)
+                </span>
+              {% endif %}
+            </div>
+
+          </div>
+          {% endfor %}
+        </div>
+
+        <!-- Retroalimentación / Justificación Pedagógica -->
+        {% if item.retroalimentacion %}
+        <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:12px; padding:14px 16px; margin-top:8px;">
+          <div style="font-size:12px; font-weight:800; color:#1e40af; margin-bottom:4px; display:flex; align-items:center; gap:6px;">
+            <span>💡</span> JUSTIFICACIÓN / RETROALIMENTACIÓN PEDAGÓGICA
+          </div>
+          <div style="font-size:13px; color:#1e3a8a; line-height:1.5;">
+            {{ item.retroalimentacion }}
+          </div>
+        </div>
+        {% endif %}
+
+      </div>
+      {% endfor %}
+
+    </div>
+
+    <!-- Acciones Inferiores -->
+    <div style="margin-top:36px; display:flex; justify-content:center; gap:16px; flex-wrap:wrap;">
+      <a href="/dashboard/estudiante/" class="btn btn-primary" style="padding:12px 28px; font-size:14px; border-radius:12px;">
+        &larr; Volver al Dashboard de Estudiante
       </a>
-
+      <button type="button" onclick="window.print()" class="btn btn-outline" style="padding:12px 24px; font-size:14px; border-radius:12px;">
+        🖨️ Imprimir / Guardar Resumen
+      </button>
     </div>
 
   </div>
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  function filtrarPreguntas(criterio, boton) {
+    // Actualizar estilo activo de los botones de filtro
+    document.querySelectorAll('.btn-filtro').forEach(btn => {
+      btn.style.background = 'transparent';
+      btn.style.boxShadow = 'none';
+      if (btn.innerText.includes('Correctas')) {
+        btn.style.color = '#15803d';
+      } else if (btn.innerText.includes('Incorrectas')) {
+        btn.style.color = '#b91c1c';
+      } else if (btn.innerText.includes('Omitidas')) {
+        btn.style.color = '#64748b';
+      } else {
+        btn.style.color = '#0f172a';
+      }
+    });
+
+    boton.style.background = 'white';
+    boton.style.color = '#0f172a';
+    boton.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
+
+    // Filtrar tarjetas
+    const cards = document.querySelectorAll('.card-pregunta-revision');
+    cards.forEach(card => {
+      const estado = card.getAttribute('data-estado');
+      if (criterio === 'todas') {
+        card.style.display = 'block';
+      } else if (criterio === estado) {
+        card.style.display = 'block';
+      } else {
+        card.style.display = 'none';
+      }
+    });
+  }
+</script>
 {% endblock %}

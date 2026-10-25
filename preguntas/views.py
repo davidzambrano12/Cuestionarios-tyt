@@ -243,7 +243,7 @@ def configurar_cuestionario(request, cuestionario_id=None):
         fecha_apertura = request.POST.get("fecha_apertura")
         fecha_cierre = request.POST.get("fecha_cierre")
         tiempo_limite = int(request.POST.get("tiempo_limite_minutos", 120))
-        intentos = int(request.POST.get("intentos_permitidos", 2))
+        intentos = int(request.POST.get("intentos_permitidos", 5))
         calif_max = Decimal(request.POST.get("calificacion_maxima", "5.00"))
         calif_apr = Decimal(request.POST.get("calificacion_aprobacion", "3.00"))
         mezclar_p = bool(request.POST.get("mezclar_preguntas"))
@@ -389,7 +389,7 @@ def evaluacion_en_vivo(request, intento_id):
     cuestionario = intento.cuestionario
     cuestionario_preguntas = cuestionario.cuestionario_preguntas.select_related(
         "pregunta", "pregunta__categoria"
-    ).prefetch_related("pregunta__opciones").order_by("orden")
+    ).prefetch_related("pregunta__opciones").order_by("orden", "id")
 
     # Serializar preguntas a JSON para la navegación interactiva en JavaScript
     preguntas_lista = []
@@ -411,11 +411,18 @@ def evaluacion_en_vivo(request, intento_id):
             "opciones": opciones_lista,
         })
 
+    # Cargar respuestas previas guardadas si existen (para recuperación ante recargas)
+    respuestas_previas = {
+        r.pregunta_id: r.opcion_seleccionada_id
+        for r in intento.respuestas.filter(opcion_seleccionada__isnull=False)
+    }
+
     return render(request, "evaluacion_en_vivo.html", {
         "intento": intento,
         "cuestionario": cuestionario,
         "total_preguntas": len(preguntas_lista),
         "preguntas_json": json.dumps(preguntas_lista),
+        "respuestas_previas_json": json.dumps(respuestas_previas),
     })
 
 
@@ -435,6 +442,10 @@ def finalizar_evaluacion(request, intento_id):
     if intento.participante_codigo != codigo_usuario and not request.user.is_superuser:
         return HttpResponseForbidden("Acceso denegado a este intento.")
 
+    # Si ya fue finalizado previamente, redirigir directamente al reporte de resultados
+    if intento.estado == "finalizado":
+        return redirect(f"/evaluacion/{intento.id}/resultado/")
+
     if request.method == "POST":
         respuestas_raw = request.POST.get("respuestas_json", "{}")
         try:
@@ -443,12 +454,15 @@ def finalizar_evaluacion(request, intento_id):
             respuestas_map = {}
 
         cuestionario = intento.cuestionario
-        cuestionario_preguntas = cuestionario.cuestionario_preguntas.select_related("pregunta").all()
+        cuestionario_preguntas = cuestionario.cuestionario_preguntas.select_related("pregunta").order_by("orden", "id")
 
         puntaje_obtenido = Decimal("0.00")
         puntaje_total_posible = Decimal("0.00")
 
         with transaction.atomic():
+            # Limpiar respuestas previas si existieran para evitar duplicidad
+            intento.respuestas.all().delete()
+
             for cp in cuestionario_preguntas:
                 pregunta = cp.pregunta
                 peso = cp.puntaje_asignado or pregunta.puntaje or Decimal("1.00")
@@ -503,14 +517,90 @@ def finalizar_evaluacion(request, intento_id):
 
 @login_required
 def resultado_evaluacion(request, intento_id):
-    """Muestra el resultado y la calificación final calculada por Django."""
+    """Muestra el resultado, la calificación final calculada y la previsualización detallada de preguntas acertadas/erradas."""
     intento = get_object_or_404(Intento, id=intento_id)
 
     codigo_usuario = getattr(getattr(request.user, "perfil", None), "codigo_institucional", None) or request.user.username
     if intento.participante_codigo != codigo_usuario and not request.user.is_superuser:
         return HttpResponseForbidden("Acceso denegado a este reporte.")
 
-    return render(request, "resultado_evaluacion.html", {"intento": intento})
+    # Cargar respuestas del intento con preguntas y opciones
+    respuestas_qs = intento.respuestas.select_related(
+        "pregunta", "pregunta__categoria", "opcion_seleccionada"
+    ).prefetch_related("pregunta__opciones").all()
+
+    # Mapeo de orden y puntaje según CuestionarioPregunta
+    orden_dict = {
+        cp.pregunta_id: (cp.orden, cp.puntaje_asignado)
+        for cp in intento.cuestionario.cuestionario_preguntas.all()
+    }
+
+    respuestas_ordenadas = sorted(
+        respuestas_qs,
+        key=lambda r: orden_dict.get(r.pregunta_id, (9999, None))[0]
+    )
+
+    detalles_respuestas = []
+    total_correctas = 0
+    total_incorrectas = 0
+    total_sin_responder = 0
+    letras = ["A", "B", "C", "D", "E"]
+
+    for idx, resp in enumerate(respuestas_ordenadas, start=1):
+        pregunta = resp.pregunta
+        orden_info = orden_dict.get(pregunta.id, (idx, None))
+        peso_total = orden_info[1] or pregunta.puntaje or Decimal("1.00")
+
+        opciones_raw = list(pregunta.opciones.all().order_by("orden", "id"))
+        opcion_correcta = next((op for op in opciones_raw if op.es_correcta), None)
+
+        if resp.opcion_seleccionada is None:
+            estado_resp = "sin_responder"
+            total_sin_responder += 1
+        elif resp.es_correcta:
+            estado_resp = "correcta"
+            total_correctas += 1
+        else:
+            estado_resp = "incorrecta"
+            total_incorrectas += 1
+
+        opciones_procesadas = []
+        for o_idx, op in enumerate(opciones_raw):
+            es_sel = bool(resp.opcion_seleccionada and resp.opcion_seleccionada_id == op.id)
+            opciones_procesadas.append({
+                "letra": letras[o_idx] if o_idx < len(letras) else str(o_idx + 1),
+                "id": op.id,
+                "texto": op.texto,
+                "es_correcta": op.es_correcta,
+                "es_seleccionada": es_sel,
+            })
+
+        detalles_respuestas.append({
+            "numero": idx,
+            "pregunta": pregunta,
+            "peso_total": peso_total,
+            "puntaje_obtenido": resp.puntaje_obtenido or Decimal("0.00"),
+            "estado": estado_resp,
+            "es_correcta": resp.es_correcta,
+            "opcion_seleccionada": resp.opcion_seleccionada,
+            "opcion_correcta": opcion_correcta,
+            "opciones": opciones_procesadas,
+            "retroalimentacion": pregunta.retroalimentacion,
+        })
+
+    total_preguntas = len(detalles_respuestas)
+    porcentaje_acierto = round((total_correctas / total_preguntas * 100), 1) if total_preguntas > 0 else 0
+
+    return render(request, "resultado_evaluacion.html", {
+        "intento": intento,
+        "cuestionario": intento.cuestionario,
+        "detalles_respuestas": detalles_respuestas,
+        "total_preguntas": total_preguntas,
+        "total_correctas": total_correctas,
+        "total_incorrectas": total_incorrectas,
+        "total_sin_responder": total_sin_responder,
+        "porcentaje_acierto": porcentaje_acierto,
+    })
 
 
 # ==============================================================================
