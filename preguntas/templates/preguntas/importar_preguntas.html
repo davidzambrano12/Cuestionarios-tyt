@@ -29,6 +29,31 @@
       </div>
     </div>
 
+    <!-- Banner si ya hay una importación pendiente -->
+    {% if pendiente %}
+    <div class="card" style="padding:14px 20px; margin-bottom:20px; background:#eff6ff; border:1px solid #93c5fd; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; border-radius:14px;">
+      <div>
+        <div style="font-size:12px; font-weight:800; color:#1e40af; display:flex; align-items:center; gap:6px;">
+          <span>ℹ️</span> Tienes una importación activa en proceso
+        </div>
+        <div style="font-size:13px; color:#1e3a8a; margin-top:2px;">
+          Archivo: <strong>{{ pendiente.nombre_archivo }}</strong>
+        </div>
+      </div>
+      <div style="display:flex; gap:8px;">
+        <a href="{% url 'preguntas:previsualizar' %}" class="btn btn-primary" style="font-size:12px; padding:8px 16px; background:#2563eb; font-weight:700;">
+          Ir a Auditoría y Corrección &rarr;
+        </a>
+        <form method="POST" action="{% url 'preguntas:cancelar' %}" style="margin:0;">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-outline" style="font-size:12px; padding:8px 12px; color:#b91c1c; border-color:#fca5a5;">
+            Descartar
+          </button>
+        </form>
+      </div>
+    </div>
+    {% endif %}
+
     <!-- Card Formulario Principal de Subida -->
     <div class="card" style="padding:28px 24px; border-radius:20px; margin-bottom:20px;">
       

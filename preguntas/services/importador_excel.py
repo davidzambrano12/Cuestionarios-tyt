@@ -15,6 +15,7 @@ validación nunca se desincroniza de lo que realmente se guarda.
 from __future__ import annotations
 
 import hashlib
+import json
 import re
 from dataclasses import dataclass, field
 from decimal import Decimal, InvalidOperation
@@ -64,6 +65,42 @@ class FilaImportacion:
     puntaje: Decimal | None = None
     opciones: list[tuple[str, bool]] = field(default_factory=list)  # (texto, es_correcta)
     huella: str = ""
+    valores_crudos: dict = field(default_factory=dict)
+
+    @property
+    def json_data(self) -> str:
+        resp_corr = self.valores_crudos.get("respuesta_correcta", "")
+        if not resp_corr and self.opciones:
+            for idx, (_, es_corr) in enumerate(self.opciones):
+                if es_corr and idx < 4:
+                    resp_corr = ["A", "B", "C", "D"][idx]
+                    break
+
+        opc_a = self.valores_crudos.get("opcion_a", "") or (self.opciones[0][0] if len(self.opciones) > 0 else "")
+        opc_b = self.valores_crudos.get("opcion_b", "") or (self.opciones[1][0] if len(self.opciones) > 1 else "")
+        opc_c = self.valores_crudos.get("opcion_c", "") or (self.opciones[2][0] if len(self.opciones) > 2 else "")
+        opc_d = self.valores_crudos.get("opcion_d", "") or (self.opciones[3][0] if len(self.opciones) > 3 else "")
+
+        tipo_limpio = (self.valores_crudos.get("tipo", "") or self.tipo or "").upper().strip()
+        if tipo_limpio not in ("MULTIPLE", "V_F"):
+            tipo_limpio = ""
+
+        data = {
+            "fila_excel": self.fila_excel,
+            "categoria": self.valores_crudos.get("categoria", "") or self.categoria,
+            "tipo": tipo_limpio,
+            "texto_base": self.valores_crudos.get("texto_base", "") or self.texto_base,
+            "pregunta": self.valores_crudos.get("pregunta", "") or self.enunciado,
+            "opcion_a": opc_a,
+            "opcion_b": opc_b,
+            "opcion_c": opc_c,
+            "opcion_d": opc_d,
+            "respuesta_correcta": resp_corr,
+            "retroalimentacion": self.valores_crudos.get("retroalimentacion", "") or self.retroalimentacion,
+            "puntaje": str(self.valores_crudos.get("puntaje", "")) or (str(self.puntaje) if self.puntaje else "1.0"),
+            "errores": self.errores,
+        }
+        return json.dumps(data)
 
 
 @dataclass
@@ -157,6 +194,7 @@ def _validar_fila(valores: dict) -> FilaImportacion:
         retroalimentacion=retroalimentacion,
         puntaje=puntaje,
         opciones=opciones,
+        valores_crudos={k: _texto(valores.get(k, "")) for k in COLUMNAS},
     )
     if not errores:
         fila.huella = calcular_huella(enunciado, [o[0] for o in opciones])
@@ -195,6 +233,8 @@ def procesar_archivo(ruta_archivo: str, nombre_archivo: str, *, commit: bool = F
                 huellas_vistas_en_archivo[fila.huella] = fila_excel
 
         resultado.filas.append(fila)
+
+    wb.close()
 
     if commit:
         _guardar_resultado(resultado, cuestionario_id)
@@ -245,3 +285,27 @@ def _guardar_resultado(resultado: ResultadoImportacion, cuestionario_id: int | N
         resultado=resultado.resultado_global,
     )
     resultado.importacion_id = importacion.id
+
+
+def actualizar_fila_excel(ruta_archivo: str, fila_excel: int, nuevos_valores: dict) -> None:
+    """Actualiza una fila en el archivo Excel con las correcciones introducidas por el usuario."""
+    wb = openpyxl.load_workbook(ruta_archivo)
+    ws = wb["preguntas"] if "preguntas" in wb.sheetnames else wb.active
+
+    for col_idx, col_name in enumerate(COLUMNAS, start=1):
+        if col_name in nuevos_valores:
+            val = nuevos_valores[col_name]
+            if col_name == "puntaje":
+                try:
+                    val = float(val) if val else 1.0
+                except (ValueError, TypeError):
+                    val = str(val)
+            elif col_name in ("tipo", "respuesta_correcta"):
+                val = str(val).strip().upper()
+            else:
+                val = str(val).strip()
+            ws.cell(row=fila_excel, column=col_idx, value=val)
+
+    wb.save(ruta_archivo)
+    wb.close()
+

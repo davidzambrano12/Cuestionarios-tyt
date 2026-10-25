@@ -22,7 +22,12 @@ from .models import (
     Pregunta,
     RespuestaIntento,
 )
-from .services.importador_excel import calcular_huella, procesar_archivo
+from .services.importador_excel import (
+    _validar_fila,
+    actualizar_fila_excel,
+    calcular_huella,
+    procesar_archivo,
+)
 
 CARPETA_TEMPORAL = "importaciones_tmp"
 
@@ -610,7 +615,7 @@ def resultado_evaluacion(request, intento_id):
 @login_required
 @requiere_permiso("preguntas.importar")
 def importar_preguntas(request):
-    """Paso 1: subida y validación del archivo Excel."""
+    """Paso 1: subida del archivo Excel."""
     if request.method == "POST":
         form = ImportarPreguntasForm(request.POST, request.FILES)
         if form.is_valid():
@@ -618,13 +623,13 @@ def importar_preguntas(request):
             cuestionario_obj = form.cleaned_data.get("cuestionario")
             cuestionario_id = cuestionario_obj.id if cuestionario_obj else None
 
+            # Limpiamos importación previa huérfana si la hubiera
+            previa = request.session.pop("importacion_pendiente", None)
+            if previa and default_storage.exists(previa.get("ruta", "")):
+                default_storage.delete(previa["ruta"])
+
             ruta_relativa = f"{CARPETA_TEMPORAL}/{uuid.uuid4().hex}.xlsx"
             ruta_guardada = default_storage.save(ruta_relativa, archivo)
-            ruta_absoluta = default_storage.path(ruta_guardada)
-
-            resultado = procesar_archivo(
-                ruta_absoluta, archivo.name, commit=False,
-            )
 
             request.session["importacion_pendiente"] = {
                 "ruta": ruta_guardada,
@@ -633,25 +638,110 @@ def importar_preguntas(request):
                 "cuestionario_nombre": cuestionario_obj.nombre if cuestionario_obj else None,
             }
 
-            return render(request, "preguntas/previsualizar_importacion.html", {
-                "resultado": resultado,
-                "cuestionario": cuestionario_obj,
-            })
+            return redirect("preguntas:previsualizar")
     else:
         form = ImportarPreguntasForm()
 
-    return render(request, "preguntas/importar_preguntas.html", {"form": form})
+    pendiente = request.session.get("importacion_pendiente")
+    return render(request, "preguntas/importar_preguntas.html", {
+        "form": form,
+        "pendiente": pendiente,
+    })
+
+
+@login_required
+@requiere_permiso("preguntas.importar")
+def previsualizar_importacion(request):
+    """Paso 2 y 3: previsualización, auditoría y corrección en caliente de preguntas."""
+    pendiente = request.session.get("importacion_pendiente")
+    if not pendiente or not default_storage.exists(pendiente.get("ruta", "")):
+        messages.warning(request, "No hay ningún archivo cargado pendiente por validar.")
+        return redirect("preguntas:importar")
+
+    ruta_absoluta = default_storage.path(pendiente["ruta"])
+    resultado = procesar_archivo(
+        ruta_absoluta, pendiente["nombre_archivo"], commit=False,
+    )
+
+    cuestionario_obj = None
+    if pendiente.get("cuestionario_id"):
+        cuestionario_obj = Cuestionario.objects.filter(id=pendiente["cuestionario_id"]).first()
+
+    return render(request, "preguntas/previsualizar_importacion.html", {
+        "resultado": resultado,
+        "cuestionario": cuestionario_obj,
+    })
+
+
+@login_required
+@requiere_permiso("preguntas.importar")
+def corregir_fila_importacion(request):
+    """Permite corregir directamente los datos de una fila errónea desde la vista web."""
+    if request.method != "POST":
+        return redirect("preguntas:importar")
+
+    pendiente = request.session.get("importacion_pendiente")
+    if not pendiente or not default_storage.exists(pendiente.get("ruta", "")):
+        messages.error(request, "No hay ninguna importación en curso.")
+        return redirect("preguntas:importar")
+
+    try:
+        fila_excel = int(request.POST.get("fila_excel", 0))
+    except (ValueError, TypeError):
+        messages.error(request, "Número de fila inválido.")
+        return redirect("preguntas:previsualizar")
+
+    if fila_excel < 2:
+        messages.error(request, "La fila a corregir no es válida.")
+        return redirect("preguntas:previsualizar")
+
+    tipo = request.POST.get("tipo", "").strip().upper()
+    if not tipo or tipo not in ("MULTIPLE", "V_F"):
+        messages.error(
+            request,
+            f"Fila #{fila_excel}: Debes seleccionar obligatoriamente un tipo válido (MULTIPLE o V_F).",
+        )
+        return redirect("preguntas:previsualizar")
+
+    nuevos_valores = {
+        "categoria": request.POST.get("categoria", "").strip(),
+        "tipo": tipo,
+        "texto_base": request.POST.get("texto_base", "").strip(),
+        "pregunta": request.POST.get("pregunta", "").strip(),
+        "opcion_a": request.POST.get("opcion_a", "").strip(),
+        "opcion_b": request.POST.get("opcion_b", "").strip(),
+        "opcion_c": request.POST.get("opcion_c", "").strip(),
+        "opcion_d": request.POST.get("opcion_d", "").strip(),
+        "respuesta_correcta": request.POST.get("respuesta_correcta", "").strip().upper(),
+        "retroalimentacion": request.POST.get("retroalimentacion", "").strip(),
+        "puntaje": request.POST.get("puntaje", "1.0").strip(),
+    }
+
+    ruta_absoluta = default_storage.path(pendiente["ruta"])
+    actualizar_fila_excel(ruta_absoluta, fila_excel, nuevos_valores)
+
+    # Validamos cómo quedó
+    fila_evaluada = _validar_fila(nuevos_valores)
+    if fila_evaluada.estado == "valida":
+        messages.success(request, f"¡Fila #{fila_excel} corregida con éxito! Ahora es válida para importar.")
+    else:
+        messages.warning(
+            request,
+            f"Fila #{fila_excel} actualizada, pero aún tiene observaciones: {', '.join(fila_evaluada.errores)}",
+        )
+
+    return redirect("preguntas:previsualizar")
 
 
 @login_required
 @requiere_permiso("preguntas.importar")
 def confirmar_importacion(request):
-    """Paso 2: confirmación y guardado en base de datos dentro de transacción."""
+    """Paso 4: confirmación y guardado en base de datos dentro de transacción."""
     if request.method != "POST":
         return redirect("preguntas:importar")
 
     pendiente = request.session.get("importacion_pendiente")
-    if not pendiente:
+    if not pendiente or not default_storage.exists(pendiente.get("ruta", "")):
         messages.error(request, "No hay una importación pendiente por confirmar.")
         return redirect("preguntas:importar")
 
@@ -677,6 +767,7 @@ def confirmar_importacion(request):
 @login_required
 def cancelar_importacion(request):
     pendiente = request.session.pop("importacion_pendiente", None)
-    if pendiente:
+    if pendiente and default_storage.exists(pendiente.get("ruta", "")):
         default_storage.delete(pendiente["ruta"])
+    messages.info(request, "Se ha cancelado la importación y liberado el archivo temporal.")
     return redirect("preguntas:importar")

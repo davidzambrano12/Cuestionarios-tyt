@@ -99,7 +99,7 @@ DATABASES = {
         "ENGINE": "django.db.backends.mysql",
         "NAME": os.environ.get("DB_NAME", "simulador_tyt"),
         "USER": os.environ.get("DB_USER", "root"),
-        "PASSWORD": os.environ.get("DB_PASSWORD", "1234"),
+        "PASSWORD": os.environ.get("DB_PASSWORD", "1030080"),
         "HOST": os.environ.get("DB_HOST", "127.0.0.1"),
         "PORT": os.environ.get("DB_PORT", "3306"),
         "OPTIONS": {"charset": "utf8mb4"},
@@ -156,3 +156,9 @@ MAILERS = {
         "BACKEND": "django.core.mail.backends.console.EmailBackend",
     },
 }
+
+# Redirecciones de Autenticación
+LOGIN_URL = "/login/"
+LOGIN_REDIRECT_URL = "/dashboard/estudiante/"
+LOGOUT_REDIRECT_URL = "/login/"
+
