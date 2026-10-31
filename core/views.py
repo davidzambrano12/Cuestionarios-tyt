@@ -1,8 +1,9 @@
+from django.utils import timezone
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.db.models import Avg
+from django.db.models import Avg, Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -14,7 +15,12 @@ from preguntas.models import Categoria, Cuestionario, Intento, Pregunta
 
 def landing_view(request):
     """Página de inicio pública del Simulador Saber TyT Uniputumayo."""
-    cuestionarios = Cuestionario.objects.filter(estado="disponible").order_by("-id")
+    ahora = timezone.now()
+    cuestionarios = Cuestionario.objects.filter(
+        estado="disponible",
+        fecha_apertura__lte=ahora,
+        fecha_cierre__gte=ahora,
+    ).order_by("-id")
     return render(request, "landing.html", {"cuestionarios": cuestionarios})
 
 
@@ -150,9 +156,29 @@ def estudiante_dashboard_view(request):
     user = request.user
     codigo = user.perfil.codigo_institucional if hasattr(user, "perfil") else user.username
 
-    cuestionarios_disponibles = Cuestionario.objects.filter(estado="disponible").order_by("-id")
+    ahora = timezone.now()
+
+    # Cuestionarios realmente vigentes
+    cuestionarios_disponibles = (
+        Cuestionario.objects.filter(
+            estado="disponible",
+            fecha_apertura__lte=ahora,
+            fecha_cierre__gte=ahora,
+        )
+        .prefetch_related("cuestionario_preguntas", "intentos")
+        .order_by("fecha_cierre")
+    )
     cuestionario_destacado = cuestionarios_disponibles.first()
-    
+
+    # Cuestionarios programados para fechas futuras
+    cuestionarios_programados = (
+        Cuestionario.objects.filter(
+            Q(estado="programado") | Q(estado="disponible", fecha_apertura__gt=ahora)
+        )
+        .prefetch_related("cuestionario_preguntas")
+        .order_by("fecha_apertura")
+    )
+
     # Intentos propios del estudiante (aislamiento de seguridad)
     intentos_estudiante = Intento.objects.filter(
         participante_codigo=codigo
@@ -163,9 +189,11 @@ def estudiante_dashboard_view(request):
 
     return render(request, "estudiante_dashboard.html", {
         "cuestionarios_disponibles": cuestionarios_disponibles,
+        "cuestionarios_programados": cuestionarios_programados,
         "cuestionario_destacado": cuestionario_destacado,
         "intentos_estudiante": intentos_estudiante,
         "disponibles_count": cuestionarios_disponibles.count(),
+        "programados_count": cuestionarios_programados.count(),
         "promedio_global": promedio_global,
     })
 

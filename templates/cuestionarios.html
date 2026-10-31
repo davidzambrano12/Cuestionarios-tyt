@@ -97,10 +97,21 @@
     
     <div>
       <!-- Cabecera de la Tarjeta -->
-      <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
-        <span class="badge {% if c.estado == 'disponible' %}badge-success{% elif c.estado == 'borrador' %}badge-warning{% elif c.estado == 'programado' %}badge-info{% else %}badge-danger{% endif %}">
-          ● {{ c.get_estado_display }}
-        </span>
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px; gap:8px; flex-wrap:wrap;">
+        <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+          {% if c.esta_vencido %}
+            <span class="badge badge-danger">● Cerrado (Expirado)</span>
+          {% elif c.esta_vigente %}
+            <span class="badge badge-success">● Disponible</span>
+          {% elif c.estado_temporal == 'programado' %}
+            <span class="badge badge-info">● Programado</span>
+          {% else %}
+            <span class="badge badge-warning">● Borrador</span>
+          {% endif %}
+          <span class="badge {{ c.tiempo_restante_info.clase }}" style="font-size:11px;">
+            {{ c.tiempo_restante_info.texto }}
+          </span>
+        </div>
         <span class="text-xs text-muted font-medium" style="display:inline-flex; align-items:center; gap:4px;">
           <i data-lucide="clock" style="width:13px; height:13px;"></i> {{ c.tiempo_limite_minutos }} min
         </span>
@@ -142,7 +153,7 @@
         </div>
         <div style="display:flex; justify-content:space-between;">
           <span>Cierre:</span>
-          <strong>{{ c.fecha_cierre|date:"d/m/Y H:i" }}</strong>
+          <strong style="{% if c.esta_vencido %}color:#dc2626; font-weight:700;{% endif %}">{{ c.fecha_cierre|date:"d/m/Y H:i" }}</strong>
         </div>
       </div>
     </div>
@@ -157,10 +168,18 @@
         <i data-lucide="eye" style="width:14px; height:14px;"></i> Previsualizar
       </a>
       {% else %}
-        {% if c.estado == 'disponible' %}
+        {% if c.esta_vigente %}
         <a href="/evaluacion/iniciar/{{ c.id }}/" class="btn btn-primary" style="flex:1; font-size:13px; padding:8px 10px; display:inline-flex; align-items:center; justify-content:center; gap:6px;">
           <i data-lucide="play" style="width:14px; height:14px;"></i> Iniciar
         </a>
+        {% elif c.esta_vencido %}
+        <button disabled class="btn btn-outline" style="flex:1; font-size:12px; padding:8px 10px; opacity:0.6; cursor:not-allowed; display:inline-flex; align-items:center; justify-content:center; gap:6px;">
+          <i data-lucide="lock" style="width:13px; height:13px;"></i> Plazo Vencido
+        </button>
+        {% else %}
+        <button disabled class="btn btn-outline" style="flex:1; font-size:12px; padding:8px 10px; opacity:0.6; cursor:not-allowed; display:inline-flex; align-items:center; justify-content:center; gap:6px;">
+          <i data-lucide="calendar" style="width:13px; height:13px;"></i> Programado
+        </button>
         {% endif %}
       {% endif %}
     </div>

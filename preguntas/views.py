@@ -234,9 +234,9 @@ def cuestionarios_list(request):
         .order_by("-id")
     )
     total_count = cuestionarios.count()
-    disponibles_count = cuestionarios.filter(estado="disponible").count()
+    disponibles_count = sum(1 for c in cuestionarios if c.esta_vigente)
     borradores_count = cuestionarios.filter(estado="borrador").count()
-    cerrados_count = cuestionarios.filter(estado="cerrado").count()
+    cerrados_count = sum(1 for c in cuestionarios if c.esta_vencido)
 
     return render(
         request,

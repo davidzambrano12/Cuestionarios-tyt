@@ -36,9 +36,9 @@
         </div>
       </div>
 
-      <!-- Cuestionario Destacado Disponible -->
+      <!-- Cuestionario Destacado Vigente (Solo si realmente está disponible ahora) -->
       {% if cuestionario_destacado %}
-      <div class="card" style="border-top:4px solid #22c55e; margin-bottom:28px;">
+      <div class="card" style="border-top:4px solid #186382; margin-bottom:28px;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
           <div style="display:flex; align-items:center; gap:8px;">
             <span class="badge badge-success">● DISPONIBLE AHORA</span>
@@ -51,7 +51,7 @@
           {{ cuestionario_destacado.nombre }}
         </h2>
         <div style="font-size:13px; color:#64748b; margin-bottom:16px; display:inline-flex; align-items:center; gap:6px;">
-          <i data-lucide="user-check" style="width:15px; height:15px;"></i> Docente responsable: <strong>Prof. Patricia Jaramillo</strong>
+          <i data-lucide="shield-check" style="width:15px; height:15px; color:#186382;"></i> Evaluación Oficial · <strong>Coordinación Saber TyT Uniputumayo</strong>
         </div>
 
         <div style="background:#f8fafc; border-radius:12px; padding:16px; margin-bottom:20px;">
@@ -63,13 +63,32 @@
           </div>
           <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid #e2e8f0; padding-top:10px; font-size:12px;">
             <span style="color:#64748b; display:inline-flex; align-items:center; gap:6px;"><i data-lucide="calendar" style="width:14px; height:14px;"></i> Cierre: {{ cuestionario_destacado.fecha_cierre|date:"d M · H:i" }}</span>
-            <span class="badge badge-danger">Quedan pocos días</span>
+            <span class="badge {{ cuestionario_destacado.tiempo_restante_info.clase }}">{{ cuestionario_destacado.tiempo_restante_info.texto }}</span>
           </div>
         </div>
 
-        <a href="/evaluacion/iniciar/{{ cuestionario_destacado.id }}/" class="btn btn-primary btn-full" style="padding:14px; font-size:15px; border-radius:12px; background:#186382;">
+        <a href="/evaluacion/iniciar/{{ cuestionario_destacado.id }}/" class="btn btn-primary btn-full" style="padding:14px; font-size:15px; border-radius:12px;">
           <i data-lucide="play"></i> Iniciar Intento de Examen
         </a>
+      </div>
+      {% else %}
+      <!-- Estado Limpio cuando no hay cuestionarios disponibles en este momento -->
+      <div class="card" style="border-top:4px solid #64748b; margin-bottom:28px; padding:28px; text-align:center;">
+        <div style="width:48px; height:48px; border-radius:50%; background:#f1f5f9; color:#64748b; display:flex; align-items:center; justify-content:center; margin:0 auto 12px;">
+          <i data-lucide="check-circle" style="width:24px; height:24px; color:#16a34a;"></i>
+        </div>
+        <h2 style="font-size:18px; font-weight:800; color:#0f172a; margin-bottom:6px;">No tienes cuestionarios activos con entrega pendiente</h2>
+        <p style="font-size:13px; color:#64748b; max-width:480px; margin:0 auto 16px;">
+          Actualmente no hay evaluaciones abiertas en este momento. Puedes consultar tu historial de intentos o revisar los cuestionarios programados para próximas fechas.
+        </p>
+        <div style="display:flex; justify-content:center; gap:12px;">
+          <button type="button" onclick="switchEstudianteTab('prog', document.querySelectorAll('.tab-btn')[1])" class="btn btn-outline" style="font-size:13px; padding:8px 16px; gap:6px;">
+            <i data-lucide="calendar" style="width:14px; height:14px;"></i> Ver Programados
+          </button>
+          <button type="button" onclick="switchEstudianteTab('hist', document.querySelectorAll('.tab-btn')[2])" class="btn btn-secondary" style="font-size:13px; padding:8px 16px; gap:6px;">
+            <i data-lucide="history" style="width:14px; height:14px;"></i> Historial de Intentos
+          </button>
+        </div>
       </div>
       {% endif %}
 
@@ -80,7 +99,7 @@
             Disponibles <span class="badge badge-info">{{ cuestionarios_disponibles.count }}</span>
           </button>
           <button type="button" class="tab-btn" onclick="switchEstudianteTab('prog', this)">
-            Programados <span class="badge" style="background:#cbd5e1; color:#334155;">1</span>
+            Programados <span class="badge" style="background:#cbd5e1; color:#334155;">{{ programados_count|default:"0" }}</span>
           </button>
           <button type="button" class="tab-btn" onclick="switchEstudianteTab('hist', this)">
             Historial de Intentos <span class="badge" style="background:#cbd5e1; color:#334155;">{{ intentos_estudiante.count }}</span>
@@ -98,7 +117,9 @@
                   <h3 style="font-size:17px; font-weight:800; color:#0f172a;">{{ c.nombre }}</h3>
                   <div style="font-size:12px; color:#64748b; display:inline-flex; align-items:center; gap:4px;"><i data-lucide="landmark" style="width:13px; height:13px;"></i> Uniputumayo · Pruebas Saber TyT</div>
                 </div>
-                <span style="font-size:12px; color:#64748b;">Cierra en {{ c.fecha_cierre|timeuntil }}</span>
+                <span class="badge {{ c.tiempo_restante_info.clase }}" style="font-size:11px;">
+                  <i data-lucide="clock" style="width:12px; height:12px;"></i> {{ c.tiempo_restante_info.texto }}
+                </span>
               </div>
               <div style="display:flex; gap:16px; font-size:13px; color:#475569; margin:12px 0;">
                 <span style="display:inline-flex; align-items:center; gap:4px;"><i data-lucide="help-circle" style="width:14px; height:14px;"></i> {{ c.cuestionario_preguntas.count }} ítems</span>
@@ -119,20 +140,31 @@
 
         <!-- Tab 2: Programados -->
         <div id="tab-prog" class="tab-content-box" style="display:none;">
-          <div class="card" style="border-left:4px solid #0284c7; padding:20px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-              <span class="badge badge-info">PROGRAMADO</span>
-              <i data-lucide="calendar" style="color:#0284c7;"></i>
+          <div style="display:flex; flex-direction:column; gap:16px;">
+            {% for c in cuestionarios_programados %}
+            <div class="card" style="border-left:4px solid #0284c7; padding:20px; margin-bottom:0;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <span class="badge badge-info"><i data-lucide="calendar" style="width:12px; height:12px;"></i> PROGRAMADO</span>
+                <span style="font-size:12px; color:#0284c7; font-weight:600;">{{ c.tiempo_restante_info.texto }}</span>
+              </div>
+              <h3 style="font-size:17px; font-weight:800; color:#0f172a; margin-bottom:8px;">{{ c.nombre }}</h3>
+              <div style="background:#f0f9ff; border-radius:8px; padding:12px; font-size:13px; color:#0369a1; margin-bottom:16px;">
+                <div style="display:flex; align-items:center; gap:6px;">
+                  <i data-lucide="calendar" style="width:14px; height:14px;"></i> <strong>Apertura:</strong> {{ c.fecha_apertura|date:"d M Y · H:i" }}
+                </div>
+                <div style="display:flex; align-items:center; gap:6px; margin-top:4px;">
+                  <i data-lucide="clock" style="width:14px; height:14px;"></i> {{ c.tiempo_limite_minutos }} minutos · {{ c.cuestionario_preguntas.count }} reactivos
+                </div>
+              </div>
+              <button disabled class="btn btn-outline btn-full" style="opacity:0.65; cursor:not-allowed; display:inline-flex; align-items:center; justify-content:center; gap:6px;">
+                <i data-lucide="lock" style="width:14px; height:14px;"></i> Apertura pendiente ({{ c.fecha_apertura|date:"d/m/Y H:i" }})
+              </button>
             </div>
-            <h3 style="font-size:17px; font-weight:800; color:#0f172a; margin-bottom:8px;">Competencias Ciudadanas e Inglés II</h3>
-            <div style="background:#f0f9ff; border-radius:8px; padding:12px; font-size:13px; color:#0369a1; margin-bottom:16px;">
-              <div style="display:flex; align-items:center; gap:6px;"><i data-lucide="calendar" style="width:14px; height:14px;"></i> <strong>Apertura:</strong> Próxima semana · 07:00 AM</div>
-              <div style="display:flex; align-items:center; gap:6px;"><i data-lucide="clock" style="width:14px; height:14px;"></i> 240 minutos (4 hrs) · 25 ítems</div>
-              <div style="margin-top:4px; display:flex; align-items:center; gap:6px;"><i data-lucide="hourglass" style="width:14px; height:14px;"></i> Abre en 8 días</div>
+            {% empty %}
+            <div class="card" style="text-align:center; padding:30px; color:#64748b;">
+              No hay cuestionarios programados para próximas fechas.
             </div>
-            <button disabled class="btn btn-outline btn-full" style="opacity:0.6; cursor:not-allowed;">
-              <i data-lucide="lock"></i> Aún no disponible (Apertura pendiente)
-            </button>
+            {% endfor %}
           </div>
         </div>
 
