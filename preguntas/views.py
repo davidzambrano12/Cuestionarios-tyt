@@ -363,6 +363,8 @@ def previsualizar_cuestionario(request, cuestionario_id):
         "pregunta", "pregunta__categoria"
     ).prefetch_related("pregunta__opciones").order_by("orden", "id")
 
+    import random
+
     preguntas_lista = []
     for cp in cuestionario_preguntas:
         p = cp.pregunta
@@ -373,6 +375,12 @@ def previsualizar_cuestionario(request, cuestionario_id):
                 "texto": op.texto,
                 "es_correcta": op.es_correcta,
             })
+
+        # Aplicar política de mezclar_respuestas si está activa
+        if cuestionario.mezclar_respuestas:
+            rng_resp = random.Random(cuestionario.id * 1000 + p.id)
+            rng_resp.shuffle(opciones_lista)
+
         preguntas_lista.append({
             "id": p.id,
             "categoria": p.categoria.nombre if p.categoria else "General",
@@ -383,6 +391,11 @@ def previsualizar_cuestionario(request, cuestionario_id):
             "puntaje": str(p.puntaje),
             "opciones": opciones_lista,
         })
+
+    # Aplicar política de mezclar_preguntas si está activa
+    if cuestionario.mezclar_preguntas:
+        rng_preg = random.Random(cuestionario.id)
+        rng_preg.shuffle(preguntas_lista)
 
     return render(request, "cuestionario_previsualizar.html", {
         "cuestionario": cuestionario,
@@ -511,6 +524,8 @@ def evaluacion_en_vivo(request, intento_id):
         "pregunta", "pregunta__categoria"
     ).prefetch_related("pregunta__opciones").order_by("orden", "id")
 
+    import random
+
     # Serializar preguntas a JSON para la navegación interactiva en JavaScript
     preguntas_lista = []
     for cp in cuestionario_preguntas:
@@ -521,7 +536,12 @@ def evaluacion_en_vivo(request, intento_id):
                 "id": op.id,
                 "texto": op.texto,
             })
-        
+
+        # Aplicar política de mezclar_respuestas por intento (semilla determinista)
+        if cuestionario.mezclar_respuestas:
+            rng_resp = random.Random(intento.id * 1000 + p.id)
+            rng_resp.shuffle(opciones_lista)
+
         preguntas_lista.append({
             "id": p.id,
             "enunciado": p.enunciado,
@@ -530,6 +550,11 @@ def evaluacion_en_vivo(request, intento_id):
             "puntaje": str(cp.puntaje_asignado or p.puntaje),
             "opciones": opciones_lista,
         })
+
+    # Aplicar política de mezclar_preguntas por intento (semilla determinista)
+    if cuestionario.mezclar_preguntas:
+        rng_preg = random.Random(intento.id)
+        rng_preg.shuffle(preguntas_lista)
 
     # Cargar respuestas previas guardadas si existen (para recuperación ante recargas)
     respuestas_previas = {
@@ -724,21 +749,16 @@ def resultado_evaluacion(request, intento_id):
     if intento.participante_codigo != codigo_usuario and not request.user.is_superuser:
         return HttpResponseForbidden("Acceso denegado a este reporte.")
 
+    permitir_revision = (
+        intento.cuestionario.permitir_revision
+        or request.user.is_staff
+        or request.user.is_superuser
+    )
+
     # Cargar respuestas del intento con preguntas y opciones
     respuestas_qs = intento.respuestas.select_related(
         "pregunta", "pregunta__categoria", "opcion_seleccionada"
     ).prefetch_related("pregunta__opciones").all()
-
-    # Mapeo de orden y puntaje según CuestionarioPregunta
-    orden_dict = {
-        cp.pregunta_id: (cp.orden, cp.puntaje_asignado)
-        for cp in intento.cuestionario.cuestionario_preguntas.all()
-    }
-
-    respuestas_ordenadas = sorted(
-        respuestas_qs,
-        key=lambda r: orden_dict.get(r.pregunta_id, (9999, None))[0]
-    )
 
     detalles_respuestas = []
     total_correctas = 0
@@ -746,49 +766,68 @@ def resultado_evaluacion(request, intento_id):
     total_sin_responder = 0
     letras = ["A", "B", "C", "D", "E"]
 
-    for idx, resp in enumerate(respuestas_ordenadas, start=1):
-        pregunta = resp.pregunta
-        orden_info = orden_dict.get(pregunta.id, (idx, None))
-        peso_total = orden_info[1] or pregunta.puntaje or Decimal("1.00")
+    if permitir_revision:
+        # Mapeo de orden y puntaje según CuestionarioPregunta
+        orden_dict = {
+            cp.pregunta_id: (cp.orden, cp.puntaje_asignado)
+            for cp in intento.cuestionario.cuestionario_preguntas.all()
+        }
 
-        opciones_raw = list(pregunta.opciones.all().order_by("orden", "id"))
-        opcion_correcta = next((op for op in opciones_raw if op.es_correcta), None)
+        respuestas_ordenadas = sorted(
+            respuestas_qs,
+            key=lambda r: orden_dict.get(r.pregunta_id, (9999, None))[0]
+        )
 
-        if resp.opcion_seleccionada is None:
-            estado_resp = "sin_responder"
-            total_sin_responder += 1
-        elif resp.es_correcta:
-            estado_resp = "correcta"
-            total_correctas += 1
-        else:
-            estado_resp = "incorrecta"
-            total_incorrectas += 1
+        for idx, resp in enumerate(respuestas_ordenadas, start=1):
+            pregunta = resp.pregunta
+            orden_info = orden_dict.get(pregunta.id, (idx, None))
+            peso_total = orden_info[1] or pregunta.puntaje or Decimal("1.00")
 
-        opciones_procesadas = []
-        for o_idx, op in enumerate(opciones_raw):
-            es_sel = bool(resp.opcion_seleccionada and resp.opcion_seleccionada_id == op.id)
-            opciones_procesadas.append({
-                "letra": letras[o_idx] if o_idx < len(letras) else str(o_idx + 1),
-                "id": op.id,
-                "texto": op.texto,
-                "es_correcta": op.es_correcta,
-                "es_seleccionada": es_sel,
+            opciones_raw = list(pregunta.opciones.all().order_by("orden", "id"))
+            opcion_correcta = next((op for op in opciones_raw if op.es_correcta), None)
+
+            if resp.opcion_seleccionada is None:
+                estado_resp = "sin_responder"
+                total_sin_responder += 1
+            elif resp.es_correcta:
+                estado_resp = "correcta"
+                total_correctas += 1
+            else:
+                estado_resp = "incorrecta"
+                total_incorrectas += 1
+
+            opciones_procesadas = []
+            for o_idx, op in enumerate(opciones_raw):
+                es_sel = bool(resp.opcion_seleccionada and resp.opcion_seleccionada_id == op.id)
+                opciones_procesadas.append({
+                    "letra": letras[o_idx] if o_idx < len(letras) else str(o_idx + 1),
+                    "id": op.id,
+                    "texto": op.texto,
+                    "es_correcta": op.es_correcta,
+                    "es_seleccionada": es_sel,
+                })
+
+            detalles_respuestas.append({
+                "numero": idx,
+                "pregunta": pregunta,
+                "peso_total": peso_total,
+                "puntaje_obtenido": resp.puntaje_obtenido or Decimal("0.00"),
+                "estado": estado_resp,
+                "es_correcta": resp.es_correcta,
+                "opcion_seleccionada": resp.opcion_seleccionada,
+                "opcion_correcta": opcion_correcta,
+                "opciones": opciones_procesadas,
+                "retroalimentacion": pregunta.retroalimentacion,
             })
 
-        detalles_respuestas.append({
-            "numero": idx,
-            "pregunta": pregunta,
-            "peso_total": peso_total,
-            "puntaje_obtenido": resp.puntaje_obtenido or Decimal("0.00"),
-            "estado": estado_resp,
-            "es_correcta": resp.es_correcta,
-            "opcion_seleccionada": resp.opcion_seleccionada,
-            "opcion_correcta": opcion_correcta,
-            "opciones": opciones_procesadas,
-            "retroalimentacion": pregunta.retroalimentacion,
-        })
+        total_preguntas = len(detalles_respuestas)
+    else:
+        # Si la revisión pedagógica está deshabilitada, se totalizan métricas sin transferir detalles
+        total_correctas = respuestas_qs.filter(es_correcta=True).count()
+        total_sin_responder = respuestas_qs.filter(opcion_seleccionada__isnull=True).count()
+        total_incorrectas = respuestas_qs.filter(opcion_seleccionada__isnull=False, es_correcta=False).count()
+        total_preguntas = respuestas_qs.count()
 
-    total_preguntas = len(detalles_respuestas)
     porcentaje_acierto = round((total_correctas / total_preguntas * 100), 1) if total_preguntas > 0 else 0
 
     return render(request, "resultado_evaluacion.html", {
@@ -800,6 +839,7 @@ def resultado_evaluacion(request, intento_id):
         "total_incorrectas": total_incorrectas,
         "total_sin_responder": total_sin_responder,
         "porcentaje_acierto": porcentaje_acierto,
+        "permitir_revision": permitir_revision,
     })
 
 

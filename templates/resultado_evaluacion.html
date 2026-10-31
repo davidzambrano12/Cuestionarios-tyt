@@ -96,6 +96,7 @@
 
     </div>
 
+    {% if permitir_revision %}
     <!-- ================= BARRA DE FILTROS INTERACTIVOS ================= -->
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:12px;">
       <div>
@@ -243,6 +244,19 @@
       {% endfor %}
 
     </div>
+
+    {% else %}
+    <!-- Mensaje cuando la revisión pedagógica está deshabilitada -->
+    <div class="card" style="padding:40px; border-radius:18px; text-align:center; margin-top:20px; box-shadow:var(--shadow-sm);">
+      <div style="width:52px; height:52px; border-radius:50%; background:#f1f5f9; color:#64748b; display:flex; align-items:center; justify-content:center; margin:0 auto 14px;">
+        <i data-lucide="lock" style="width:26px; height:26px; color:#186382;"></i>
+      </div>
+      <h3 style="font-size:18px; font-weight:800; color:#0f172a; margin-bottom:8px;">Revisión Pedagógica no Habilitada</h3>
+      <p style="font-size:13px; color:#64748b; max-width:500px; margin:0 auto 16px; line-height:1.6;">
+        El docente responsable ha configurado esta evaluación para mantener confidencial el desglose detallado de reactivos y claves correctas. Tu calificación oficial y dictamen de aprobación han quedado debidamente asentados en el sistema.
+      </p>
+    </div>
+    {% endif %}
 
     <!-- Acciones Inferiores -->
     <div style="margin-top:36px; display:flex; justify-content:center; gap:16px; flex-wrap:wrap;">
