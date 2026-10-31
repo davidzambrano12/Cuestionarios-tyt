@@ -46,10 +46,10 @@
   /* ========================================================================
      PALETA CROMÁTICA INSTITUCIONAL (DESIGN.md & RULE-03)
      ======================================================================== */
-  --primary: #1550af;          /* Azul Institucional Uniputumayo */
-  --primary-hover: #0f3e8a;
+  --primary: #186382;          /* Azul Institucional Uniputumayo */
+  --primary-hover: #124d66;
   --primary-light: #e0f2fe;
-  --primary-dark: #0c316e;
+  --primary-dark: #0f3d52;
   
   --secondary: #0ea5e9;
   --secondary-hover: #0284c7;
@@ -73,7 +73,7 @@
   --bg-surface: #ffffff;
   --bg-muted: #f1f5f9;
   --border-color: #e2e8f0;
-  --border-focus: #1550af;
+  --border-focus: #186382;
 
   --text-main: #0f172a;
   --text-muted: #64748b;
@@ -159,7 +159,20 @@ h5, .h5 {
 p {
   font-size: var(--text-body);
   line-height: var(--leading-normal);
-  color: var(--text-main);
+  color: inherit;
+}
+
+/* Soporte para contenedores oscuros e invertidos */
+.banner-dark,
+.bg-dark,
+.dark-container {
+  color: #ffffff !important;
+}
+
+.banner-dark h1, .banner-dark h2, .banner-dark h3, .banner-dark h4, .banner-dark h5, .banner-dark p,
+.bg-dark h1, .bg-dark h2, .bg-dark h3, .bg-dark h4, .bg-dark h5, .bg-dark p,
+.dark-container h1, .dark-container h2, .dark-container h3, .dark-container h4, .dark-container h5, .dark-container p {
+  color: #ffffff !important;
 }
 
 /* Clases Semánticas y de Jerarquía Tipográfica */
