@@ -93,14 +93,14 @@
 <!-- Grilla de Tarjetas de Cuestionarios -->
 <div id="cuestionarios-grid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(340px, 1fr)); gap:20px;">
   {% for c in cuestionarios %}
-  <div class="card cuestionario-card" data-estado="{{ c.estado }}" data-texto="{{ c.nombre|lower }} {{ c.descripcion|lower }}" style="margin-bottom:0; display:flex; flex-direction:column; justify-content:space-between; padding:22px;">
+  <div class="card cuestionario-card" data-estado="{{ c.estado }}" data-texto="{{ c.nombre|lower }} {{ c.descripcion|lower }}" style="margin-bottom:0; display:flex; flex-direction:column; justify-content:space-between; padding:22px; border-radius:16px; transition:transform 0.15s ease, box-shadow 0.15s ease;">
     
     <div>
-      <!-- Cabecera de la Tarjeta -->
-      <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px; gap:8px; flex-wrap:wrap;">
+      <!-- Cabecera de la Tarjeta: Badges a la izquierda y Vista Previa a la derecha -->
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; gap:8px;">
         <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
           {% if c.esta_vencido %}
-            <span class="badge badge-danger">● Cerrado (Expirado)</span>
+            <span class="badge badge-danger">● Cerrado</span>
           {% elif c.esta_vigente %}
             <span class="badge badge-success">● Disponible</span>
           {% elif c.estado_temporal == 'programado' %}
@@ -112,76 +112,80 @@
             {{ c.tiempo_restante_info.texto }}
           </span>
         </div>
-        <span class="text-xs text-muted font-medium" style="display:inline-flex; align-items:center; gap:4px;">
-          <i data-lucide="clock" style="width:13px; height:13px;"></i> {{ c.tiempo_limite_minutos }} min
-        </span>
+
+        {% if user.is_superuser or user.perfil.es_admin or user.perfil.es_docente %}
+        <a href="/cuestionarios/{{ c.id }}/previsualizar/" class="btn btn-outline" style="padding:4px 9px; font-size:11px; border-radius:8px; display:inline-flex; align-items:center; gap:4px; color:#475569; border-color:#e2e8f0; background:#f8fafc;" title="Previsualizar cuestionario como estudiante">
+          <i data-lucide="eye" style="width:13px; height:13px; color:#186382;"></i> Vista previa
+        </a>
+        {% endif %}
       </div>
 
       <!-- Título y Descripción -->
-      <h3 class="card-title text-xl font-bold text-main" style="margin-bottom:6px;">
+      <h3 class="card-title text-xl font-bold text-main" style="margin-bottom:6px; line-height:1.3;">
         {{ c.nombre }}
       </h3>
-      <p class="card-subtitle text-sm" style="margin-bottom:18px;">
-        {{ c.descripcion|default:"Evaluación estandarizada por competencias para el fortalecimiento académico institucional Saber TyT."|truncatewords:20 }}
+      <p class="card-subtitle text-sm" style="margin-bottom:14px; line-height:1.5;">
+        {{ c.descripcion|default:"Evaluación estandarizada por competencias para el fortalecimiento académico institucional Saber TyT."|truncatewords:18 }}
       </p>
 
-      <!-- Metadatos Clave -->
-      <div class="text-xs text-muted" style="background:#f8fafc; border-radius:10px; padding:12px; margin-bottom:18px; display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-        <div style="display:flex; align-items:center; gap:6px;">
-          <i data-lucide="help-circle" style="width:14px; height:14px; color:#186382;"></i>
-          <span><strong>{{ c.cuestionario_preguntas.count }}</strong> preguntas</span>
-        </div>
-        <div style="display:flex; align-items:center; gap:6px;">
-          <i data-lucide="users" style="width:14px; height:14px; color:#186382;"></i>
-          <span><strong>{{ c.intentos.count }}</strong> participantes</span>
-        </div>
-        <div style="display:flex; align-items:center; gap:6px;">
-          <i data-lucide="award" style="width:14px; height:14px; color:#186382;"></i>
-          <span>Mín: <strong>{{ c.calificacion_aprobacion }}</strong> / {{ c.calificacion_maxima }}</span>
-        </div>
-        <div style="display:flex; align-items:center; gap:6px;">
-          <i data-lucide="shuffle" style="width:14px; height:14px; color:#186382;"></i>
-          <span>{% if c.mezclar_preguntas %}Aleatorio{% else %}Fijo{% endif %}</span>
-        </div>
+      <!-- Micro-métricas de Evaluación (Línea limpia y horizontal) -->
+      <div style="display:flex; align-items:center; gap:10px; font-size:12px; color:#64748b; flex-wrap:wrap; margin-bottom:14px;">
+        <span style="display:inline-flex; align-items:center; gap:4px;">
+          <i data-lucide="help-circle" style="width:13px; height:13px; color:#186382;"></i>
+          <strong>{{ c.cuestionario_preguntas.count }}</strong> preguntas
+        </span>
+        <span style="color:#cbd5e1;">&middot;</span>
+        <span style="display:inline-flex; align-items:center; gap:4px;">
+          <i data-lucide="clock" style="width:13px; height:13px; color:#186382;"></i>
+          <strong>{{ c.tiempo_limite_minutos }}</strong> min
+        </span>
+        <span style="color:#cbd5e1;">&middot;</span>
+        <span style="display:inline-flex; align-items:center; gap:4px;">
+          <i data-lucide="award" style="width:13px; height:13px; color:#186382;"></i>
+          Mín: <strong>{{ c.calificacion_aprobacion }}</strong>/{{ c.calificacion_maxima }}
+        </span>
+        <span style="color:#cbd5e1;">&middot;</span>
+        <span style="display:inline-flex; align-items:center; gap:4px;">
+          <i data-lucide="shuffle" style="width:13px; height:13px; color:#186382;"></i>
+          {% if c.mezclar_preguntas %}Aleatorio{% else %}Fijo{% endif %}
+        </span>
       </div>
 
-      <!-- Fechas de Disponibilidad -->
-      <div class="text-2xs text-muted" style="margin-bottom:16px; border-top:1px dashed #e2e8f0; padding-top:10px;">
-        <div style="display:flex; justify-content:space-between; margin-bottom:3px;">
-          <span>Apertura:</span>
-          <strong>{{ c.fecha_apertura|date:"d/m/Y H:i" }}</strong>
-        </div>
-        <div style="display:flex; justify-content:space-between;">
-          <span>Cierre:</span>
-          <strong style="{% if c.esta_vencido %}color:#dc2626; font-weight:700;{% endif %}">{{ c.fecha_cierre|date:"d/m/Y H:i" }}</strong>
-        </div>
+      <!-- Fecha en 1 sola línea sutil -->
+      <div style="font-size:12px; color:#475569; border-top:1px solid #f1f5f9; padding-top:10px; margin-bottom:16px; display:flex; justify-content:space-between; align-items:center;">
+        <span style="display:inline-flex; align-items:center; gap:6px; color:#64748b;">
+          <i data-lucide="calendar" style="width:13px; height:13px; color:#64748b;"></i>
+          Cierre: <strong style="color:{% if c.esta_vencido %}#dc2626{% else %}#0f172a{% endif %};">{{ c.fecha_cierre|date:"d M Y · H:i" }}</strong>
+        </span>
+        <span style="font-size:11px; color:#94a3b8;">
+          Inicio: {{ c.fecha_apertura|date:"d M" }}
+        </span>
       </div>
     </div>
 
-    <!-- Botones de Acción Segregados por Rol -->
-    <div style="display:flex; gap:8px; border-top:1px solid #f1f5f9; padding-top:14px; margin-top:auto;">
+    <!-- Botones de Acción Segregados por Rol: 2 Botones Balanceados y Anchos -->
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:auto;">
       {% if user.is_superuser or user.perfil.es_admin or user.perfil.es_docente %}
-      <a href="/cuestionarios/{{ c.id }}/intentos/" class="btn btn-outline" style="flex:1.1; font-size:12px; padding:8px 6px; display:inline-flex; align-items:center; justify-content:center; gap:5px; color:#186382; font-weight:700;" title="Ver y gestionar intentos de estudiantes">
-        <i data-lucide="users" style="width:13px; height:13px; color:#186382;"></i> Intentos ({{ c.intentos.count }})
+      <a href="/cuestionarios/{{ c.id }}/intentos/" class="btn btn-outline" style="font-size:13px; padding:10px 14px; display:inline-flex; align-items:center; justify-content:center; gap:6px; color:#186382; font-weight:700; border-color:#cbd5e1; border-radius:10px;" title="Ver calificaciones y estudiantes que presentaron">
+        <i data-lucide="users" style="width:15px; height:15px; color:#186382;"></i>
+        Intentos ({{ c.intentos.count }})
       </a>
-      <a href="/cuestionarios/{{ c.id }}/previsualizar/" class="btn btn-outline" style="flex:1; font-size:12px; padding:8px 6px; display:inline-flex; align-items:center; justify-content:center; gap:5px;" title="Probar examen en modo simulación">
-        <i data-lucide="eye" style="width:13px; height:13px;"></i> Probar
-      </a>
-      <a href="/cuestionarios/{{ c.id }}/editar/" class="btn btn-primary" style="flex:1; font-size:12px; padding:8px 6px; display:inline-flex; align-items:center; justify-content:center; gap:5px;" title="Editar políticas y preguntas">
-        <i data-lucide="settings" style="width:13px; height:13px;"></i> Configurar
+      <a href="/cuestionarios/{{ c.id }}/editar/" class="btn btn-primary" style="font-size:13px; padding:10px 14px; display:inline-flex; align-items:center; justify-content:center; gap:6px; font-weight:700; border-radius:10px;" title="Configurar parámetros y preguntas">
+        <i data-lucide="settings" style="width:15px; height:15px;"></i>
+        Configurar
       </a>
       {% else %}
         {% if c.esta_vigente %}
-        <a href="/evaluacion/iniciar/{{ c.id }}/" class="btn btn-primary" style="flex:1; font-size:13px; padding:8px 10px; display:inline-flex; align-items:center; justify-content:center; gap:6px;">
-          <i data-lucide="play" style="width:14px; height:14px;"></i> Iniciar
+        <a href="/evaluacion/iniciar/{{ c.id }}/" class="btn btn-primary" style="grid-column:1 / -1; font-size:13px; padding:10px; display:inline-flex; align-items:center; justify-content:center; gap:6px; border-radius:10px;">
+          <i data-lucide="play" style="width:14px; height:14px;"></i> Iniciar Evaluación
         </a>
         {% elif c.esta_vencido %}
-        <button disabled class="btn btn-outline" style="flex:1; font-size:12px; padding:8px 10px; opacity:0.6; cursor:not-allowed; display:inline-flex; align-items:center; justify-content:center; gap:6px;">
+        <button disabled class="btn btn-outline" style="grid-column:1 / -1; font-size:12px; padding:10px; opacity:0.6; cursor:not-allowed; display:inline-flex; align-items:center; justify-content:center; gap:6px; border-radius:10px;">
           <i data-lucide="lock" style="width:13px; height:13px;"></i> Plazo Vencido
         </button>
         {% else %}
-        <button disabled class="btn btn-outline" style="flex:1; font-size:12px; padding:8px 10px; opacity:0.6; cursor:not-allowed; display:inline-flex; align-items:center; justify-content:center; gap:6px;">
-          <i data-lucide="calendar" style="width:13px; height:13px;"></i> Programado
+        <button disabled class="btn btn-outline" style="grid-column:1 / -1; font-size:12px; padding:10px; opacity:0.6; cursor:not-allowed; display:inline-flex; align-items:center; justify-content:center; gap:6px; border-radius:10px;">
+          <i data-lucide="calendar" style="width:13px; height:13px;"></i> Programado ({{ c.fecha_apertura|date:"d M" }})
         </button>
         {% endif %}
       {% endif %}
