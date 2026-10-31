@@ -147,17 +147,21 @@
       </div>
     </div>
 
-    <!-- Botones de Acción -->
+    <!-- Botones de Acción Segregados por Rol -->
     <div style="display:flex; gap:8px; border-top:1px solid #f1f5f9; padding-top:14px; margin-top:auto;">
       {% if user.is_superuser or user.perfil.es_admin or user.perfil.es_docente %}
       <a href="/cuestionarios/{{ c.id }}/editar/" class="btn btn-outline" style="flex:1; font-size:13px; padding:8px 10px; display:inline-flex; align-items:center; justify-content:center; gap:6px;">
         <i data-lucide="settings" style="width:14px; height:14px;"></i> Configurar
       </a>
-      {% endif %}
-      {% if c.estado == 'disponible' %}
-      <a href="/evaluacion/iniciar/{{ c.id }}/" class="btn btn-primary" style="flex:1; font-size:13px; padding:8px 10px; display:inline-flex; align-items:center; justify-content:center; gap:6px;">
-        <i data-lucide="play" style="width:14px; height:14px;"></i> Iniciar
+      <a href="/cuestionarios/{{ c.id }}/previsualizar/" class="btn btn-primary" style="flex:1; font-size:13px; padding:8px 10px; display:inline-flex; align-items:center; justify-content:center; gap:6px;">
+        <i data-lucide="eye" style="width:14px; height:14px;"></i> Previsualizar
       </a>
+      {% else %}
+        {% if c.estado == 'disponible' %}
+        <a href="/evaluacion/iniciar/{{ c.id }}/" class="btn btn-primary" style="flex:1; font-size:13px; padding:8px 10px; display:inline-flex; align-items:center; justify-content:center; gap:6px;">
+          <i data-lucide="play" style="width:14px; height:14px;"></i> Iniciar
+        </a>
+        {% endif %}
       {% endif %}
     </div>
 

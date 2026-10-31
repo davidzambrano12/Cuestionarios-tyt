@@ -341,6 +341,56 @@ def configurar_cuestionario(request, cuestionario_id=None):
 # ==============================================================================
 
 @login_required
+def previsualizar_cuestionario(request, cuestionario_id):
+    """
+    Modo Previsualización para Docentes y Administradores:
+    Permite recorrer e interactuar con el cuestionario en vivo de forma simulada,
+    con opción de revelar la clave pedagógica y retroalimentación de cada reactivo,
+    sin generar registros en la tabla 'intentos' ni alterar estadísticas estudiantiles.
+    """
+    cuestionario = get_object_or_404(Cuestionario, id=cuestionario_id)
+    es_docente_o_admin = (
+        request.user.is_staff or 
+        request.user.is_superuser or 
+        getattr(getattr(request.user, "perfil", None), "es_docente", False) or 
+        getattr(getattr(request.user, "perfil", None), "es_admin", False)
+    )
+    if not es_docente_o_admin:
+        messages.error(request, "Acceso no autorizado: la previsualización de evaluaciones es exclusiva para el cuerpo docente.")
+        return redirect("/dashboard/estudiante/")
+
+    cuestionario_preguntas = cuestionario.cuestionario_preguntas.select_related(
+        "pregunta", "pregunta__categoria"
+    ).prefetch_related("pregunta__opciones").order_by("orden", "id")
+
+    preguntas_lista = []
+    for cp in cuestionario_preguntas:
+        p = cp.pregunta
+        opciones_lista = []
+        for op in p.opciones.all().order_by("orden", "id"):
+            opciones_lista.append({
+                "id": op.id,
+                "texto": op.texto,
+                "es_correcta": op.es_correcta,
+            })
+        preguntas_lista.append({
+            "id": p.id,
+            "categoria": p.categoria.nombre if p.categoria else "General",
+            "tipo": p.tipo,
+            "texto_base": p.texto_base or "",
+            "enunciado": p.enunciado,
+            "retroalimentacion": p.retroalimentacion or "",
+            "puntaje": str(p.puntaje),
+            "opciones": opciones_lista,
+        })
+
+    return render(request, "cuestionario_previsualizar.html", {
+        "cuestionario": cuestionario,
+        "total_preguntas": len(preguntas_lista),
+        "preguntas_json": json.dumps(preguntas_lista),
+    })
+
+
 def iniciar_evaluacion(request, cuestionario_id):
     """
     Inicia un nuevo intento de examen con validación estricta en el servidor:
@@ -350,6 +400,16 @@ def iniciar_evaluacion(request, cuestionario_id):
     """
     cuestionario = get_object_or_404(Cuestionario, id=cuestionario_id)
     ahora = timezone.now()
+    # Salvaguarda de rol: Redirigir a previsualización si es docente/admin para proteger estadísticas
+    es_docente_o_admin = (
+        request.user.is_staff or 
+        request.user.is_superuser or 
+        getattr(getattr(request.user, "perfil", None), "es_docente", False) or 
+        getattr(getattr(request.user, "perfil", None), "es_admin", False)
+    )
+    if es_docente_o_admin:
+        messages.info(request, "Acceso como docente: Has sido redirigido al modo de previsualización para no alterar las estadísticas estudiantiles.")
+        return redirect(f"/cuestionarios/{cuestionario.id}/previsualizar/")
 
     # 1. Validación de cuenta
     if not request.user.is_active:

@@ -21,6 +21,8 @@ urlpatterns = [
     path("cuestionarios/", views.cuestionarios_list, name="cuestionarios_list"),
     path("cuestionarios/crear/", views.configurar_cuestionario, name="cuestionario_crear"),
     path("cuestionarios/<int:cuestionario_id>/editar/", views.configurar_cuestionario, name="cuestionario_editar"),
+    path("cuestionarios/<int:cuestionario_id>/previsualizar/", views.previsualizar_cuestionario, name="cuestionario_previsualizar"),
+
 
     # Evaluación en Vivo y Calificación
     path("evaluacion/iniciar/<int:cuestionario_id>/", views.iniciar_evaluacion, name="iniciar_evaluacion"),
