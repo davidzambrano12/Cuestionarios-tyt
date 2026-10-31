@@ -27,6 +27,8 @@ urlpatterns = [
     # Evaluación en Vivo y Calificación
     path("evaluacion/iniciar/<int:cuestionario_id>/", views.iniciar_evaluacion, name="iniciar_evaluacion"),
     path("evaluacion/<int:intento_id>/", views.evaluacion_en_vivo, name="evaluacion_en_vivo"),
+    path("evaluacion/<int:intento_id>/guardar-respuesta/", views.guardar_respuesta_ajax, name="guardar_respuesta_ajax"),
+
     path("evaluacion/<int:intento_id>/finalizar/", views.finalizar_evaluacion, name="finalizar_evaluacion"),
     path("evaluacion/<int:intento_id>/resultado/", views.resultado_evaluacion, name="resultado_evaluacion"),
 ]

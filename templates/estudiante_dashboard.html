@@ -41,7 +41,11 @@
       <div class="card" style="border-top:4px solid #186382; margin-bottom:28px;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
           <div style="display:flex; align-items:center; gap:8px;">
+            {% if cuestionario_destacado.intento_activo %}
+            <span class="badge" style="background:#fef3c7; color:#92400e; font-weight:700;">● INTENTO EN CURSO</span>
+            {% else %}
             <span class="badge badge-success">● DISPONIBLE AHORA</span>
+            {% endif %}
             <span class="badge" style="background:#f1f5f9; color:#475569;">Saber TyT 2026</span>
           </div>
           <i data-lucide="zap" style="color:#f59e0b; width:22px; height:22px;"></i>
@@ -67,9 +71,15 @@
           </div>
         </div>
 
+        {% if cuestionario_destacado.intento_activo %}
+        <a href="/evaluacion/{{ cuestionario_destacado.intento_activo.id }}/" class="btn btn-full" style="padding:14px; font-size:15px; border-radius:12px; background:#d97706; color:#ffffff; font-weight:700; display:flex; align-items:center; justify-content:center; gap:8px;">
+          <i data-lucide="play-circle"></i> Continuar Intento en Curso
+        </a>
+        {% else %}
         <a href="/evaluacion/iniciar/{{ cuestionario_destacado.id }}/" class="btn btn-primary btn-full" style="padding:14px; font-size:15px; border-radius:12px;">
           <i data-lucide="play"></i> Iniciar Intento de Examen
         </a>
+        {% endif %}
       </div>
       {% else %}
       <!-- Estado Limpio cuando no hay cuestionarios disponibles en este momento -->
@@ -113,7 +123,11 @@
             <div class="card" style="margin-bottom:0; padding:20px;">
               <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
                 <div>
+                  {% if c.intento_activo %}
+                  <span class="badge" style="background:#fef3c7; color:#92400e; font-weight:700; margin-bottom:6px;">● INTENTO EN CURSO</span>
+                  {% else %}
                   <span class="badge badge-success" style="margin-bottom:6px;">● DISPONIBLE</span>
+                  {% endif %}
                   <h3 style="font-size:17px; font-weight:800; color:#0f172a;">{{ c.nombre }}</h3>
                   <div style="font-size:12px; color:#64748b; display:inline-flex; align-items:center; gap:4px;"><i data-lucide="landmark" style="width:13px; height:13px;"></i> Uniputumayo · Pruebas Saber TyT</div>
                 </div>
@@ -126,9 +140,15 @@
                 <span style="display:inline-flex; align-items:center; gap:4px;"><i data-lucide="clock" style="width:14px; height:14px;"></i> {{ c.tiempo_limite_minutos }} min</span>
                 <span style="display:inline-flex; align-items:center; gap:4px;"><i data-lucide="rotate-cw" style="width:14px; height:14px;"></i> {{ c.intentos_permitidos }} intentos</span>
               </div>
+              {% if c.intento_activo %}
+              <a href="/evaluacion/{{ c.intento_activo.id }}/" class="btn" style="padding:10px; font-size:14px; background:#d97706; color:#ffffff; font-weight:700; display:inline-flex; align-items:center; gap:6px;">
+                <i data-lucide="play-circle"></i> Continuar Intento
+              </a>
+              {% else %}
               <a href="/evaluacion/iniciar/{{ c.id }}/" class="btn btn-primary" style="padding:10px; font-size:14px;">
                 <i data-lucide="play"></i> Iniciar Intento
               </a>
+              {% endif %}
             </div>
             {% empty %}
             <div class="card" style="text-align:center; padding:30px; color:#64748b;">

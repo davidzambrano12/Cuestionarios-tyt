@@ -179,6 +179,30 @@ def estudiante_dashboard_view(request):
         .order_by("fecha_apertura")
     )
 
+    # Mapear intentos activos (en progreso) para permitir reanudar
+    intentos_activos_qs = Intento.objects.filter(
+        participante_codigo=codigo,
+        estado="en_progreso",
+    ).order_by("-fecha_inicio")
+
+    intentos_activos_map = {}
+    for i_act in intentos_activos_qs:
+        limite_seg = i_act.cuestionario.tiempo_limite_minutos * 60
+        delta_s = int((ahora - i_act.fecha_inicio).total_seconds())
+        if delta_s > (limite_seg + 30):
+            # Auto-cerrar intento vencido
+            i_act.estado = "vencido"
+            i_act.fecha_fin = ahora
+            i_act.duracion_segundos = delta_s
+            i_act.save()
+        else:
+            intentos_activos_map[i_act.cuestionario_id] = i_act
+
+    for c in cuestionarios_disponibles:
+        c.intento_activo = intentos_activos_map.get(c.id)
+    if cuestionario_destacado:
+        cuestionario_destacado.intento_activo = intentos_activos_map.get(cuestionario_destacado.id)
+
     # Intentos propios del estudiante (aislamiento de seguridad)
     intentos_estudiante = Intento.objects.filter(
         participante_codigo=codigo

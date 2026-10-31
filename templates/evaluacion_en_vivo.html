@@ -157,6 +157,7 @@
   // Datos del examen inyectados desde Django
   const preguntasData = {{ preguntas_json|safe }};
   const tiempoLimiteMinutos = {{ cuestionario.tiempo_limite_minutos }};
+  const segundosRestantesServidor = {{ segundos_restantes|default:7200 }};
   const intentoId = {{ intento.id }};
   
   let preguntaActualIdx = 0;
@@ -177,7 +178,8 @@
     }
     construirGrillaNavegacion();
     mostrarPregunta(0);
-    iniciarTemporizador(tiempoLimiteMinutos * 60);
+    // Iniciar temporizador con los segundos reales restantes validados por backend
+    iniciarTemporizador(segundosRestantesServidor);
   });
 
   function construirGrillaNavegacion() {
@@ -251,6 +253,42 @@
     actualizarEstadosGrilla();
   }
 
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+
+  function guardarRespuestaServidor(preguntaId, opcionId) {
+    const csrftoken = getCookie('csrftoken') || (document.querySelector('[name=csrfmiddlewaretoken]') ? document.querySelector('[name=csrfmiddlewaretoken]').value : '');
+    fetch(`/evaluacion/${intentoId}/guardar-respuesta/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': csrftoken
+      },
+      body: JSON.stringify({
+        pregunta_id: preguntaId,
+        opcion_id: opcionId
+      })
+    }).then(res => res.json()).then(data => {
+      if (data.status !== 'ok') {
+        console.warn('Advertencia al autoguardar:', data.mensaje);
+      }
+    }).catch(err => {
+      console.warn('Error de red al autoguardar respuesta:', err);
+    });
+  }
+
   function seleccionarOpcion(preguntaId, opcionId) {
     respuestasUsuario[preguntaId] = opcionId;
     // Sincronizar en el input oculto
@@ -259,6 +297,8 @@
       inputHidden.value = JSON.stringify(respuestasUsuario);
     }
     mostrarPregunta(preguntaActualIdx);
+    // Persistencia asíncrona inmediata en backend MariaDB
+    guardarRespuestaServidor(preguntaId, opcionId);
   }
 
   function irSiguienteOTerminar() {

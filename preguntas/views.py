@@ -429,14 +429,46 @@ def iniciar_evaluacion(request, cuestionario_id):
         messages.error(request, "El plazo para presentar este cuestionario ha expirado.")
         return redirect("/dashboard/estudiante/")
 
-    # 3. Validación de intentos permitidos
+    # 3. Validación y Reanudación de Intentos
     codigo = getattr(getattr(request.user, "perfil", None), "codigo_institucional", None) or request.user.username
-    intentos_previos = Intento.objects.filter(
+
+    # A. Verificar si el estudiante ya tiene un intento activo (en_progreso)
+    intento_activo = (
+        Intento.objects.filter(
+            cuestionario=cuestionario,
+            participante_codigo=codigo,
+            estado="en_progreso",
+        )
+        .order_by("-fecha_inicio")
+        .first()
+    )
+
+    if intento_activo:
+        tiempo_limite_seg = cuestionario.tiempo_limite_minutos * 60
+        delta_seg = int((ahora - intento_activo.fecha_inicio).total_seconds())
+        ventana_gracia = 30
+
+        if delta_seg > (tiempo_limite_seg + ventana_gracia):
+            # El intento expiró por tiempo mientras el alumno estaba fuera
+            intento_activo.estado = "vencido"
+            intento_activo.fecha_fin = ahora
+            intento_activo.duracion_segundos = delta_seg
+            intento_activo.save()
+            messages.warning(request, "Tu intento previo expiró por límite de tiempo y ha sido cerrado.")
+            return redirect(f"/evaluacion/{intento_activo.id}/resultado/")
+        else:
+            # Reanudar intento activo sin consumir nuevos intentos
+            messages.info(request, "Reanudando tu intento en curso. El tiempo continúa corriendo en el servidor.")
+            return redirect(f"/evaluacion/{intento_activo.id}/")
+
+    # B. Si no hay intento en progreso, validar límite de intentos completados/cerrados
+    intentos_completados = Intento.objects.filter(
         cuestionario=cuestionario,
         participante_codigo=codigo,
+        estado__in=["finalizado", "vencido"],
     ).count()
 
-    if intentos_previos >= cuestionario.intentos_permitidos:
+    if intentos_completados >= cuestionario.intentos_permitidos:
         messages.warning(
             request,
             f"Has alcanzado el límite máximo de {cuestionario.intentos_permitidos} intentos permitidos para este cuestionario."
@@ -499,13 +531,82 @@ def evaluacion_en_vivo(request, intento_id):
         for r in intento.respuestas.filter(opcion_seleccionada__isnull=False)
     }
 
+    # Calcular tiempo restante exacto en el servidor
+    ahora = timezone.now()
+    tiempo_limite_seg = cuestionario.tiempo_limite_minutos * 60
+    segundos_transcurridos = int((ahora - intento.fecha_inicio).total_seconds())
+    ventana_gracia = 30
+
+    if segundos_transcurridos > (tiempo_limite_seg + ventana_gracia):
+        intento.estado = "vencido"
+        intento.fecha_fin = ahora
+        intento.duracion_segundos = segundos_transcurridos
+        intento.save()
+        messages.warning(request, "El tiempo límite para este examen ha vencido.")
+        return redirect(f"/evaluacion/{intento.id}/resultado/")
+
+    segundos_restantes = max(1, tiempo_limite_seg - segundos_transcurridos)
+
     return render(request, "evaluacion_en_vivo.html", {
         "intento": intento,
         "cuestionario": cuestionario,
         "total_preguntas": len(preguntas_lista),
         "preguntas_json": json.dumps(preguntas_lista),
         "respuestas_previas_json": json.dumps(respuestas_previas),
+        "segundos_restantes": segundos_restantes,
     })
+
+
+@login_required
+def guardar_respuesta_ajax(request, intento_id):
+    """
+    Guarda asíncronamente (AJAX/Fetch) la selección de una pregunta para asegurar
+    persistencia inmediata ante recargas, caídas de red o salidas accidentales.
+    """
+    if request.method != "POST":
+        return JsonResponse({"error": "Método no permitido"}, status=405)
+
+    intento = get_object_or_404(Intento, id=intento_id)
+    codigo_usuario = getattr(getattr(request.user, "perfil", None), "codigo_institucional", None) or request.user.username
+    if intento.participante_codigo != codigo_usuario and not request.user.is_superuser:
+        return JsonResponse({"error": "No autorizado"}, status=403)
+
+    if intento.estado != "en_progreso":
+        return JsonResponse({"error": "El examen ya no está activo"}, status=400)
+
+    try:
+        data = json.loads(request.body)
+        pregunta_id = int(data.get("pregunta_id"))
+        opcion_id = data.get("opcion_id")
+        marcada = bool(data.get("marcada_para_revision", False))
+
+        pregunta = get_object_or_404(Pregunta, id=pregunta_id)
+        opcion_obj = None
+        es_correcta = False
+        if opcion_id:
+            opcion_obj = OpcionRespuesta.objects.filter(id=int(opcion_id), pregunta=pregunta).first()
+            if opcion_obj and opcion_obj.es_correcta:
+                es_correcta = True
+
+        peso = Decimal("1.00")
+        cp = CuestionarioPregunta.objects.filter(cuestionario=intento.cuestionario, pregunta=pregunta).first()
+        if cp:
+            peso = cp.puntaje_asignado or pregunta.puntaje or Decimal("1.00")
+
+        # Actualizar o crear registro en respuestas_intento
+        RespuestaIntento.objects.update_or_create(
+            intento=intento,
+            pregunta=pregunta,
+            defaults={
+                "opcion_seleccionada": opcion_obj,
+                "es_correcta": es_correcta,
+                "puntaje_obtenido": peso if es_correcta else Decimal("0.00"),
+                "marcada_para_revision": marcada,
+            }
+        )
+        return JsonResponse({"status": "ok", "guardado": True})
+    except Exception as e:
+        return JsonResponse({"status": "error", "mensaje": str(e)}, status=400)
 
 
 @login_required
