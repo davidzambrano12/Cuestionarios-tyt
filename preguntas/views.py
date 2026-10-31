@@ -1019,11 +1019,15 @@ def cuestionario_intentos(request, cuestionario_id):
     """
     Panel para Docentes y Administradores para auditar y gestionar
     todos los intentos presentados por los estudiantes en un cuestionario.
+    Agrupa por estudiante único (1 fila por alumno con acordeón de intentos)
+    para evitar saturación de filas repetidas en cuestionarios con múltiples intentos.
     """
+    from collections import OrderedDict
     cuestionario = get_object_or_404(Cuestionario, id=cuestionario_id)
     
     q = request.GET.get("q", "").strip()
     estado_filtro = request.GET.get("estado", "").strip()
+    vista_tab = request.GET.get("vista", "estudiantes").strip()
 
     intentos_qs = cuestionario.intentos.all().order_by("-fecha_inicio")
 
@@ -1035,35 +1039,102 @@ def cuestionario_intentos(request, cuestionario_id):
     if estado_filtro:
         intentos_qs = intentos_qs.filter(estado=estado_filtro)
 
-    # Métricas y estadísticas consolidadas
-    todos_los_intentos = cuestionario.intentos.all()
-    total_intentos = todos_los_intentos.count()
-    finalizados_count = todos_los_intentos.filter(estado="finalizado").count()
-    en_progreso_count = todos_los_intentos.filter(estado="en_progreso").count()
-    vencidos_count = todos_los_intentos.filter(estado="vencido").count()
-    
-    aprobados_count = todos_los_intentos.filter(estado="finalizado", aprobado=True).count()
-    reprobados_count = todos_los_intentos.filter(estado="finalizado", aprobado=False).count()
+    # 1. Agrupar intentos por estudiante único
+    estudiantes_dict = OrderedDict()
+    for it in intentos_qs:
+        cod = it.participante_codigo
+        if cod not in estudiantes_dict:
+            estudiantes_dict[cod] = {
+                "codigo": cod,
+                "nombre": it.participante_nombre,
+                "intentos": [],
+                "mejor_calificacion": None,
+                "aprobado": False,
+                "tiene_activo": False,
+                "ultimo_intento": it,
+            }
+        estudiantes_dict[cod]["intentos"].append(it)
+        if it.estado == "en_progreso":
+            estudiantes_dict[cod]["tiene_activo"] = True
 
-    tasa_aprobacion = round((aprobados_count / finalizados_count * 100), 1) if finalizados_count > 0 else 0
-    prom_val = todos_los_intentos.filter(estado="finalizado").aggregate(avg=Avg("calificacion"))["avg"]
-    promedio_calif = round(prom_val, 2) if prom_val is not None else Decimal("0.00")
+    # 2. Calcular nota definitiva institucional (la nota más alta obtenida)
+    estudiantes_agrupados = []
+    notas_definitivas = []
+    estudiantes_aprobados_count = 0
+
+    for cod, datos in estudiantes_dict.items():
+        califs = [
+            i.calificacion for i in datos["intentos"]
+            if i.estado in ["finalizado", "vencido"] and i.calificacion is not None
+        ]
+        if califs:
+            mejor = max(califs)
+            datos["mejor_calificacion"] = mejor
+            datos["aprobado"] = mejor >= cuestionario.calificacion_aprobacion
+            notas_definitivas.append(mejor)
+            if datos["aprobado"]:
+                estudiantes_aprobados_count += 1
+        else:
+            datos["mejor_calificacion"] = None
+            datos["aprobado"] = False
+        
+        datos["total_intentos"] = len(datos["intentos"])
+        estudiantes_agrupados.append(datos)
+
+    # 3. Métricas consolidadas
+    total_estudiantes = len(estudiantes_agrupados)
+    estudiantes_reprobados_count = total_estudiantes - estudiantes_aprobados_count
+    tasa_aprobacion_estudiantes = (
+        round((estudiantes_aprobados_count / total_estudiantes * 100), 1)
+        if total_estudiantes > 0 else 0
+    )
+    promedio_definitivo = (
+        round(sum(notas_definitivas) / len(notas_definitivas), 2)
+        if notas_definitivas else Decimal("0.00")
+    )
+
+    todos_los_intentos = cuestionario.intentos.all()
+    total_intentos_registrados = todos_los_intentos.count()
 
     return render(request, "cuestionario_intentos.html", {
         "cuestionario": cuestionario,
+        "estudiantes_agrupados": estudiantes_agrupados,
         "intentos": intentos_qs,
-        "total_intentos": total_intentos,
-        "finalizados_count": finalizados_count,
-        "en_progreso_count": en_progreso_count,
-        "vencidos_count": vencidos_count,
-        "aprobados_count": aprobados_count,
-        "reprobados_count": reprobados_count,
-        "tasa_aprobacion": tasa_aprobacion,
-        "promedio_calif": promedio_calif,
+        "total_estudiantes": total_estudiantes,
+        "estudiantes_aprobados_count": estudiantes_aprobados_count,
+        "estudiantes_reprobados_count": estudiantes_reprobados_count,
+        "tasa_aprobacion": tasa_aprobacion_estudiantes,
+        "promedio_calif": promedio_definitivo,
+        "total_intentos_registrados": total_intentos_registrados,
         "q": q,
         "estado_filtro": estado_filtro,
+        "vista_tab": vista_tab,
         "active_tab": "cuestionarios",
     })
+
+
+@login_required
+@requiere_permiso("cuestionarios.gestionar")
+def reiniciar_estudiante_cuestionario(request, cuestionario_id, codigo_estudiante):
+    """
+    Reinicia y purga todos los intentos de un estudiante en un cuestionario específico,
+    restaurando su cupo íntegro de intentos permitidos de inmediato.
+    """
+    if request.method != "POST":
+        return redirect(f"/cuestionarios/{cuestionario_id}/intentos/")
+
+    cuestionario = get_object_or_404(Cuestionario, id=cuestionario_id)
+    with transaction.atomic():
+        eliminados, _ = Intento.objects.filter(
+            cuestionario=cuestionario,
+            participante_codigo=codigo_estudiante
+        ).delete()
+
+    messages.success(
+        request,
+        f"Se han reiniciado los {eliminados} intentos del estudiante ({codigo_estudiante}). Su cupo ha quedado totalmente restaurado."
+    )
+    return redirect(f"/cuestionarios/{cuestionario_id}/intentos/")
 
 
 @login_required
