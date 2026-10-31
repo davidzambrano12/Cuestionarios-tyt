@@ -161,11 +161,14 @@
     <!-- Botones de Acción Segregados por Rol -->
     <div style="display:flex; gap:8px; border-top:1px solid #f1f5f9; padding-top:14px; margin-top:auto;">
       {% if user.is_superuser or user.perfil.es_admin or user.perfil.es_docente %}
-      <a href="/cuestionarios/{{ c.id }}/editar/" class="btn btn-outline" style="flex:1; font-size:13px; padding:8px 10px; display:inline-flex; align-items:center; justify-content:center; gap:6px;">
-        <i data-lucide="settings" style="width:14px; height:14px;"></i> Configurar
+      <a href="/cuestionarios/{{ c.id }}/intentos/" class="btn btn-outline" style="flex:1.1; font-size:12px; padding:8px 6px; display:inline-flex; align-items:center; justify-content:center; gap:5px; color:#186382; font-weight:700;" title="Ver y gestionar intentos de estudiantes">
+        <i data-lucide="users" style="width:13px; height:13px; color:#186382;"></i> Intentos ({{ c.intentos.count }})
       </a>
-      <a href="/cuestionarios/{{ c.id }}/previsualizar/" class="btn btn-primary" style="flex:1; font-size:13px; padding:8px 10px; display:inline-flex; align-items:center; justify-content:center; gap:6px;">
-        <i data-lucide="eye" style="width:14px; height:14px;"></i> Previsualizar
+      <a href="/cuestionarios/{{ c.id }}/previsualizar/" class="btn btn-outline" style="flex:1; font-size:12px; padding:8px 6px; display:inline-flex; align-items:center; justify-content:center; gap:5px;" title="Probar examen en modo simulación">
+        <i data-lucide="eye" style="width:13px; height:13px;"></i> Probar
+      </a>
+      <a href="/cuestionarios/{{ c.id }}/editar/" class="btn btn-primary" style="flex:1; font-size:12px; padding:8px 6px; display:inline-flex; align-items:center; justify-content:center; gap:5px;" title="Editar políticas y reactivos">
+        <i data-lucide="settings" style="width:13px; height:13px;"></i> Configurar
       </a>
       {% else %}
         {% if c.esta_vigente %}

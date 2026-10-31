@@ -1,0 +1,259 @@
+{% extends 'base.html' %}
+
+{% block title %}Intentos y Calificaciones - {{ cuestionario.nombre }}{% endblock %}
+
+{% block content %}
+<div class="content-container" style="max-width:1280px; margin:0 auto; padding:24px 20px;">
+
+  <!-- Breadcrumb -->
+  <nav style="display:flex; align-items:center; gap:8px; font-size:13px; color:#64748b; margin-bottom:16px;">
+    <a href="/cuestionarios/" style="color:#186382; text-decoration:none; font-weight:600; display:inline-flex; align-items:center; gap:4px;">
+      <i data-lucide="file-text" style="width:14px; height:14px;"></i> Cuestionarios
+    </a>
+    <span>&rsaquo;</span>
+    <span style="color:#0f172a; font-weight:700;">Auditoría de Intentos</span>
+    <span>&rsaquo;</span>
+    <span style="color:#64748b;">{{ cuestionario.nombre }}</span>
+  </nav>
+
+  <!-- Header Principal -->
+  <div class="card" style="margin-bottom:24px; padding:24px; border-radius:18px;">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:16px;">
+      <div>
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:6px;">
+          <h1 style="font-size:24px; font-weight:800; color:#0f172a; margin:0;">
+            {{ cuestionario.nombre }}
+          </h1>
+          {% if cuestionario.esta_vencido %}
+            <span class="badge badge-danger">● Cerrado</span>
+          {% elif cuestionario.esta_vigente %}
+            <span class="badge badge-success">● Disponible</span>
+          {% else %}
+            <span class="badge badge-warning">● {{ cuestionario.estado|capfirst }}</span>
+          {% endif %}
+        </div>
+        <p style="color:#64748b; font-size:13px; margin:0 0 12px 0; max-width:640px;">
+          {{ cuestionario.descripcion|default:"Evaluación institucional Saber TyT. Registro y trazabilidad de intentos presentados por los estudiantes." }}
+        </p>
+        <div style="display:flex; gap:16px; font-size:12px; color:#475569; flex-wrap:wrap;">
+          <span><i data-lucide="clock" style="width:13px; height:13px; color:#186382; vertical-align:middle;"></i> Límite: <strong>{{ cuestionario.tiempo_limite_minutos }} min</strong></span>
+          <span><i data-lucide="rotate-cw" style="width:13px; height:13px; color:#186382; vertical-align:middle;"></i> Máx. Intentos: <strong>{{ cuestionario.intentos_permitidos }}</strong></span>
+          <span><i data-lucide="award" style="width:13px; height:13px; color:#186382; vertical-align:middle;"></i> Aprobación: <strong>{{ cuestionario.calificacion_aprobacion }} / {{ cuestionario.calificacion_maxima }}</strong></span>
+          <span><i data-lucide="help-circle" style="width:13px; height:13px; color:#186382; vertical-align:middle;"></i> Reactivos: <strong>{{ cuestionario.cuestionario_preguntas.count }}</strong></span>
+        </div>
+      </div>
+
+      <!-- Acciones de Cabecera -->
+      <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+        <a href="/cuestionarios/{{ cuestionario.id }}/intentos/exportar/" class="btn btn-outline" style="font-size:13px; padding:10px 16px; gap:6px;">
+          <i data-lucide="download" style="width:15px; height:15px;"></i> Exportar a Excel (CSV)
+        </a>
+        <a href="/cuestionarios/{{ cuestionario.id }}/previsualizar/" class="btn btn-outline" style="font-size:13px; padding:10px 16px; gap:6px;">
+          <i data-lucide="eye" style="width:15px; height:15px;"></i> Previsualizar
+        </a>
+        <a href="/cuestionarios/" class="btn btn-primary" style="font-size:13px; padding:10px 16px; gap:6px;">
+          <i data-lucide="arrow-left" style="width:15px; height:15px;"></i> Volver
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Métricas Rápidas -->
+  <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:16px; margin-bottom:24px;">
+    
+    <div class="card" style="padding:18px 20px; border-radius:14px; margin-bottom:0;">
+      <div style="font-size:12px; color:#64748b; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px;">
+        Total Presentaciones
+      </div>
+      <div style="font-size:28px; font-weight:800; color:#0f172a;">{{ total_intentos }}</div>
+      <div style="font-size:12px; color:#64748b; margin-top:4px;">
+        {{ finalizados_count }} finalizados &middot; {{ en_progreso_count }} en curso
+      </div>
+    </div>
+
+    <div class="card" style="padding:18px 20px; border-radius:14px; margin-bottom:0; background:#f0fdf4; border:1px solid #bbf7d0;">
+      <div style="font-size:12px; color:#166534; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px;">
+        Estudiantes Aprobados
+      </div>
+      <div style="font-size:28px; font-weight:800; color:#15803d;">{{ aprobados_count }}</div>
+      <div style="font-size:12px; color:#166534; margin-top:4px;">
+        Tasa de éxito: <strong>{{ tasa_aprobacion }}%</strong>
+      </div>
+    </div>
+
+    <div class="card" style="padding:18px 20px; border-radius:14px; margin-bottom:0; background:#fef2f2; border:1px solid #fecaca;">
+      <div style="font-size:12px; color:#991b1b; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px;">
+        Estudiantes Reprobados
+      </div>
+      <div style="font-size:28px; font-weight:800; color:#b91c1c;">{{ reprobados_count }}</div>
+      <div style="font-size:12px; color:#991b1b; margin-top:4px;">
+        Bajo el umbral de {{ cuestionario.calificacion_aprobacion }}
+      </div>
+    </div>
+
+    <div class="card" style="padding:18px 20px; border-radius:14px; margin-bottom:0; background:#f0f9ff; border:1px solid #bae6fd;">
+      <div style="font-size:12px; color:#0369a1; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px;">
+        Promedio General
+      </div>
+      <div style="font-size:28px; font-weight:800; color:#0284c7;">{{ promedio_calif }}</div>
+      <div style="font-size:12px; color:#0369a1; margin-top:4px;">
+        Escala: 0.00 a {{ cuestionario.calificacion_maxima }}
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Barra de Filtros y Búsqueda -->
+  <div class="card" style="padding:16px 20px; margin-bottom:20px; border-radius:14px;">
+    <form method="GET" action="" style="display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap;">
+      <div style="display:flex; align-items:center; gap:12px; flex-grow:1; max-width:540px;">
+        <div style="position:relative; width:100%;">
+          <i data-lucide="search" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); width:16px; height:16px; color:#94a3b8;"></i>
+          <input type="text" name="q" value="{{ q }}" placeholder="Buscar por nombre o código institucional..." class="form-input" style="padding-left:36px; height:40px; font-size:13px; width:100%;">
+        </div>
+      </div>
+
+      <div style="display:flex; align-items:center; gap:10px;">
+        <select name="estado" class="form-select" style="height:40px; font-size:13px; padding-right:32px;" onchange="this.form.submit()">
+          <option value="">Todos los Estados</option>
+          <option value="finalizado" {% if estado_filtro == 'finalizado' %}selected{% endif %}>Finalizados</option>
+          <option value="en_progreso" {% if estado_filtro == 'en_progreso' %}selected{% endif %}>En Progreso</option>
+          <option value="vencido" {% if estado_filtro == 'vencido' %}selected{% endif %}>Vencidos / Expirados</option>
+        </select>
+        <button type="submit" class="btn btn-outline" style="height:40px; padding:0 16px; font-size:13px;">Filtrar</button>
+        {% if q or estado_filtro %}
+        <a href="?" class="btn btn-outline" style="height:40px; padding:0 12px; font-size:13px; color:#64748b;" title="Limpiar filtros">
+          <i data-lucide="x" style="width:16px; height:16px;"></i>
+        </a>
+        {% endif %}
+      </div>
+    </form>
+  </div>
+
+  <!-- Tabla de Intentos -->
+  <div class="card" style="padding:0; border-radius:16px; overflow:hidden;">
+    <div class="table-responsive">
+      <table class="table" style="width:100%; margin:0; border-collapse:collapse;">
+        <thead style="background:#f8fafc; border-bottom:1px solid #e2e8f0;">
+          <tr>
+            <th style="padding:14px 18px; font-size:12px; font-weight:700; color:#475569; text-align:left;">Estudiante</th>
+            <th style="padding:14px 18px; font-size:12px; font-weight:700; color:#475569; text-align:left;">Fecha y Hora</th>
+            <th style="padding:14px 18px; font-size:12px; font-weight:700; color:#475569; text-align:center;">Duración</th>
+            <th style="padding:14px 18px; font-size:12px; font-weight:700; color:#475569; text-align:center;">Calificación</th>
+            <th style="padding:14px 18px; font-size:12px; font-weight:700; color:#475569; text-align:center;">Estado</th>
+            <th style="padding:14px 18px; font-size:12px; font-weight:700; color:#475569; text-align:right;">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for i in intentos %}
+          <tr style="border-bottom:1px solid #f1f5f9; transition:background 0.15s ease;">
+            
+            <!-- Estudiante -->
+            <td style="padding:16px 18px;">
+              <div style="font-weight:700; font-size:14px; color:#0f172a;">{{ i.participante_nombre }}</div>
+              <div style="font-size:12px; color:#64748b; display:inline-flex; align-items:center; gap:4px; margin-top:2px;">
+                <i data-lucide="badge-check" style="width:13px; height:13px; color:#186382;"></i>
+                Código: <strong style="color:#186382;">{{ i.participante_codigo }}</strong>
+              </div>
+            </td>
+
+            <!-- Fecha Inicio / Fin -->
+            <td style="padding:16px 18px; font-size:13px; color:#334155;">
+              <div style="display:flex; align-items:center; gap:6px;">
+                <i data-lucide="play" style="width:12px; height:12px; color:#16a34a;"></i>
+                {{ i.fecha_inicio|date:"d M Y · H:i:s" }}
+              </div>
+              {% if i.fecha_fin %}
+              <div style="display:flex; align-items:center; gap:6px; font-size:12px; color:#64748b; margin-top:3px;">
+                <i data-lucide="check" style="width:12px; height:12px; color:#64748b;"></i>
+                Entrega: {{ i.fecha_fin|date:"H:i:s" }}
+              </div>
+              {% endif %}
+            </td>
+
+            <!-- Duración -->
+            <td style="padding:16px 18px; font-size:13px; color:#475569; text-align:center;">
+              {% if i.duracion_segundos %}
+                <span class="badge" style="background:#f1f5f9; color:#334155; font-weight:600;">
+                  <i data-lucide="timer" style="width:12px; height:12px; margin-right:4px;"></i>
+                  {{ i.duracion_segundos }} seg
+                </span>
+              {% else %}
+                <span style="color:#94a3b8;">--</span>
+              {% endif %}
+            </td>
+
+            <!-- Calificación y Dictamen -->
+            <td style="padding:16px 18px; text-align:center;">
+              {% if i.estado == 'finalizado' %}
+                <div style="font-size:16px; font-weight:800; color:#0f172a;">
+                  {{ i.calificacion }} <span style="font-size:12px; color:#94a3b8; font-weight:500;">/ {{ cuestionario.calificacion_maxima }}</span>
+                </div>
+                {% if i.aprobado %}
+                  <span class="badge badge-success" style="font-size:11px; padding:2px 8px; margin-top:4px;">● Aprobado</span>
+                {% else %}
+                  <span class="badge badge-danger" style="font-size:11px; padding:2px 8px; margin-top:4px;">● Reprobado</span>
+                {% endif %}
+              {% elif i.estado == 'en_progreso' %}
+                <span style="font-size:13px; color:#d97706; font-weight:600;">En resolución</span>
+              {% else %}
+                <span style="font-size:13px; color:#64748b;">0.00 (Expirado)</span>
+              {% endif %}
+            </td>
+
+            <!-- Estado -->
+            <td style="padding:16px 18px; text-align:center;">
+              {% if i.estado == 'finalizado' %}
+                <span class="badge badge-info" style="font-size:12px;">Finalizado</span>
+              {% elif i.estado == 'en_progreso' %}
+                <span class="badge" style="background:#fef3c7; color:#92400e; font-weight:700; font-size:12px;">● En curso</span>
+              {% else %}
+                <span class="badge" style="background:#f1f5f9; color:#64748b; font-size:12px;">Vencido</span>
+              {% endif %}
+            </td>
+
+            <!-- Acciones -->
+            <td style="padding:16px 18px; text-align:right;">
+              <div style="display:inline-flex; align-items:center; gap:8px;">
+                
+                <!-- Ver Examen -->
+                <a href="/evaluacion/{{ i.id }}/resultado/" class="btn btn-outline" style="padding:6px 12px; font-size:12px; gap:4px;" title="Ver desglose y respuestas del examen">
+                  <i data-lucide="eye" style="width:13px; height:13px;"></i> Ver Examen
+                </a>
+
+                <!-- Reiniciar Intento -->
+                <form method="POST" action="/cuestionarios/intentos/{{ i.id }}/reiniciar/" onsubmit="return confirm('¿Confirmas que deseas REINICIAR el intento del estudiante {{ i.participante_nombre }} ({{ i.participante_codigo }})?\n\nEsta acción anula las respuestas actuales y restaura de inmediato el cupo del estudiante para que pueda volver a presentar la prueba.');" style="display:inline;">
+                  {% csrf_token %}
+                  <button type="submit" class="btn" style="background:#fef2f2; border:1px solid #fecaca; color:#dc2626; padding:6px 12px; font-size:12px; display:inline-flex; align-items:center; gap:4px;" title="Reiniciar intento y restaurar cupo del estudiante">
+                    <i data-lucide="rotate-ccw" style="width:13px; height:13px;"></i> Reiniciar
+                  </button>
+                </form>
+
+              </div>
+            </td>
+
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="6" style="padding:48px 24px; text-align:center; color:#64748b;">
+              <div style="width:48px; height:48px; border-radius:50%; background:#f1f5f9; display:flex; align-items:center; justify-content:center; margin:0 auto 12px;">
+                <i data-lucide="users" style="width:24px; height:24px; color:#94a3b8;"></i>
+              </div>
+              <h3 style="font-size:16px; font-weight:800; color:#0f172a; margin-bottom:4px;">No se encontraron intentos registrados</h3>
+              <p style="font-size:13px; color:#64748b; margin:0;">
+                {% if q or estado_filtro %}
+                  No hay intentos que coincidan con los filtros de búsqueda aplicados.
+                {% else %}
+                  Ningún estudiante ha iniciado aún este cuestionario.
+                {% endif %}
+              </p>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

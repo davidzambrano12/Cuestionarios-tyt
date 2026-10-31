@@ -1006,3 +1006,145 @@ def cancelar_importacion(request):
         default_storage.delete(pendiente["ruta"])
     messages.info(request, "Se ha cancelado la importación y liberado el archivo temporal.")
     return redirect("preguntas:importar")
+
+
+# ==============================================================================
+# GESTIÓN Y AUDITORÍA DE INTENTOS DE ESTUDIANTES (DOCENTE / ADMIN)
+# ==============================================================================
+
+@login_required
+@requiere_permiso("cuestionarios.gestionar")
+def cuestionario_intentos(request, cuestionario_id):
+    """
+    Panel para Docentes y Administradores para auditar y gestionar
+    todos los intentos presentados por los estudiantes en un cuestionario.
+    """
+    cuestionario = get_object_or_404(Cuestionario, id=cuestionario_id)
+    
+    q = request.GET.get("q", "").strip()
+    estado_filtro = request.GET.get("estado", "").strip()
+
+    intentos_qs = cuestionario.intentos.all().order_by("-fecha_inicio")
+
+    if q:
+        intentos_qs = intentos_qs.filter(
+            Q(participante_nombre__icontains=q) | Q(participante_codigo__icontains=q)
+        )
+
+    if estado_filtro:
+        intentos_qs = intentos_qs.filter(estado=estado_filtro)
+
+    # Métricas y estadísticas consolidadas
+    todos_los_intentos = cuestionario.intentos.all()
+    total_intentos = todos_los_intentos.count()
+    finalizados_count = todos_los_intentos.filter(estado="finalizado").count()
+    en_progreso_count = todos_los_intentos.filter(estado="en_progreso").count()
+    vencidos_count = todos_los_intentos.filter(estado="vencido").count()
+    
+    aprobados_count = todos_los_intentos.filter(estado="finalizado", aprobado=True).count()
+    reprobados_count = todos_los_intentos.filter(estado="finalizado", aprobado=False).count()
+
+    tasa_aprobacion = round((aprobados_count / finalizados_count * 100), 1) if finalizados_count > 0 else 0
+    prom_val = todos_los_intentos.filter(estado="finalizado").aggregate(avg=Avg("calificacion"))["avg"]
+    promedio_calif = round(prom_val, 2) if prom_val is not None else Decimal("0.00")
+
+    return render(request, "cuestionario_intentos.html", {
+        "cuestionario": cuestionario,
+        "intentos": intentos_qs,
+        "total_intentos": total_intentos,
+        "finalizados_count": finalizados_count,
+        "en_progreso_count": en_progreso_count,
+        "vencidos_count": vencidos_count,
+        "aprobados_count": aprobados_count,
+        "reprobados_count": reprobados_count,
+        "tasa_aprobacion": tasa_aprobacion,
+        "promedio_calif": promedio_calif,
+        "q": q,
+        "estado_filtro": estado_filtro,
+        "active_tab": "cuestionarios",
+    })
+
+
+@login_required
+@requiere_permiso("cuestionarios.gestionar")
+def reiniciar_intento(request, intento_id):
+    """
+    Permite al Docente o Administrador anular/reiniciar el intento de un estudiante
+    ante contingencias justificadas (caída de red, fuerza mayor), restaurando su cupo.
+    """
+    if request.method != "POST":
+        return redirect("/cuestionarios/")
+
+    intento = get_object_or_404(Intento, id=intento_id)
+    cuestionario_id = intento.cuestionario_id
+    codigo = intento.participante_codigo
+    nombre = intento.participante_nombre
+
+    with transaction.atomic():
+        # Al eliminar el intento, MariaDB borra en cascada sus respuestas_intento
+        intento.delete()
+
+    messages.success(
+        request,
+        f"Se ha reiniciado con éxito el intento de {nombre} ({codigo}). El estudiante ahora cuenta con su cupo restaurado para presentar nuevamente la prueba."
+    )
+    return redirect(f"/cuestionarios/{cuestionario_id}/intentos/")
+
+
+@login_required
+@requiere_permiso("cuestionarios.gestionar")
+def exportar_intentos_csv(request, cuestionario_id):
+    """
+    Exporta la planilla completa de calificaciones e intentos en CSV con codificación
+    UTF-8 con BOM para visualización perfecta e inmediata en Microsoft Excel.
+    """
+    import csv
+    from django.utils.text import slugify
+
+    cuestionario = get_object_or_404(Cuestionario, id=cuestionario_id)
+    intentos = cuestionario.intentos.all().order_by("participante_codigo", "-fecha_inicio")
+
+    response = HttpResponse(content_type="text/csv; charset=utf-8-sig")
+    nombre_archivo = f"sabana_notas_cuestionario_{cuestionario.id}_{slugify(cuestionario.nombre)}.csv"
+    response["Content-Disposition"] = f'attachment; filename="{nombre_archivo}"'
+
+    writer = csv.writer(response)
+    # Cabecera oficial
+    writer.writerow([
+        "ID Intento",
+        "Código Estudiante",
+        "Nombre Completo",
+        "Fecha Inicio",
+        "Fecha Entrega",
+        "Duración (Segundos)",
+        "Puntaje Obtenido",
+        "Puntaje Posible",
+        "Calificación",
+        "Escala Máxima",
+        "Mínimo Aprobación",
+        "Estado Intento",
+        "Dictamen"
+    ])
+
+    for i in intentos:
+        inicio_str = i.fecha_inicio.strftime("%Y-%m-%d %H:%M:%S") if i.fecha_inicio else ""
+        fin_str = i.fecha_fin.strftime("%Y-%m-%d %H:%M:%S") if i.fecha_fin else ""
+        dictamen_str = "Aprobado" if i.aprobado else ("Reprobado" if i.estado == "finalizado" else "Pendiente")
+
+        writer.writerow([
+            i.id,
+            i.participante_codigo,
+            i.participante_nombre,
+            inicio_str,
+            fin_str,
+            i.duracion_segundos or "",
+            str(i.puntaje_obtenido or "0.00"),
+            str(i.puntaje_total_posible or "0.00"),
+            str(i.calificacion or "0.00"),
+            str(cuestionario.calificacion_maxima),
+            str(cuestionario.calificacion_aprobacion),
+            i.estado,
+            dictamen_str
+        ])
+
+    return response
