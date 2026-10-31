@@ -1,3 +1,4 @@
+from django.utils import timezone
 """
 Modelos mapeados a las tablas que ya existen en MariaDB (creadas por el
 script pruebas-tyt.sql). Se usan `managed = False` porque la base de datos
@@ -24,8 +25,6 @@ class Categoria(models.Model):
 
     def __str__(self):
         return self.nombre
-
-
 class Pregunta(models.Model):
     TIPO_MULTIPLE = "MULTIPLE"
     TIPO_VF = "V_F"
@@ -102,6 +101,68 @@ class Cuestionario(models.Model):
 
     def __str__(self):
         return self.nombre
+
+    @property
+    def estado_temporal(self):
+        """Retorna el estado dinámico evaluando las fechas del servidor."""
+        if self.estado == "borrador":
+            return "borrador"
+        ahora = timezone.now()
+        if self.estado == "cerrado" or (self.fecha_cierre and ahora > self.fecha_cierre):
+            return "cerrado"
+        if self.fecha_apertura and ahora < self.fecha_apertura:
+            return "programado"
+        if self.estado == "disponible":
+            return "disponible"
+        return self.estado
+
+    @property
+    def esta_vigente(self):
+        """True si el cuestionario está publicado y dentro del rango de apertura y cierre."""
+        if self.estado != "disponible":
+            return False
+        ahora = timezone.now()
+        if not self.fecha_apertura or not self.fecha_cierre:
+            return True
+        return self.fecha_apertura <= ahora <= self.fecha_cierre
+
+    @property
+    def esta_vencido(self):
+        """True si el plazo de entrega ya expiró o fue forzado a cerrado."""
+        if self.estado == "cerrado":
+            return True
+        if self.fecha_cierre and timezone.now() > self.fecha_cierre:
+            return True
+        return False
+
+    @property
+    def tiempo_restante_info(self):
+        """Genera un diccionario semántico para los badges y alertas de tiempo."""
+        if self.estado == "borrador":
+            return {"texto": "Borrador sin publicar", "clase": "badge-warning", "urgencia": "baja"}
+        ahora = timezone.now()
+        if self.esta_vencido:
+            return {"texto": "Plazo finalizado", "clase": "badge-danger", "urgencia": "vencido"}
+        if self.fecha_apertura and ahora < self.fecha_apertura:
+            delta = self.fecha_apertura - ahora
+            if delta.days == 0:
+                horas = max(1, int(delta.total_seconds() // 3600))
+                return {"texto": f"Abre hoy en ~{horas}h", "clase": "badge-info", "urgencia": "proximo"}
+            return {"texto": f"Abre en {delta.days} días", "clase": "badge-info", "urgencia": "proximo"}
+        if not self.fecha_cierre:
+            return {"texto": "Sin fecha límite", "clase": "badge-success", "urgencia": "baja"}
+        delta = self.fecha_cierre - ahora
+        total_seg = delta.total_seconds()
+        if total_seg <= 3600:
+            return {"texto": "Cierra en menos de 1h", "clase": "badge-danger", "urgencia": "critica"}
+        elif total_seg < 86400:
+            horas = int(total_seg // 3600)
+            return {"texto": f"Cierra hoy (~{horas}h restantes)", "clase": "badge-warning", "urgencia": "alta"}
+        elif delta.days <= 3:
+            return {"texto": f"Quedan {delta.days} días", "clase": "badge-warning", "urgencia": "media"}
+        else:
+            return {"texto": f"Cierra en {delta.days} días", "clase": "badge-success", "urgencia": "baja"}
+
 
 
 class CuestionarioPregunta(models.Model):

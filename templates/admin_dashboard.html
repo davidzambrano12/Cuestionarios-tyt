@@ -1,66 +1,11 @@
-{% extends 'base.html' %}
+{% extends 'app_base.html' %}
 
 {% block title %}Dashboard de Administración - Simulador Saber TyT{% endblock %}
 
-{% block content %}
-<div class="app-container">
+{% block nav_title %}Dashboard de Administración{% endblock %}
 
-  <!-- Sidebar -->
-  <aside class="sidebar">
-    <div class="sidebar-header">
-      <div class="sidebar-title">Simulador Saber TyT</div>
-      <div class="sidebar-subtitle">Dashboard de Administración</div>
-    </div>
-
-    <nav class="sidebar-nav">
-      <a href="/dashboard/admin/" class="nav-item active">
-        <span>🏠</span> Inicio
-      </a>
-      <a href="/preguntas/" class="nav-item">
-        <span>📖</span> Preguntas
-      </a>
-      <a href="/usuarios/" class="nav-item">
-        <span>👥</span> Usuarios
-      </a>
-      <a href="/cuestionarios/" class="nav-item">
-        <span>📋</span> Cuestionarios
-      </a>
-      <a href="/ajustes/" class="nav-item">
-        <span>⚙️</span> Ajustes
-      </a>
-    </nav>
-
-    <div style="padding-top:20px; border-top:1px solid #e2e8f0; font-size:12px; color:#64748b;">
-      <div>Usuario: <strong>{{ user.username }}</strong></div>
-      <div style="color:#0284c7;">Rol: Administrador</div>
-    </div>
-  </aside>
-
-  <!-- Main Content -->
-  <main class="main-content">
-    
-    <!-- Topbar -->
-    <header class="top-navbar">
-      <div class="navbar-brand-title">
-        Simulador Saber TyT / <span style="font-weight:400; color:#64748b;">Dashboard de Administración</span>
-      </div>
-      <div class="navbar-user-info">
-        <a href="/perfil/" title="Mi Perfil" style="display:flex; align-items:center; gap:8px; color:#0f172a; text-decoration:none;">
-          <div class="user-avatar-circle">
-            {{ user.first_name|default:user.username|slice:":1"|upper }}
-          </div>
-          <span style="font-size:14px; font-weight:600;">{{ user.get_full_name|default:user.username }}</span>
-        </a>
-        <a href="/logout/" onclick="cerrarSesion(); return false;" title="Cerrar Sesión" class="btn btn-outline" style="padding:6px 12px; font-size:13px; color:#b91c1c; text-decoration:none; display:inline-flex; align-items:center; gap:6px;">
-          🚪 Salir
-        </a>
-      </div>
-    </header>
-
-    <!-- Page Body -->
-    <div class="page-body">
-
-      <!-- Header Banner -->
+{% block app_content %}
+<!-- Header Banner -->
       <div class="dashboard-banner">
         <div style="display:flex; justify-content:space-between; align-items:flex-start;">
           <div>
@@ -68,21 +13,21 @@
             <h1 class="banner-title">Panel de Administración</h1>
             <p class="banner-subtitle">Monitoreo de banco de preguntas y cuestionarios Saber TyT</p>
           </div>
-          <div style="font-size:13px; font-weight:700; color:#0369a1; background:rgba(255,255,255,0.7); padding:6px 14px; border-radius:9999px;">
-            📅 2026-II
+          <div style="font-size:13px; font-weight:700; color:#0369a1; background:rgba(255,255,255,0.7); padding:6px 14px; border-radius:9999px; display:inline-flex; align-items:center; gap:6px;">
+            <i data-lucide="calendar" style="width:15px; height:15px;"></i> 2026-II
           </div>
         </div>
       </div>
 
       <!-- Acciones Rápidas -->
-      <div style="margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
-        <span style="font-size:14px; font-weight:700; color:#0f172a;">Acciones Rápidas</span>
-        <span style="font-size:12px; color:#64748b;">Atajos de edición</span>
+      <div class="section-header">
+        <h2 class="section-title">Acciones Rápidas</h2>
+        <span class="section-subtitle">Atajos de edición</span>
       </div>
 
       <div class="quick-actions-bar">
         <a href="/preguntas/#nueva" class="action-card-btn">
-          <div class="action-icon-box" style="background:#186382;">➕</div>
+          <div class="action-icon-box" style="background:#186382;"><i data-lucide="plus" style="color:#fff;"></i></div>
           <div>
             <div style="font-weight:700; font-size:14px;">Nueva Pregunta</div>
             <div style="font-size:12px; color:#64748b;">Banco IUP</div>
@@ -90,7 +35,7 @@
         </a>
 
         <a href="/cuestionarios/crear/" class="action-card-btn">
-          <div class="action-icon-box" style="background:#0284c7;">📝</div>
+          <div class="action-icon-box" style="background:#0284c7;"><i data-lucide="file-text" style="color:#fff;"></i></div>
           <div>
             <div style="font-weight:700; font-size:14px;">Crear Examen</div>
             <div style="font-size:12px; color:#64748b;">Cuestionario</div>
@@ -98,7 +43,7 @@
         </a>
 
         <a href="/preguntas/importar/" class="action-card-btn">
-          <div class="action-icon-box" style="background:#16a34a;">📥</div>
+          <div class="action-icon-box" style="background:#16a34a;"><i data-lucide="upload" style="color:#fff;"></i></div>
           <div>
             <div style="font-weight:700; font-size:14px;">Importar</div>
             <div style="font-size:12px; color:#64748b;">Archivo Excel</div>
@@ -107,15 +52,15 @@
       </div>
 
       <!-- Métricas de la Plataforma -->
-      <div style="margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
-        <span style="font-size:14px; font-weight:700; color:#0f172a;">Métricas de la Plataforma</span>
-        <span style="font-size:12px; color:#64748b;">Tiempo real</span>
+      <div class="section-header">
+        <h2 class="section-title">Métricas de la Plataforma</h2>
+        <span class="section-subtitle">Tiempo real</span>
       </div>
 
       <div class="metrics-grid">
         <div class="metric-card">
           <div class="metric-header">
-            <div class="metric-icon" style="background:#e0f2fe; color:#0284c7;">❓</div>
+            <div class="metric-icon" style="background:#e0f2fe; color:#0284c7;"><i data-lucide="help-circle"></i></div>
             <span class="badge badge-success">+{{ preguntas_activas }} activas</span>
           </div>
           <div class="metric-number">{{ preguntas_activas|default:142 }}</div>
@@ -124,7 +69,7 @@
 
         <div class="metric-card">
           <div class="metric-header">
-            <div class="metric-icon" style="background:#f1f5f9; color:#475569;">🏛️</div>
+            <div class="metric-icon" style="background:#f1f5f9; color:#475569;"><i data-lucide="landmark"></i></div>
             <span class="badge badge-info">Módulos</span>
           </div>
           <div class="metric-number">{{ categorias_count|default:5 }}</div>
@@ -133,7 +78,7 @@
 
         <div class="metric-card">
           <div class="metric-header">
-            <div class="metric-icon" style="background:#f0fdf4; color:#16a34a;">📋</div>
+            <div class="metric-icon" style="background:#f0fdf4; color:#16a34a;"><i data-lucide="clipboard-list"></i></div>
             <span class="badge badge-success">Activos</span>
           </div>
           <div class="metric-number">{{ cuestionarios_count|default:3 }}</div>
@@ -142,7 +87,7 @@
 
         <div class="metric-card">
           <div class="metric-header">
-            <div class="metric-icon" style="background:#fef3c7; color:#d97706;">👥</div>
+            <div class="metric-icon" style="background:#fef3c7; color:#d97706;"><i data-lucide="users"></i></div>
             <span class="badge badge-info">Completados</span>
           </div>
           <div class="metric-number">{{ intentos_count|default:89 }}</div>
@@ -212,14 +157,14 @@
               </div>
 
               <div style="display:flex; gap:16px; font-size:12px; color:#64748b; margin-bottom:12px;">
-                <span>📅 {{ c.fecha_apertura|date:"d M" }} - {{ c.fecha_cierre|date:"d M Y" }}</span>
-                <span>⏱️ {{ c.tiempo_limite_minutos }} min</span>
+                <span style="display:inline-flex; align-items:center; gap:4px;"><i data-lucide="calendar" style="width:14px; height:14px;"></i> {{ c.fecha_apertura|date:"d M" }} - {{ c.fecha_cierre|date:"d M Y" }}</span>
+                <span style="display:inline-flex; align-items:center; gap:4px;"><i data-lucide="clock" style="width:14px; height:14px;"></i> {{ c.tiempo_limite_minutos }} min</span>
               </div>
 
               <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid #f1f5f9; padding-top:12px;">
-                <span style="font-size:12px; color:#475569;">👥 {{ c.intentos.count }} estudiantes presentaron</span>
+                <span style="font-size:12px; color:#475569; display:inline-flex; align-items:center; gap:4px;"><i data-lucide="users" style="width:14px; height:14px;"></i> {{ c.intentos.count }} estudiantes presentaron</span>
                 <a href="/cuestionarios/{{ c.id }}/editar/" class="btn btn-outline" style="padding:6px 14px; font-size:12px;">
-                  Editar reactivos
+                  Editar preguntas
                 </a>
               </div>
             </div>
@@ -232,9 +177,4 @@
         </div>
 
       </div>
-
-    </div>
-  </main>
-
-</div>
 {% endblock %}

@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+
+{% block title %}Simulador Saber TyT - Uniputumayo{% endblock %}
+
+{% block content %}
+<div class="app-container">
+
+  <!-- Sidebar Persistente Dinámico según Rol -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-title">Simulador Saber TyT</div>
+      <div class="sidebar-subtitle">
+        {% if user.is_superuser or user.perfil.es_admin %}
+          Dashboard de Administración
+        {% elif user.perfil.es_docente %}
+          Dashboard de Docente
+        {% else %}
+          Dashboard de Estudiante
+        {% endif %}
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      {% if user.is_superuser or user.perfil.es_admin %}
+        <a href="/dashboard/admin/" class="nav-item {% if '/dashboard/' in request.path or active_tab == 'inicio' %}active{% endif %}">
+          <i data-lucide="home"></i> Inicio
+        </a>
+        <a href="/preguntas/" class="nav-item {% if '/preguntas/' in request.path or active_tab == 'preguntas' %}active{% endif %}">
+          <i data-lucide="help-circle"></i> Preguntas
+        </a>
+        <a href="/usuarios/" class="nav-item {% if '/usuarios/' in request.path or '/roles/' in request.path or active_tab == 'usuarios' %}active{% endif %}">
+          <i data-lucide="users"></i> Usuarios
+        </a>
+        <a href="/cuestionarios/" class="nav-item {% if '/cuestionarios/' in request.path or active_tab == 'cuestionarios' %}active{% endif %}">
+          <i data-lucide="clipboard-list"></i> Cuestionarios
+        </a>
+        <a href="/ajustes/" class="nav-item {% if '/ajustes/' in request.path or active_tab == 'ajustes' %}active{% endif %}">
+          <i data-lucide="settings"></i> Ajustes
+        </a>
+      {% elif user.perfil.es_docente %}
+        <a href="/dashboard/docente/" class="nav-item {% if '/dashboard/' in request.path or active_tab == 'inicio' %}active{% endif %}">
+          <i data-lucide="home"></i> Inicio
+        </a>
+        <a href="/preguntas/" class="nav-item {% if '/preguntas/' in request.path or active_tab == 'preguntas' %}active{% endif %}">
+          <i data-lucide="help-circle"></i> Preguntas
+        </a>
+        <a href="/cuestionarios/" class="nav-item {% if '/cuestionarios/' in request.path or active_tab == 'cuestionarios' %}active{% endif %}">
+          <i data-lucide="clipboard-list"></i> Cuestionarios
+        </a>
+        <a href="/ajustes/" class="nav-item {% if '/ajustes/' in request.path or active_tab == 'ajustes' %}active{% endif %}">
+          <i data-lucide="settings"></i> Ajustes
+        </a>
+      {% else %}
+        <a href="/dashboard/estudiante/" onclick="if (window.location.pathname.startsWith('/dashboard/estudiante')) { event.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); if (history.pushState) history.pushState(null, null, '/dashboard/estudiante/'); }" class="nav-item {% if '/dashboard/' in request.path or active_tab == 'inicio' %}active{% endif %}">
+          <i data-lucide="home"></i> Inicio
+        </a>
+        <a href="/dashboard/estudiante/#cuestionarios" onclick="if (window.location.pathname.startsWith('/dashboard/estudiante')) { event.preventDefault(); irACuestionariosEstudiante(); }" class="nav-item {% if '/cuestionarios/' in request.path or active_tab == 'cuestionarios' %}active{% endif %}">
+          <i data-lucide="clipboard-list"></i> Cuestionarios
+        </a>
+        <a href="/perfil/" class="nav-item {% if '/perfil/' in request.path or active_tab == 'perfil' %}active{% endif %}">
+          <i data-lucide="user"></i> Mi Perfil
+        </a>
+      {% endif %}
+    </nav>
+
+    <!-- Footer del Sidebar con Identidad del Usuario -->
+    <div style="padding-top:16px; border-top:1px solid #e2e8f0; margin-top:auto;" class="text-xs text-muted">
+      <div style="display:flex; align-items:center; justify-content:space-between;">
+        <div style="overflow:hidden; padding-right:8px;">
+          <div style="text-overflow:ellipsis; overflow:hidden; white-space:nowrap;" class="text-sm font-bold text-main">
+            {{ user.get_full_name|default:user.username }}
+          </div>
+          <div style="color:var(--primary);" class="text-2xs font-semibold">
+            {% if user.is_superuser or user.perfil.es_admin %}
+              Administrador
+            {% elif user.perfil.es_docente %}
+              {{ user.perfil.rol.nombre|default:"Docente Evaluador" }}
+            {% else %}
+              Cód: {{ user.perfil.codigo_institucional|default:user.username }}
+            {% endif %}
+          </div>
+        </div>
+        <a href="/perfil/" title="Ver mi perfil" style="display:inline-flex; align-items:center; justify-content:center; width:30px; height:30px; border-radius:8px; background:#f1f5f9; color:#475569; text-decoration:none; flex-shrink:0;">
+          <i data-lucide="user" style="width:15px; height:15px;"></i>
+        </a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Contenido Principal -->
+  <main class="main-content">
+    
+    <!-- Topbar Persistente Compartido -->
+    <header class="top-navbar">
+      <div class="navbar-brand-title">
+        Simulador Saber TyT / <span class="text-muted font-normal">{% block nav_title %}Plataforma Institucional{% endblock %}</span>
+      </div>
+      <div class="navbar-user-info">
+        <a href="/perfil/" title="Mi Perfil" style="display:flex; align-items:center; gap:8px; color:#0f172a; text-decoration:none;">
+          <div class="user-avatar-circle" style="background:#186382; color:white;">
+            {{ user.first_name|default:user.username|slice:":1"|upper }}
+          </div>
+          <span class="text-base font-semibold text-main">{{ user.get_full_name|default:user.username }}</span>
+        </a>
+        <a href="/logout/" onclick="cerrarSesion(); return false;" title="Cerrar Sesión" class="btn btn-outline btn-sm" style="color:var(--danger-text); text-decoration:none;">
+          <i data-lucide="log-out"></i> Salir
+        </a>
+      </div>
+    </header>
+
+    <!-- Cuerpo de Página -->
+    <div class="page-body">
+      {% block app_content %}{% endblock %}
+    </div>
+
+  </main>
+
+</div>
+
+<script>
+  function irACuestionariosEstudiante() {
+    const el = document.getElementById('cuestionarios');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (history.pushState) {
+        history.pushState(null, null, '#cuestionarios');
+      } else {
+        location.hash = '#cuestionarios';
+      }
+    } else {
+      window.location.href = '/dashboard/estudiante/#cuestionarios';
+    }
+  }
+</script>
+{% endblock %}
+
+
+{% block extra_scripts %}{% endblock %}

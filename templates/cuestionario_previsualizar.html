@@ -1,0 +1,364 @@
+{% extends 'base.html' %}
+
+{% block title %}Previsualización: {{ cuestionario.nombre }} - Simulador Saber TyT{% endblock %}
+
+{% block content %}
+<div style="background-color:#f8fafc; min-height:100vh; display:flex; flex-direction:column;">
+
+  <!-- Header Superior de Previsualización Docente -->
+  <header style="background:white; border-bottom:1px solid #e2e8f0; padding:12px 32px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
+    <div style="display:flex; align-items:center; gap:16px;">
+      <a href="/cuestionarios/" style="display:inline-flex; align-items:center; justify-content:center; width:36px; height:36px; border-radius:50%; background:#f1f5f9; color:#0f172a; text-decoration:none;" title="Volver al listado de cuestionarios">
+        <i data-lucide="arrow-left" style="width:18px; height:18px;"></i>
+      </a>
+      <div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span class="badge" style="background:#fef3c7; color:#92400e; border:1px solid #fde68a; font-size:11px; font-weight:700;">
+            <i data-lucide="eye" style="width:12px; height:12px;"></i> MODO PREVISUALIZACIÓN DOCENTE
+          </span>
+          <span style="font-size:12px; color:#64748b;">(Entorno Simulado)</span>
+        </div>
+        <div style="font-size:16px; font-weight:800; color:#0f172a; margin-top:2px;">{{ cuestionario.nombre }}</div>
+      </div>
+    </div>
+
+    <!-- Controles Docentes Superiores -->
+    <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+      <button type="button" id="btn-toggle-clave" onclick="toggleClaveDocente()" class="btn btn-outline" style="border-color:#186382; color:#186382; font-size:13px; font-weight:600; padding:8px 14px; display:inline-flex; align-items:center; gap:6px;">
+        <i data-lucide="key" style="width:15px; height:15px;"></i>
+        <span id="label-toggle-clave">Revelar Claves y Retroalimentación</span>
+      </button>
+
+      <a href="/cuestionarios/{{ cuestionario.id }}/editar/" class="btn btn-outline" style="font-size:13px; padding:8px 14px; display:inline-flex; align-items:center; gap:6px;">
+        <i data-lucide="settings" style="width:15px; height:15px;"></i> Configuración
+      </a>
+
+      <a href="/cuestionarios/" class="btn btn-primary" style="font-size:13px; padding:8px 16px; display:inline-flex; align-items:center; gap:6px;">
+        <i data-lucide="check" style="width:15px; height:15px;"></i> Salir de Vista Previa
+      </a>
+    </div>
+  </header>
+
+  <!-- Banner Informativo Institucional -->
+  <div style="max-width:1400px; width:100%; margin:16px auto 0; padding:0 32px;">
+    <div style="background:#fef9e7; border:1px solid #fde68a; border-radius:12px; padding:12px 18px; display:flex; justify-content:space-between; align-items:center; gap:14px; flex-wrap:wrap;">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <i data-lucide="info" style="width:18px; height:18px; color:#b45309; flex-shrink:0;"></i>
+        <span style="font-size:13px; color:#78350f; font-weight:500;">
+          <strong>Simulación de experiencia estudiantil:</strong> En este entorno puedes probar la navegación, verificar los enunciados y revelar las claves correctas sin generar registros en la tabla de intentos ni alterar las notas de los estudiantes.
+        </span>
+      </div>
+      <div style="font-size:12px; font-weight:700; color:#b45309; background:white; padding:4px 10px; border-radius:6px; border:1px solid #fde68a;">
+        Límite configurado: {{ cuestionario.tiempo_limite_minutos }} min
+      </div>
+    </div>
+  </div>
+
+  <!-- Barra de Progreso Simulada -->
+  <div style="padding:16px 32px 10px; max-width:1400px; width:100%; margin:0 auto;">
+    <div style="display:flex; justify-content:space-between; align-items:center; font-size:13px; font-weight:700; margin-bottom:8px;">
+      <span style="color:#186382;">Pregunta <span id="idx-pregunta-label">1</span> de {{ total_preguntas }}</span>
+      <span id="porcentaje-progreso" style="color:#16a34a;">0% explorado</span>
+    </div>
+    <div class="progress-bar-container">
+      <div id="barra-progreso" class="progress-bar-fill" style="width: 5%;"></div>
+    </div>
+  </div>
+
+  <!-- Cuerpo Principal (Grid Split 3 Columnas) -->
+  <div style="flex:1; max-width:1400px; width:100%; margin:0 auto; padding:12px 32px 40px;">
+    <div style="display:grid; grid-template-columns: 280px 1fr 280px; gap:24px; align-items:start;">
+      
+      <!-- ================= COLUMNA 1: CONTEXTO OPERATIVO ================= -->
+      <div>
+        <!-- Badges de la pregunta actual -->
+        <div style="display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap;">
+          <span id="badge-competencia" class="badge badge-info" style="font-size:12px; padding:6px 12px;">Competencia</span>
+          <span id="badge-puntaje" class="badge" style="background:#e2e8f0; color:#334155; font-size:12px; padding:6px 12px;">Valor: 1.00 pt</span>
+        </div>
+
+        <!-- Card Contexto Operativo -->
+        <div class="card" style="padding:20px; border-radius:16px; margin-bottom:16px;">
+          <div style="display:flex; align-items:center; gap:8px; font-size:12px; font-weight:800; color:#186382; margin-bottom:12px; text-transform:uppercase;">
+            <i data-lucide="file-text" style="width:16px; height:16px;"></i> CONTEXTO OPERATIVO
+          </div>
+          <div id="texto-contexto" class="text-reading text-sm text-main" style="line-height:var(--leading-relaxed); max-height:300px; overflow-y:auto;">
+            Texto descriptivo de apoyo para la formulación del problema y resolución de la pregunta.
+          </div>
+        </div>
+
+        <!-- Acción Docente Rápida: Editar en Banco -->
+        <div class="card" style="padding:16px; border-radius:16px;">
+          <div style="font-size:12px; font-weight:700; color:#0f172a; margin-bottom:6px; display:flex; align-items:center; gap:6px;">
+            <i data-lucide="tool" style="width:14px; height:14px; color:#186382;"></i> Gestión de la Pregunta
+          </div>
+          <p style="font-size:12px; color:#64748b; margin-bottom:12px;">
+            ¿Detectaste un error tipográfico o deseas ajustar el enunciado?
+          </p>
+          <a id="link-editar-pregunta" href="#" target="_blank" class="btn btn-outline btn-full" style="font-size:12px; padding:8px 10px; display:inline-flex; align-items:center; justify-content:center; gap:6px;">
+            <i data-lucide="edit-3" style="width:13px; height:13px;"></i> Editar en el Banco &rarr;
+          </a>
+        </div>
+      </div>
+
+      <!-- ================= COLUMNA 2: ENUNCIADO Y OPCIONES ================= -->
+      <div>
+        <div class="card" style="padding:32px; border-radius:20px; min-height:480px; display:flex; flex-direction:column; justify-content:space-between;">
+          <div>
+            <h2 id="enunciado-pregunta" class="section-title text-xl font-bold text-main" style="margin-bottom:28px; line-height:var(--leading-snug);">
+              Cargando pregunta...
+            </h2>
+
+            <!-- Contenedor dinámico de opciones A, B, C, D -->
+            <div id="contenedor-opciones" style="display:flex; flex-direction:column; gap:12px;">
+              <!-- Rellenado por JS -->
+            </div>
+
+            <!-- Panel Desplegable de Retroalimentación Pedagógica (Modo Docente) -->
+            <div id="panel-retroalimentacion" style="display:none; margin-top:24px; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:14px; padding:18px;">
+              <div style="display:flex; align-items:center; gap:8px; font-size:13px; font-weight:800; color:#166534; margin-bottom:8px;">
+                <i data-lucide="check-circle" style="width:16px; height:16px;"></i> RETROALIMENTACIÓN PEDAGÓGICA (CLAVE OFICIAL)
+              </div>
+              <div id="texto-retroalimentacion" style="font-size:13px; color:#14532d; line-height:1.5;">
+                Sin retroalimentación registrada para esta pregunta.
+              </div>
+            </div>
+          </div>
+
+          <!-- Navegación Anterior / Siguiente -->
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:32px; border-top:1px solid #f1f5f9; padding-top:20px; gap:12px; flex-wrap:wrap;">
+            <button type="button" id="btn-anterior" onclick="cambiarPregunta(preguntaActualIdx - 1)" class="btn btn-outline" style="padding:10px 20px; display:inline-flex; align-items:center; gap:6px;">
+              <i data-lucide="chevron-left" style="width:16px; height:16px;"></i> Anterior
+            </button>
+
+            <div style="display:flex; align-items:center; gap:10px;">
+              <button type="button" id="btn-siguiente" onclick="irSiguiente()" class="btn btn-primary" style="padding:10px 24px; font-weight:700; display:inline-flex; align-items:center; gap:6px;">
+                Siguiente <i data-lucide="chevron-right" style="width:16px; height:16px;"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= COLUMNA 3: MAPEO Y DATOS ================= -->
+      <div>
+        <div class="card" style="padding:24px; border-radius:20px;">
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+            <i data-lucide="layout-grid" style="width:18px; height:18px; color:#186382;"></i>
+            <h3 style="font-size:15px; font-weight:800; color:#0f172a; margin:0;">Mapeo de Preguntas</h3>
+          </div>
+          <div id="resumen-mapeo-label" style="font-size:12px; color:#64748b; margin-bottom:14px;">
+            Pregunta 1 de {{ total_preguntas }}
+          </div>
+
+          <!-- Grilla interactiva de botones numéricos -->
+          <div class="question-nav-grid" id="grilla-navegacion">
+            <!-- Rellenado por JS: 1 a N -->
+          </div>
+
+          <!-- Leyenda de colores -->
+          <div style="margin-top:20px; border-top:1px solid #f1f5f9; padding-top:14px; font-size:11px; color:#64748b; display:flex; flex-direction:column; gap:8px;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span style="width:12px; height:12px; background:#186382; border-radius:3px;"></span> Pregunta actual
+            </div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span style="width:12px; height:12px; background:#bae6fd; border-radius:3px;"></span> Respuesta probada
+            </div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span style="width:12px; height:12px; background:#f1f5f9; border-radius:3px; border:1px solid #cbd5e1;"></span> No probada
+            </div>
+          </div>
+
+          <!-- Ficha de Parámetros del Examen -->
+          <div style="margin-top:20px; border-top:1px solid #f1f5f9; padding-top:14px;">
+            <div style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; margin-bottom:8px;">Parámetros del Cuestionario</div>
+            <div style="display:flex; flex-direction:column; gap:6px; font-size:12px; color:#475569;">
+              <div style="display:flex; justify-content:space-between;">
+                <span>Total Preguntas:</span>
+                <strong>{{ total_preguntas }}</strong>
+              </div>
+              <div style="display:flex; justify-content:space-between;">
+                <span>Calificación Máxima:</span>
+                <strong>{{ cuestionario.calificacion_maxima }} pts</strong>
+              </div>
+              <div style="display:flex; justify-content:space-between;">
+                <span>Nota Aprobación:</span>
+                <strong>{{ cuestionario.calificacion_aprobacion }} pts</strong>
+              </div>
+              <div style="display:flex; justify-content:space-between;">
+                <span>Aleatoriedad:</span>
+                <strong>{% if cuestionario.barajar_preguntas %}Aleatorio{% else %}Fijo{% endif %}</strong>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  const preguntasData = {{ preguntas_json|safe }};
+  let preguntaActualIdx = 0;
+  let mostrarClavesDocente = false;
+  let respuestasSimuladas = {};
+
+  document.addEventListener('DOMContentLoaded', () => {
+    construirGrillaNavegacion();
+    if (preguntasData.length > 0) {
+      mostrarPregunta(0);
+    } else {
+      document.getElementById('enunciado-pregunta').innerText = 'Este cuestionario aún no tiene preguntas vinculadas.';
+    }
+  });
+
+  function toggleClaveDocente() {
+    mostrarClavesDocente = !mostrarClavesDocente;
+    const btn = document.getElementById('btn-toggle-clave');
+    const label = document.getElementById('label-toggle-clave');
+    if (mostrarClavesDocente) {
+      btn.style.background = '#186382';
+      btn.style.color = '#ffffff';
+      label.innerText = 'Ocultar Claves Pedagógicas';
+    } else {
+      btn.style.background = 'transparent';
+      btn.style.color = '#186382';
+      label.innerText = 'Revelar Claves y Retroalimentación';
+    }
+    mostrarPregunta(preguntaActualIdx);
+  }
+
+  function construirGrillaNavegacion() {
+    const grilla = document.getElementById('grilla-navegacion');
+    grilla.innerHTML = '';
+    preguntasData.forEach((p, idx) => {
+      const btn = document.createElement('div');
+      btn.id = `nav-item-${idx}`;
+      btn.className = `q-nav-item ${idx === 0 ? 'current' : ''}`;
+      btn.innerText = idx + 1;
+      btn.onclick = () => cambiarPregunta(idx);
+      grilla.appendChild(btn);
+    });
+  }
+
+  function mostrarPregunta(idx) {
+    if (idx < 0 || idx >= preguntasData.length) return;
+    preguntaActualIdx = idx;
+
+    const p = preguntasData[idx];
+
+    // Actualizar labels
+    document.getElementById('idx-pregunta-label').innerText = idx + 1;
+    document.getElementById('resumen-mapeo-label').innerText = `Pregunta ${idx + 1} de ${preguntasData.length}`;
+    document.getElementById('badge-competencia').innerText = p.categoria;
+    document.getElementById('badge-puntaje').innerText = `Valor: ${p.puntaje} pt`;
+    document.getElementById('texto-contexto').innerText = p.texto_base || 'Sin contexto adicional para esta pregunta.';
+    document.getElementById('enunciado-pregunta').innerText = p.enunciado;
+
+    // Actualizar link de edición directa en banco
+    const linkEditar = document.getElementById('link-editar-pregunta');
+    if (linkEditar) {
+      linkEditar.href = `/preguntas/${p.id}/editar/`;
+    }
+
+    // Actualizar botones Anterior / Siguiente
+    document.getElementById('btn-anterior').style.visibility = idx === 0 ? 'hidden' : 'visible';
+    const btnSig = document.getElementById('btn-siguiente');
+    if (idx === preguntasData.length - 1) {
+      btnSig.innerHTML = '<i data-lucide="check"></i> Fin de Previsualización';
+    } else {
+      btnSig.innerHTML = 'Siguiente <i data-lucide="chevron-right" style="width:16px; height:16px;"></i>';
+    }
+
+    // Actualizar barra de progreso simulada
+    const progreso = Math.round(((idx + 1) / preguntasData.length) * 100);
+    document.getElementById('porcentaje-progreso').innerText = `${progreso}% explorado`;
+    document.getElementById('barra-progreso').style.width = `${progreso}%`;
+
+    // Renderizar opciones
+    const contenedor = document.getElementById('contenedor-opciones');
+    contenedor.innerHTML = '';
+
+    const letras = ['A', 'B', 'C', 'D'];
+    p.opciones.forEach((op, oIdx) => {
+      const letra = letras[oIdx] || `${oIdx + 1}`;
+      const estaSeleccionada = respuestasSimuladas[p.id] === op.id;
+      const esCorrecta = op.es_correcta;
+
+      const card = document.createElement('div');
+      card.className = `option-card ${estaSeleccionada ? 'selected' : ''}`;
+      
+      // Estilo de revelación de clave
+      if (mostrarClavesDocente && esCorrecta) {
+        card.style.borderColor = '#16a34a';
+        card.style.background = '#f0fdf4';
+      }
+
+      card.onclick = () => {
+        respuestasSimuladas[p.id] = op.id;
+        mostrarPregunta(preguntaActualIdx);
+      };
+
+      card.innerHTML = `
+        <div class="option-letter-badge" style="${mostrarClavesDocente && esCorrecta ? 'background:#16a34a; color:white;' : ''}">${letra}</div>
+        <div style="flex-grow:1; font-size:14px; color:#0f172a; font-weight:500;">
+          ${op.texto}
+          ${mostrarClavesDocente && esCorrecta ? '<span class="badge badge-success" style="margin-left:8px; font-size:11px; padding:2px 8px;"><i data-lucide="check" style="width:11px; height:11px;"></i> Clave Oficial Correcta</span>' : ''}
+        </div>
+        <div style="width:20px; height:20px; border-radius:50%; border:2px solid ${estaSeleccionada ? '#186382' : '#cbd5e1'}; display:flex; align-items:center; justify-content:center; background:${estaSeleccionada ? '#186382' : 'transparent'}; color:white; font-size:12px;">
+          ${estaSeleccionada ? '<i data-lucide="check" style="width:12px; height:12px;"></i>' : ''}
+        </div>
+      `;
+      contenedor.appendChild(card);
+    });
+
+    // Panel de retroalimentación
+    const panelRetro = document.getElementById('panel-retroalimentacion');
+    const textoRetro = document.getElementById('texto-retroalimentacion');
+    if (mostrarClavesDocente) {
+      panelRetro.style.display = 'block';
+      textoRetro.innerText = p.retroalimentacion || 'El autor no especificó una retroalimentación adicional para esta pregunta.';
+    } else {
+      panelRetro.style.display = 'none';
+    }
+
+    actualizarEstadosGrilla();
+    if (window.lucide) {
+      lucide.createIcons();
+    }
+  }
+
+  function irSiguiente() {
+    if (preguntaActualIdx >= preguntasData.length - 1) {
+      window.location.href = '/cuestionarios/';
+    } else {
+      cambiarPregunta(preguntaActualIdx + 1);
+    }
+  }
+
+  function cambiarPregunta(nuevoIdx) {
+    if (nuevoIdx >= 0 && nuevoIdx < preguntasData.length) {
+      mostrarPregunta(nuevoIdx);
+    }
+  }
+
+  function actualizarEstadosGrilla() {
+    preguntasData.forEach((p, idx) => {
+      const el = document.getElementById(`nav-item-${idx}`);
+      if (!el) return;
+      el.className = 'q-nav-item';
+      if (respuestasSimuladas[p.id]) {
+        el.classList.add('answered');
+      }
+      if (idx === preguntaActualIdx) {
+        el.classList.add('current');
+      }
+    });
+  }
+</script>
+{% endblock %}

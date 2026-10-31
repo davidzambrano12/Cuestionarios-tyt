@@ -1,70 +1,15 @@
-{% extends 'base.html' %}
+{% extends 'app_base.html' %}
 
 {% block title %}Dashboard de Docente - Simulador Saber TyT{% endblock %}
 
-{% block content %}
-<div class="app-container">
+{% block nav_title %}Dashboard de Docente{% endblock %}
 
-  <!-- Sidebar -->
-  <aside class="sidebar">
-    <div class="sidebar-header">
-      <div class="sidebar-title">Simulador Saber TyT</div>
-      <div class="sidebar-subtitle">Dashboard de Docente</div>
-    </div>
-
-    <nav class="sidebar-nav">
-      <a href="/dashboard/docente/" class="nav-item active">
-        <span>🏠</span> Inicio
-      </a>
-      <a href="/preguntas/" class="nav-item">
-        <span>📖</span> Preguntas
-      </a>
-      <a href="/cuestionarios/" class="nav-item">
-        <span>📋</span> Cuestionarios
-      </a>
-      <a href="/resultados/" class="nav-item">
-        <span>📊</span> Resultados
-      </a>
-      <a href="/ajustes/" class="nav-item">
-        <span>⚙️</span> Ajustes
-      </a>
-    </nav>
-
-    <div style="padding-top:20px; border-top:1px solid #e2e8f0; font-size:12px; color:#64748b;">
-      <div>Docente: <strong>{{ user.get_full_name|default:user.username }}</strong></div>
-      <div style="color:#0284c7;">Rol: Docente Evaluador</div>
-    </div>
-  </aside>
-
-  <!-- Main Content -->
-  <main class="main-content">
-    
-    <!-- Topbar -->
-    <header class="top-navbar">
-      <div class="navbar-brand-title">
-        Simulador Saber TyT / <span style="font-weight:400; color:#64748b;">Dashboard de Docente</span>
-      </div>
-      <div class="navbar-user-info">
-        <a href="/perfil/" title="Mi Perfil" style="display:flex; align-items:center; gap:8px; color:#0f172a; text-decoration:none;">
-          <div class="user-avatar-circle">
-            {{ user.first_name|default:user.username|slice:":1"|upper }}
-          </div>
-          <span style="font-size:14px; font-weight:600;">{{ user.get_full_name|default:user.username }}</span>
-        </a>
-        <a href="/logout/" onclick="cerrarSesion(); return false;" title="Cerrar Sesión" class="btn btn-outline" style="padding:6px 12px; font-size:13px; color:#b91c1c; text-decoration:none; display:inline-flex; align-items:center; gap:6px;">
-          🚪 Salir
-        </a>
-      </div>
-    </header>
-
-    <!-- Page Body -->
-    <div class="page-body">
-
-      <!-- Header Banner -->
+{% block app_content %}
+<!-- Header Banner -->
       <div class="dashboard-banner" style="background:linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%);">
         <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px;">
           <div>
-            <div style="font-size:12px; font-weight:700; color:#64748b; margin-bottom:4px;">📅 2026-II</div>
+            <div style="font-size:12px; font-weight:700; color:#64748b; margin-bottom:4px; display:inline-flex; align-items:center; gap:4px;"><i data-lucide="calendar" style="width:14px; height:14px;"></i> 2026-II</div>
             <h1 class="banner-title" style="font-size:26px;">Hola, {{ user.first_name|default:user.username }}</h1>
             <p class="banner-subtitle">Prepara y gestiona tus evaluaciones Saber TyT.</p>
           </div>
@@ -88,8 +33,8 @@
       </div>
 
       <!-- Tu Espacio de Trabajo -->
-      <div style="margin-bottom:16px;">
-        <h2 style="font-size:16px; font-weight:800; color:#0f172a;">Tu espacio de trabajo</h2>
+      <div class="section-header">
+        <h2 class="section-title">Tu espacio de trabajo</h2>
       </div>
 
       <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(340px, 1fr)); gap:20px; margin-bottom:32px;">
@@ -97,18 +42,18 @@
         <div class="card" style="margin-bottom:0; padding:24px;">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
             <div style="display:flex; align-items:center; gap:10px;">
-              <span style="font-size:22px;">📋</span>
-              <h3 style="font-size:16px; font-weight:800; color:#0f172a; margin:0;">Cuestionarios</h3>
+              <div style="width:36px; height:36px; border-radius:8px; background:#eff6ff; display:flex; align-items:center; justify-content:center; color:#0284c7;"><i data-lucide="clipboard-list"></i></div>
+              <h3 class="card-title" style="margin:0;">Cuestionarios</h3>
             </div>
             <span class="badge badge-success">3 publicados</span>
           </div>
-          <p style="font-size:13px; color:#64748b; margin-bottom:20px;">8 cuestionarios · 2 borradores por completar</p>
+          <p class="card-subtitle" style="margin-bottom:20px;">8 cuestionarios · 2 borradores por completar</p>
           <div style="display:flex; gap:10px;">
             <a href="/cuestionarios/crear/" class="btn btn-primary" style="flex:1; font-size:13px; padding:10px;">
-              + Crear cuestionario
+              <i data-lucide="plus"></i> Crear cuestionario
             </a>
             <a href="/cuestionarios/" class="btn btn-secondary" style="flex:1; font-size:13px; padding:10px;">
-              ⚙️ Administrar
+              <i data-lucide="settings"></i> Administrar
             </a>
           </div>
         </div>
@@ -117,27 +62,27 @@
         <div class="card" style="margin-bottom:0; padding:24px;">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
             <div style="display:flex; align-items:center; gap:10px;">
-              <span style="font-size:22px;">❓</span>
-              <h3 style="font-size:16px; font-weight:800; color:#0f172a; margin:0;">Banco de preguntas</h3>
+              <div style="width:36px; height:36px; border-radius:8px; background:#eff6ff; display:flex; align-items:center; justify-content:center; color:#0284c7;"><i data-lucide="help-circle"></i></div>
+              <h3 class="card-title" style="margin:0;">Banco de preguntas</h3>
             </div>
             <span class="badge badge-info">5 módulos</span>
           </div>
-          <p style="font-size:13px; color:#64748b; margin-bottom:20px;">64 preguntas · 6 pendientes de revisión</p>
+          <p class="card-subtitle" style="margin-bottom:20px;">64 preguntas · 6 pendientes de revisión</p>
           <div style="display:flex; gap:10px;">
             <a href="/preguntas/#nueva" class="btn btn-primary" style="flex:1; font-size:13px; padding:10px;">
-              + Nueva pregunta
+              <i data-lucide="plus"></i> Nueva pregunta
             </a>
             <a href="/preguntas/" class="btn btn-secondary" style="flex:1; font-size:13px; padding:10px;">
-              ⚙️ Administrar
+              <i data-lucide="settings"></i> Administrar
             </a>
           </div>
         </div>
       </div>
 
       <!-- Cuestionarios Recientes -->
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-        <h2 style="font-size:16px; font-weight:800; color:#0f172a;">Cuestionarios recientes</h2>
-        <a href="/cuestionarios/" style="font-size:13px; font-weight:600; color:#186382;">Ver todos &rarr;</a>
+      <div class="section-header">
+        <h2 class="section-title">Cuestionarios recientes</h2>
+        <a href="/cuestionarios/" class="section-subtitle font-semibold text-primary">Ver todos &rarr;</a>
       </div>
 
       <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(340px, 1fr)); gap:20px;">
@@ -150,10 +95,10 @@
           </div>
           <h3 style="font-size:16px; font-weight:800; color:#0f172a; margin-bottom:6px;">{{ c.nombre }}</h3>
           <div style="font-size:12px; color:#64748b; margin-bottom:14px;">
-            📖 {{ c.cuestionario_preguntas.count }} preguntas · ⏱️ {{ c.tiempo_limite_minutos }} min
+            <span style="display:inline-flex; align-items:center; gap:4px;"><i data-lucide="help-circle" style="width:14px; height:14px;"></i> {{ c.cuestionario_preguntas.count }} preguntas</span> · <span style="display:inline-flex; align-items:center; gap:4px;"><i data-lucide="clock" style="width:14px; height:14px;"></i> {{ c.tiempo_limite_minutos }} min</span>
           </div>
           <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid #f1f5f9; padding-top:12px;">
-            <span style="font-size:12px; color:#64748b;">{{ c.intentos.count }} participantes</span>
+            <span style="font-size:12px; color:#64748b; display:inline-flex; align-items:center; gap:4px;"><i data-lucide="users" style="width:14px; height:14px;"></i> {{ c.intentos.count }} participantes</span>
             <a href="/cuestionarios/{{ c.id }}/editar/" style="font-size:13px; font-weight:700; color:#186382;">
               Administrar &rarr;
             </a>
@@ -161,9 +106,4 @@
         </div>
         {% endfor %}
       </div>
-
-    </div>
-  </main>
-
-</div>
 {% endblock %}

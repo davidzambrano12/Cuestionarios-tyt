@@ -1,26 +1,18 @@
-{% extends 'base.html' %}
+{% extends 'app_base.html' %}
 
 {% block title %}Configuración General del Sistema - Simulador Saber TyT{% endblock %}
 
-{% block content %}
-<div style="background:#f8fafc; min-height:100vh; padding:24px 20px;">
-  <div style="max-width:540px; margin:0 auto;">
+{% block nav_title %}Ajustes del Sistema{% endblock %}
 
-    <!-- Topbar -->
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-      <a href="javascript:history.back()" style="display:inline-flex; align-items:center; justify-content:center; width:38px; height:38px; border-radius:50%; background:white; border:1px solid #e2e8f0; color:#0f172a; text-decoration:none;">
-        &larr;
-      </a>
-      <h2 style="font-size:18px; font-weight:800; color:#0f172a;">Configuración</h2>
-      <div style="width:38px;"></div>
-    </div>
+{% block app_content %}
+<div style="max-width:680px; margin:0 auto;">
 
     <!-- Card Configuración General -->
     <div class="card" style="padding:28px 24px; border-radius:20px;">
       
       <div style="margin-bottom:20px;">
         <span class="badge badge-success" style="font-size:11px; margin-bottom:6px;">● Versión activa en producción · Todos los servicios en línea</span>
-        <h1 style="font-size:20px; font-weight:800; color:#0f172a; margin-bottom:4px;">Configuración General del Sistema</h1>
+        <h1 class="page-title text-2xl font-extrabold text-main" style="margin-bottom:4px;">Configuración General del Sistema</h1>
         <p style="font-size:12px; color:#64748b;">Ajuste de parámetros institucionales, identidad visual, zona horaria y canales oficiales de soporte.</p>
       </div>
 
@@ -30,8 +22,8 @@
         <!-- Identidad Institucional -->
         <div style="border-top:1px solid #f1f5f9; padding-top:18px; margin-bottom:20px;">
           <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
-            <span>🏛️</span>
-            <h3 style="font-size:14px; font-weight:800; color:#0f172a; margin:0;">Identidad Institucional</h3>
+            <i data-lucide="landmark" style="width:16px; height:16px; color:#186382;"></i>
+            <h3 class="card-title text-base font-bold text-main" style="margin:0;">Identidad Institucional</h3>
           </div>
 
           <div class="form-group">
@@ -51,7 +43,7 @@
         <!-- Configuración Regional y Servidor -->
         <div style="border-top:1px solid #f1f5f9; padding-top:18px; margin-bottom:20px;">
           <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
-            <span>🌐</span>
+            <i data-lucide="globe" style="width:16px; height:16px; color:#186382;"></i>
             <h3 style="font-size:14px; font-weight:800; color:#0f172a; margin:0;">Configuración Regional y Servidor</h3>
           </div>
 
@@ -72,7 +64,7 @@
         <!-- Mesa de Ayuda y Soporte -->
         <div style="border-top:1px solid #f1f5f9; padding-top:18px; margin-bottom:24px;">
           <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
-            <span>🎧</span>
+            <i data-lucide="headphones" style="width:16px; height:16px; color:#186382;"></i>
             <h3 style="font-size:14px; font-weight:800; color:#0f172a; margin:0;">Mesa de Ayuda y Soporte</h3>
           </div>
 
@@ -90,16 +82,14 @@
           </div>
         </div>
 
-        <button type="submit" class="btn btn-primary btn-full" style="padding:12px; font-size:14px; margin-bottom:10px;">
-          💾 Guardar y Aplicar Cambios
+        <button type="submit" class="btn btn-primary btn-full" style="padding:12px; font-size:14px; margin-bottom:10px; display:inline-flex; align-items:center; justify-content:center; gap:6px;">
+          <i data-lucide="save" style="width:16px; height:16px;"></i> Guardar y Aplicar Cambios
         </button>
-        <button type="button" onclick="mostrarNotificacion('Configuración predeterminada institucional restaurada.', 'success', 'Ajustes del Sistema');" class="btn btn-outline btn-full" style="padding:10px; font-size:13px;">
-          🔄 Restaurar Predeterminados
+        <button type="button" onclick="mostrarNotificacion('Configuración predeterminada institucional restaurada.', 'success', 'Ajustes del Sistema');" class="btn btn-outline btn-full" style="padding:10px; font-size:13px; display:inline-flex; align-items:center; justify-content:center; gap:6px;">
+          <i data-lucide="rotate-ccw" style="width:15px; height:15px;"></i> Restaurar Predeterminados
         </button>
       </form>
 
     </div>
-
-  </div>
 </div>
 {% endblock %}

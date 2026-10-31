@@ -5,13 +5,33 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}Simulador Saber TyT - Uniputumayo{% endblock %}</title>
   
-  <!-- Google Fonts: Inter -->
+  <!-- Google Fonts: Inter (UI), Merriweather (Lectura Crítica) y JetBrains Mono (Datos Tabulares) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300;1,400&display=swap" rel="stylesheet">
   
   <!-- Estilos globales del sistema de diseño -->
   <link rel="stylesheet" href="/static/css/styles.css">
+
+  <!-- Estilos para iconos vectoriales Lucide -->
+  <style>
+    .lucide {
+      width: 1.15em;
+      height: 1.15em;
+      display: inline-block;
+      vertical-align: -0.2em;
+      stroke-width: 2;
+      stroke: currentColor;
+    }
+    .btn .lucide {
+      margin-right: 6px;
+    }
+    .sidebar-nav .nav-item .lucide {
+      width: 18px;
+      height: 18px;
+      margin-right: 10px;
+    }
+  </style>
   
   {% block extra_head %}{% endblock %}
 </head>
@@ -23,7 +43,15 @@
       {% for message in messages %}
       <div class="toast-item {% if message.tags == 'error' %}toast-error{% elif message.tags == 'success' %}toast-success{% elif message.tags == 'warning' %}toast-warning{% else %}toast-info{% endif %}" id="toast-msg-{{ forloop.counter }}">
         <div class="toast-icon-box">
-          {% if message.tags == 'error' %}✕{% elif message.tags == 'success' %}✓{% elif message.tags == 'warning' %}⚠{% else %}ℹ{% endif %}
+          {% if message.tags == 'error' %}
+            <i data-lucide="alert-circle"></i>
+          {% elif message.tags == 'success' %}
+            <i data-lucide="check-circle-2"></i>
+          {% elif message.tags == 'warning' %}
+            <i data-lucide="alert-triangle"></i>
+          {% else %}
+            <i data-lucide="info"></i>
+          {% endif %}
         </div>
         <div class="toast-content">
           <div class="toast-title">
@@ -102,16 +130,16 @@
       };
 
       const iconos = {
-        success: '✓',
-        error: '✕',
-        warning: '⚠',
-        info: 'ℹ'
+        success: '<i data-lucide="check-circle-2"></i>',
+        error: '<i data-lucide="alert-circle"></i>',
+        warning: '<i data-lucide="alert-triangle"></i>',
+        info: '<i data-lucide="info"></i>'
       };
 
       const toast = document.createElement('div');
       toast.className = `toast-item toast-${tipo}`;
       toast.innerHTML = `
-        <div class="toast-icon-box">${iconos[tipo] || 'ℹ'}</div>
+        <div class="toast-icon-box">${iconos[tipo] || '<i data-lucide="info"></i>'}</div>
         <div class="toast-content">
           <div class="toast-title">${titulo || titulosDefault[tipo] || 'Notificación'}</div>
           <div class="toast-message">${mensaje}</div>
@@ -121,6 +149,9 @@
       `;
 
       container.appendChild(toast);
+      if (window.lucide) {
+        lucide.createIcons({ root: toast });
+      }
 
       // Auto-cierre tras 4.5 segundos
       setTimeout(() => {
@@ -149,6 +180,16 @@
     }
   </script>
   
+  <!-- Lucide Icons Script -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      if (window.lucide) {
+        lucide.createIcons();
+      }
+    });
+  </script>
+
   {% block extra_scripts %}{% endblock %}
 </body>
 </html>

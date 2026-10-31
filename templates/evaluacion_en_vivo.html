@@ -9,7 +9,7 @@
   <header style="background:white; border-bottom:1px solid #e2e8f0; padding:12px 32px; display:flex; justify-content:space-between; align-items:center;">
     <div style="display:flex; align-items:center; gap:16px;">
       <a href="/dashboard/estudiante/" onclick="return confirm('¿Seguro que deseas salir? El temporizador seguirá corriendo.');" style="display:inline-flex; align-items:center; justify-content:center; width:36px; height:36px; border-radius:50%; background:#f1f5f9; color:#0f172a; text-decoration:none;">
-        &larr;
+        <i data-lucide="arrow-left" style="width:18px; height:18px;"></i>
       </a>
       <div>
         <div style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.5px;">SABER TYT 2026 · SESIÓN OFICIAL</div>
@@ -19,12 +19,12 @@
 
     <!-- Temporizador Digital Flotante -->
     <div style="display:flex; align-items:center; gap:12px;">
-      <div class="eval-timer-box">
-        <span>⏱️</span>
+      <div class="eval-timer-box" style="display:inline-flex; align-items:center; gap:6px;">
+        <i data-lucide="clock" style="width:16px; height:16px;"></i>
         <span id="reloj-tiempo">--:--:--</span>
       </div>
-      <button type="button" onclick="mostrarNotificacion('El temporizador continúa sincronizado en el servidor.', 'info', 'Sincronización');" style="background:#f1f5f9; border:1px solid #cbd5e1; width:36px; height:36px; border-radius:8px; cursor:pointer;">
-        ⏸️
+      <button type="button" onclick="mostrarNotificacion('El temporizador continúa sincronizado en el servidor.', 'info', 'Sincronización');" style="background:#f1f5f9; border:1px solid #cbd5e1; width:36px; height:36px; border-radius:8px; cursor:pointer; display:inline-flex; align-items:center; justify-content:center;">
+        <i data-lucide="pause" style="width:16px; height:16px; color:#475569;"></i>
       </button>
     </div>
   </header>
@@ -59,20 +59,20 @@
           <!-- Card Contexto Operativo -->
           <div class="card" style="padding:20px; border-radius:16px; margin-bottom:16px;">
             <div style="display:flex; align-items:center; gap:8px; font-size:12px; font-weight:800; color:#186382; margin-bottom:12px; text-transform:uppercase;">
-              <span>📄</span> CONTEXTO OPERATIVO
+              <i data-lucide="file-text" style="width:16px; height:16px;"></i> CONTEXTO OPERATIVO
             </div>
-            <div id="texto-contexto" style="font-size:13px; color:#334155; line-height:1.6;">
-              Texto descriptivo de apoyo para la formulación del problema y resolución del reactivo.
+            <div id="texto-contexto" class="text-reading text-sm text-main" style="line-height:var(--leading-relaxed);">
+              Texto descriptivo de apoyo para la formulación del problema y resolución de la pregunta.
             </div>
           </div>
 
           <!-- Imagen o Referencia Contextual -->
           <div style="background:white; border:1px solid #e2e8f0; border-radius:16px; overflow:hidden; box-shadow:var(--shadow-sm);">
-            <div style="background:linear-gradient(135deg, #0f3d52 0%, #186382 100%); height:120px; display:flex; align-items:center; justify-content:center; color:white; font-size:36px;">
-              🌱
+            <div style="background:linear-gradient(135deg, #0f3d52 0%, #186382 100%); height:120px; display:flex; align-items:center; justify-content:center; color:white;">
+              <i data-lucide="sprout" style="width:38px; height:38px;"></i>
             </div>
-            <div style="padding:10px 14px; font-size:11px; color:#64748b; font-weight:600; text-align:center;">
-              🌿 Unidad de Aplicación Práctica · Uniputumayo
+            <div style="padding:10px 14px; font-size:11px; color:#64748b; font-weight:600; text-align:center; display:flex; align-items:center; justify-content:center; gap:6px;">
+              <i data-lucide="leaf" style="width:14px; height:14px; color:#16a34a;"></i> Unidad de Aplicación Práctica · Uniputumayo
             </div>
           </div>
         </div>
@@ -81,7 +81,7 @@
         <div>
           <div class="card" style="padding:32px; border-radius:20px; min-height:460px; display:flex; flex-direction:column; justify-content:space-between;">
             <div>
-              <h2 id="enunciado-pregunta" style="font-size:20px; font-weight:800; color:#0f172a; line-height:1.4; margin-bottom:28px;">
+              <h2 id="enunciado-pregunta" class="section-title text-xl font-bold text-main" style="margin-bottom:28px; line-height:var(--leading-snug);">
                 Cargando pregunta...
               </h2>
 
@@ -91,20 +91,15 @@
               </div>
             </div>
 
-            <!-- Navegación Anterior / Siguiente / Terminar -->
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:32px; border-top:1px solid #f1f5f9; padding-top:20px; gap:12px; flex-wrap:wrap;">
-              <button type="button" id="btn-anterior" onclick="cambiarPregunta(preguntaActualIdx - 1)" class="btn btn-outline" style="padding:10px 20px;">
-                &larr; Anterior
+            <!-- Navegación Anterior / Siguiente -->
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:32px; border-top:1px solid #f1f5f9; padding-top:20px; gap:12px;">
+              <button type="button" id="btn-anterior" onclick="cambiarPregunta(preguntaActualIdx - 1)" class="btn btn-outline" style="padding:10px 22px; font-weight:600; display:inline-flex; align-items:center; gap:6px;">
+                <i data-lucide="chevron-left" style="width:16px; height:16px;"></i> Anterior
               </button>
 
-              <div style="display:flex; align-items:center; gap:10px;">
-                <button type="button" onclick="confirmarEntrega()" class="btn btn-outline" style="border-color:#cbd5e1; color:#475569; padding:10px 18px; font-size:13px;" title="Terminar examen ahora">
-                  ⏹️ Terminar Examen
-                </button>
-                <button type="button" id="btn-siguiente" onclick="irSiguienteOTerminar()" class="btn btn-primary" style="padding:10px 24px; background:#186382; font-weight:700;">
-                  Guardar y Siguiente &rarr;
-                </button>
-              </div>
+              <button type="button" id="btn-siguiente" onclick="irSiguienteOTerminar()" class="btn btn-primary" style="padding:10px 24px; background:#186382; font-weight:700; display:inline-flex; align-items:center; gap:6px;">
+                <span>Siguiente</span> <i data-lucide="chevron-right" style="width:16px; height:16px;"></i>
+              </button>
             </div>
           </div>
         </div>
@@ -113,7 +108,7 @@
         <div>
           <div class="card" style="padding:24px; border-radius:20px;">
             <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
-              <span style="font-size:16px;">☷</span>
+              <i data-lucide="layout-grid" style="width:18px; height:18px; color:#186382;"></i>
               <h3 style="font-size:15px; font-weight:800; color:#0f172a; margin:0;">Mapeo de Preguntas</h3>
             </div>
             <div id="resumen-mapeo-label" style="font-size:12px; color:#64748b; margin-bottom:14px;">
@@ -139,8 +134,8 @@
             </div>
 
             <!-- Botón Finalizar Examen -->
-            <button type="button" onclick="confirmarEntrega()" class="btn btn-full" style="margin-top:24px; background:#16a34a; color:white; font-size:14px; padding:12px; border-radius:10px; font-weight:700;">
-              ✓ Finalizar y Entregar Intento
+            <button type="button" onclick="confirmarEntrega()" class="btn btn-full" style="margin-top:24px; background:#16a34a; color:white; font-size:14px; padding:12px; border-radius:10px; font-weight:700; display:inline-flex; align-items:center; justify-content:center; gap:6px;">
+              <i data-lucide="check-circle-2"></i> Finalizar y Entregar Intento
             </button>
           </div>
         </div>
@@ -157,6 +152,7 @@
   // Datos del examen inyectados desde Django
   const preguntasData = {{ preguntas_json|safe }};
   const tiempoLimiteMinutos = {{ cuestionario.tiempo_limite_minutos }};
+  const segundosRestantesServidor = {{ segundos_restantes|default:7200 }};
   const intentoId = {{ intento.id }};
   
   let preguntaActualIdx = 0;
@@ -177,7 +173,8 @@
     }
     construirGrillaNavegacion();
     mostrarPregunta(0);
-    iniciarTemporizador(tiempoLimiteMinutos * 60);
+    // Iniciar temporizador con los segundos reales restantes validados por backend
+    iniciarTemporizador(segundosRestantesServidor);
   });
 
   function construirGrillaNavegacion() {
@@ -210,13 +207,19 @@
     document.getElementById('btn-anterior').style.visibility = idx === 0 ? 'hidden' : 'visible';
     const btnSig = document.getElementById('btn-siguiente');
     if (idx === preguntasData.length - 1) {
-      btnSig.innerHTML = '✓ Guardar y Terminar Examen';
+      btnSig.innerHTML = '<i data-lucide="check-circle-2" style="width:16px; height:16px;"></i> Finalizar y Entregar Examen';
       btnSig.style.background = '#16a34a';
       btnSig.style.color = '#ffffff';
+      btnSig.style.borderColor = '#16a34a';
     } else {
-      btnSig.innerHTML = 'Guardar y Siguiente &rarr;';
+      btnSig.innerHTML = '<span>Siguiente</span> <i data-lucide="chevron-right" style="width:16px; height:16px;"></i>';
       btnSig.style.background = '#186382';
       btnSig.style.color = '#ffffff';
+      btnSig.style.borderColor = '#186382';
+    }
+    if (window.lucide) {
+      lucide.createIcons({ root: btnSig });
+      lucide.createIcons({ root: document.getElementById('btn-anterior') });
     }
 
     // Renderizar opciones A, B, C, D
@@ -236,13 +239,52 @@
         <div class="option-letter-badge">${letra}</div>
         <div style="flex-grow:1; font-size:14px; color:#0f172a; font-weight:500;">${op.texto}</div>
         <div style="width:20px; height:20px; border-radius:50%; border:2px solid ${estaSeleccionada ? '#186382' : '#cbd5e1'}; display:flex; align-items:center; justify-content:center; background:${estaSeleccionada ? '#186382' : 'transparent'}; color:white; font-size:12px;">
-          ${estaSeleccionada ? '✓' : ''}
+          ${estaSeleccionada ? '<i data-lucide="check" style="width:12px; height:12px;"></i>' : ''}
         </div>
       `;
       contenedor.appendChild(card);
+      if (window.lucide) {
+        lucide.createIcons({ root: card });
+      }
     });
 
     actualizarEstadosGrilla();
+  }
+
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+
+  function guardarRespuestaServidor(preguntaId, opcionId) {
+    const csrftoken = getCookie('csrftoken') || (document.querySelector('[name=csrfmiddlewaretoken]') ? document.querySelector('[name=csrfmiddlewaretoken]').value : '');
+    fetch(`/evaluacion/${intentoId}/guardar-respuesta/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': csrftoken
+      },
+      body: JSON.stringify({
+        pregunta_id: preguntaId,
+        opcion_id: opcionId
+      })
+    }).then(res => res.json()).then(data => {
+      if (data.status !== 'ok') {
+        console.warn('Advertencia al autoguardar:', data.mensaje);
+      }
+    }).catch(err => {
+      console.warn('Error de red al autoguardar respuesta:', err);
+    });
   }
 
   function seleccionarOpcion(preguntaId, opcionId) {
@@ -253,6 +295,8 @@
       inputHidden.value = JSON.stringify(respuestasUsuario);
     }
     mostrarPregunta(preguntaActualIdx);
+    // Persistencia asíncrona inmediata en backend MariaDB
+    guardarRespuestaServidor(preguntaId, opcionId);
   }
 
   function irSiguienteOTerminar() {
@@ -329,7 +373,7 @@
 
     let mensaje = `¿Estás seguro de finalizar y entregar tu examen?\n\n• Respondidas: ${respondidas} de ${total}\n• Pendientes: ${faltantes}`;
     if (faltantes > 0) {
-      mensaje += `\n\n⚠️ Atención: Aún tienes ${faltantes} pregunta(s) sin responder. Se calificarán con 0 puntos.`;
+      mensaje += `\n\nAtención: Aún tienes ${faltantes} pregunta(s) sin responder. Se calificarán con 0 puntos.`;
     }
 
     if (confirm(mensaje)) {

@@ -21,10 +21,18 @@ urlpatterns = [
     path("cuestionarios/", views.cuestionarios_list, name="cuestionarios_list"),
     path("cuestionarios/crear/", views.configurar_cuestionario, name="cuestionario_crear"),
     path("cuestionarios/<int:cuestionario_id>/editar/", views.configurar_cuestionario, name="cuestionario_editar"),
+    path("cuestionarios/<int:cuestionario_id>/previsualizar/", views.previsualizar_cuestionario, name="cuestionario_previsualizar"),
+    path("cuestionarios/<int:cuestionario_id>/intentos/", views.cuestionario_intentos, name="cuestionario_intentos"),
+    path("cuestionarios/intentos/<int:intento_id>/reiniciar/", views.reiniciar_intento, name="reiniciar_intento"),
+    path("cuestionarios/<int:cuestionario_id>/intentos/reiniciar-estudiante/<str:codigo_estudiante>/", views.reiniciar_estudiante_cuestionario, name="reiniciar_estudiante_cuestionario"),
+    path("cuestionarios/<int:cuestionario_id>/intentos/exportar/", views.exportar_intentos_csv, name="exportar_intentos_csv"),
+
 
     # Evaluación en Vivo y Calificación
     path("evaluacion/iniciar/<int:cuestionario_id>/", views.iniciar_evaluacion, name="iniciar_evaluacion"),
     path("evaluacion/<int:intento_id>/", views.evaluacion_en_vivo, name="evaluacion_en_vivo"),
+    path("evaluacion/<int:intento_id>/guardar-respuesta/", views.guardar_respuesta_ajax, name="guardar_respuesta_ajax"),
+
     path("evaluacion/<int:intento_id>/finalizar/", views.finalizar_evaluacion, name="finalizar_evaluacion"),
     path("evaluacion/<int:intento_id>/resultado/", views.resultado_evaluacion, name="resultado_evaluacion"),
 ]

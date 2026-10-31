@@ -1,232 +1,402 @@
-{% extends 'base.html' %}
+{% extends 'app_base.html' %}
 
-{% block title %}Configurar Cuestionario - Simulador Saber TyT{% endblock %}
+{% block title %}{% if cuestionario %}Editar Cuestionario: {{ cuestionario.nombre }}{% else %}Crear Cuestionario{% endif %} - Simulador Saber TyT{% endblock %}
 
-{% block content %}
-<div style="background:#f8fafc; min-height:100vh; padding:24px 20px;">
-  <div style="max-width:760px; margin:0 auto;">
+{% block nav_title %}{% if cuestionario %}Configurar Cuestionario{% else %}Crear Cuestionario{% endif %}{% endblock %}
 
-    <!-- Topbar -->
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-      <a href="/cuestionarios/" style="display:inline-flex; align-items:center; justify-content:center; width:38px; height:38px; border-radius:50%; background:white; border:1px solid #e2e8f0; color:#0f172a; text-decoration:none;">
-        &larr;
-      </a>
-      <h2 style="font-size:18px; font-weight:800; color:#0f172a;">Cuestionarios</h2>
-      <div style="width:38px;"></div>
+{% block app_content %}
+<div style="max-width:1160px; margin:0 auto; padding-bottom:40px;">
+
+  <!-- Navegación Superior y Volver -->
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+    <a href="/cuestionarios/" style="display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:600; color:#186382; text-decoration:none;">
+      <i data-lucide="arrow-left" style="width:16px; height:16px;"></i> Volver a Cuestionarios
+    </a>
+    {% if cuestionario %}
+    <a href="/cuestionarios/{{ cuestionario.id }}/previsualizar/" class="btn btn-outline" style="font-size:12px; padding:6px 12px; gap:6px;">
+      <i data-lucide="eye" style="width:14px; height:14px;"></i> Previsualizar Examen
+    </a>
+    {% endif %}
+  </div>
+
+  <!-- Header de Configuración -->
+  <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
+    <div>
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+        {% if cuestionario %}
+          <span class="badge {{ cuestionario.tiempo_restante_info.clase }}">● {{ cuestionario.get_estado_display }}</span>
+          <span class="badge" style="background:#f1f5f9; color:#475569;">ID: #{{ cuestionario.id }}</span>
+        {% else %}
+          <span class="badge badge-warning">● Nuevo Cuestionario (Borrador)</span>
+        {% endif %}
+      </div>
+      <h1 style="font-size:22px; font-weight:800; color:#0f172a; margin-bottom:4px;">
+        {% if cuestionario %}Editar: {{ cuestionario.nombre }}{% else %}Diseño y Configuración de Evaluación{% endif %}
+      </h1>
+      <p style="font-size:13px; color:#64748b;">Configura el contenido pedagógico, programación temporal y banco de preguntas institucionales.</p>
     </div>
 
-    <!-- Header y Estado -->
-    <div style="margin-bottom:20px;">
-      <span class="badge badge-warning" style="margin-bottom:8px;">● {{ cuestionario.get_estado_display|default:"Borrador en Edición" }}</span>
-      <h1 style="font-size:22px; font-weight:800; color:#0f172a; margin-bottom:4px;">Configurar Cuestionario</h1>
-      <p style="font-size:13px; color:#64748b;">Parámetros de evaluación, disponibilidad y selección de reactivos</p>
-    </div>
-
-    <!-- Docente Responsable Card -->
-    <div class="card" style="padding:14px 18px; display:flex; align-items:center; gap:12px; margin-bottom:24px; background:#f0f9ff; border-color:#bae6fd;">
-      <div class="user-avatar-circle" style="background:#186382; color:white; width:40px; height:40px; font-size:14px;">
+    <!-- Docente Responsable Badge -->
+    <div style="display:inline-flex; align-items:center; gap:10px; background:#f0f9ff; border:1px solid #bae6fd; padding:8px 14px; border-radius:10px;">
+      <div class="user-avatar-circle" style="background:#186382; color:white; width:32px; height:32px; font-size:12px;">
         {{ user.first_name|default:user.username|slice:":2"|upper }}
       </div>
-      <div>
-        <div style="font-size:13px; font-weight:700; color:#0c4a6e;">{{ user.get_full_name|default:user.username }}</div>
-        <div style="font-size:11px; color:#0369a1;">Docente IUP · Coordinación Saber TyT</div>
+      <div style="text-align:left;">
+        <div style="font-size:12px; font-weight:700; color:#0c4a6e;">{{ user.get_full_name|default:user.username }}</div>
+        <div style="font-size:10px; color:#0369a1;">Docente IUP · Gestor de Evaluación</div>
       </div>
     </div>
-
-    <!-- Formulario Principal -->
-    <form method="POST" id="form-cuestionario">
-      {% csrf_token %}
-
-      <!-- Sección A: Información General -->
-      <div class="card" style="margin-bottom:20px;">
-        <div style="display:flex; align-items:center; gap:8px; margin-bottom:16px; border-bottom:1px solid #f1f5f9; padding-bottom:10px;">
-          <span style="font-size:18px;">📋</span>
-          <h2 style="font-size:15px; font-weight:800; color:#0f172a; margin:0;">Sección A: Información General</h2>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Nombre del Cuestionario *</label>
-          <input type="text" name="nombre" value="{{ cuestionario.nombre|default:'' }}" required class="form-input" placeholder="ej. Simulacro Diagnóstico Saber TyT - Razonamiento Cuantitativo">
-        </div>
-
-        <div class="form-group" style="margin-bottom:0;">
-          <label class="form-label">Instrucciones Pedagógicas *</label>
-          <textarea name="descripcion" required class="form-textarea" placeholder="Evaluación formativa para medir competencias... Lea atentamente cada reactivo.">{{ cuestionario.descripcion|default:'' }}</textarea>
-          <div style="font-size:11px; color:#94a3b8; margin-top:4px;">👁️ Visible para los estudiantes antes de iniciar el intento.</div>
-        </div>
-      </div>
-
-      <!-- Sección B: Ventana de Acceso -->
-      <div class="card" style="margin-bottom:20px;">
-        <div style="display:flex; align-items:center; gap:8px; margin-bottom:16px; border-bottom:1px solid #f1f5f9; padding-bottom:10px;">
-          <span style="font-size:18px;">📅</span>
-          <h2 style="font-size:15px; font-weight:800; color:#0f172a; margin:0;">Sección B: Ventana de Acceso</h2>
-        </div>
-
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
-          <div class="form-group">
-            <label class="form-label">Fecha y Hora de Apertura *</label>
-            <input type="datetime-local" name="fecha_apertura" value="{{ cuestionario.fecha_apertura|date:'Y-m-d\TH:i' }}" required class="form-input">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Fecha y Hora de Cierre *</label>
-            <input type="datetime-local" name="fecha_cierre" value="{{ cuestionario.fecha_cierre|date:'Y-m-d\TH:i' }}" required class="form-input">
-          </div>
-        </div>
-
-        <div style="display:flex; align-items:center; gap:8px; font-size:12px; color:#15803d; background:#dcfce7; padding:8px 12px; border-radius:8px;">
-          <span>✓</span> Fecha de cierre validada por el servidor (impide evaluaciones fuera de fecha).
-        </div>
-      </div>
-
-      <!-- Sección C: Parámetros e Intentos -->
-      <div class="card" style="margin-bottom:20px;">
-        <div style="display:flex; align-items:center; gap:8px; margin-bottom:16px; border-bottom:1px solid #f1f5f9; padding-bottom:10px;">
-          <span style="font-size:18px;">⚙️</span>
-          <h2 style="font-size:15px; font-weight:800; color:#0f172a; margin:0;">Sección C: Parámetros e Intentos</h2>
-        </div>
-
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
-          <div class="form-group">
-            <label class="form-label">Tiempo Límite (minutos) *</label>
-            <input type="number" min="5" max="360" name="tiempo_limite_minutos" value="{{ cuestionario.tiempo_limite_minutos|default:120 }}" required class="form-input">
-            <span style="font-size:11px; color:#64748b;">Requerido > 0 min</span>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Intentos Permitidos *</label>
-            <input type="number" min="1" max="10" name="intentos_permitidos" value="{{ cuestionario.intentos_permitidos|default:5 }}" required class="form-input">
-            <span style="font-size:11px; color:#64748b;">Método: Nota más alta</span>
-          </div>
-        </div>
-
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; background:#f8fafc; padding:14px; border-radius:10px; margin-bottom:12px;">
-          <div class="form-group" style="margin-bottom:0;">
-            <label class="form-label">Calificación Máxima</label>
-            <input type="number" step="0.1" name="calificacion_maxima" value="{{ cuestionario.calificacion_maxima|default:'5.00' }}" required class="form-input">
-          </div>
-          <div class="form-group" style="margin-bottom:0;">
-            <label class="form-label">Nota Mínima Aprobación</label>
-            <input type="number" step="0.1" name="calificacion_aprobacion" value="{{ cuestionario.calificacion_aprobacion|default:'3.00' }}" required class="form-input">
-          </div>
-        </div>
-
-        <div style="font-size:12px; color:#15803d; display:flex; align-items:center; gap:6px;">
-          <span>✓</span> 0.00 &lt; 3.00 &le; 5.00 OK (Rango institucional IUP validado)
-        </div>
-      </div>
-
-      <!-- Sección D: Opciones de Entrega -->
-      <div class="card" style="margin-bottom:20px;">
-        <div style="display:flex; align-items:center; gap:8px; margin-bottom:16px; border-bottom:1px solid #f1f5f9; padding-bottom:10px;">
-          <span style="font-size:18px;">🔀</span>
-          <h2 style="font-size:15px; font-weight:800; color:#0f172a; margin:0;">Sección D: Opciones de Entrega</h2>
-        </div>
-
-        <div style="display:flex; flex-direction:column; gap:14px;">
-          <label style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;">
-            <div>
-              <div style="font-size:13px; font-weight:700; color:#0f172a;">Mezclar orden de preguntas</div>
-              <div style="font-size:11px; color:#64748b;">Secuencia aleatoria para cada estudiante</div>
-            </div>
-            <input type="checkbox" name="mezclar_preguntas" {% if cuestionario.mezclar_preguntas %}checked{% endif %} style="width:20px; height:20px; accent-color:#186382;">
-          </label>
-
-          <label style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;">
-            <div>
-              <div style="font-size:13px; font-weight:700; color:#0f172a;">Mezclar opciones de respuesta</div>
-              <div style="font-size:11px; color:#64748b;">Permuta alternativas A, B, C y D</div>
-            </div>
-            <input type="checkbox" name="mezclar_respuestas" {% if cuestionario.mezclar_respuestas %}checked{% endif %} style="width:20px; height:20px; accent-color:#186382;">
-          </label>
-
-          <label style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;">
-            <div>
-              <div style="font-size:13px; font-weight:700; color:#0f172a;">Revisión pedagógica retroalimentación</div>
-              <div style="font-size:11px; color:#64748b;">Se revelarán explicaciones sólo tras finalizar y calificar</div>
-            </div>
-            <input type="checkbox" name="permitir_revision" {% if cuestionario.permitir_revision or not cuestionario.id %}checked{% endif %} style="width:20px; height:20px; accent-color:#186382;">
-          </label>
-        </div>
-      </div>
-
-      <!-- Sección E: Reactivos del Banco -->
-      <div class="card" style="margin-bottom:24px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; border-bottom:1px solid #f1f5f9; padding-bottom:10px;">
-          <div style="display:flex; align-items:center; gap:8px;">
-            <span style="font-size:18px;">📚</span>
-            <h2 style="font-size:15px; font-weight:800; color:#0f172a; margin:0;">Sección E: Reactivos del Banco</h2>
-          </div>
-          <button type="button" onclick="openModal('modal-selector-preguntas')" class="btn btn-outline" style="font-size:12px; padding:6px 12px; color:#186382; border-color:#93c5fd;">
-            ➕ Añadir Preguntas
-          </button>
-        </div>
-
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; background:#f8fafc; padding:12px; border-radius:10px; margin-bottom:16px; text-align:center;">
-          <div>
-            <div style="font-size:11px; color:#64748b; text-transform:uppercase;">Total Reactivos</div>
-            <div id="conteo-reactivos" style="font-size:22px; font-weight:800; color:#0f172a;">{{ reactivos_asignados.count }} Preguntas</div>
-          </div>
-          <div>
-            <div style="font-size:11px; color:#64748b; text-transform:uppercase;">Puntaje Total</div>
-            <div id="puntaje-acumulado" style="font-size:22px; font-weight:800; color:#0284c7;">{{ puntaje_total|default:"0.00" }} pts</div>
-          </div>
-        </div>
-
-        <!-- Lista de preguntas seleccionadas -->
-        <div id="lista-reactivos-seleccionados" style="display:flex; flex-direction:column; gap:8px;">
-          {% for cp in reactivos_asignados %}
-          <div class="item-reactivo" data-id="{{ cp.pregunta.id }}" data-puntaje="{{ cp.pregunta.puntaje }}" style="display:flex; justify-content:space-between; align-items:center; background:#ffffff; border:1px solid #e2e8f0; border-radius:8px; padding:10px 14px;">
-            <input type="hidden" name="preguntas_ids" value="{{ cp.pregunta.id }}">
-            <div>
-              <div style="font-size:11px; font-weight:700; color:#0284c7;">{{ cp.pregunta.categoria.nombre }} · {{ cp.pregunta.puntaje }} pt</div>
-              <div style="font-size:13px; color:#0f172a;">{{ cp.pregunta.enunciado|truncatechars:65 }}</div>
-            </div>
-            <button type="button" onclick="removerReactivo(this)" style="background:none; border:none; color:#ef4444; font-size:16px; cursor:pointer;" title="Eliminar del examen">🗑️</button>
-          </div>
-          {% endfor %}
-        </div>
-      </div>
-
-      <!-- Botones de Acción Final -->
-      <div style="display:flex; gap:12px; margin-top:20px;">
-        <button type="submit" name="accion" value="borrador" class="btn btn-outline" style="flex:1; height:48px; font-size:14px;">
-          💾 Guardar Borrador
-        </button>
-        <button type="submit" name="accion" value="publicar" class="btn btn-primary" style="flex:1; height:48px; font-size:14px; background:#186382;">
-          🚀 Publicar y Habilitar
-        </button>
-      </div>
-
-    </form>
-
   </div>
+
+  <!-- Stepper / Navegación por Pasos Interactiva -->
+  <div style="background:white; border:1px solid #e2e8f0; border-radius:12px; padding:6px; margin-bottom:24px; display:flex; gap:6px; box-shadow:var(--shadow-sm);">
+    <button type="button" id="tab-step-1" onclick="irAPaso(1)" class="tab-step-btn active" style="flex:1; display:inline-flex; align-items:center; justify-content:center; gap:8px; border:none; border-radius:8px; padding:10px 14px; cursor:pointer; font-weight:700; transition:all 0.2s;">
+      <span class="step-num" id="step-num-1" style="width:22px; height:22px; border-radius:50%; background:#186382; color:white; display:inline-flex; align-items:center; justify-content:center; font-size:11px; font-weight:800;">1</span>
+      <span>Información y Fechas</span>
+    </button>
+    <button type="button" id="tab-step-2" onclick="irAPaso(2)" class="tab-step-btn" style="flex:1; display:inline-flex; align-items:center; justify-content:center; gap:8px; border:none; border-radius:8px; padding:10px 14px; cursor:pointer; color:#64748b; font-weight:600; background:transparent; transition:all 0.2s;">
+      <span class="step-num" id="step-num-2" style="width:22px; height:22px; border-radius:50%; background:#e2e8f0; color:#475569; display:inline-flex; align-items:center; justify-content:center; font-size:11px; font-weight:800;">2</span>
+      <span>Políticas y Evaluación</span>
+    </button>
+    <button type="button" id="tab-step-3" onclick="irAPaso(3)" class="tab-step-btn" style="flex:1; display:inline-flex; align-items:center; justify-content:center; gap:8px; border:none; border-radius:8px; padding:10px 14px; cursor:pointer; color:#64748b; font-weight:600; background:transparent; transition:all 0.2s;">
+      <span class="step-num" id="step-num-3" style="width:22px; height:22px; border-radius:50%; background:#e2e8f0; color:#475569; display:inline-flex; align-items:center; justify-content:center; font-size:11px; font-weight:800;">3</span>
+      <span>Preguntas del Banco</span>
+      <span id="tab-count-badge" class="badge badge-info" style="font-size:11px; padding:2px 7px;">{{ reactivos_asignados.count }}</span>
+    </button>
+  </div>
+
+  <!-- Formulario Principal -->
+  <form method="POST" id="form-cuestionario">
+    {% csrf_token %}
+
+    <div style="display:grid; grid-template-columns: 1fr 340px; gap:24px; align-items:start;">
+
+      <!-- ================= COLUMNA IZQUIERDA: CONTENIDO DEL PASO (70%) ================= -->
+      <div>
+
+        <!-- PASO 1: INFORMACIÓN GENERAL Y FECHAS -->
+        <div id="step-content-1" class="step-content">
+          <!-- Card A: Datos Básicos -->
+          <div class="card" style="margin-bottom:20px; padding:24px;">
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:18px; border-bottom:1px solid #f1f5f9; padding-bottom:12px;">
+              <i data-lucide="clipboard-list" style="color:#186382; width:20px; height:20px;"></i>
+              <h2 style="font-size:16px; font-weight:800; color:#0f172a; margin:0;">Información General del Examen</h2>
+            </div>
+
+            <div class="form-group" style="margin-bottom:16px;">
+              <label class="form-label">Nombre del Cuestionario *</label>
+              <input type="text" id="input-nombre" name="nombre" value="{{ cuestionario.nombre|default:'' }}" required class="form-input" placeholder="ej. Simulacro Diagnóstico Saber TyT - Razonamiento Cuantitativo" oninput="actualizarResumen()">
+              <span style="font-size:11px; color:#64748b;">Debe ser claro y representativo de la competencia a evaluar.</span>
+            </div>
+
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Instrucciones Pedagógicas *</label>
+              <textarea name="descripcion" required class="form-textarea" style="min-height:90px;" placeholder="Evaluación formativa para medir competencias... Lea atentamente cada pregunta y elija la mejor opción.">{{ cuestionario.descripcion|default:'' }}</textarea>
+              <div style="font-size:11px; color:#64748b; margin-top:6px; display:inline-flex; align-items:center; gap:4px;">
+                <i data-lucide="eye" style="width:13px; height:13px; color:#186382;"></i> Visible para los estudiantes antes de comenzar el examen.
+              </div>
+            </div>
+          </div>
+
+          <!-- Card B: Ventana de Acceso y Temporizador -->
+          <div class="card" style="margin-bottom:20px; padding:24px;">
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:18px; border-bottom:1px solid #f1f5f9; padding-bottom:12px;">
+              <i data-lucide="calendar" style="color:#186382; width:20px; height:20px;"></i>
+              <h2 style="font-size:16px; font-weight:800; color:#0f172a; margin:0;">Ventana Temporal y Duración</h2>
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
+              <div class="form-group">
+                <label class="form-label">Fecha y Hora de Apertura *</label>
+                <input type="datetime-local" id="input-apertura" name="fecha_apertura" value="{{ cuestionario.fecha_apertura|date:'Y-m-d\TH:i' }}" required class="form-input" onchange="actualizarResumen()">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Fecha y Hora de Cierre *</label>
+                <input type="datetime-local" id="input-cierre" name="fecha_cierre" value="{{ cuestionario.fecha_cierre|date:'Y-m-d\TH:i' }}" required class="form-input" onchange="actualizarResumen()">
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom:16px;">
+              <label class="form-label">Tiempo Límite de la Prueba (en minutos) *</label>
+              <div style="display:flex; align-items:center; gap:12px;">
+                <input type="number" min="5" max="360" id="input-tiempo" name="tiempo_limite_minutos" value="{{ cuestionario.tiempo_limite_minutos|default:120 }}" required class="form-input" style="max-width:200px;" oninput="actualizarResumen()">
+                <span style="font-size:13px; color:#64748b;" id="tiempo-horas-label">Equivale a 2 horas</span>
+              </div>
+              <span style="font-size:11px; color:#64748b;">Rango permitido: 5 a 360 minutos (estándar oficial Saber TyT: 120-240 min).</span>
+            </div>
+
+            <div style="display:flex; align-items:center; gap:8px; font-size:12px; color:#15803d; background:#dcfce7; padding:10px 14px; border-radius:8px;">
+              <i data-lucide="shield-check" style="width:16px; height:16px; flex-shrink:0;"></i>
+              <span>El servidor valida y controla el tiempo real automáticamente (anti-fraude por desfase horario).</span>
+            </div>
+          </div>
+
+          <!-- Botón de Avance Paso 1 -->
+          <div style="display:flex; justify-content:flex-end;">
+            <button type="button" onclick="irAPaso(2)" class="btn btn-primary" style="padding:10px 24px; font-weight:700; display:inline-flex; align-items:center; gap:8px;">
+              Continuar a Políticas y Calificación <i data-lucide="arrow-right" style="width:16px; height:16px;"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- PASO 2: POLÍTICAS Y EVALUACIÓN -->
+        <div id="step-content-2" class="step-content" style="display:none;">
+          <!-- Card C: Escala de Calificación e Intentos -->
+          <div class="card" style="margin-bottom:20px; padding:24px;">
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:18px; border-bottom:1px solid #f1f5f9; padding-bottom:12px;">
+              <i data-lucide="award" style="color:#186382; width:20px; height:20px;"></i>
+              <h2 style="font-size:16px; font-weight:800; color:#0f172a; margin:0;">Escala y Calificación</h2>
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-bottom:16px;">
+              <div class="form-group">
+                <label class="form-label">Intentos Permitidos *</label>
+                <input type="number" min="1" max="10" name="intentos_permitidos" value="{{ cuestionario.intentos_permitidos|default:5 }}" required class="form-input">
+                <span style="font-size:11px; color:#64748b;">Método: Nota más alta</span>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Calificación Máxima *</label>
+                <input type="number" step="0.1" id="input-calif-max" name="calificacion_maxima" value="{{ cuestionario.calificacion_maxima|default:'5.00' }}" required class="form-input" oninput="actualizarResumen()">
+                <span style="font-size:11px; color:#64748b;">Escala superior (ej. 5.00)</span>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Nota Mínima Aprobación *</label>
+                <input type="number" step="0.1" id="input-calif-apr" name="calificacion_aprobacion" value="{{ cuestionario.calificacion_aprobacion|default:'3.00' }}" required class="form-input" oninput="actualizarResumen()">
+                <span style="font-size:11px; color:#64748b;">Umbral aprobatorio (ej. 3.00)</span>
+              </div>
+            </div>
+
+            <div style="font-size:12px; color:#15803d; background:#f0fdf4; border:1px solid #bbf7d0; padding:10px 14px; border-radius:8px; display:flex; align-items:center; gap:8px;">
+              <i data-lucide="check" style="width:16px; height:16px; flex-shrink:0;"></i>
+              <span>Fórmula determinista institucional: <strong>Nota = (Puntos Obtenidos / Puntos Posibles) &times; Calificación Máxima</strong></span>
+            </div>
+          </div>
+
+          <!-- Card D: Opciones de Entrega y Aleatoriedad -->
+          <div class="card" style="margin-bottom:20px; padding:24px;">
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:18px; border-bottom:1px solid #f1f5f9; padding-bottom:12px;">
+              <i data-lucide="shuffle" style="color:#186382; width:20px; height:20px;"></i>
+              <h2 style="font-size:16px; font-weight:800; color:#0f172a; margin:0;">Opciones de Entrega y Retroalimentación</h2>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:16px;">
+              <label style="display:flex; justify-content:space-between; align-items:center; cursor:pointer; padding:12px; border:1px solid #e2e8f0; border-radius:10px;">
+                <div>
+                  <div style="font-size:13px; font-weight:700; color:#0f172a;">Mezclar orden de las preguntas</div>
+                  <div style="font-size:12px; color:#64748b;">Secuencia aleatoria diferente para cada participante (dificulta copia).</div>
+                </div>
+                <input type="checkbox" name="mezclar_preguntas" {% if cuestionario.mezclar_preguntas %}checked{% endif %} style="width:20px; height:20px; accent-color:#186382;">
+              </label>
+
+              <label style="display:flex; justify-content:space-between; align-items:center; cursor:pointer; padding:12px; border:1px solid #e2e8f0; border-radius:10px;">
+                <div>
+                  <div style="font-size:13px; font-weight:700; color:#0f172a;">Mezclar opciones de respuesta</div>
+                  <div style="font-size:12px; color:#64748b;">Permuta las alternativas A, B, C y D en cada intento.</div>
+                </div>
+                <input type="checkbox" name="mezclar_respuestas" {% if cuestionario.mezclar_respuestas %}checked{% endif %} style="width:20px; height:20px; accent-color:#186382;">
+              </label>
+
+              <label style="display:flex; justify-content:space-between; align-items:center; cursor:pointer; padding:12px; border:1px solid #e2e8f0; border-radius:10px;">
+                <div>
+                  <div style="font-size:13px; font-weight:700; color:#0f172a;">Permitir revisión pedagógica</div>
+                  <div style="font-size:12px; color:#64748b;">Los estudiantes verán la justificación pedagógica y aciertos sólo al finalizar el intento.</div>
+                </div>
+                <input type="checkbox" name="permitir_revision" {% if cuestionario.permitir_revision or not cuestionario.id %}checked{% endif %} style="width:20px; height:20px; accent-color:#186382;">
+              </label>
+            </div>
+          </div>
+
+          <!-- Botones de Navegación Paso 2 -->
+          <div style="display:flex; justify-content:space-between;">
+            <button type="button" onclick="irAPaso(1)" class="btn btn-outline" style="padding:10px 20px; display:inline-flex; align-items:center; gap:6px;">
+              <i data-lucide="arrow-left" style="width:16px; height:16px;"></i> Paso Anterior
+            </button>
+            <button type="button" onclick="irAPaso(3)" class="btn btn-primary" style="padding:10px 24px; font-weight:700; display:inline-flex; align-items:center; gap:8px;">
+              Continuar a Selección de Preguntas <i data-lucide="arrow-right" style="width:16px; height:16px;"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- PASO 3: SELECCIÓN DE PREGUNTAS -->
+        <div id="step-content-3" class="step-content" style="display:none;">
+          <div class="card" style="margin-bottom:20px; padding:24px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; border-bottom:1px solid #f1f5f9; padding-bottom:12px; flex-wrap:wrap; gap:10px;">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <i data-lucide="book-open" style="color:#186382; width:20px; height:20px;"></i>
+                <h2 style="font-size:16px; font-weight:800; color:#0f172a; margin:0;">Preguntas Asignadas a la Evaluación</h2>
+              </div>
+              <button type="button" onclick="openModal('modal-selector-preguntas')" class="btn btn-primary" style="font-size:13px; padding:8px 14px; display:inline-flex; align-items:center; gap:6px;">
+                <i data-lucide="plus" style="width:14px; height:14px;"></i> Añadir Preguntas del Banco
+              </button>
+            </div>
+
+            <!-- Métricas rápidas de las preguntas -->
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; background:#f8fafc; padding:14px; border-radius:10px; margin-bottom:18px; text-align:center;">
+              <div>
+                <div style="font-size:11px; color:#64748b; font-weight:600; text-transform:uppercase;">Total Preguntas Asignadas</div>
+                <div id="conteo-preguntas" style="font-size:22px; font-weight:800; color:#0f172a;">{{ reactivos_asignados.count }} Preguntas</div>
+              </div>
+              <div>
+                <div style="font-size:11px; color:#64748b; font-weight:600; text-transform:uppercase;">Puntaje Bruto Acumulado</div>
+                <div id="puntaje-acumulado" style="font-size:22px; font-weight:800; color:#186382;">{{ puntaje_total|default:"0.00" }} pts</div>
+              </div>
+            </div>
+
+            <!-- Lista de preguntas seleccionadas -->
+            <div id="lista-preguntas-seleccionados" style="display:flex; flex-direction:column; gap:10px;">
+              {% for cp in reactivos_asignados %}
+              <div class="item-pregunta" data-id="{{ cp.pregunta.id }}" data-puntaje="{{ cp.pregunta.puntaje }}" style="display:flex; align-items:center; justify-content:space-between; gap:16px; background:#ffffff; border:1px solid #e2e8f0; border-radius:10px; padding:12px 16px; transition:border-color 0.2s, box-shadow 0.2s;">
+                <input type="hidden" name="preguntas_ids" value="{{ cp.pregunta.id }}">
+                <div style="display:flex; align-items:flex-start; gap:12px; flex:1; min-width:0;">
+                  <div class="pregunta-indice" style="width:28px; height:28px; border-radius:6px; background:#f1f5f9; color:#475569; font-size:12px; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:2px;">
+                    {{ forloop.counter }}
+                  </div>
+                  <div style="flex:1; min-width:0;">
+                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px; flex-wrap:wrap;">
+                      <span class="badge badge-info" style="font-size:10px; font-weight:700;">{{ cp.pregunta.categoria.nombre }}</span>
+                      <span class="badge" style="background:#f8fafc; border:1px solid #e2e8f0; color:#475569; font-size:10px; font-weight:600;">{{ cp.pregunta.get_tipo_display }}</span>
+                      <span style="font-size:11px; font-weight:700; color:#186382;">Valor: {{ cp.pregunta.puntaje }} pt</span>
+                    </div>
+                    <div style="font-size:13px; font-weight:600; color:#0f172a; line-height:1.45; word-break:break-word;">{{ cp.pregunta.enunciado }}</div>
+                  </div>
+                </div>
+                <button type="button" onclick="removerPregunta(this)" style="width:34px; height:34px; border-radius:8px; border:1px solid #fee2e2; background:#fff5f5; color:#dc2626; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; transition:all 0.2s;" title="Remover del examen">
+                  <i data-lucide="trash-2" style="width:16px; height:16px;"></i>
+                </button>
+              </div>
+              {% empty %}
+              <div id="empty-preguntas-msg" style="text-align:center; padding:36px 20px; border:2px dashed #e2e8f0; border-radius:12px; color:#64748b;">
+                <i data-lucide="file-question" style="width:32px; height:32px; color:#94a3b8; margin:0 auto 8px; display:block;"></i>
+                <div style="font-size:14px; font-weight:700; color:#334155; margin-bottom:4px;">No has vinculado preguntas a este examen</div>
+                <p style="font-size:12px; margin:0 auto 14px; max-width:380px;">Haz clic en el botón superior para explorar el banco institucional y seleccionar las preguntas que presentarán los estudiantes.</p>
+                <button type="button" onclick="openModal('modal-selector-preguntas')" class="btn btn-outline" style="font-size:12px; padding:6px 14px;">
+                  <i data-lucide="plus"></i> Seleccionar Preguntas
+                </button>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+
+          <!-- Botones de Navegación Paso 3 -->
+          <div style="display:flex; justify-content:space-between;">
+            <button type="button" onclick="irAPaso(2)" class="btn btn-outline" style="padding:10px 20px; display:inline-flex; align-items:center; gap:6px;">
+              <i data-lucide="arrow-left" style="width:16px; height:16px;"></i> Paso Anterior
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ================= COLUMNA DERECHA: RESUMEN FLOTANTE Y ACCIONES (30%) ================= -->
+      <div style="position:sticky; top:20px;">
+        <div class="card" style="padding:22px; border-radius:16px; box-shadow:var(--shadow-md);">
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:14px; border-bottom:1px solid #f1f5f9; padding-bottom:10px;">
+            <i data-lucide="file-text" style="width:18px; height:18px; color:#186382;"></i>
+            <h3 style="font-size:15px; font-weight:800; color:#0f172a; margin:0;">Ficha Resumen</h3>
+          </div>
+
+          <!-- Resumen de Datos Clave -->
+          <div style="display:flex; flex-direction:column; gap:12px; font-size:12px; margin-bottom:20px;">
+            <div>
+              <span style="color:#64748b; display:block; font-size:11px; font-weight:600; text-transform:uppercase;">Nombre de Evaluación</span>
+              <strong id="resumen-nombre" style="font-size:13px; color:#0f172a; word-break:break-word;">
+                {{ cuestionario.nombre|default:"Sin nombre asignado" }}
+              </strong>
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; background:#f8fafc; padding:10px; border-radius:8px;">
+              <div>
+                <span style="color:#64748b; font-size:11px;">Duración:</span>
+                <strong id="resumen-tiempo" style="display:block; color:#0f172a;">{{ cuestionario.tiempo_limite_minutos|default:120 }} min</strong>
+              </div>
+              <div>
+                <span style="color:#64748b; font-size:11px;">Preguntas:</span>
+                <strong id="resumen-preguntas" style="display:block; color:#186382;">{{ reactivos_asignados.count }} preguntas</strong>
+              </div>
+              <div>
+                <span style="color:#64748b; font-size:11px;">Puntaje:</span>
+                <strong id="resumen-puntaje" style="display:block; color:#0f172a;">{{ puntaje_total|default:"0.00" }} pts</strong>
+              </div>
+              <div>
+                <span style="color:#64748b; font-size:11px;">Escala Max:</span>
+                <strong id="resumen-escala-max" style="display:block; color:#0f172a;">{{ cuestionario.calificacion_maxima|default:"5.00" }}</strong>
+              </div>
+            </div>
+
+            <div>
+              <span style="color:#64748b; display:block; font-size:11px; margin-bottom:2px;">Disponibilidad:</span>
+              <div id="resumen-fechas" style="font-size:11px; color:#475569; line-height:1.4;">
+                {% if cuestionario.fecha_apertura and cuestionario.fecha_cierre %}
+                  {{ cuestionario.fecha_apertura|date:"d M Y H:i" }} &rarr; {{ cuestionario.fecha_cierre|date:"d M Y H:i" }}
+                {% else %}
+                  Configura las fechas en el Paso 1
+                {% endif %}
+              </div>
+            </div>
+          </div>
+
+          <!-- Botones de Guardado y Publicación -->
+          <div style="display:flex; flex-direction:column; gap:10px; border-top:1px solid #f1f5f9; padding-top:16px;">
+            <button type="submit" name="accion" value="borrador" class="btn btn-outline btn-full" style="padding:12px; font-size:13px; font-weight:700; display:inline-flex; align-items:center; justify-content:center; gap:8px;">
+              <i data-lucide="save" style="width:16px; height:16px;"></i> Guardar como Borrador
+            </button>
+            <button type="submit" name="accion" value="publicar" class="btn btn-primary btn-full" style="padding:12px; font-size:13px; font-weight:700; display:inline-flex; align-items:center; justify-content:center; gap:8px;">
+              <i data-lucide="send" style="width:16px; height:16px;"></i> Publicar y Habilitar
+            </button>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </form>
+
 </div>
 
-<!-- MODAL: SELECTOR DE PREGUNTAS DEL BANCO -->
+<!-- MODAL: SELECTOR DE PREGUNTAS DEL BANCO CON BÚSQUEDA EN VIVO -->
 <div id="modal-selector-preguntas" class="modal-backdrop">
-  <div class="modal-box" style="max-width:700px;">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-      <h3 style="font-size:18px; font-weight:800; color:#0f172a;">Seleccionar Preguntas del Banco</h3>
-      <button onclick="closeModal('modal-selector-preguntas')" style="background:none; border:none; font-size:20px; cursor:pointer;">&times;</button>
+  <div class="modal-box" style="max-width:760px; max-height:85vh; display:flex; flex-direction:column;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; border-bottom:1px solid #f1f5f9; padding-bottom:10px;">
+      <div>
+        <h3 style="font-size:17px; font-weight:800; color:#0f172a; margin:0;">Banco Institucional de Preguntas</h3>
+        <p style="font-size:12px; color:#64748b; margin:2px 0 0;">Selecciona las preguntas activos para incluirlos en el cuestionario.</p>
+      </div>
+      <button type="button" onclick="closeModal('modal-selector-preguntas')" style="background:none; border:none; font-size:22px; cursor:pointer; color:#64748b;">&times;</button>
     </div>
 
-    <div style="max-height:350px; overflow-y:auto; display:flex; flex-direction:column; gap:8px; border:1px solid #e2e8f0; border-radius:10px; padding:12px; margin-bottom:16px;">
+    <!-- Buscador en tiempo real dentro del modal -->
+    <div style="margin-bottom:12px;">
+      <div style="position:relative;">
+        <i data-lucide="search" style="position:absolute; left:12px; top:11px; width:16px; height:16px; color:#94a3b8;"></i>
+        <input type="text" id="filtro-modal-preguntas" oninput="filtrarPreguntasModal()" placeholder="Buscar por palabra clave o competencia..." class="form-input" style="padding-left:36px; font-size:13px;">
+      </div>
+    </div>
+
+    <!-- Lista de preguntas disponibles -->
+    <div id="contenedor-preguntas-modal" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:8px; border:1px solid #e2e8f0; border-radius:10px; padding:12px; margin-bottom:16px; min-height:260px;">
       {% for p in todas_preguntas %}
-      <label style="display:flex; align-items:flex-start; gap:10px; padding:8px; border-radius:8px; cursor:pointer; background:#f8fafc; font-size:13px;">
-        <input type="checkbox" class="chk-banco" value="{{ p.id }}" data-cat="{{ p.categoria.nombre }}" data-puntaje="{{ p.puntaje }}" data-enunciado="{{ p.enunciado|truncatechars:65 }}" style="margin-top:3px; accent-color:#186382; width:16px; height:16px;">
-        <div>
-          <div style="font-size:11px; font-weight:700; color:#0284c7;">{{ p.categoria.nombre }} · {{ p.puntaje }} pt</div>
-          <div style="color:#0f172a;">{{ p.enunciado }}</div>
+      <label class="modal-pregunta-item" data-texto="{{ p.categoria.nombre|lower }} {{ p.enunciado|lower }}" style="display:flex; align-items:flex-start; gap:12px; padding:10px; border-radius:8px; cursor:pointer; background:#f8fafc; font-size:13px; border:1px solid transparent; transition:border-color 0.2s;">
+        <input type="checkbox" class="chk-banco" value="{{ p.id }}" data-cat="{{ p.categoria.nombre }}" data-tipo="{{ p.get_tipo_display }}" data-puntaje="{{ p.puntaje }}" data-enunciado="{{ p.enunciado }}" style="margin-top:3px; accent-color:#186382; width:16px; height:16px;">
+        <div style="flex:1;">
+          <div style="display:flex; align-items:center; gap:6px; margin-bottom:4px;">
+            <span class="badge badge-info" style="font-size:10px; font-weight:700;">{{ p.categoria.nombre }}</span>
+            <span style="font-size:11px; color:#64748b;">{{ p.puntaje }} pt</span>
+          </div>
+          <div style="color:#0f172a; font-weight:500; line-height:1.4;">{{ p.enunciado }}</div>
         </div>
       </label>
       {% empty %}
-      <div style="text-align:center; padding:20px; color:#64748b;">No hay preguntas disponibles en el banco.</div>
+      <div style="text-align:center; padding:30px; color:#64748b;">No hay preguntas activas en el banco en este momento.</div>
       {% endfor %}
     </div>
 
-    <div style="display:flex; justify-content:flex-end; gap:10px;">
-      <button type="button" onclick="closeModal('modal-selector-preguntas')" class="btn btn-outline">Cerrar</button>
-      <button type="button" onclick="agregarPreguntasSeleccionadas()" class="btn btn-primary">Añadir al Cuestionario</button>
+    <!-- Footer Modal -->
+    <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid #f1f5f9; padding-top:12px;">
+      <span id="conteo-seleccionadas-modal" style="font-size:12px; color:#64748b;">0 seleccionadas</span>
+      <div style="display:flex; gap:10px;">
+        <button type="button" onclick="closeModal('modal-selector-preguntas')" class="btn btn-outline" style="font-size:13px; padding:8px 16px;">Cancelar</button>
+        <button type="button" onclick="agregarPreguntasSeleccionadas()" class="btn btn-primary" style="font-size:13px; padding:8px 20px;">Añadir al Cuestionario</button>
+      </div>
     </div>
   </div>
 </div>
@@ -234,54 +404,179 @@
 
 {% block extra_scripts %}
 <script>
-  function removerReactivo(btn) {
-    btn.closest('.item-reactivo').remove();
+  let pasoActual = 1;
+
+  function irAPaso(paso) {
+    // Validar si intenta avanzar desde paso 1 sin nombre
+    if (pasoActual === 1 && paso > 1) {
+      const nombreInput = document.getElementById('input-nombre');
+      if (!nombreInput.checkValidity()) {
+        nombreInput.reportValidity();
+        return;
+      }
+    }
+
+    pasoActual = paso;
+
+    // Ocultar todos los contenidos de paso
+    document.querySelectorAll('.step-content').forEach(el => el.style.display = 'none');
+    const targetContent = document.getElementById(`step-content-${paso}`);
+    if (targetContent) targetContent.style.display = 'block';
+
+    // Actualizar estilos de los botones de pestañas
+    for (let i = 1; i <= 3; i++) {
+      const btn = document.getElementById(`tab-step-${i}`);
+      const num = document.getElementById(`step-num-${i}`);
+      if (i === paso) {
+        btn.style.background = '#ffffff';
+        btn.style.color = '#186382';
+        btn.style.boxShadow = 'var(--shadow-sm)';
+        btn.style.fontWeight = '700';
+        num.style.background = '#186382';
+        num.style.color = '#ffffff';
+      } else {
+        btn.style.background = 'transparent';
+        btn.style.color = '#64748b';
+        btn.style.boxShadow = 'none';
+        btn.style.fontWeight = '600';
+        num.style.background = '#e2e8f0';
+        num.style.color = '#475569';
+      }
+    }
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (window.lucide) {
+      lucide.createIcons();
+    }
+  }
+
+  function actualizarResumen() {
+    // Actualizar Nombre
+    const nom = document.getElementById('input-nombre').value.trim();
+    document.getElementById('resumen-nombre').innerText = nom || 'Sin nombre asignado';
+
+    // Actualizar Tiempo
+    const tiempo = parseInt(document.getElementById('input-tiempo').value || 120);
+    document.getElementById('resumen-tiempo').innerText = `${tiempo} min`;
+    const horas = (tiempo / 60).toFixed(1);
+    document.getElementById('tiempo-horas-label').innerText = `Equivale a ~${horas} horas`;
+
+    // Actualizar Escala
+    const maxVal = document.getElementById('input-calif-max').value || '5.00';
+    document.getElementById('resumen-escala-max').innerText = maxVal;
+
+    // Actualizar Fechas
+    const ap = document.getElementById('input-apertura').value;
+    const ci = document.getElementById('input-cierre').value;
+    if (ap && ci) {
+      document.getElementById('resumen-fechas').innerText = `${ap.replace('T', ' ')} → ${ci.replace('T', ' ')}`;
+    }
+  }
+
+  // Filtrado dinámico dentro del modal
+  function filtrarPreguntasModal() {
+    const q = document.getElementById('filtro-modal-preguntas').value.toLowerCase().trim();
+    const items = document.querySelectorAll('.modal-pregunta-item');
+    items.forEach(it => {
+      const texto = it.getAttribute('data-texto') || '';
+      it.style.display = texto.includes(q) ? 'flex' : 'none';
+    });
+  }
+
+  // Contador de seleccionadas en modal
+  document.addEventListener('change', (e) => {
+    if (e.target.classList.contains('chk-banco')) {
+      const totalSel = document.querySelectorAll('.chk-banco:checked').length;
+      document.getElementById('conteo-seleccionadas-modal').innerText = `${totalSel} seleccionadas`;
+    }
+  });
+
+  function removerPregunta(btn) {
+    btn.closest('.item-pregunta').remove();
     recalcularTotales();
+    const items = document.querySelectorAll('.item-pregunta');
+    if (items.length === 0) {
+      const msg = document.getElementById('empty-preguntas-msg');
+      if (msg) msg.style.display = 'block';
+    }
   }
 
   function agregarPreguntasSeleccionadas() {
-    const contenedor = document.getElementById('lista-reactivos-seleccionados');
+    const contenedor = document.getElementById('lista-preguntas-seleccionados');
     const checkboxes = document.querySelectorAll('.chk-banco:checked');
+    const emptyMsg = document.getElementById('empty-preguntas-msg');
 
     checkboxes.forEach(chk => {
       const id = chk.value;
-      // Verificar si ya está en la lista
-      if (document.querySelector(`.item-reactivo[data-id="${id}"]`)) return;
+      if (document.querySelector(`.item-pregunta[data-id="${id}"]`)) return;
 
       const cat = chk.getAttribute('data-cat');
       const puntaje = chk.getAttribute('data-puntaje');
       const enunciado = chk.getAttribute('data-enunciado');
 
+      if (emptyMsg) {
+        emptyMsg.style.display = 'none';
+      }
+
+      const tipo = chk.getAttribute('data-tipo') || 'Pregunta';
       const el = document.createElement('div');
-      el.className = 'item-reactivo';
+      el.className = 'item-pregunta';
       el.setAttribute('data-id', id);
       el.setAttribute('data-puntaje', puntaje);
-      el.style = 'display:flex; justify-content:space-between; align-items:center; background:#ffffff; border:1px solid #e2e8f0; border-radius:8px; padding:10px 14px;';
+      el.style = 'display:flex; align-items:center; justify-content:space-between; gap:16px; background:#ffffff; border:1px solid #e2e8f0; border-radius:10px; padding:12px 16px; transition:border-color 0.2s, box-shadow 0.2s;';
       el.innerHTML = `
         <input type="hidden" name="preguntas_ids" value="${id}">
-        <div>
-          <div style="font-size:11px; font-weight:700; color:#0284c7;">${cat} · ${puntaje} pt</div>
-          <div style="font-size:13px; color:#0f172a;">${enunciado}</div>
+        <div style="display:flex; align-items:flex-start; gap:12px; flex:1; min-width:0;">
+          <div class="pregunta-indice" style="width:28px; height:28px; border-radius:6px; background:#f1f5f9; color:#475569; font-size:12px; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:2px;">
+            0
+          </div>
+          <div style="flex:1; min-width:0;">
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px; flex-wrap:wrap;">
+              <span class="badge badge-info" style="font-size:10px; font-weight:700;">${cat}</span>
+              <span class="badge" style="background:#f8fafc; border:1px solid #e2e8f0; color:#475569; font-size:10px; font-weight:600;">${tipo}</span>
+              <span style="font-size:11px; font-weight:700; color:#186382;">Valor: ${puntaje} pt</span>
+            </div>
+            <div style="font-size:13px; font-weight:600; color:#0f172a; line-height:1.45; word-break:break-word;">${enunciado}</div>
+          </div>
         </div>
-        <button type="button" onclick="removerReactivo(this)" style="background:none; border:none; color:#ef4444; font-size:16px; cursor:pointer;" title="Eliminar del examen">🗑️</button>
+        <button type="button" onclick="removerPregunta(this)" style="width:34px; height:34px; border-radius:8px; border:1px solid #fee2e2; background:#fff5f5; color:#dc2626; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; transition:all 0.2s;" title="Remover del examen">
+          <i data-lucide="trash-2" style="width:16px; height:16px;"></i>
+        </button>
       `;
       contenedor.appendChild(el);
+      if (window.lucide) {
+        lucide.createIcons({ root: el });
+      }
       chk.checked = false;
     });
 
     closeModal('modal-selector-preguntas');
+    document.getElementById('conteo-seleccionadas-modal').innerText = '0 seleccionadas';
     recalcularTotales();
   }
 
   function recalcularTotales() {
-    const items = document.querySelectorAll('.item-reactivo');
+    const items = document.querySelectorAll('.item-pregunta');
     let totalPuntos = 0;
-    items.forEach(it => {
+    items.forEach((it, idx) => {
       totalPuntos += parseFloat(it.getAttribute('data-puntaje') || 1);
+      const ind = it.querySelector('.pregunta-indice');
+      if (ind) {
+        ind.innerText = idx + 1;
+      }
     });
 
-    document.getElementById('conteo-reactivos').innerText = `${items.length} Preguntas`;
+    document.getElementById('conteo-preguntas').innerText = `${items.length} Preguntas`;
     document.getElementById('puntaje-acumulado').innerText = `${totalPuntos.toFixed(2)} pts`;
+    document.getElementById('tab-count-badge').innerText = items.length;
+    document.getElementById('resumen-preguntas').innerText = `${items.length} preguntas`;
+    document.getElementById('resumen-puntaje').innerText = `${totalPuntos.toFixed(2)} pts`;
   }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    actualizarResumen();
+    recalcularTotales();
+    irAPaso(1);
+  });
 </script>
 {% endblock %}

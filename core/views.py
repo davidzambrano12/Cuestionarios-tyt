@@ -1,8 +1,9 @@
+from django.utils import timezone
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.db.models import Avg
+from django.db.models import Avg, Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -14,7 +15,12 @@ from preguntas.models import Categoria, Cuestionario, Intento, Pregunta
 
 def landing_view(request):
     """Página de inicio pública del Simulador Saber TyT Uniputumayo."""
-    cuestionarios = Cuestionario.objects.filter(estado="disponible").order_by("-id")
+    ahora = timezone.now()
+    cuestionarios = Cuestionario.objects.filter(
+        estado="disponible",
+        fecha_apertura__lte=ahora,
+        fecha_cierre__gte=ahora,
+    ).order_by("-id")
     return render(request, "landing.html", {"cuestionarios": cuestionarios})
 
 
@@ -150,9 +156,81 @@ def estudiante_dashboard_view(request):
     user = request.user
     codigo = user.perfil.codigo_institucional if hasattr(user, "perfil") else user.username
 
-    cuestionarios_disponibles = Cuestionario.objects.filter(estado="disponible").order_by("-id")
+    ahora = timezone.now()
+
+    # Cuestionarios realmente vigentes
+    cuestionarios_disponibles = (
+        Cuestionario.objects.filter(
+            estado="disponible",
+            fecha_apertura__lte=ahora,
+            fecha_cierre__gte=ahora,
+        )
+        .prefetch_related("cuestionario_preguntas", "intentos")
+        .order_by("fecha_cierre")
+    )
     cuestionario_destacado = cuestionarios_disponibles.first()
-    
+
+    # Cuestionarios programados para fechas futuras
+    cuestionarios_programados = (
+        Cuestionario.objects.filter(
+            Q(estado="programado") | Q(estado="disponible", fecha_apertura__gt=ahora)
+        )
+        .prefetch_related("cuestionario_preguntas")
+        .order_by("fecha_apertura")
+    )
+
+    from django.db.models import Count
+
+    # Mapear intentos activos (en progreso), asegurando cerrar duplicados huérfanos
+    intentos_activos_qs = Intento.objects.filter(
+        participante_codigo=codigo,
+        estado="en_progreso",
+    ).order_by("-fecha_inicio")
+
+    intentos_activos_map = {}
+    for i_act in intentos_activos_qs:
+        limite_seg = i_act.cuestionario.tiempo_limite_minutos * 60
+        delta_s = int((ahora - i_act.fecha_inicio).total_seconds())
+        if delta_s > (limite_seg + 30):
+            # Auto-cerrar intento vencido
+            i_act.estado = "vencido"
+            i_act.fecha_fin = ahora
+            i_act.duracion_segundos = delta_s
+            i_act.save()
+        elif i_act.cuestionario_id not in intentos_activos_map:
+            intentos_activos_map[i_act.cuestionario_id] = i_act
+        else:
+            # Cerrar duplicado huérfano más antiguo
+            i_act.estado = "vencido"
+            i_act.fecha_fin = ahora
+            i_act.duracion_segundos = delta_s
+            i_act.save()
+
+    # Mapear intentos realizados (finalizados o vencidos) por cuestionario
+    intentos_hechos_qs = (
+        Intento.objects.filter(
+            participante_codigo=codigo,
+            estado__in=["finalizado", "vencido"],
+        )
+        .values("cuestionario_id")
+        .annotate(total=Count("id"))
+    )
+    intentos_hechos_map = {item["cuestionario_id"]: item["total"] for item in intentos_hechos_qs}
+
+    for c in cuestionarios_disponibles:
+        c.intento_activo = intentos_activos_map.get(c.id)
+        c.intentos_hechos = intentos_hechos_map.get(c.id, 0)
+        c.intentos_restantes = max(0, c.intentos_permitidos - c.intentos_hechos)
+        c.intentos_agotados = (c.intentos_hechos >= c.intentos_permitidos) and not bool(c.intento_activo)
+        c.siguiente_intento_num = min(c.intentos_permitidos, c.intentos_hechos + 1)
+
+    if cuestionario_destacado:
+        cuestionario_destacado.intento_activo = intentos_activos_map.get(cuestionario_destacado.id)
+        cuestionario_destacado.intentos_hechos = intentos_hechos_map.get(cuestionario_destacado.id, 0)
+        cuestionario_destacado.intentos_restantes = max(0, cuestionario_destacado.intentos_permitidos - cuestionario_destacado.intentos_hechos)
+        cuestionario_destacado.intentos_agotados = (cuestionario_destacado.intentos_hechos >= cuestionario_destacado.intentos_permitidos) and not bool(cuestionario_destacado.intento_activo)
+        cuestionario_destacado.siguiente_intento_num = min(cuestionario_destacado.intentos_permitidos, cuestionario_destacado.intentos_hechos + 1)
+
     # Intentos propios del estudiante (aislamiento de seguridad)
     intentos_estudiante = Intento.objects.filter(
         participante_codigo=codigo
@@ -163,9 +241,11 @@ def estudiante_dashboard_view(request):
 
     return render(request, "estudiante_dashboard.html", {
         "cuestionarios_disponibles": cuestionarios_disponibles,
+        "cuestionarios_programados": cuestionarios_programados,
         "cuestionario_destacado": cuestionario_destacado,
         "intentos_estudiante": intentos_estudiante,
         "disponibles_count": cuestionarios_disponibles.count(),
+        "programados_count": cuestionarios_programados.count(),
         "promedio_global": promedio_global,
     })
 

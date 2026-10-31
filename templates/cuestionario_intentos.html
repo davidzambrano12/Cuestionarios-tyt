@@ -1,0 +1,425 @@
+{% extends 'app_base.html' %}
+
+{% block title %}Auditoría e Intentos: {{ cuestionario.nombre }} - Simulador Saber TyT{% endblock %}
+
+{% block nav_title %}Intentos y Calificaciones{% endblock %}
+
+{% block app_content %}
+<div>
+
+  <!-- Header Banner Institucional Uniputumayo -->
+  <div class="dashboard-banner">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:16px;">
+      <div>
+        <div class="banner-badge">● Auditoría y Calificaciones Oficiales Saber TyT</div>
+        <h1 class="banner-title">{{ cuestionario.nombre }}</h1>
+        <p class="banner-subtitle">
+          Sábana de notas definitivas, auditoría de presentaciones y control de reintentos
+        </p>
+        <div style="display:flex; gap:16px; font-size:12px; color:rgba(255,255,255,0.85); margin-top:8px; flex-wrap:wrap;">
+          <span><i data-lucide="clock" style="width:13px; height:13px; vertical-align:middle;"></i> Límite: <strong>{{ cuestionario.tiempo_limite_minutos }} min</strong></span>
+          <span><i data-lucide="rotate-cw" style="width:13px; height:13px; vertical-align:middle;"></i> Máx. Intentos: <strong>{{ cuestionario.intentos_permitidos }}</strong></span>
+          <span><i data-lucide="award" style="width:13px; height:13px; vertical-align:middle;"></i> Aprobación: <strong>{{ cuestionario.calificacion_aprobacion }} / {{ cuestionario.calificacion_maxima }}</strong></span>
+          <span><i data-lucide="help-circle" style="width:13px; height:13px; vertical-align:middle;"></i> Preguntas: <strong>{{ cuestionario.cuestionario_preguntas.count }}</strong></span>
+        </div>
+      </div>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <a href="/cuestionarios/{{ cuestionario.id }}/intentos/exportar/" class="btn btn-outline" style="background:white; color:#0f172a; padding:10px 16px; border-radius:10px; font-weight:600; display:inline-flex; align-items:center; gap:6px;">
+          <i data-lucide="download" style="width:15px; height:15px;"></i> Exportar Sábana Excel
+        </a>
+        <a href="/cuestionarios/{{ cuestionario.id }}/previsualizar/" class="btn btn-outline" style="background:white; color:#0f172a; padding:10px 16px; border-radius:10px; font-weight:600; display:inline-flex; align-items:center; gap:6px;">
+          <i data-lucide="eye" style="width:15px; height:15px;"></i> Probar Examen
+        </a>
+        <a href="/cuestionarios/" class="btn btn-primary" style="padding:10px 18px; border-radius:10px; font-weight:700; display:inline-flex; align-items:center; gap:6px;">
+          <i data-lucide="arrow-left" style="width:15px; height:15px;"></i> Volver
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Métricas Rápidas Clave -->
+  <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:16px; margin-bottom:20px;">
+    
+    <div class="card" style="padding:18px 20px; border-radius:14px; margin-bottom:0;">
+      <div style="font-size:11px; color:#64748b; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px;">
+        Estudiantes Evaluados
+      </div>
+      <div style="font-size:26px; font-weight:800; color:#0f172a;">{{ total_estudiantes }}</div>
+      <div style="font-size:12px; color:#64748b; margin-top:4px;">
+        {{ total_intentos_registrados }} presentaciones totales registradas
+      </div>
+    </div>
+
+    <div class="card" style="padding:18px 20px; border-radius:14px; margin-bottom:0; background:#f0fdf4; border:1px solid #bbf7d0;">
+      <div style="font-size:11px; color:#166534; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px;">
+        Estudiantes Aprobados
+      </div>
+      <div style="font-size:26px; font-weight:800; color:#15803d;">{{ estudiantes_aprobados_count }}</div>
+      <div style="font-size:12px; color:#166534; margin-top:4px;">
+        Tasa de éxito grupal: <strong>{{ tasa_aprobacion }}%</strong>
+      </div>
+    </div>
+
+    <div class="card" style="padding:18px 20px; border-radius:14px; margin-bottom:0; background:#fef2f2; border:1px solid #fecaca;">
+      <div style="font-size:11px; color:#991b1b; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px;">
+        Estudiantes Reprobados
+      </div>
+      <div style="font-size:26px; font-weight:800; color:#b91c1c;">{{ estudiantes_reprobados_count }}</div>
+      <div style="font-size:12px; color:#991b1b; margin-top:4px;">
+        Bajo el umbral institucional ({{ cuestionario.calificacion_aprobacion }})
+      </div>
+    </div>
+
+    <div class="card" style="padding:18px 20px; border-radius:14px; margin-bottom:0; background:#f0f9ff; border:1px solid #bae6fd;">
+      <div style="font-size:11px; color:#0369a1; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px;">
+        Promedio Definitivo
+      </div>
+      <div style="font-size:26px; font-weight:800; color:#0284c7;">{{ promedio_calif }}</div>
+      <div style="font-size:12px; color:#0369a1; margin-top:4px;">
+        Nota más alta promedio (Escala: {{ cuestionario.calificacion_maxima }})
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Barra de Filtros y Pestañas de Vista -->
+  <div class="card" style="padding:16px 20px; margin-bottom:20px; border-radius:14px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap;">
+      
+      <!-- Pestañas Duales: Agrupado por Estudiante vs Historial Plano -->
+      <div class="tabs-header" style="margin-bottom:0; border-bottom:none;">
+        <button type="button" class="tab-btn active" id="btn-tab-estudiantes" onclick="cambiarVista('estudiantes')">
+          <i data-lucide="users" style="width:14px; height:14px; margin-right:4px;"></i>
+          Sábana por Estudiantes <span class="badge badge-info" style="margin-left:6px;">{{ total_estudiantes }}</span>
+        </button>
+        <button type="button" class="tab-btn" id="btn-tab-historial" onclick="cambiarVista('historial')">
+          <i data-lucide="history" style="width:14px; height:14px; margin-right:4px;"></i>
+          Historial de Intentos <span class="badge" style="background:#cbd5e1; color:#334155; margin-left:6px;">{{ total_intentos_registrados }}</span>
+        </button>
+      </div>
+
+      <!-- Buscador en tiempo real -->
+      <div style="position:relative; width:100%; max-width:380px;">
+        <i data-lucide="search" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); width:15px; height:15px; color:#94a3b8;"></i>
+        <input type="text" id="filtro-busqueda" onkeyup="filtrarContenido()" placeholder="Buscar por nombre o código..." class="form-input" style="padding-left:36px; height:38px; font-size:13px; width:100%;">
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================= VISTA 1: SÁBANA POR ESTUDIANTES (AGRUPADA Y LIMPIA - ALTERNATIVA 1) ================= -->
+  <div id="vista-estudiantes" class="card" style="padding:0; border-radius:16px; overflow:hidden; margin-bottom:30px;">
+    <div class="table-responsive" style="overflow-x:auto;">
+      <table class="table" style="width:100%; margin:0; border-collapse:collapse; min-width:880px;">
+        <colgroup>
+          <col style="width: 24%;">
+          <col style="width: 11%;">
+          <col style="width: 15%;">
+          <col style="width: 18%;">
+          <col style="width: 32%;">
+        </colgroup>
+        <thead style="background:#f8fafc; border-bottom:1px solid #e2e8f0;">
+          <tr>
+            <th style="padding:14px 18px; font-size:12px; font-weight:700; color:#475569; text-align:left; white-space:nowrap;">Estudiante</th>
+            <th style="padding:14px 18px; font-size:12px; font-weight:700; color:#475569; text-align:center; white-space:nowrap;">Intentos</th>
+            <th style="padding:14px 18px; font-size:12px; font-weight:700; color:#475569; text-align:center; white-space:nowrap;">Nota Final</th>
+            <th style="padding:14px 18px; font-size:12px; font-weight:700; color:#475569; text-align:left; white-space:nowrap;">Estado / Entrega</th>
+            <th style="padding:14px 18px; font-size:12px; font-weight:700; color:#475569; text-align:right; white-space:nowrap;">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for est in estudiantes_agrupados %}
+          <!-- Fila Principal del Estudiante -->
+          <tr class="fila-estudiante" data-texto="{{ est.nombre|lower }} {{ est.codigo|lower }}" style="border-bottom:1px solid #f1f5f9;">
+            
+            <!-- Estudiante -->
+            <td style="padding:16px 18px; vertical-align:middle;">
+              <div style="font-weight:700; font-size:14px; color:#0f172a; line-height:1.3;">{{ est.nombre }}</div>
+              <div style="font-size:12px; color:#64748b; display:inline-flex; align-items:center; gap:4px; margin-top:3px;">
+                <i data-lucide="badge-check" style="width:13px; height:13px; color:#186382;"></i>
+                Cód: <strong style="color:#186382;">{{ est.codigo }}</strong>
+              </div>
+            </td>
+
+            <!-- Intentos Usados -->
+            <td style="padding:16px 18px; text-align:center; vertical-align:middle;">
+              <span class="badge" style="background:#e0f2fe; color:#0369a1; font-weight:700; font-size:12px; padding:4px 10px; white-space:nowrap;">
+                {{ est.total_intentos }} de {{ cuestionario.intentos_permitidos }}
+              </span>
+            </td>
+
+            <!-- Nota Final (Definitiva) -->
+            <td style="padding:16px 18px; text-align:center; vertical-align:middle;">
+              {% if est.mejor_calificacion is not None %}
+                <div style="font-size:16px; font-weight:800; color:#0f172a; white-space:nowrap;">
+                  {{ est.mejor_calificacion }} <span style="font-size:12px; color:#94a3b8; font-weight:500;">/ {{ cuestionario.calificacion_maxima }}</span>
+                </div>
+                <div style="margin-top:3px;">
+                  {% if est.aprobado %}
+                    <span class="badge badge-success" style="font-size:11px; padding:2px 8px; white-space:nowrap;">● Aprobado</span>
+                  {% else %}
+                    <span class="badge badge-danger" style="font-size:11px; padding:2px 8px; white-space:nowrap;">● Reprobado</span>
+                  {% endif %}
+                </div>
+              {% else %}
+                <span style="font-size:12px; color:#64748b; font-style:italic;">En progreso</span>
+              {% endif %}
+            </td>
+
+            <!-- Estado / Entrega -->
+            <td style="padding:16px 18px; font-size:12px; vertical-align:middle;">
+              {% if est.tiene_activo %}
+                <div style="display:flex; flex-direction:column; gap:3px;">
+                  <span class="badge" style="background:#fef3c7; color:#92400e; font-weight:700; font-size:11px; width:fit-content; white-space:nowrap;">● En curso</span>
+                  <span style="font-size:11px; color:#64748b; white-space:nowrap;">Inicio: {{ est.ultimo_intento.fecha_inicio|date:"d M · H:i" }}</span>
+                </div>
+              {% elif est.ultimo_intento.fecha_fin %}
+                <div style="display:flex; flex-direction:column; gap:2px;">
+                  <span style="font-size:12px; color:#0f172a; font-weight:600; white-space:nowrap; display:inline-flex; align-items:center; gap:4px;">
+                    <i data-lucide="check" style="width:12px; height:12px; color:#16a34a;"></i> {{ est.ultimo_intento.fecha_fin|date:"d M Y · H:i" }}
+                  </span>
+                  <span style="font-size:11px; color:#64748b; white-space:nowrap;">Duración: {{ est.ultimo_intento.duracion_segundos }} seg</span>
+                </div>
+              {% elif est.ultimo_intento %}
+                <div style="font-size:12px; color:#64748b; white-space:nowrap;">Inicio: {{ est.ultimo_intento.fecha_inicio|date:"d M · H:i" }}</div>
+              {% else %}
+                <span style="color:#94a3b8;">--</span>
+              {% endif %}
+            </td>
+
+            <!-- Acciones -->
+            <td style="padding:16px 18px; text-align:right; vertical-align:middle; white-space:nowrap;">
+              <div style="display:inline-flex; align-items:center; gap:8px;">
+                
+                <!-- Botón Acordeón Desplegable -->
+                <button type="button" onclick="toggleAcordeon('detalles-est-{{ forloop.counter }}', this)" class="btn btn-outline" style="padding:6px 12px; font-size:12px; gap:5px; font-weight:600; white-space:nowrap; border-radius:8px;">
+                  <span>Ver {{ est.total_intentos }} intento{% if est.total_intentos != 1 %}s{% endif %}</span>
+                  <i data-lucide="chevron-down" style="width:13px; height:13px; transition:transform 0.2s ease;"></i>
+                </button>
+
+                <!-- Reiniciar todos los intentos del alumno -->
+                <form method="POST" action="/cuestionarios/{{ cuestionario.id }}/intentos/reiniciar-estudiante/{{ est.codigo }}/" onsubmit="return confirm('¿Confirmas reiniciar TODOS los intentos de {{ est.nombre }} ({{ est.codigo }}) en este examen?\n\nEsta acción restablecerá totalmente su cupo de presentación a cero intentos consumidos.');" style="display:inline; margin:0;">
+                  {% csrf_token %}
+                  <button type="submit" class="btn" style="background:#fef2f2; border:1px solid #fecaca; color:#dc2626; padding:6px 10px; font-size:12px; display:inline-flex; align-items:center; gap:4px; white-space:nowrap; border-radius:8px;" title="Restablecer cupo completo al estudiante">
+                    <i data-lucide="rotate-ccw" style="width:13px; height:13px;"></i> Restablecer
+                  </button>
+                </form>
+
+              </div>
+            </td>
+
+          </tr>
+
+          <!-- Fila Acordeón con los Intentos Individuales del Estudiante -->
+          <tr id="detalles-est-{{ forloop.counter }}" style="display:none; background:#f8fafc;">
+            <td colspan="5" style="padding:16px 24px; border-bottom:2px solid #e2e8f0;">
+              
+              <div style="background:white; border:1px solid #e2e8f0; border-radius:12px; padding:14px; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+                <div style="font-size:12px; font-weight:800; color:#186382; text-transform:uppercase; margin-bottom:10px; display:flex; align-items:center; gap:6px;">
+                  <i data-lucide="layers" style="width:14px; height:14px;"></i> Desglose Cronológico de Intentos: {{ est.nombre }}
+                </div>
+
+                <div style="display:flex; flex-direction:column; gap:8px;">
+                  {% for it in est.intentos %}
+                  <div style="display:flex; justify-content:space-between; align-items:center; background:#f8fafc; border:1px solid #f1f5f9; border-radius:8px; padding:10px 14px; font-size:12px; flex-wrap:wrap; gap:8px;">
+                    
+                    <div style="display:flex; align-items:center; gap:12px;">
+                      <span class="badge" style="background:#0f172a; color:white; font-size:11px; font-weight:700;">
+                        Intento #{{ forloop.counter }}
+                      </span>
+                      <span>
+                        <i data-lucide="calendar" style="width:12px; height:12px; vertical-align:middle; color:#64748b;"></i>
+                        {{ it.fecha_inicio|date:"d M Y · H:i:s" }}
+                      </span>
+                      {% if it.duracion_segundos %}
+                        <span style="color:#64748b;"><i data-lucide="timer" style="width:12px; height:12px; vertical-align:middle;"></i> {{ it.duracion_segundos }} seg</span>
+                      {% endif %}
+                    </div>
+
+                    <div style="display:flex; align-items:center; gap:16px;">
+                      <!-- Nota del Intento -->
+                      <div>
+                        {% if it.estado == 'finalizado' %}
+                          <strong>Nota: {{ it.calificacion }}</strong> / {{ cuestionario.calificacion_maxima }}
+                          {% if it.aprobado %}
+                            <span class="badge badge-success" style="font-size:10px; margin-left:4px;">Aprobado</span>
+                          {% else %}
+                            <span class="badge badge-danger" style="font-size:10px; margin-left:4px;">Reprobado</span>
+                          {% endif %}
+                        {% elif it.estado == 'en_progreso' %}
+                          <span class="badge" style="background:#fef3c7; color:#92400e; font-size:10px;">● En curso</span>
+                        {% else %}
+                          <span class="badge" style="background:#f1f5f9; color:#64748b; font-size:10px;">Vencido</span>
+                        {% endif %}
+                      </div>
+
+                      <!-- Acciones del Intento -->
+                      <div style="display:inline-flex; gap:6px;">
+                        <a href="/evaluacion/{{ it.id }}/resultado/" class="btn btn-outline" style="padding:4px 8px; font-size:11px; gap:4px;" title="Ver respuestas del examen">
+                          <i data-lucide="eye" style="width:12px; height:12px;"></i> Ver Examen
+                        </a>
+                        <form method="POST" action="/cuestionarios/intentos/{{ it.id }}/reiniciar/" onsubmit="return confirm('¿Reiniciar este intento individual #{{ forloop.counter }} de {{ est.nombre }}?');" style="display:inline;">
+                          {% csrf_token %}
+                          <button type="submit" class="btn" style="background:#fff; border:1px solid #fecaca; color:#dc2626; padding:4px 8px; font-size:11px; display:inline-flex; align-items:center; gap:4px;" title="Eliminar solo este intento">
+                            <i data-lucide="trash-2" style="width:12px; height:12px;"></i> Anular
+                          </button>
+                        </form>
+                      </div>
+                    </div>
+
+                  </div>
+                  {% endfor %}
+                </div>
+
+              </div>
+
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="5" style="padding:48px 24px; text-align:center; color:#64748b;">
+              <div style="width:48px; height:48px; border-radius:50%; background:#f1f5f9; display:flex; align-items:center; justify-content:center; margin:0 auto 12px;">
+                <i data-lucide="users" style="width:24px; height:24px; color:#94a3b8;"></i>
+              </div>
+              <h3 style="font-size:16px; font-weight:800; color:#0f172a; margin-bottom:4px;">No hay presentaciones registradas</h3>
+              <p style="font-size:13px; color:#64748b; margin:0;">
+                Ningún estudiante ha iniciado aún este cuestionario.
+              </p>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+
+  <!-- ================= VISTA 2: HISTORIAL COMPLETO DE INTENTOS (CRONOLÓGICO) ================= -->
+  <div id="vista-historial" class="card" style="display:none; padding:0; border-radius:16px; overflow:hidden; margin-bottom:30px;">
+    <div class="table-responsive" style="overflow-x:auto;">
+      <table class="table" style="width:100%; margin:0; border-collapse:collapse; min-width:880px;">
+        <thead style="background:#f8fafc; border-bottom:1px solid #e2e8f0;">
+          <tr>
+            <th style="padding:14px 18px; font-size:12px; font-weight:700; color:#475569; text-align:left;">Estudiante</th>
+            <th style="padding:14px 18px; font-size:12px; font-weight:700; color:#475569; text-align:left;">Fecha y Hora</th>
+            <th style="padding:14px 18px; font-size:12px; font-weight:700; color:#475569; text-align:center;">Duración</th>
+            <th style="padding:14px 18px; font-size:12px; font-weight:700; color:#475569; text-align:center;">Calificación</th>
+            <th style="padding:14px 18px; font-size:12px; font-weight:700; color:#475569; text-align:center;">Estado</th>
+            <th style="padding:14px 18px; font-size:12px; font-weight:700; color:#475569; text-align:right;">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for i in intentos %}
+          <tr class="fila-historial" data-texto="{{ i.participante_nombre|lower }} {{ i.participante_codigo|lower }}" style="border-bottom:1px solid #f1f5f9;">
+            <td style="padding:16px 18px;">
+              <div style="font-weight:700; font-size:14px; color:#0f172a;">{{ i.participante_nombre }}</div>
+              <div style="font-size:12px; color:#64748b;">Código: <strong style="color:#186382;">{{ i.participante_codigo }}</strong></div>
+            </td>
+            <td style="padding:16px 18px; font-size:13px; color:#334155;">
+              <div>{{ i.fecha_inicio|date:"d M Y · H:i:s" }}</div>
+              {% if i.fecha_fin %}
+                <div style="font-size:12px; color:#64748b;">Fin: {{ i.fecha_fin|date:"H:i:s" }}</div>
+              {% endif %}
+            </td>
+            <td style="padding:16px 18px; font-size:13px; text-align:center;">
+              {% if i.duracion_segundos %}{{ i.duracion_segundos }} s{% else %}--{% endif %}
+            </td>
+            <td style="padding:16px 18px; text-align:center;">
+              {% if i.estado == 'finalizado' %}
+                <strong style="font-size:15px; color:#0f172a;">{{ i.calificacion }}</strong>
+                {% if i.aprobado %}
+                  <span class="badge badge-success" style="font-size:10px; margin-left:4px;">Aprobado</span>
+                {% else %}
+                  <span class="badge badge-danger" style="font-size:10px; margin-left:4px;">Reprobado</span>
+                {% endif %}
+              {% else %}
+                <span style="font-size:12px; color:#64748b;">Pendiente</span>
+              {% endif %}
+            </td>
+            <td style="padding:16px 18px; text-align:center;">
+              {% if i.estado == 'finalizado' %}
+                <span class="badge badge-info" style="font-size:11px;">Finalizado</span>
+              {% elif i.estado == 'en_progreso' %}
+                <span class="badge" style="background:#fef3c7; color:#92400e; font-size:11px;">● En curso</span>
+              {% else %}
+                <span class="badge" style="background:#f1f5f9; color:#64748b; font-size:11px;">Vencido</span>
+              {% endif %}
+            </td>
+            <td style="padding:16px 18px; text-align:right;">
+              <div style="display:inline-flex; align-items:center; gap:6px;">
+                <a href="/evaluacion/{{ i.id }}/resultado/" class="btn btn-outline" style="padding:6px 10px; font-size:11px;">
+                  <i data-lucide="eye" style="width:12px; height:12px;"></i> Ver
+                </a>
+                <form method="POST" action="/cuestionarios/intentos/{{ i.id }}/reiniciar/" onsubmit="return confirm('¿Reiniciar este intento?');" style="display:inline;">
+                  {% csrf_token %}
+                  <button type="submit" class="btn" style="background:#fef2f2; border:1px solid #fecaca; color:#dc2626; padding:6px 10px; font-size:11px;">
+                    <i data-lucide="trash-2" style="width:12px; height:12px;"></i> Anular
+                  </button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  function cambiarVista(vista) {
+    const vistaEst = document.getElementById('vista-estudiantes');
+    const vistaHist = document.getElementById('vista-historial');
+    const btnEst = document.getElementById('btn-tab-estudiantes');
+    const btnHist = document.getElementById('btn-tab-historial');
+
+    if (vista === 'estudiantes') {
+      vistaEst.style.display = 'block';
+      vistaHist.style.display = 'none';
+      btnEst.classList.add('active');
+      btnHist.classList.remove('active');
+    } else {
+      vistaEst.style.display = 'none';
+      vistaHist.style.display = 'block';
+      btnEst.classList.remove('active');
+      btnHist.classList.add('active');
+    }
+  }
+
+  function toggleAcordeon(idFila, btn) {
+    const fila = document.getElementById(idFila);
+    const icon = btn.querySelector('[data-lucide="chevron-down"]');
+    if (fila.style.display === 'none' || fila.style.display === '') {
+      fila.style.display = 'table-row';
+      if (icon) icon.style.transform = 'rotate(180deg)';
+    } else {
+      fila.style.display = 'none';
+      if (icon) icon.style.transform = 'rotate(0deg)';
+    }
+  }
+
+  function filtrarContenido() {
+    const q = document.getElementById('filtro-busqueda').value.toLowerCase().trim();
+    
+    // Filtrar filas de estudiantes
+    document.querySelectorAll('.fila-estudiante').forEach((fila, idx) => {
+      const texto = fila.getAttribute('data-texto') || '';
+      const visible = texto.includes(q);
+      fila.style.display = visible ? 'table-row' : 'none';
+      const filaDetalle = document.getElementById(`detalles-est-${idx + 1}`);
+      if (filaDetalle && !visible) {
+        filaDetalle.style.display = 'none';
+      }
+    });
+
+    // Filtrar filas de historial
+    document.querySelectorAll('.fila-historial').forEach(fila => {
+      const texto = fila.getAttribute('data-texto') || '';
+      fila.style.display = texto.includes(q) ? 'table-row' : 'none';
+    });
+  }
+</script>
+{% endblock %}

@@ -1,38 +1,35 @@
-{% extends 'base.html' %}
+{% extends 'app_base.html' %}
 
 {% block title %}Banco de Preguntas - Simulador Saber TyT{% endblock %}
 
-{% block content %}
-<div style="background:#f8fafc; min-height:100vh; padding:24px 20px;">
-  <div style="max-width:860px; margin:0 auto;">
+{% block nav_title %}Banco de Preguntas{% endblock %}
 
-    <!-- Topbar con volver -->
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-      <a href="javascript:history.back()" style="display:inline-flex; align-items:center; justify-content:center; width:38px; height:38px; border-radius:50%; background:white; border:1px solid #e2e8f0; color:#0f172a; text-decoration:none;">
-        &larr;
-      </a>
-      <h2 style="font-size:18px; font-weight:800; color:#0f172a;">Preguntas</h2>
-      <a href="/preguntas/importar/" class="btn btn-outline" style="font-size:12px; padding:6px 12px;">
-        📥 Importar Excel
-      </a>
-    </div>
-
-    <!-- Header y botón Nueva -->
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+{% block app_content %}
+<div>
+  <!-- Header Banner -->
+  <div class="dashboard-banner">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:16px;">
       <div>
-        <h1 style="font-size:24px; font-weight:800; color:#0f172a; margin-bottom:4px;">Banco de Preguntas</h1>
-        <p style="font-size:13px; color:#64748b;">Gestión, edición y clasificación de reactivos Saber TyT</p>
+        <div class="banner-badge">● Preguntas Institucionales Saber TyT</div>
+        <h1 class="banner-title">Banco de Preguntas</h1>
+        <p class="banner-subtitle">Gestión, edición y clasificación de preguntas por competencia evaluada</p>
       </div>
-      <button type="button" onclick="openModal('modal-nueva-pregunta')" class="btn btn-primary" style="padding:10px 18px; border-radius:10px;">
-        <span>+</span> Nueva
-      </button>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <a href="/preguntas/importar/" class="btn btn-outline" style="padding:10px 16px; border-radius:10px; background:white; font-weight:600; display:inline-flex; align-items:center; gap:6px;">
+          <i data-lucide="upload" style="width:16px; height:16px;"></i> Importar Excel
+        </a>
+        <button type="button" onclick="openModal('modal-nueva-pregunta')" class="btn btn-primary" style="padding:10px 18px; border-radius:10px; font-weight:700; display:inline-flex; align-items:center; gap:6px;">
+          <i data-lucide="plus"></i> Nueva Pregunta
+        </button>
+      </div>
     </div>
+  </div>
 
     <!-- Buscador y Filtros -->
     <div class="card" style="padding:16px; margin-bottom:20px;">
       <div style="display:flex; gap:12px; flex-wrap:wrap;">
         <div style="flex:2; min-width:240px; position:relative;">
-          <span style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:#94a3b8;">🔍</span>
+          <i data-lucide="search" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:#94a3b8; width:16px; height:16px;"></i>
           <input type="text" id="filtro-pregunta" onkeyup="filtrarPreguntas()" placeholder="Buscar por enunciado o palabra clave..." class="form-input" style="padding-left:36px;">
         </div>
 
@@ -78,24 +75,24 @@
 
         <!-- Código y Enunciado -->
         <div style="font-size:11px; color:#94a3b8; font-weight:700; margin-bottom:4px;">Cód. P-{{ p.id }}</div>
-        <h3 style="font-size:15px; font-weight:700; color:#0f172a; line-height:1.4; margin-bottom:10px;">
+        <h3 class="text-md font-bold text-main" style="margin-bottom:10px;">
           {{ p.enunciado }}
         </h3>
 
         <!-- Texto base si existe -->
         {% if p.texto_base %}
-        <div style="background:#f8fafc; border-left:3px solid #186382; padding:10px 14px; font-size:12px; color:#475569; margin-bottom:14px; border-radius:0 8px 8px 0;">
+        <div class="text-reading text-sm text-muted" style="background:#f8fafc; border-left:3px solid var(--primary); padding:10px 14px; margin-bottom:14px; border-radius:0 8px 8px 0;">
           <strong>Texto de apoyo:</strong> {{ p.texto_base|truncatewords:30 }}
         </div>
         {% endif %}
 
         <!-- Opciones de respuesta -->
         <div style="margin-bottom:14px;">
-          <div style="font-size:12px; font-weight:700; color:#334155; margin-bottom:6px;">Opciones de respuesta:</div>
+          <div class="text-xs font-bold text-main" style="margin-bottom:6px;">Opciones de respuesta:</div>
           <div style="display:flex; flex-direction:column; gap:6px;">
             {% for op in p.opciones.all %}
             <div style="display:flex; align-items:center; gap:8px; padding:6px 12px; border-radius:6px; font-size:12px; {% if op.es_correcta %}background:#dcfce7; color:#15803d; border:1px solid #86efac; font-weight:600;{% else %}background:#f8fafc; color:#475569; border:1px solid #e2e8f0;{% endif %}">
-              <span>{% if op.es_correcta %}✓ Correcta{% else %}○{% endif %}:</span>
+              <span style="display:inline-flex; align-items:center; gap:4px;">{% if op.es_correcta %}<i data-lucide="check" style="width:14px; height:14px;"></i> Correcta{% else %}<i data-lucide="circle" style="width:12px; height:12px;"></i>{% endif %}:</span>
               <span>{{ op.texto }}</span>
             </div>
             {% endfor %}
@@ -104,8 +101,9 @@
 
         <!-- Retroalimentación -->
         {% if p.retroalimentacion %}
-        <div style="font-size:11px; color:#64748b; background:#f0fdf4; border-radius:6px; padding:8px 12px; margin-bottom:14px;">
-          💡 <strong>Retroalimentación pedagógica:</strong> {{ p.retroalimentacion }}
+        <div style="font-size:11px; color:#64748b; background:#f0fdf4; border-radius:6px; padding:8px 12px; margin-bottom:14px; display:flex; align-items:flex-start; gap:6px;">
+          <i data-lucide="lightbulb" style="width:14px; height:14px; color:#16a34a; flex-shrink:0; margin-top:2px;"></i>
+          <div><strong>Retroalimentación pedagógica:</strong> {{ p.retroalimentacion }}</div>
         </div>
         {% endif %}
 
@@ -113,18 +111,18 @@
         <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid #f1f5f9; padding-top:12px;">
           <span style="font-size:11px; color:#94a3b8;">Huella SHA-256 validada</span>
           <div style="display:flex; gap:8px;">
-            <button type="button" onclick="cargarPreguntaEditar('{{ p.id }}')" class="btn btn-outline" style="padding:4px 10px; font-size:11px; color:#186382; background:#f0f9ff; border-color:#bae6fd;">
-              ✏️ Editar
+            <button type="button" onclick="cargarPreguntaEditar('{{ p.id }}')" class="btn btn-outline" style="padding:4px 10px; font-size:11px; color:#186382; background:#f0f9ff; border-color:#bae6fd; display:inline-flex; align-items:center; gap:4px;">
+              <i data-lucide="edit-3" style="width:13px; height:13px;"></i> Editar
             </button>
             <form method="POST" action="/preguntas/{{ p.id }}/toggle-estado/">
               {% csrf_token %}
               {% if p.activa %}
-                <button type="submit" class="btn btn-outline" style="padding:4px 10px; font-size:11px; color:#b91c1c;">
-                  🚫 Desactivar
+                <button type="submit" class="btn btn-outline" style="padding:4px 10px; font-size:11px; color:#b91c1c; display:inline-flex; align-items:center; gap:4px;">
+                  <i data-lucide="eye-off" style="width:13px; height:13px;"></i> Desactivar
                 </button>
               {% else %}
-                <button type="submit" class="btn btn-outline" style="padding:4px 10px; font-size:11px; color:#15803d; background:#dcfce7;">
-                  ✓ Activar
+                <button type="submit" class="btn btn-outline" style="padding:4px 10px; font-size:11px; color:#15803d; background:#dcfce7; display:inline-flex; align-items:center; gap:4px;">
+                  <i data-lucide="eye" style="width:13px; height:13px;"></i> Activar
                 </button>
               {% endif %}
             </form>
@@ -138,8 +136,6 @@
       </div>
       {% endfor %}
     </div>
-
-  </div>
 </div>
 
 <!-- MODAL: NUEVA PREGUNTA -->
@@ -241,6 +237,7 @@
     </form>
   </div>
 </div>
+
 <!-- MODAL: EDITAR PREGUNTA -->
 <div id="modal-editar-pregunta" class="modal-backdrop">
   <div class="modal-box" style="max-width:680px;">
@@ -373,12 +370,12 @@
         headers: { 'X-Requested-With': 'XMLHttpRequest' }
       });
       if (!resp.ok) {
-        mostrarNotificacion("Error al cargar los datos del reactivo.", "error", "Banco de Preguntas");
+        mostrarNotificacion("Error al cargar los datos de la pregunta.", "error", "Banco de Preguntas");
         return;
       }
       const data = await resp.json();
       document.getElementById('form-editar-pregunta').action = `/preguntas/${id}/editar/`;
-      document.getElementById('editar-pregunta-subtitulo').textContent = `Reactivo Cód. P-${id}`;
+      document.getElementById('editar-pregunta-subtitulo').textContent = `Pregunta Cód. P-${id}`;
       document.getElementById('editar-categoria-id').value = data.categoria_id;
       document.getElementById('editar-tipo-pregunta').value = data.tipo;
       document.getElementById('editar-texto-base').value = data.texto_base;

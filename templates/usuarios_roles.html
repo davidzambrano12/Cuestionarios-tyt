@@ -1,21 +1,29 @@
-{% extends 'base.html' %}
+{% extends 'app_base.html' %}
 
 {% block title %}Gestión de Usuarios y Roles - Simulador Saber TyT{% endblock %}
 
-{% block content %}
-<div style="background:#f8fafc; min-height:100vh; padding:24px 20px;">
-  <div style="max-width:760px; margin:0 auto;">
+{% block nav_title %}Usuarios y Roles{% endblock %}
 
-    <!-- Top bar con botón volver -->
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-      <a href="/dashboard/admin/" style="display:inline-flex; align-items:center; justify-content:center; width:38px; height:38px; border-radius:50%; background:white; border:1px solid #e2e8f0; color:#0f172a; text-decoration:none;">
-        &larr;
-      </a>
-      <h2 style="font-size:18px; font-weight:800; color:#0f172a;">Usuario y roles</h2>
-      <a href="/perfil/" style="display:inline-flex; align-items:center; justify-content:center; width:38px; height:38px; border-radius:50%; background:white; border:1px solid #e2e8f0; color:#0f172a; text-decoration:none;">
-        ⚙️
-      </a>
+{% block app_content %}
+<div>
+  <!-- Header Banner -->
+  <div class="dashboard-banner">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:16px;">
+      <div>
+        <div class="banner-badge">● Administración Institucional Uniputumayo</div>
+        <h1 class="banner-title">Gestión de Usuarios y Roles</h1>
+        <p class="banner-subtitle">Control de acceso, perfiles institucionales y asignación de permisos del sistema</p>
+      </div>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <button type="button" onclick="openModal('modal-nuevo-usuario')" class="btn btn-primary" style="padding:10px 18px; border-radius:10px; font-weight:700; display:inline-flex; align-items:center; gap:6px;">
+          <i data-lucide="user-plus"></i> Nuevo Usuario
+        </button>
+        <button type="button" onclick="openModal('modal-nuevo-rol')" class="btn btn-outline" style="padding:10px 16px; border-radius:10px; background:white; font-weight:600; display:inline-flex; align-items:center; gap:6px;">
+          <i data-lucide="shield"></i> Nuevo Rol
+        </button>
+      </div>
     </div>
+  </div>
 
     <!-- Admin profile card en cabecera -->
     <div class="card" style="padding:16px 20px; display:flex; align-items:center; gap:16px; margin-bottom:24px;">
@@ -25,7 +33,9 @@
       <div style="flex-grow:1;">
         <div style="display:flex; align-items:center; gap:8px;">
           <h3 style="font-size:15px; font-weight:800; color:#0f172a; margin:0;">{{ user.get_full_name|default:user.username }}</h3>
-          <span class="badge badge-info" style="font-size:11px;">🛡️ Super Admin</span>
+          <span class="badge badge-info" style="font-size:11px; display:inline-flex; align-items:center; gap:4px;">
+            <i data-lucide="shield" style="width:12px; height:12px;"></i> Super Admin
+          </span>
         </div>
         <div style="font-size:12px; color:#64748b;">Administrador del Sistema · Uniputumayo</div>
       </div>
@@ -40,10 +50,10 @@
     <!-- Tab Selector -->
     <div style="background:#e2e8f0; border-radius:14px; padding:4px; display:flex; gap:4px; margin-bottom:20px;">
       <button type="button" id="tab-btn-usuarios" onclick="switchTab('usuarios')" style="flex:1; border:none; padding:10px; border-radius:10px; font-weight:700; font-size:13px; cursor:pointer; background:white; color:#0f172a; display:flex; align-items:center; justify-content:center; gap:8px; box-shadow:0 1px 3px rgba(0,0,0,0.1);">
-        <span>👥</span> Usuarios <span class="badge badge-info" style="font-size:11px;">{{ usuarios.count }}</span>
+        <i data-lucide="users" style="width:16px; height:16px;"></i> Usuarios <span class="badge badge-info" style="font-size:11px;">{{ usuarios.count }}</span>
       </button>
       <button type="button" id="tab-btn-roles" onclick="switchTab('roles')" style="flex:1; border:none; padding:10px; border-radius:10px; font-weight:700; font-size:13px; cursor:pointer; background:transparent; color:#64748b; display:flex; align-items:center; justify-content:center; gap:8px;">
-        <span>🛡️</span> Roles y Permisos <span class="badge" style="background:#cbd5e1; color:#334155; font-size:11px;">{{ roles.count }}</span>
+        <i data-lucide="shield" style="width:16px; height:16px;"></i> Roles y Permisos <span class="badge" style="background:#cbd5e1; color:#334155; font-size:11px;">{{ roles.count }}</span>
       </button>
     </div>
 
@@ -51,13 +61,13 @@
     <div id="tab-usuarios">
       <!-- Buscador -->
       <div style="position:relative; margin-bottom:14px;">
-        <span style="position:absolute; left:14px; top:50%; transform:translateY(-50%); color:#94a3b8;">🔍</span>
+        <i data-lucide="search" style="position:absolute; left:14px; top:50%; transform:translateY(-50%); color:#94a3b8; width:16px; height:16px;"></i>
         <input type="text" id="filtro-texto-usuarios" onkeyup="filtrarUsuarios()" placeholder="Buscar por nombre, código o correo institucional" class="form-input" style="padding-left:40px; height:44px; border-radius:12px;">
       </div>
 
       <!-- Botón Nuevo Usuario -->
-      <button type="button" onclick="openModal('modal-nuevo-usuario')" class="btn btn-primary btn-full" style="height:46px; border-radius:12px; margin-bottom:18px; font-size:14px;">
-        <span>👤+</span> Nuevo Usuario
+      <button type="button" onclick="openModal('modal-nuevo-usuario')" class="btn btn-primary btn-full" style="height:46px; border-radius:12px; margin-bottom:18px; font-size:14px; display:inline-flex; align-items:center; justify-content:center; gap:8px;">
+        <i data-lucide="user-plus" style="width:18px; height:18px;"></i> Nuevo Usuario
       </button>
 
       <!-- Filtros de Rol y Estado -->
@@ -98,14 +108,16 @@
               {% if u.is_active %}
                 <span class="badge badge-success">● Activo</span>
               {% else %}
-                <span class="badge badge-danger">🔒 Inactivo</span>
+                <span class="badge badge-danger" style="display:inline-flex; align-items:center; gap:4px;">
+                  <i data-lucide="lock" style="width:12px; height:12px;"></i> Inactivo
+                </span>
               {% endif %}
             </div>
           </div>
 
           {% if u.perfil.modulo_asignado %}
           <div style="background:#f0f9ff; border-radius:8px; padding:8px 12px; font-size:12px; color:#0369a1; margin-bottom:12px;">
-            <strong>∑ Módulo asignado:</strong> {{ u.perfil.modulo_asignado }}
+            <strong>Módulo asignado:</strong> {{ u.perfil.modulo_asignado }}
           </div>
           {% endif %}
 
@@ -113,18 +125,18 @@
             <form method="POST" action="/usuarios/{{ u.id }}/toggle-estado/" style="flex:1;">
               {% csrf_token %}
               {% if u.is_active %}
-                <button type="submit" class="btn btn-outline btn-full" style="padding:6px 12px; font-size:12px; color:#b91c1c; border-color:#fca5a5;">
-                  ⛔ Suspender
+                <button type="submit" class="btn btn-outline btn-full" style="padding:6px 12px; font-size:12px; color:#b91c1c; border-color:#fca5a5; display:inline-flex; align-items:center; justify-content:center; gap:4px;">
+                  <i data-lucide="user-x" style="width:14px; height:14px;"></i> Suspender
                 </button>
               {% else %}
-                <button type="submit" class="btn btn-outline btn-full" style="padding:6px 12px; font-size:12px; color:#15803d; border-color:#86efac; background:#dcfce7;">
-                  🔓 Reactivar Acceso
+                <button type="submit" class="btn btn-outline btn-full" style="padding:6px 12px; font-size:12px; color:#15803d; border-color:#86efac; background:#dcfce7; display:inline-flex; align-items:center; justify-content:center; gap:4px;">
+                  <i data-lucide="user-check" style="width:14px; height:14px;"></i> Reactivar Acceso
                 </button>
               {% endif %}
             </form>
 
-            <button type="button" onclick="editarUsuario('{{ u.id }}', '{{ u.first_name }}', '{{ u.last_name }}', '{{ u.email }}', '{{ u.perfil.rol.id|default:'' }}', '{{ u.perfil.codigo_institucional|default:'' }}')" class="btn btn-primary" style="flex:1; padding:6px 12px; font-size:12px;">
-              ✏️ Editar
+            <button type="button" onclick="editarUsuario('{{ u.id }}', '{{ u.first_name }}', '{{ u.last_name }}', '{{ u.email }}', '{{ u.perfil.rol.id|default:'' }}', '{{ u.perfil.codigo_institucional|default:'' }}')" class="btn btn-primary" style="flex:1; padding:6px 12px; font-size:12px; display:inline-flex; align-items:center; justify-content:center; gap:4px;">
+              <i data-lucide="edit-3" style="width:14px; height:14px;"></i> Editar
             </button>
           </div>
         </div>
@@ -140,13 +152,13 @@
     <div id="tab-roles" style="display:none;">
       <!-- Buscador -->
       <div style="position:relative; margin-bottom:14px;">
-        <span style="position:absolute; left:14px; top:50%; transform:translateY(-50%); color:#94a3b8;">🔍</span>
+        <i data-lucide="search" style="position:absolute; left:14px; top:50%; transform:translateY(-50%); color:#94a3b8; width:16px; height:16px;"></i>
         <input type="text" id="filtro-texto-roles" placeholder="Buscar por rol..." class="form-input" style="padding-left:40px; height:44px; border-radius:12px;">
       </div>
 
       <!-- Botón Nuevo Rol -->
-      <button type="button" onclick="openModal('modal-nuevo-rol')" class="btn btn-primary btn-full" style="height:46px; border-radius:12px; margin-bottom:20px; font-size:14px;">
-        <span>🛡️+</span> Nuevo Rol
+      <button type="button" onclick="openModal('modal-nuevo-rol')" class="btn btn-primary btn-full" style="height:46px; border-radius:12px; margin-bottom:20px; font-size:14px; display:inline-flex; align-items:center; justify-content:center; gap:6px;">
+        <i data-lucide="shield-plus" style="width:18px; height:18px;"></i> Nuevo Rol
       </button>
 
       <!-- Lista de Roles -->
@@ -178,8 +190,8 @@
           </div>
 
           <div style="display:flex; gap:10px;">
-            <button type="button" onclick="abrirModalPermisos('{{ r.id }}', '{{ r.nombre }}')" class="btn btn-outline btn-full" style="background:#eff6ff; color:#186382; border-color:#bfdbfe; font-size:13px; padding:8px;">
-              🛡️ Editar Permisos
+            <button type="button" onclick="abrirModalPermisos('{{ r.id }}', '{{ r.nombre }}')" class="btn btn-outline btn-full" style="background:#eff6ff; color:#186382; border-color:#bfdbfe; font-size:13px; padding:8px; display:inline-flex; align-items:center; justify-content:center; gap:6px;">
+              <i data-lucide="shield" style="width:15px; height:15px;"></i> Editar Permisos
             </button>
             {% if not r.es_sistema %}
             <form method="POST" action="/roles/{{ r.id }}/toggle-estado/" style="flex-shrink:0;">
@@ -194,8 +206,6 @@
         {% endfor %}
       </div>
     </div>
-
-  </div>
 </div>
 
 <!-- MODAL: NUEVO USUARIO -->
@@ -443,10 +453,8 @@
     document.getElementById('nombre-rol-permisos').innerText = `Rol: ${rolNombre}`;
     document.getElementById('form-editar-permisos').action = `/roles/${rolId}/editar-permisos/`;
     
-    // Desmarcar todos primero
     document.querySelectorAll('#form-editar-permisos input[type="checkbox"]').forEach(c => c.checked = false);
 
-    // Obtener los permisos actuales del rol por fetch
     try {
       const res = await fetch(`/api/roles/${rolId}/permisos/`);
       if (res.ok) {
