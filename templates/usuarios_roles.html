@@ -1,21 +1,29 @@
-{% extends 'base.html' %}
+{% extends 'app_base.html' %}
 
 {% block title %}Gestión de Usuarios y Roles - Simulador Saber TyT{% endblock %}
 
-{% block content %}
-<div style="background:#f8fafc; min-height:100vh; padding:24px 20px;">
-  <div style="max-width:760px; margin:0 auto;">
+{% block nav_title %}Usuarios y Roles{% endblock %}
 
-    <!-- Top bar con botón volver -->
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-      <a href="/dashboard/admin/" style="display:inline-flex; align-items:center; justify-content:center; width:38px; height:38px; border-radius:50%; background:white; border:1px solid #e2e8f0; color:#0f172a; text-decoration:none;">
-        <i data-lucide="arrow-left" style="width:18px; height:18px;"></i>
-      </a>
-      <h2 style="font-size:18px; font-weight:800; color:#0f172a;">Usuario y roles</h2>
-      <a href="/perfil/" style="display:inline-flex; align-items:center; justify-content:center; width:38px; height:38px; border-radius:50%; background:white; border:1px solid #e2e8f0; color:#0f172a; text-decoration:none;">
-        <i data-lucide="settings" style="width:18px; height:18px;"></i>
-      </a>
+{% block app_content %}
+<div>
+  <!-- Header Banner -->
+  <div class="dashboard-banner">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:16px;">
+      <div>
+        <div class="banner-badge">● Administración Institucional Uniputumayo</div>
+        <h1 class="banner-title">Gestión de Usuarios y Roles</h1>
+        <p class="banner-subtitle">Control de acceso, perfiles institucionales y asignación de permisos del sistema</p>
+      </div>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <button type="button" onclick="openModal('modal-nuevo-usuario')" class="btn btn-primary" style="padding:10px 18px; border-radius:10px; font-weight:700; display:inline-flex; align-items:center; gap:6px;">
+          <i data-lucide="user-plus"></i> Nuevo Usuario
+        </button>
+        <button type="button" onclick="openModal('modal-nuevo-rol')" class="btn btn-outline" style="padding:10px 16px; border-radius:10px; background:white; font-weight:600; display:inline-flex; align-items:center; gap:6px;">
+          <i data-lucide="shield"></i> Nuevo Rol
+        </button>
+      </div>
     </div>
+  </div>
 
     <!-- Admin profile card en cabecera -->
     <div class="card" style="padding:16px 20px; display:flex; align-items:center; gap:16px; margin-bottom:24px;">
@@ -198,8 +206,6 @@
         {% endfor %}
       </div>
     </div>
-
-  </div>
 </div>
 
 <!-- MODAL: NUEVO USUARIO -->

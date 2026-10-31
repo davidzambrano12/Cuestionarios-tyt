@@ -227,12 +227,29 @@ def toggle_pregunta_estado(request, pregunta_id):
 @login_required
 @requiere_permiso("cuestionarios.gestionar")
 def cuestionarios_list(request):
-    """Lista de cuestionarios para administración y edición."""
-    cuestionarios = Cuestionario.objects.all().order_by("-id")
-    return render(request, "admin_dashboard.html", {
-        "cuestionarios_recientes": cuestionarios,
-        "cuestionarios_count": cuestionarios.count(),
-    })
+    """Lista completa de cuestionarios institucionales con filtros y métricas."""
+    cuestionarios = (
+        Cuestionario.objects.all()
+        .prefetch_related("cuestionario_preguntas", "intentos")
+        .order_by("-id")
+    )
+    total_count = cuestionarios.count()
+    disponibles_count = cuestionarios.filter(estado="disponible").count()
+    borradores_count = cuestionarios.filter(estado="borrador").count()
+    cerrados_count = cuestionarios.filter(estado="cerrado").count()
+
+    return render(
+        request,
+        "cuestionarios.html",
+        {
+            "cuestionarios": cuestionarios,
+            "total_count": total_count,
+            "disponibles_count": disponibles_count,
+            "borradores_count": borradores_count,
+            "cerrados_count": cerrados_count,
+            "active_tab": "cuestionarios",
+        },
+    )
 
 
 @login_required

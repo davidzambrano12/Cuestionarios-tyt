@@ -1,19 +1,11 @@
-{% extends 'base.html' %}
+{% extends 'app_base.html' %}
 
 {% block title %}Perfil Institucional - Simulador Saber TyT{% endblock %}
 
-{% block content %}
-<div style="background:#f8fafc; min-height:100vh; padding:24px 20px;">
-  <div style="max-width:540px; margin:0 auto;">
+{% block nav_title %}Mi Perfil Institucional{% endblock %}
 
-    <!-- Topbar -->
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-      <a href="javascript:history.back()" style="display:inline-flex; align-items:center; justify-content:center; width:38px; height:38px; border-radius:50%; background:white; border:1px solid #e2e8f0; color:#0f172a; text-decoration:none;">
-        <i data-lucide="arrow-left" style="width:18px; height:18px;"></i>
-      </a>
-      <h2 style="font-size:18px; font-weight:800; color:#0f172a;">Perfil</h2>
-      <div style="width:38px;"></div>
-    </div>
+{% block app_content %}
+<div style="max-width:640px; margin:0 auto;">
 
     <!-- Card Perfil Principal -->
     <div class="card" style="padding:28px 24px; border-radius:20px; margin-bottom:20px;">
@@ -102,7 +94,5 @@
       </div>
 
     </div>
-
-  </div>
 </div>
 {% endblock %}
