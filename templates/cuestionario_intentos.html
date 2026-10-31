@@ -109,14 +109,14 @@
 
   <!-- ================= VISTA 1: SÁBANA POR ESTUDIANTES (AGRUPADA Y LIMPIA - ALTERNATIVA 1) ================= -->
   <div id="vista-estudiantes" class="card" style="padding:0; border-radius:16px; overflow:hidden; margin-bottom:30px;">
-    <div class="table-responsive">
-      <table class="table" style="width:100%; margin:0; border-collapse:collapse; table-layout:fixed;">
+    <div class="table-responsive" style="overflow-x:auto;">
+      <table class="table" style="width:100%; margin:0; border-collapse:collapse; min-width:880px;">
         <colgroup>
-          <col style="width: 27%;">
-          <col style="width: 14%;">
-          <col style="width: 16%;">
-          <col style="width: 20%;">
-          <col style="width: 23%;">
+          <col style="width: 24%;">
+          <col style="width: 11%;">
+          <col style="width: 15%;">
+          <col style="width: 18%;">
+          <col style="width: 32%;">
         </colgroup>
         <thead style="background:#f8fafc; border-bottom:1px solid #e2e8f0;">
           <tr>
@@ -201,7 +201,7 @@
                 <form method="POST" action="/cuestionarios/{{ cuestionario.id }}/intentos/reiniciar-estudiante/{{ est.codigo }}/" onsubmit="return confirm('¿Confirmas reiniciar TODOS los intentos de {{ est.nombre }} ({{ est.codigo }}) en este examen?\n\nEsta acción restablecerá totalmente su cupo de presentación a cero intentos consumidos.');" style="display:inline; margin:0;">
                   {% csrf_token %}
                   <button type="submit" class="btn" style="background:#fef2f2; border:1px solid #fecaca; color:#dc2626; padding:6px 10px; font-size:12px; display:inline-flex; align-items:center; gap:4px; white-space:nowrap; border-radius:8px;" title="Restablecer cupo completo al estudiante">
-                    <i data-lucide="rotate-ccw" style="width:13px; height:13px;"></i> Restablecer Cupo
+                    <i data-lucide="rotate-ccw" style="width:13px; height:13px;"></i> Restablecer
                   </button>
                 </form>
 
@@ -296,8 +296,8 @@
 
   <!-- ================= VISTA 2: HISTORIAL COMPLETO DE INTENTOS (CRONOLÓGICO) ================= -->
   <div id="vista-historial" class="card" style="display:none; padding:0; border-radius:16px; overflow:hidden; margin-bottom:30px;">
-    <div class="table-responsive">
-      <table class="table" style="width:100%; margin:0; border-collapse:collapse;">
+    <div class="table-responsive" style="overflow-x:auto;">
+      <table class="table" style="width:100%; margin:0; border-collapse:collapse; min-width:880px;">
         <thead style="background:#f8fafc; border-bottom:1px solid #e2e8f0;">
           <tr>
             <th style="padding:14px 18px; font-size:12px; font-weight:700; color:#475569; text-align:left;">Estudiante</th>
