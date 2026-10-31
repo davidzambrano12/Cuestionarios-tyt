@@ -74,7 +74,7 @@
       {% endif %}
 
       <!-- Pestañas de Cuestionarios: Disponibles / Programados / Historial -->
-      <div id="cuestionarios" style="margin-top:20px;">
+      <div id="cuestionarios" style="margin-top:20px; scroll-margin-top:80px;">
         <div class="tabs-header">
           <button type="button" class="tab-btn active" onclick="switchEstudianteTab('disp', this)">
             Disponibles <span class="badge badge-info">{{ cuestionarios_disponibles.count }}</span>
@@ -198,3 +198,32 @@
         </div>
       </div>
 {% endblock %}
+
+{% block extra_scripts %}
+<script>
+  function switchEstudianteTab(tab, btn) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    document.getElementById('tab-disp').style.display = 'none';
+    document.getElementById('tab-prog').style.display = 'none';
+    document.getElementById('tab-hist').style.display = 'none';
+
+    document.getElementById('tab-' + tab).style.display = 'block';
+  }
+
+  // Posicionamiento suave si se entra o recarga con el hash #cuestionarios
+  function verificarHashCuestionarios() {
+    if (window.location.hash === '#cuestionarios') {
+      setTimeout(() => {
+        const el = document.getElementById('cuestionarios');
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 150);
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', verificarHashCuestionarios);
+  window.addEventListener('hashchange', verificarHashCuestionarios);
+</script>

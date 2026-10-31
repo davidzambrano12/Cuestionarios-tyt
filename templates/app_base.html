@@ -51,10 +51,10 @@
           <i data-lucide="settings"></i> Ajustes
         </a>
       {% else %}
-        <a href="/dashboard/estudiante/" class="nav-item {% if '/dashboard/' in request.path or active_tab == 'inicio' %}active{% endif %}">
+        <a href="/dashboard/estudiante/" onclick="if (window.location.pathname.startsWith('/dashboard/estudiante')) { event.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); if (history.pushState) history.pushState(null, null, '/dashboard/estudiante/'); }" class="nav-item {% if '/dashboard/' in request.path or active_tab == 'inicio' %}active{% endif %}">
           <i data-lucide="home"></i> Inicio
         </a>
-        <a href="/dashboard/estudiante/#cuestionarios" class="nav-item {% if '/cuestionarios/' in request.path or active_tab == 'cuestionarios' %}active{% endif %}">
+        <a href="/dashboard/estudiante/#cuestionarios" onclick="if (window.location.pathname.startsWith('/dashboard/estudiante')) { event.preventDefault(); irACuestionariosEstudiante(); }" class="nav-item {% if '/cuestionarios/' in request.path or active_tab == 'cuestionarios' %}active{% endif %}">
           <i data-lucide="clipboard-list"></i> Cuestionarios
         </a>
         <a href="/perfil/" class="nav-item {% if '/perfil/' in request.path or active_tab == 'perfil' %}active{% endif %}">
@@ -116,4 +116,20 @@
   </main>
 
 </div>
+
+<script>
+  function irACuestionariosEstudiante() {
+    const el = document.getElementById('cuestionarios');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (history.pushState) {
+        history.pushState(null, null, '#cuestionarios');
+      } else {
+        location.hash = '#cuestionarios';
+      }
+    } else {
+      window.location.href = '/dashboard/estudiante/#cuestionarios';
+    }
+  }
+</script>
 {% endblock %}
