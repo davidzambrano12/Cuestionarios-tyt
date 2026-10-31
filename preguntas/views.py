@@ -433,17 +433,23 @@ def iniciar_evaluacion(request, cuestionario_id):
     codigo = getattr(getattr(request.user, "perfil", None), "codigo_institucional", None) or request.user.username
 
     # A. Verificar si el estudiante ya tiene un intento activo (en_progreso)
-    intento_activo = (
+    intentos_activos_qs = list(
         Intento.objects.filter(
             cuestionario=cuestionario,
             participante_codigo=codigo,
             estado="en_progreso",
-        )
-        .order_by("-fecha_inicio")
-        .first()
+        ).order_by("-fecha_inicio")
     )
 
-    if intento_activo:
+    if intentos_activos_qs:
+        intento_activo = intentos_activos_qs[0]
+        # Cerrar duplicados huérfanos si existieran
+        for i_extra in intentos_activos_qs[1:]:
+            i_extra.estado = "vencido"
+            i_extra.fecha_fin = ahora
+            i_extra.duracion_segundos = int((ahora - i_extra.fecha_inicio).total_seconds())
+            i_extra.save()
+
         tiempo_limite_seg = cuestionario.tiempo_limite_minutos * 60
         delta_seg = int((ahora - intento_activo.fecha_inicio).total_seconds())
         ventana_gracia = 30
@@ -691,6 +697,17 @@ def finalizar_evaluacion(request, intento_id):
             intento.aprobado = aprobado
             intento.estado = "finalizado"
             intento.save()
+
+            # Cerrar cualquier otro intento huérfano en_progreso residual
+            Intento.objects.filter(
+                cuestionario=cuestionario,
+                participante_codigo=codigo_usuario,
+                estado="en_progreso",
+            ).exclude(id=intento.id).update(
+                estado="vencido",
+                fecha_fin=ahora,
+                duracion_segundos=1,
+            )
 
         messages.success(request, f"¡Evaluación completada! Calificación obtenida: {calificacion} / {cuestionario.calificacion_maxima}")
         return redirect(f"/evaluacion/{intento.id}/resultado/")

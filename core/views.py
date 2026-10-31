@@ -179,7 +179,9 @@ def estudiante_dashboard_view(request):
         .order_by("fecha_apertura")
     )
 
-    # Mapear intentos activos (en progreso) para permitir reanudar
+    from django.db.models import Count
+
+    # Mapear intentos activos (en progreso), asegurando cerrar duplicados huérfanos
     intentos_activos_qs = Intento.objects.filter(
         participante_codigo=codigo,
         estado="en_progreso",
@@ -195,13 +197,39 @@ def estudiante_dashboard_view(request):
             i_act.fecha_fin = ahora
             i_act.duracion_segundos = delta_s
             i_act.save()
-        else:
+        elif i_act.cuestionario_id not in intentos_activos_map:
             intentos_activos_map[i_act.cuestionario_id] = i_act
+        else:
+            # Cerrar duplicado huérfano más antiguo
+            i_act.estado = "vencido"
+            i_act.fecha_fin = ahora
+            i_act.duracion_segundos = delta_s
+            i_act.save()
+
+    # Mapear intentos realizados (finalizados o vencidos) por cuestionario
+    intentos_hechos_qs = (
+        Intento.objects.filter(
+            participante_codigo=codigo,
+            estado__in=["finalizado", "vencido"],
+        )
+        .values("cuestionario_id")
+        .annotate(total=Count("id"))
+    )
+    intentos_hechos_map = {item["cuestionario_id"]: item["total"] for item in intentos_hechos_qs}
 
     for c in cuestionarios_disponibles:
         c.intento_activo = intentos_activos_map.get(c.id)
+        c.intentos_hechos = intentos_hechos_map.get(c.id, 0)
+        c.intentos_restantes = max(0, c.intentos_permitidos - c.intentos_hechos)
+        c.intentos_agotados = (c.intentos_hechos >= c.intentos_permitidos) and not bool(c.intento_activo)
+        c.siguiente_intento_num = min(c.intentos_permitidos, c.intentos_hechos + 1)
+
     if cuestionario_destacado:
         cuestionario_destacado.intento_activo = intentos_activos_map.get(cuestionario_destacado.id)
+        cuestionario_destacado.intentos_hechos = intentos_hechos_map.get(cuestionario_destacado.id, 0)
+        cuestionario_destacado.intentos_restantes = max(0, cuestionario_destacado.intentos_permitidos - cuestionario_destacado.intentos_hechos)
+        cuestionario_destacado.intentos_agotados = (cuestionario_destacado.intentos_hechos >= cuestionario_destacado.intentos_permitidos) and not bool(cuestionario_destacado.intento_activo)
+        cuestionario_destacado.siguiente_intento_num = min(cuestionario_destacado.intentos_permitidos, cuestionario_destacado.intentos_hechos + 1)
 
     # Intentos propios del estudiante (aislamiento de seguridad)
     intentos_estudiante = Intento.objects.filter(

@@ -43,6 +43,8 @@
           <div style="display:flex; align-items:center; gap:8px;">
             {% if cuestionario_destacado.intento_activo %}
             <span class="badge" style="background:#fef3c7; color:#92400e; font-weight:700;">● INTENTO EN CURSO</span>
+            {% elif cuestionario_destacado.intentos_agotados %}
+            <span class="badge" style="background:#f1f5f9; color:#64748b; font-weight:700;">● INTENTOS AGOTADOS</span>
             {% else %}
             <span class="badge badge-success">● DISPONIBLE AHORA</span>
             {% endif %}
@@ -62,7 +64,7 @@
           <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:12px; font-size:13px; color:#475569; margin-bottom:12px;">
             <div style="display:inline-flex; align-items:center; gap:6px;"><i data-lucide="help-circle" style="width:14px; height:14px;"></i> {{ cuestionario_destacado.cuestionario_preguntas.count }} preguntas</div>
             <div style="display:inline-flex; align-items:center; gap:6px;"><i data-lucide="clock" style="width:14px; height:14px;"></i> {{ cuestionario_destacado.tiempo_limite_minutos }} minutos</div>
-            <div style="display:inline-flex; align-items:center; gap:6px;"><i data-lucide="rotate-cw" style="width:14px; height:14px;"></i> Intentos permitidos: {{ cuestionario_destacado.intentos_permitidos }}</div>
+            <div style="display:inline-flex; align-items:center; gap:6px;"><i data-lucide="rotate-cw" style="width:14px; height:14px;"></i> Intentos: <strong>{{ cuestionario_destacado.intentos_hechos }} de {{ cuestionario_destacado.intentos_permitidos }}</strong> realizados</div>
             <div style="display:inline-flex; align-items:center; gap:6px;"><i data-lucide="target" style="width:14px; height:14px;"></i> Mínimo aprobación: {{ cuestionario_destacado.calificacion_aprobacion }} / {{ cuestionario_destacado.calificacion_maxima }}</div>
           </div>
           <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid #e2e8f0; padding-top:10px; font-size:12px;">
@@ -75,9 +77,13 @@
         <a href="/evaluacion/{{ cuestionario_destacado.intento_activo.id }}/" class="btn btn-full" style="padding:14px; font-size:15px; border-radius:12px; background:#d97706; color:#ffffff; font-weight:700; display:flex; align-items:center; justify-content:center; gap:8px;">
           <i data-lucide="play-circle"></i> Continuar Intento en Curso
         </a>
+        {% elif cuestionario_destacado.intentos_agotados %}
+        <button type="button" onclick="switchEstudianteTab('hist', document.querySelectorAll('.tab-btn')[2])" class="btn btn-outline btn-full" style="padding:14px; font-size:15px; border-radius:12px; color:#475569; border-color:#cbd5e1; display:flex; align-items:center; justify-content:center; gap:8px;">
+          <i data-lucide="history"></i> Intentos Agotados ({{ cuestionario_destacado.intentos_hechos }}/{{ cuestionario_destacado.intentos_permitidos }}) · Ver Calificaciones
+        </button>
         {% else %}
-        <a href="/evaluacion/iniciar/{{ cuestionario_destacado.id }}/" class="btn btn-primary btn-full" style="padding:14px; font-size:15px; border-radius:12px;">
-          <i data-lucide="play"></i> Iniciar Intento de Examen
+        <a href="/evaluacion/iniciar/{{ cuestionario_destacado.id }}/" class="btn btn-primary btn-full" style="padding:14px; font-size:15px; border-radius:12px; display:flex; align-items:center; justify-content:center; gap:8px;">
+          <i data-lucide="play"></i> Iniciar Intento {{ cuestionario_destacado.siguiente_intento_num }} de {{ cuestionario_destacado.intentos_permitidos }}
         </a>
         {% endif %}
       </div>
@@ -125,6 +131,8 @@
                 <div>
                   {% if c.intento_activo %}
                   <span class="badge" style="background:#fef3c7; color:#92400e; font-weight:700; margin-bottom:6px;">● INTENTO EN CURSO</span>
+                  {% elif c.intentos_agotados %}
+                  <span class="badge" style="background:#f1f5f9; color:#64748b; font-weight:700; margin-bottom:6px;">● INTENTOS AGOTADOS</span>
                   {% else %}
                   <span class="badge badge-success" style="margin-bottom:6px;">● DISPONIBLE</span>
                   {% endif %}
@@ -138,15 +146,19 @@
               <div style="display:flex; gap:16px; font-size:13px; color:#475569; margin:12px 0;">
                 <span style="display:inline-flex; align-items:center; gap:4px;"><i data-lucide="help-circle" style="width:14px; height:14px;"></i> {{ c.cuestionario_preguntas.count }} ítems</span>
                 <span style="display:inline-flex; align-items:center; gap:4px;"><i data-lucide="clock" style="width:14px; height:14px;"></i> {{ c.tiempo_limite_minutos }} min</span>
-                <span style="display:inline-flex; align-items:center; gap:4px;"><i data-lucide="rotate-cw" style="width:14px; height:14px;"></i> {{ c.intentos_permitidos }} intentos</span>
+                <span style="display:inline-flex; align-items:center; gap:4px;"><i data-lucide="rotate-cw" style="width:14px; height:14px;"></i> {{ c.intentos_hechos }}/{{ c.intentos_permitidos }} intentos</span>
               </div>
               {% if c.intento_activo %}
-              <a href="/evaluacion/{{ c.intento_activo.id }}/" class="btn" style="padding:10px; font-size:14px; background:#d97706; color:#ffffff; font-weight:700; display:inline-flex; align-items:center; gap:6px;">
+              <a href="/evaluacion/{{ c.intento_activo.id }}/" class="btn" style="padding:10px 18px; font-size:14px; background:#d97706; color:#ffffff; font-weight:700; display:inline-flex; align-items:center; gap:6px;">
                 <i data-lucide="play-circle"></i> Continuar Intento
               </a>
+              {% elif c.intentos_agotados %}
+              <button type="button" onclick="switchEstudianteTab('hist', document.querySelectorAll('.tab-btn')[2])" class="btn btn-outline" style="padding:10px 16px; font-size:13px; color:#475569; border-color:#cbd5e1; display:inline-flex; align-items:center; gap:6px;">
+                <i data-lucide="history"></i> Agotado ({{ c.intentos_hechos }}/{{ c.intentos_permitidos }}) · Ver Resultados
+              </button>
               {% else %}
-              <a href="/evaluacion/iniciar/{{ c.id }}/" class="btn btn-primary" style="padding:10px; font-size:14px;">
-                <i data-lucide="play"></i> Iniciar Intento
+              <a href="/evaluacion/iniciar/{{ c.id }}/" class="btn btn-primary" style="padding:10px 18px; font-size:14px; display:inline-flex; align-items:center; gap:6px;">
+                <i data-lucide="play"></i> Iniciar Intento ({{ c.siguiente_intento_num }}/{{ c.intentos_permitidos }})
               </a>
               {% endif %}
             </div>
