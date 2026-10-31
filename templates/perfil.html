@@ -9,7 +9,7 @@
     <!-- Topbar -->
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
       <a href="javascript:history.back()" style="display:inline-flex; align-items:center; justify-content:center; width:38px; height:38px; border-radius:50%; background:white; border:1px solid #e2e8f0; color:#0f172a; text-decoration:none;">
-        &larr;
+        <i data-lucide="arrow-left" style="width:18px; height:18px;"></i>
       </a>
       <h2 style="font-size:18px; font-weight:800; color:#0f172a;">Perfil</h2>
       <div style="width:38px;"></div>
@@ -34,7 +34,7 @@
       <!-- Datos Personales y Programa -->
       <div style="border-top:1px solid #f1f5f9; padding-top:20px; margin-bottom:24px;">
         <div style="display:flex; align-items:center; gap:8px; margin-bottom:14px;">
-          <span style="font-size:16px;">🎓</span>
+          <i data-lucide="graduation-cap" style="width:16px; height:16px; color:#186382;"></i>
           <h3 style="font-size:14px; font-weight:800; color:#0f172a; margin:0;">Datos Personales y Programa</h3>
         </div>
 
@@ -69,7 +69,7 @@
       <!-- Seguridad y Credenciales -->
       <div style="border-top:1px solid #f1f5f9; padding-top:20px; margin-bottom:20px;">
         <div style="display:flex; align-items:center; gap:8px; margin-bottom:14px;">
-          <span style="font-size:16px;">🔒</span>
+          <i data-lucide="lock" style="width:16px; height:16px; color:#186382;"></i>
           <h3 style="font-size:14px; font-weight:800; color:#0f172a; margin:0;">Seguridad y Credenciales</h3>
         </div>
 
@@ -84,8 +84,8 @@
             <input type="password" name="confirmar_password" required class="form-input" placeholder="Repite la nueva contraseña">
           </div>
 
-          <button type="submit" class="btn btn-outline btn-full" style="padding:10px; font-size:13px; color:#186382; border-color:#93c5fd;">
-            💾 Guardar Nueva Contraseña
+          <button type="submit" class="btn btn-outline btn-full" style="padding:10px; font-size:13px; color:#186382; border-color:#93c5fd; display:inline-flex; align-items:center; justify-content:center; gap:6px;">
+            <i data-lucide="save" style="width:14px; height:14px;"></i> Guardar Nueva Contraseña
           </button>
         </form>
       </div>
@@ -93,11 +93,11 @@
       <!-- Sesión Activa Segura y Logout -->
       <div style="background:#f8fafc; border-radius:12px; padding:16px; border:1px solid #e2e8f0;">
         <div style="display:flex; justify-content:space-between; align-items:center; font-size:12px; color:#64748b; margin-bottom:12px;">
-          <span>🌐 Red IUP Campus Mocoa</span>
+          <span style="display:inline-flex; align-items:center; gap:4px;"><i data-lucide="globe" style="width:13px; height:13px;"></i> Red IUP Campus Mocoa</span>
           <span style="color:#16a34a; font-weight:700;">● Sesión Activa Segura</span>
         </div>
         <a href="/logout/" onclick="cerrarSesion(); return false;" class="btn btn-danger btn-full" style="padding:10px; font-size:13px; text-decoration:none; display:inline-flex; align-items:center; justify-content:center; gap:8px;">
-          🚪 Cerrar Sesión Segura (Revocar JWT)
+          <i data-lucide="log-out" style="width:15px; height:15px;"></i> Cerrar Sesión Segura (Revocar JWT)
         </a>
       </div>
 

@@ -9,7 +9,7 @@
     <!-- Topbar -->
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
       <a href="/preguntas/importar/" style="display:inline-flex; align-items:center; justify-content:center; width:38px; height:38px; border-radius:50%; background:white; border:1px solid #e2e8f0; color:#0f172a; text-decoration:none;" title="Volver a Carga">
-        &larr;
+        <i data-lucide="arrow-left" style="width:18px; height:18px;"></i>
       </a>
       <h2 style="font-size:18px; font-weight:800; color:#0f172a; margin:0;">Validación y Auditoría de Ingesta</h2>
       <div style="width:38px;"></div>
@@ -32,7 +32,7 @@
     <!-- Cuestionario de destino si se indicó -->
     {% if cuestionario %}
     <div class="card" style="padding:14px 20px; margin-bottom:16px; display:flex; align-items:center; gap:12px; background:#ffffff;">
-      <span style="font-size:22px;">📋</span>
+      <i data-lucide="clipboard-list" style="width:22px; height:22px; color:#0284c7;"></i>
       <div>
         <div style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase;">Cuestionario de Destino Vinculado</div>
         <div style="font-size:14px; font-weight:800; color:#0f172a;">{{ cuestionario.nombre }}</div>
@@ -43,15 +43,17 @@
     <!-- Archivo cargado verificado -->
     <div class="card" style="padding:16px 20px; margin-bottom:20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
       <div style="display:flex; align-items:center; gap:12px;">
-        <span style="font-size:28px;">📊</span>
+        <i data-lucide="file-spreadsheet" style="width:28px; height:28px; color:#186382;"></i>
         <div>
           <div style="font-size:14px; font-weight:800; color:#0f172a;">{{ resultado.nombre_archivo }}</div>
-          <div style="font-size:12px; color:#16a34a; font-weight:600;">✓ Archivo en procesamiento activo</div>
+          <div style="font-size:12px; color:#16a34a; font-weight:600; display:inline-flex; align-items:center; gap:4px;">
+            <i data-lucide="check" style="width:13px; height:13px;"></i> Archivo en procesamiento activo
+          </div>
         </div>
       </div>
       <div style="display:flex; gap:8px;">
-        <a href="/preguntas/importar/" class="btn btn-outline" style="font-size:12px; padding:6px 12px;">
-          🔄 Subir Otro Archivo
+        <a href="/preguntas/importar/" class="btn btn-outline" style="font-size:12px; padding:6px 12px; display:inline-flex; align-items:center; gap:6px;">
+          <i data-lucide="rotate-cw" style="width:14px; height:14px;"></i> Subir Otro Archivo
         </a>
       </div>
     </div>
@@ -65,20 +67,20 @@
 
       <!-- 3 Cajas de conteo -->
       <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:12px; margin-bottom:24px; text-align:center;">
-        <div style="background:#f0fdf4; border:1px solid #86efac; border-radius:12px; padding:14px;">
-          <div style="font-size:20px; color:#16a34a; margin-bottom:2px;">✔</div>
+        <div style="background:#f0fdf4; border:1px solid #86efac; border-radius:12px; padding:14px; display:flex; flex-direction:column; align-items:center;">
+          <i data-lucide="check-circle" style="width:20px; height:20px; color:#16a34a; margin-bottom:4px;"></i>
           <div style="font-size:24px; font-weight:800; color:#15803d;">{{ resultado.validas|length }}</div>
           <div style="font-size:11px; font-weight:600; color:#15803d;">Listas para Guardar</div>
         </div>
 
-        <div style="background:#eff6ff; border:1px solid #93c5fd; border-radius:12px; padding:14px;">
-          <div style="font-size:20px; color:#2563eb; margin-bottom:2px;">📄</div>
+        <div style="background:#eff6ff; border:1px solid #93c5fd; border-radius:12px; padding:14px; display:flex; flex-direction:column; align-items:center;">
+          <i data-lucide="copy" style="width:20px; height:20px; color:#2563eb; margin-bottom:4px;"></i>
           <div style="font-size:24px; font-weight:800; color:#1d4ed8;">{{ resultado.duplicadas|length }}</div>
           <div style="font-size:11px; font-weight:600; color:#1d4ed8;">Duplicadas (Omitidas)</div>
         </div>
 
-        <div style="background:#fef2f2; border:1px solid #fca5a5; border-radius:12px; padding:14px;">
-          <div style="font-size:20px; color:#dc2626; margin-bottom:2px;">✖</div>
+        <div style="background:#fef2f2; border:1px solid #fca5a5; border-radius:12px; padding:14px; display:flex; flex-direction:column; align-items:center;">
+          <i data-lucide="alert-circle" style="width:20px; height:20px; color:#dc2626; margin-bottom:4px;"></i>
           <div style="font-size:24px; font-weight:800; color:#b91c1c;">{{ resultado.con_error|length }}</div>
           <div style="font-size:11px; font-weight:600; color:#b91c1c;">Con Errores</div>
         </div>
@@ -89,7 +91,7 @@
       <div style="margin-bottom:24px;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
           <div style="font-size:13px; font-weight:800; color:#991b1b; display:flex; align-items:center; gap:6px;">
-            <span>⚠️</span> Preguntas que requieren Corrección ({{ resultado.con_error|length }})
+            <i data-lucide="alert-triangle" style="width:16px; height:16px; color:#dc2626;"></i> Preguntas que requieren Corrección ({{ resultado.con_error|length }})
           </div>
           <span style="font-size:11px; color:#64748b;">Corrige los campos directo aquí sin salir al Excel</span>
         </div>
@@ -119,7 +121,7 @@
                     class="btn btn-danger"
                     style="font-size:12px; padding:8px 14px; font-weight:700; background:#dc2626; border:none; border-radius:8px; display:inline-flex; align-items:center; gap:6px; cursor:pointer; box-shadow:0 2px 4px rgba(220,38,38,0.2);"
                     onclick='abrirModalCorreccion({{ fila.fila_excel }}, {{ fila.json_data|safe }})'>
-              <span>✏️</span> Corregir
+              <i data-lucide="edit-3" style="width:14px; height:14px;"></i> Corregir
             </button>
           </div>
           {% endfor %}
@@ -130,7 +132,9 @@
       <!-- SECCIÓN: Preguntas Duplicadas -->
       {% if resultado.duplicadas %}
       <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:20px;">
-        <div style="font-size:12px; font-weight:700; color:#1e40af;">📄 Preguntas Duplicadas Omitidas</div>
+        <div style="font-size:12px; font-weight:700; color:#1e40af; display:inline-flex; align-items:center; gap:6px;">
+          <i data-lucide="copy" style="width:14px; height:14px;"></i> Preguntas Duplicadas Omitidas
+        </div>
         {% for fila in resultado.duplicadas %}
         <div style="background:#eff6ff; border-left:4px solid #3b82f6; padding:10px 14px; border-radius:0 8px 8px 0; font-size:12px; color:#1e40af;">
           <strong>Fila #{{ fila.fila_excel }}:</strong> {{ fila.enunciado|truncatechars:80 }} — <em>Pregunta ya registrada previamente en el banco (SHA-256 idéntico).</em>
@@ -143,7 +147,9 @@
       {% if resultado.validas %}
       <details style="margin-bottom:20px; background:#f0fdf4; border:1px solid #86efac; border-radius:12px; padding:12px 16px;">
         <summary style="font-size:13px; font-weight:800; color:#15803d; cursor:pointer; display:flex; justify-content:space-between; align-items:center;">
-          <span>✓ Ver las {{ resultado.validas|length }} pregunta(s) válidas listas para importar</span>
+          <span style="display:inline-flex; align-items:center; gap:6px;">
+            <i data-lucide="check-circle" style="width:15px; height:15px;"></i> Ver las {{ resultado.validas|length }} pregunta(s) válidas listas para importar
+          </span>
           <span style="font-size:11px; font-weight:normal; text-decoration:underline;">(Clic para desplegar)</span>
         </summary>
         <div style="margin-top:12px; display:flex; flex-direction:column; gap:8px;">
@@ -162,9 +168,9 @@
             </div>
             <button type="button"
                     class="btn btn-outline"
-                    style="font-size:11px; padding:4px 10px; border-radius:6px; cursor:pointer;"
+                    style="font-size:11px; padding:4px 10px; border-radius:6px; cursor:pointer; display:inline-flex; align-items:center; gap:4px;"
                     onclick='abrirModalCorreccion({{ fila.fila_excel }}, {{ fila.json_data|safe }})'>
-              ✏️ Modificar
+              <i data-lucide="edit-3" style="width:12px; height:12px;"></i> Modificar
             </button>
           </div>
           {% endfor %}
@@ -197,25 +203,25 @@
       {% if resultado.validas %}
       <form method="POST" action="{% url 'preguntas:confirmar' %}">
         {% csrf_token %}
-        <button type="submit" class="btn btn-primary btn-full" style="padding:14px; font-size:15px; border-radius:12px; margin-bottom:12px; background:#186382; font-weight:700;">
-          ✓ Confirmar e Importar {{ resultado.validas|length }} Pregunta(s) Válida(s)
+        <button type="submit" class="btn btn-primary btn-full" style="padding:14px; font-size:15px; border-radius:12px; margin-bottom:12px; background:#186382; font-weight:700; display:inline-flex; align-items:center; justify-content:center; gap:8px;">
+          <i data-lucide="check-circle-2" style="width:18px; height:18px;"></i> Confirmar e Importar {{ resultado.validas|length }} Pregunta(s) Válida(s)
         </button>
       </form>
       {% else %}
       <div style="background:#fef2f2; color:#991b1b; padding:16px; border-radius:12px; font-size:13px; text-align:center; margin-bottom:14px; border:1px solid #fecaca;">
-        <strong>⚠️ Aún no hay preguntas válidas para importar.</strong>
-        <div style="font-size:12px; color:#7f1d1d; margin-top:4px;">Utiliza el botón <strong>"✏️ Corregir"</strong> en las filas rojas arriba para solucionar los errores directamente aquí.</div>
+        <strong>Aún no hay preguntas válidas para importar.</strong>
+        <div style="font-size:12px; color:#7f1d1d; margin-top:4px;">Utiliza el botón <strong>"Corregir"</strong> en las filas rojas arriba para solucionar los errores directamente aquí.</div>
       </div>
       {% endif %}
 
       <div style="display:flex; gap:10px;">
-        <a href="/static/plantillas/plantilla_preguntas_simulador_tyt.xlsx" download class="btn btn-outline" style="flex:1; font-size:12px; padding:10px; text-align:center;">
-          📥 Descargar Plantilla Oficial
+        <a href="/static/plantillas/plantilla_preguntas_simulador_tyt.xlsx" download class="btn btn-outline" style="flex:1; font-size:12px; padding:10px; text-align:center; display:inline-flex; align-items:center; justify-content:center; gap:6px;">
+          <i data-lucide="download" style="width:14px; height:14px;"></i> Descargar Plantilla Oficial
         </a>
         <form method="POST" action="{% url 'preguntas:cancelar' %}" style="flex:1;">
           {% csrf_token %}
-          <button type="submit" class="btn btn-outline btn-full" style="font-size:12px; padding:10px; color:#b91c1c; border-color:#fca5a5;">
-            ✖ Cancelar Ingesta
+          <button type="submit" class="btn btn-outline btn-full" style="font-size:12px; padding:10px; color:#b91c1c; border-color:#fca5a5; display:inline-flex; align-items:center; justify-content:center; gap:6px;">
+            <i data-lucide="x" style="width:14px; height:14px;"></i> Cancelar Ingesta
           </button>
         </form>
       </div>
@@ -235,16 +241,16 @@
     <div style="padding:18px 24px; border-bottom:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center; background:#f8fafc; border-radius:18px 18px 0 0;">
       <div>
         <h3 style="margin:0; font-size:16px; font-weight:800; color:#0f172a; display:flex; align-items:center; gap:8px;">
-          <span>✏️</span> Corregir Reactivo — <span id="modalFilaTitulo" style="color:#186382;">Fila #</span>
+          <i data-lucide="edit-3" style="width:16px; height:16px; color:#186382;"></i> Corregir Reactivo — <span id="modalFilaTitulo" style="color:#186382;">Fila #</span>
         </h3>
         <div style="font-size:12px; color:#64748b; margin-top:2px;">Los cambios se guardan y revalidan automáticamente.</div>
       </div>
-      <button type="button" onclick="cerrarModalCorreccion()" style="background:none; border:none; font-size:20px; font-weight:bold; color:#64748b; cursor:pointer; padding:4px 8px;">✕</button>
+      <button type="button" onclick="cerrarModalCorreccion()" style="background:none; border:none; font-size:22px; font-weight:bold; color:#64748b; cursor:pointer; padding:4px 8px;">&times;</button>
     </div>
 
     <!-- Caja de errores detectados en la fila -->
     <div id="modalCajaErrores" style="display:none; margin:16px 24px 0 24px; padding:12px 14px; background:#fef2f2; border:1px solid #fecaca; border-radius:10px; font-size:12px; color:#991b1b;">
-      <div style="font-weight:800; margin-bottom:4px;">⚠️ Observaciones detectadas en esta fila:</div>
+      <div style="font-weight:800; margin-bottom:4px;">Observaciones detectadas en esta fila:</div>
       <div id="modalListaErrores"></div>
     </div>
 
@@ -338,8 +344,8 @@
         <button type="button" class="btn btn-outline" onclick="cerrarModalCorreccion()" style="padding:10px 16px; font-size:13px; border-radius:8px;">
           Cancelar
         </button>
-        <button type="submit" class="btn btn-primary" style="padding:10px 20px; font-size:13px; font-weight:700; border-radius:8px; background:#186382;">
-          💾 Guardar Corrección y Revalidar
+        <button type="submit" class="btn btn-primary" style="padding:10px 20px; font-size:13px; font-weight:700; border-radius:8px; background:#186382; display:inline-flex; align-items:center; gap:6px;">
+          <i data-lucide="save" style="width:15px; height:15px;"></i> Guardar Corrección y Revalidar
         </button>
       </div>
 
@@ -355,10 +361,8 @@
     document.getElementById('input_fila_excel').value = filaExcel;
     document.getElementById('modalFilaTitulo').innerText = 'Fila #' + filaExcel;
 
-    // Llenar campos
     document.getElementById('input_categoria').value = data.categoria || '';
 
-    // Manejar Tipo estrictamente
     const inputTipo = document.getElementById('input_tipo');
     const tipoVal = (data.tipo || '').toUpperCase().trim();
     if (tipoVal === 'MULTIPLE' || tipoVal === 'V_F') {
@@ -381,7 +385,6 @@
     document.getElementById('input_respuesta_correcta').value = (data.respuesta_correcta || 'A').toUpperCase();
     document.getElementById('input_retroalimentacion').value = data.retroalimentacion || '';
 
-    // Manejar errores
     const cajaErrores = document.getElementById('modalCajaErrores');
     const listaErrores = document.getElementById('modalListaErrores');
     if (data.errores && data.errores.length > 0) {
@@ -394,9 +397,11 @@
 
     toggleTipoPregunta();
 
-    // Mostrar modal
     const modal = document.getElementById('modalCorreccion');
     modal.style.display = 'flex';
+    if (window.lucide) {
+      lucide.createIcons({ root: modal });
+    }
   }
 
   function cerrarModalCorreccion() {
@@ -427,7 +432,6 @@
       inputC.removeAttribute('required');
       inputD.removeAttribute('required');
 
-      // Si no tienen texto, poner sugerencia Verdadero/Falso
       const inputA = document.getElementById('input_opcion_a');
       const inputB = document.getElementById('input_opcion_b');
       if (!inputA.value) inputA.value = 'Verdadero';
@@ -454,20 +458,18 @@
       inputTipo.style.borderColor = '#dc2626';
       inputTipo.style.background = '#fef2f2';
       inputTipo.focus();
-      alert('⚠️ Debes seleccionar un Tipo de reactivo válido (MULTIPLE o V_F) antes de guardar.');
+      alert('Debes seleccionar un Tipo de reactivo válido (MULTIPLE o V_F) antes de guardar.');
       return false;
     }
     return true;
   }
 
-  // Cerrar al presionar la tecla Esc
   document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
       cerrarModalCorreccion();
     }
   });
 
-  // Cerrar al hacer clic fuera de la tarjeta modal
   document.getElementById('modalCorreccion').addEventListener('click', function(e) {
     if (e.target === this) {
       cerrarModalCorreccion();

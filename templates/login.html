@@ -7,8 +7,8 @@
 
   <!-- Header con botón volver -->
   <div style="padding:20px 32px;">
-    <a href="/" style="display:inline-flex; align-items:center; justify-content:center; width:40px; height:40px; border-radius:50%; background:white; border:1px solid #e2e8f0; color:#0f172a; font-size:20px; text-decoration:none; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
-      &larr;
+    <a href="/" style="display:inline-flex; align-items:center; justify-content:center; width:40px; height:40px; border-radius:50%; background:white; border:1px solid #e2e8f0; color:#0f172a; text-decoration:none; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+      <i data-lucide="arrow-left" style="width:18px; height:18px;"></i>
     </a>
   </div>
 
@@ -22,7 +22,7 @@
         <!-- Badge y Título -->
         <div style="text-align:center; margin-bottom:28px;">
           <div style="display:inline-flex; align-items:center; gap:6px; background:#e0f2fe; color:#0284c7; padding:6px 14px; border-radius:9999px; font-size:12px; font-weight:700; margin-bottom:14px;">
-            <span>🎓</span> Portal de Evaluación Institucional
+            <i data-lucide="graduation-cap" style="width:15px; height:15px;"></i> Portal de Evaluación Institucional
           </div>
           <h1 style="font-size:24px; font-weight:800; color:#0f172a; margin-bottom:6px;">Simulador Saber TyT</h1>
           <p style="font-size:13px; color:#64748b;">Acceso unificado para Estudiantes, Docentes y Administradores</p>
@@ -49,10 +49,10 @@
               <a href="#" onclick="mostrarNotificacion('Por favor contacte a la Dirección de Sistemas: soporte.sistemas@uniputumayo.edu.co', 'info', 'Recuperación de Clave'); return false;" style="font-size:12px; color:#186382; font-weight:600;">¿Olvidó su clave?</a>
             </div>
             <div style="position:relative;">
-              <span style="position:absolute; left:14px; top:50%; transform:translateY(-50%); color:#94a3b8; font-size:16px;">🔒</span>
+              <i data-lucide="lock" style="position:absolute; left:14px; top:50%; transform:translateY(-50%); color:#94a3b8; width:16px; height:16px;"></i>
               <input type="password" id="password" name="password" required class="form-input" placeholder="••••••••••••" style="padding-left:40px; padding-right:40px; height:46px; border-radius:10px;">
-              <button type="button" onclick="togglePassword()" style="position:absolute; right:14px; top:50%; transform:translateY(-50%); background:none; border:none; color:#94a3b8; cursor:pointer; font-size:16px;">
-                👁️
+              <button type="button" onclick="togglePassword()" style="position:absolute; right:14px; top:50%; transform:translateY(-50%); background:none; border:none; color:#94a3b8; cursor:pointer; display:flex; align-items:center;">
+                <i data-lucide="eye" style="width:16px; height:16px;"></i>
               </button>
             </div>
           </div>
@@ -71,9 +71,15 @@
         <div style="margin-top:24px; padding-top:18px; border-top:1px dashed #e2e8f0; text-align:center;">
           <span style="font-size:11px; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px;">Acceso Rápido para Sustentación</span>
           <div style="display:flex; gap:8px; justify-content:center; margin-top:8px; flex-wrap:wrap;">
-            <button type="button" onclick="quickFill('david', '1234')" class="btn btn-outline" style="font-size:11px; padding:6px 12px; cursor:pointer; font-weight:700;">👑 Admin (david / 1234)</button>
-            <button type="button" onclick="quickFill('docente', '123456')" class="btn btn-outline" style="font-size:11px; padding:6px 12px; cursor:pointer; font-weight:700;">💼 Docente (docente / 123456)</button>
-            <button type="button" onclick="quickFill('estudiante', '123456')" class="btn btn-outline" style="font-size:11px; padding:6px 12px; cursor:pointer; font-weight:700;">🎓 Estudiante (estudiante / 123456)</button>
+            <button type="button" onclick="quickFill('david', '1234')" class="btn btn-outline" style="font-size:11px; padding:6px 12px; cursor:pointer; font-weight:700; display:inline-flex; align-items:center; gap:4px;">
+              <i data-lucide="shield" style="width:13px; height:13px;"></i> Admin (david / 1234)
+            </button>
+            <button type="button" onclick="quickFill('docente', '123456')" class="btn btn-outline" style="font-size:11px; padding:6px 12px; cursor:pointer; font-weight:700; display:inline-flex; align-items:center; gap:4px;">
+              <i data-lucide="briefcase" style="width:13px; height:13px;"></i> Docente (docente / 123456)
+            </button>
+            <button type="button" onclick="quickFill('estudiante', '123456')" class="btn btn-outline" style="font-size:11px; padding:6px 12px; cursor:pointer; font-weight:700; display:inline-flex; align-items:center; gap:4px;">
+              <i data-lucide="graduation-cap" style="width:13px; height:13px;"></i> Estudiante (estudiante / 123456)
+            </button>
           </div>
         </div>
 
@@ -81,7 +87,9 @@
 
       <!-- Footer soporte técnico -->
       <div style="text-align:center; margin-top:24px; font-size:13px; color:#64748b;">
-        <div style="font-weight:600; color:#334155; margin-bottom:2px;">🎧 Soporte Técnico: Dirección de Sistemas IUP</div>
+        <div style="font-weight:600; color:#334155; margin-bottom:2px; display:inline-flex; align-items:center; gap:6px;">
+          <i data-lucide="headphones" style="width:14px; height:14px;"></i> Soporte Técnico: Dirección de Sistemas IUP
+        </div>
         <div>Mesa de ayuda: <a href="mailto:soporte.sistemas@uniputumayo.edu.co" style="color:#186382; font-weight:500;">soporte.sistemas@uniputumayo.edu.co</a></div>
       </div>
 
@@ -101,12 +109,10 @@
   function quickFill(user, pass) {
     document.getElementById('username').value = user;
     document.getElementById('password').value = pass;
-    // Disparar click en submit
     document.getElementById('btn-submit').click();
   }
 
   async function handleLogin(e) {
-    // Si ya validamos el JWT y estamos ejecutando submit nativo, permitir que proceda
     if (window._jwt_validated) {
       return true;
     }
@@ -123,7 +129,6 @@
     btn.innerText = 'Validando credenciales JWT...';
 
     try {
-      // 1. Obtener tokens JWT desde el endpoint oficial
       const response = await fetch('/api/auth/token/', {
         method: 'POST',
         headers: {
@@ -142,17 +147,14 @@
         throw new Error(msg);
       }
 
-      // 2. Guardar tokens JWT en localStorage
       localStorage.setItem('access_token', data.access);
       localStorage.setItem('refresh_token', data.refresh);
       localStorage.setItem('user_data', JSON.stringify(data.user));
 
-      // 3. Guardar en cookies para navegación web
       const maxAge = 86400; // 1 día
       document.cookie = `access_token=${data.access}; path=/; max-age=${maxAge}; SameSite=Lax`;
       document.cookie = `refresh_token=${data.refresh}; path=/; max-age=${maxAge}; SameSite=Lax`;
 
-      // 4. Continuar submit para sincronizar la sesión Django
       window._jwt_validated = true;
       document.getElementById('form-login').submit();
 

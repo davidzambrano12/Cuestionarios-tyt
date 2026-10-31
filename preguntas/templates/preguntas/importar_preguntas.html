@@ -9,7 +9,7 @@
     <!-- Topbar -->
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
       <a href="/preguntas/" style="display:inline-flex; align-items:center; justify-content:center; width:38px; height:38px; border-radius:50%; background:white; border:1px solid #e2e8f0; color:#0f172a; text-decoration:none;">
-        &larr;
+        <i data-lucide="arrow-left" style="width:18px; height:18px;"></i>
       </a>
       <h2 style="font-size:18px; font-weight:800; color:#0f172a;">Importar Preguntas</h2>
       <div style="width:38px;"></div>
@@ -34,7 +34,7 @@
     <div class="card" style="padding:14px 20px; margin-bottom:20px; background:#eff6ff; border:1px solid #93c5fd; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; border-radius:14px;">
       <div>
         <div style="font-size:12px; font-weight:800; color:#1e40af; display:flex; align-items:center; gap:6px;">
-          <span>ℹ️</span> Tienes una importación activa en proceso
+          <i data-lucide="info" style="width:16px; height:16px;"></i> Tienes una importación activa en proceso
         </div>
         <div style="font-size:13px; color:#1e3a8a; margin-top:2px;">
           Archivo: <strong>{{ pendiente.nombre_archivo }}</strong>
@@ -63,7 +63,7 @@
         <!-- Cuestionario de Destino -->
         <div class="form-group" style="margin-bottom:20px;">
           <label class="form-label" style="display:flex; align-items:center; gap:6px;">
-            <span>📋</span> Cuestionario de Destino (Opcional)
+            <i data-lucide="clipboard-list" style="width:16px; height:16px; color:#0284c7;"></i> Cuestionario de Destino (Opcional)
           </label>
           {{ form.cuestionario }}
           <div style="font-size:11px; color:#64748b; margin-top:4px;">
@@ -74,10 +74,12 @@
         <!-- Dropzone / Input Archivo -->
         <div class="form-group" style="margin-bottom:24px;">
           <label class="form-label" style="display:flex; align-items:center; gap:6px;">
-            <span>📥</span> Archivo Excel con Formato Oficial (.xlsx)
+            <i data-lucide="upload" style="width:16px; height:16px; color:#0284c7;"></i> Archivo Excel con Formato Oficial (.xlsx)
           </label>
           <div style="border:2px dashed #cbd5e1; border-radius:12px; padding:28px 20px; text-align:center; background:#f8fafc; cursor:pointer;" onclick="document.getElementById('id_archivo').click();">
-            <div style="font-size:36px; margin-bottom:8px;">📊</div>
+            <div style="margin-bottom:8px; color:#186382; display:flex; justify-content:center;">
+              <i data-lucide="file-spreadsheet" style="width:40px; height:40px;"></i>
+            </div>
             <div style="font-weight:700; color:#0f172a; font-size:14px; margin-bottom:4px;">Haz clic para seleccionar el archivo Excel</div>
             <div style="font-size:12px; color:#64748b; margin-bottom:12px;">Compatible con Microsoft Excel (.xlsx)</div>
             <div style="display:none;">{{ form.archivo }}</div>
@@ -111,8 +113,8 @@
           Validar y Previsualizar Archivo &rarr;
         </button>
 
-        <a href="/static/plantillas/plantilla_preguntas_simulador_tyt.xlsx" download class="btn btn-outline btn-full" style="padding:10px; font-size:13px; color:#186382; border-color:#93c5fd;">
-          📥 Descargar Plantilla Oficial Excel
+        <a href="/static/plantillas/plantilla_preguntas_simulador_tyt.xlsx" download class="btn btn-outline btn-full" style="padding:10px; font-size:13px; color:#186382; border-color:#93c5fd; display:inline-flex; align-items:center; justify-content:center; gap:6px;">
+          <i data-lucide="download" style="width:15px; height:15px;"></i> Descargar Plantilla Oficial Excel
         </a>
       </form>
 
@@ -128,7 +130,7 @@
   if (fileInput) {
     fileInput.addEventListener('change', () => {
       if (fileInput.files.length > 0) {
-        document.getElementById('archivo-seleccionado-nombre').innerText = `📄 ${fileInput.files[0].name} (${(fileInput.files[0].size / 1024).toFixed(1)} KB)`;
+        document.getElementById('archivo-seleccionado-nombre').innerText = `${fileInput.files[0].name} (${(fileInput.files[0].size / 1024).toFixed(1)} KB)`;
       }
     });
   }

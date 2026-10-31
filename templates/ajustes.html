@@ -9,7 +9,7 @@
     <!-- Topbar -->
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
       <a href="javascript:history.back()" style="display:inline-flex; align-items:center; justify-content:center; width:38px; height:38px; border-radius:50%; background:white; border:1px solid #e2e8f0; color:#0f172a; text-decoration:none;">
-        &larr;
+        <i data-lucide="arrow-left" style="width:18px; height:18px;"></i>
       </a>
       <h2 style="font-size:18px; font-weight:800; color:#0f172a;">Configuración</h2>
       <div style="width:38px;"></div>
@@ -30,7 +30,7 @@
         <!-- Identidad Institucional -->
         <div style="border-top:1px solid #f1f5f9; padding-top:18px; margin-bottom:20px;">
           <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
-            <span>🏛️</span>
+            <i data-lucide="landmark" style="width:16px; height:16px; color:#186382;"></i>
             <h3 style="font-size:14px; font-weight:800; color:#0f172a; margin:0;">Identidad Institucional</h3>
           </div>
 
@@ -51,7 +51,7 @@
         <!-- Configuración Regional y Servidor -->
         <div style="border-top:1px solid #f1f5f9; padding-top:18px; margin-bottom:20px;">
           <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
-            <span>🌐</span>
+            <i data-lucide="globe" style="width:16px; height:16px; color:#186382;"></i>
             <h3 style="font-size:14px; font-weight:800; color:#0f172a; margin:0;">Configuración Regional y Servidor</h3>
           </div>
 
@@ -72,7 +72,7 @@
         <!-- Mesa de Ayuda y Soporte -->
         <div style="border-top:1px solid #f1f5f9; padding-top:18px; margin-bottom:24px;">
           <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
-            <span>🎧</span>
+            <i data-lucide="headphones" style="width:16px; height:16px; color:#186382;"></i>
             <h3 style="font-size:14px; font-weight:800; color:#0f172a; margin:0;">Mesa de Ayuda y Soporte</h3>
           </div>
 
@@ -90,11 +90,11 @@
           </div>
         </div>
 
-        <button type="submit" class="btn btn-primary btn-full" style="padding:12px; font-size:14px; margin-bottom:10px;">
-          💾 Guardar y Aplicar Cambios
+        <button type="submit" class="btn btn-primary btn-full" style="padding:12px; font-size:14px; margin-bottom:10px; display:inline-flex; align-items:center; justify-content:center; gap:6px;">
+          <i data-lucide="save" style="width:16px; height:16px;"></i> Guardar y Aplicar Cambios
         </button>
-        <button type="button" onclick="mostrarNotificacion('Configuración predeterminada institucional restaurada.', 'success', 'Ajustes del Sistema');" class="btn btn-outline btn-full" style="padding:10px; font-size:13px;">
-          🔄 Restaurar Predeterminados
+        <button type="button" onclick="mostrarNotificacion('Configuración predeterminada institucional restaurada.', 'success', 'Ajustes del Sistema');" class="btn btn-outline btn-full" style="padding:10px; font-size:13px; display:inline-flex; align-items:center; justify-content:center; gap:6px;">
+          <i data-lucide="rotate-ccw" style="width:15px; height:15px;"></i> Restaurar Predeterminados
         </button>
       </form>
 

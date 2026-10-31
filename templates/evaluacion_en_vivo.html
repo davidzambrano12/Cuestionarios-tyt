@@ -9,7 +9,7 @@
   <header style="background:white; border-bottom:1px solid #e2e8f0; padding:12px 32px; display:flex; justify-content:space-between; align-items:center;">
     <div style="display:flex; align-items:center; gap:16px;">
       <a href="/dashboard/estudiante/" onclick="return confirm('¿Seguro que deseas salir? El temporizador seguirá corriendo.');" style="display:inline-flex; align-items:center; justify-content:center; width:36px; height:36px; border-radius:50%; background:#f1f5f9; color:#0f172a; text-decoration:none;">
-        &larr;
+        <i data-lucide="arrow-left" style="width:18px; height:18px;"></i>
       </a>
       <div>
         <div style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.5px;">SABER TYT 2026 · SESIÓN OFICIAL</div>
@@ -19,12 +19,12 @@
 
     <!-- Temporizador Digital Flotante -->
     <div style="display:flex; align-items:center; gap:12px;">
-      <div class="eval-timer-box">
-        <span>⏱️</span>
+      <div class="eval-timer-box" style="display:inline-flex; align-items:center; gap:6px;">
+        <i data-lucide="clock" style="width:16px; height:16px;"></i>
         <span id="reloj-tiempo">--:--:--</span>
       </div>
-      <button type="button" onclick="mostrarNotificacion('El temporizador continúa sincronizado en el servidor.', 'info', 'Sincronización');" style="background:#f1f5f9; border:1px solid #cbd5e1; width:36px; height:36px; border-radius:8px; cursor:pointer;">
-        ⏸️
+      <button type="button" onclick="mostrarNotificacion('El temporizador continúa sincronizado en el servidor.', 'info', 'Sincronización');" style="background:#f1f5f9; border:1px solid #cbd5e1; width:36px; height:36px; border-radius:8px; cursor:pointer; display:inline-flex; align-items:center; justify-content:center;">
+        <i data-lucide="pause" style="width:16px; height:16px; color:#475569;"></i>
       </button>
     </div>
   </header>
@@ -59,7 +59,7 @@
           <!-- Card Contexto Operativo -->
           <div class="card" style="padding:20px; border-radius:16px; margin-bottom:16px;">
             <div style="display:flex; align-items:center; gap:8px; font-size:12px; font-weight:800; color:#186382; margin-bottom:12px; text-transform:uppercase;">
-              <span>📄</span> CONTEXTO OPERATIVO
+              <i data-lucide="file-text" style="width:16px; height:16px;"></i> CONTEXTO OPERATIVO
             </div>
             <div id="texto-contexto" style="font-size:13px; color:#334155; line-height:1.6;">
               Texto descriptivo de apoyo para la formulación del problema y resolución del reactivo.
@@ -68,11 +68,11 @@
 
           <!-- Imagen o Referencia Contextual -->
           <div style="background:white; border:1px solid #e2e8f0; border-radius:16px; overflow:hidden; box-shadow:var(--shadow-sm);">
-            <div style="background:linear-gradient(135deg, #0f3d52 0%, #186382 100%); height:120px; display:flex; align-items:center; justify-content:center; color:white; font-size:36px;">
-              🌱
+            <div style="background:linear-gradient(135deg, #0f3d52 0%, #186382 100%); height:120px; display:flex; align-items:center; justify-content:center; color:white;">
+              <i data-lucide="sprout" style="width:38px; height:38px;"></i>
             </div>
-            <div style="padding:10px 14px; font-size:11px; color:#64748b; font-weight:600; text-align:center;">
-              🌿 Unidad de Aplicación Práctica · Uniputumayo
+            <div style="padding:10px 14px; font-size:11px; color:#64748b; font-weight:600; text-align:center; display:flex; align-items:center; justify-content:center; gap:6px;">
+              <i data-lucide="leaf" style="width:14px; height:14px; color:#16a34a;"></i> Unidad de Aplicación Práctica · Uniputumayo
             </div>
           </div>
         </div>
@@ -98,8 +98,8 @@
               </button>
 
               <div style="display:flex; align-items:center; gap:10px;">
-                <button type="button" onclick="confirmarEntrega()" class="btn btn-outline" style="border-color:#cbd5e1; color:#475569; padding:10px 18px; font-size:13px;" title="Terminar examen ahora">
-                  ⏹️ Terminar Examen
+                <button type="button" onclick="confirmarEntrega()" class="btn btn-outline" style="border-color:#cbd5e1; color:#475569; padding:10px 18px; font-size:13px; display:inline-flex; align-items:center; gap:6px;" title="Terminar examen ahora">
+                  <i data-lucide="square" style="width:14px; height:14px;"></i> Terminar Examen
                 </button>
                 <button type="button" id="btn-siguiente" onclick="irSiguienteOTerminar()" class="btn btn-primary" style="padding:10px 24px; background:#186382; font-weight:700;">
                   Guardar y Siguiente &rarr;
@@ -113,7 +113,7 @@
         <div>
           <div class="card" style="padding:24px; border-radius:20px;">
             <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
-              <span style="font-size:16px;">☷</span>
+              <i data-lucide="layout-grid" style="width:18px; height:18px; color:#186382;"></i>
               <h3 style="font-size:15px; font-weight:800; color:#0f172a; margin:0;">Mapeo de Preguntas</h3>
             </div>
             <div id="resumen-mapeo-label" style="font-size:12px; color:#64748b; margin-bottom:14px;">
@@ -139,8 +139,8 @@
             </div>
 
             <!-- Botón Finalizar Examen -->
-            <button type="button" onclick="confirmarEntrega()" class="btn btn-full" style="margin-top:24px; background:#16a34a; color:white; font-size:14px; padding:12px; border-radius:10px; font-weight:700;">
-              ✓ Finalizar y Entregar Intento
+            <button type="button" onclick="confirmarEntrega()" class="btn btn-full" style="margin-top:24px; background:#16a34a; color:white; font-size:14px; padding:12px; border-radius:10px; font-weight:700; display:inline-flex; align-items:center; justify-content:center; gap:6px;">
+              <i data-lucide="check-circle-2"></i> Finalizar y Entregar Intento
             </button>
           </div>
         </div>
@@ -210,9 +210,12 @@
     document.getElementById('btn-anterior').style.visibility = idx === 0 ? 'hidden' : 'visible';
     const btnSig = document.getElementById('btn-siguiente');
     if (idx === preguntasData.length - 1) {
-      btnSig.innerHTML = '✓ Guardar y Terminar Examen';
+      btnSig.innerHTML = '<i data-lucide="check"></i> Guardar y Terminar Examen';
       btnSig.style.background = '#16a34a';
       btnSig.style.color = '#ffffff';
+      if (window.lucide) {
+        lucide.createIcons({ root: btnSig });
+      }
     } else {
       btnSig.innerHTML = 'Guardar y Siguiente &rarr;';
       btnSig.style.background = '#186382';
@@ -236,10 +239,13 @@
         <div class="option-letter-badge">${letra}</div>
         <div style="flex-grow:1; font-size:14px; color:#0f172a; font-weight:500;">${op.texto}</div>
         <div style="width:20px; height:20px; border-radius:50%; border:2px solid ${estaSeleccionada ? '#186382' : '#cbd5e1'}; display:flex; align-items:center; justify-content:center; background:${estaSeleccionada ? '#186382' : 'transparent'}; color:white; font-size:12px;">
-          ${estaSeleccionada ? '✓' : ''}
+          ${estaSeleccionada ? '<i data-lucide="check" style="width:12px; height:12px;"></i>' : ''}
         </div>
       `;
       contenedor.appendChild(card);
+      if (window.lucide) {
+        lucide.createIcons({ root: card });
+      }
     });
 
     actualizarEstadosGrilla();
@@ -329,7 +335,7 @@
 
     let mensaje = `¿Estás seguro de finalizar y entregar tu examen?\n\n• Respondidas: ${respondidas} de ${total}\n• Pendientes: ${faltantes}`;
     if (faltantes > 0) {
-      mensaje += `\n\n⚠️ Atención: Aún tienes ${faltantes} pregunta(s) sin responder. Se calificarán con 0 puntos.`;
+      mensaje += `\n\nAtención: Aún tienes ${faltantes} pregunta(s) sin responder. Se calificarán con 0 puntos.`;
     }
 
     if (confirm(mensaje)) {

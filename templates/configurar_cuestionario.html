@@ -9,7 +9,7 @@
     <!-- Topbar -->
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
       <a href="/cuestionarios/" style="display:inline-flex; align-items:center; justify-content:center; width:38px; height:38px; border-radius:50%; background:white; border:1px solid #e2e8f0; color:#0f172a; text-decoration:none;">
-        &larr;
+        <i data-lucide="arrow-left" style="width:18px; height:18px;"></i>
       </a>
       <h2 style="font-size:18px; font-weight:800; color:#0f172a;">Cuestionarios</h2>
       <div style="width:38px;"></div>
@@ -40,7 +40,7 @@
       <!-- Sección A: Información General -->
       <div class="card" style="margin-bottom:20px;">
         <div style="display:flex; align-items:center; gap:8px; margin-bottom:16px; border-bottom:1px solid #f1f5f9; padding-bottom:10px;">
-          <span style="font-size:18px;">📋</span>
+          <i data-lucide="clipboard-list" style="color:#0284c7; width:20px; height:20px;"></i>
           <h2 style="font-size:15px; font-weight:800; color:#0f172a; margin:0;">Sección A: Información General</h2>
         </div>
 
@@ -52,14 +52,16 @@
         <div class="form-group" style="margin-bottom:0;">
           <label class="form-label">Instrucciones Pedagógicas *</label>
           <textarea name="descripcion" required class="form-textarea" placeholder="Evaluación formativa para medir competencias... Lea atentamente cada reactivo.">{{ cuestionario.descripcion|default:'' }}</textarea>
-          <div style="font-size:11px; color:#94a3b8; margin-top:4px;">👁️ Visible para los estudiantes antes de iniciar el intento.</div>
+          <div style="font-size:11px; color:#94a3b8; margin-top:4px; display:inline-flex; align-items:center; gap:4px;">
+            <i data-lucide="eye" style="width:13px; height:13px;"></i> Visible para los estudiantes antes de iniciar el intento.
+          </div>
         </div>
       </div>
 
       <!-- Sección B: Ventana de Acceso -->
       <div class="card" style="margin-bottom:20px;">
         <div style="display:flex; align-items:center; gap:8px; margin-bottom:16px; border-bottom:1px solid #f1f5f9; padding-bottom:10px;">
-          <span style="font-size:18px;">📅</span>
+          <i data-lucide="calendar" style="color:#0284c7; width:20px; height:20px;"></i>
           <h2 style="font-size:15px; font-weight:800; color:#0f172a; margin:0;">Sección B: Ventana de Acceso</h2>
         </div>
 
@@ -75,14 +77,14 @@
         </div>
 
         <div style="display:flex; align-items:center; gap:8px; font-size:12px; color:#15803d; background:#dcfce7; padding:8px 12px; border-radius:8px;">
-          <span>✓</span> Fecha de cierre validada por el servidor (impide evaluaciones fuera de fecha).
+          <i data-lucide="check" style="width:14px; height:14px;"></i> Fecha de cierre validada por el servidor (impide evaluaciones fuera de fecha).
         </div>
       </div>
 
       <!-- Sección C: Parámetros e Intentos -->
       <div class="card" style="margin-bottom:20px;">
         <div style="display:flex; align-items:center; gap:8px; margin-bottom:16px; border-bottom:1px solid #f1f5f9; padding-bottom:10px;">
-          <span style="font-size:18px;">⚙️</span>
+          <i data-lucide="settings" style="color:#0284c7; width:20px; height:20px;"></i>
           <h2 style="font-size:15px; font-weight:800; color:#0f172a; margin:0;">Sección C: Parámetros e Intentos</h2>
         </div>
 
@@ -111,14 +113,14 @@
         </div>
 
         <div style="font-size:12px; color:#15803d; display:flex; align-items:center; gap:6px;">
-          <span>✓</span> 0.00 &lt; 3.00 &le; 5.00 OK (Rango institucional IUP validado)
+          <i data-lucide="check" style="width:14px; height:14px;"></i> 0.00 &lt; 3.00 &le; 5.00 OK (Rango institucional IUP validado)
         </div>
       </div>
 
       <!-- Sección D: Opciones de Entrega -->
       <div class="card" style="margin-bottom:20px;">
         <div style="display:flex; align-items:center; gap:8px; margin-bottom:16px; border-bottom:1px solid #f1f5f9; padding-bottom:10px;">
-          <span style="font-size:18px;">🔀</span>
+          <i data-lucide="shuffle" style="color:#0284c7; width:20px; height:20px;"></i>
           <h2 style="font-size:15px; font-weight:800; color:#0f172a; margin:0;">Sección D: Opciones de Entrega</h2>
         </div>
 
@@ -153,11 +155,11 @@
       <div class="card" style="margin-bottom:24px;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; border-bottom:1px solid #f1f5f9; padding-bottom:10px;">
           <div style="display:flex; align-items:center; gap:8px;">
-            <span style="font-size:18px;">📚</span>
+            <i data-lucide="book-open" style="color:#0284c7; width:20px; height:20px;"></i>
             <h2 style="font-size:15px; font-weight:800; color:#0f172a; margin:0;">Sección E: Reactivos del Banco</h2>
           </div>
-          <button type="button" onclick="openModal('modal-selector-preguntas')" class="btn btn-outline" style="font-size:12px; padding:6px 12px; color:#186382; border-color:#93c5fd;">
-            ➕ Añadir Preguntas
+          <button type="button" onclick="openModal('modal-selector-preguntas')" class="btn btn-outline" style="font-size:12px; padding:6px 12px; color:#186382; border-color:#93c5fd; display:inline-flex; align-items:center; gap:6px;">
+            <i data-lucide="plus" style="width:14px; height:14px;"></i> Añadir Preguntas
           </button>
         </div>
 
@@ -181,7 +183,9 @@
               <div style="font-size:11px; font-weight:700; color:#0284c7;">{{ cp.pregunta.categoria.nombre }} · {{ cp.pregunta.puntaje }} pt</div>
               <div style="font-size:13px; color:#0f172a;">{{ cp.pregunta.enunciado|truncatechars:65 }}</div>
             </div>
-            <button type="button" onclick="removerReactivo(this)" style="background:none; border:none; color:#ef4444; font-size:16px; cursor:pointer;" title="Eliminar del examen">🗑️</button>
+            <button type="button" onclick="removerReactivo(this)" style="background:none; border:none; color:#ef4444; font-size:16px; cursor:pointer;" title="Eliminar del examen">
+              <i data-lucide="trash-2" style="width:16px; height:16px;"></i>
+            </button>
           </div>
           {% endfor %}
         </div>
@@ -189,11 +193,11 @@
 
       <!-- Botones de Acción Final -->
       <div style="display:flex; gap:12px; margin-top:20px;">
-        <button type="submit" name="accion" value="borrador" class="btn btn-outline" style="flex:1; height:48px; font-size:14px;">
-          💾 Guardar Borrador
+        <button type="submit" name="accion" value="borrador" class="btn btn-outline" style="flex:1; height:48px; font-size:14px; display:inline-flex; align-items:center; justify-content:center; gap:8px;">
+          <i data-lucide="save"></i> Guardar Borrador
         </button>
-        <button type="submit" name="accion" value="publicar" class="btn btn-primary" style="flex:1; height:48px; font-size:14px; background:#186382;">
-          🚀 Publicar y Habilitar
+        <button type="submit" name="accion" value="publicar" class="btn btn-primary" style="flex:1; height:48px; font-size:14px; background:#186382; display:inline-flex; align-items:center; justify-content:center; gap:8px;">
+          <i data-lucide="send"></i> Publicar y Habilitar
         </button>
       </div>
 
@@ -263,9 +267,14 @@
           <div style="font-size:11px; font-weight:700; color:#0284c7;">${cat} · ${puntaje} pt</div>
           <div style="font-size:13px; color:#0f172a;">${enunciado}</div>
         </div>
-        <button type="button" onclick="removerReactivo(this)" style="background:none; border:none; color:#ef4444; font-size:16px; cursor:pointer;" title="Eliminar del examen">🗑️</button>
+        <button type="button" onclick="removerReactivo(this)" style="background:none; border:none; color:#ef4444; font-size:16px; cursor:pointer;" title="Eliminar del examen">
+          <i data-lucide="trash-2" style="width:16px; height:16px;"></i>
+        </button>
       `;
       contenedor.appendChild(el);
+      if (window.lucide) {
+        lucide.createIcons({ root: el });
+      }
       chk.checked = false;
     });
 
