@@ -83,14 +83,14 @@
             <i data-lucide="file-text" style="width:16px; height:16px;"></i> CONTEXTO OPERATIVO
           </div>
           <div id="texto-contexto" class="text-reading text-sm text-main" style="line-height:var(--leading-relaxed); max-height:300px; overflow-y:auto;">
-            Texto descriptivo de apoyo para la formulación del problema y resolución del reactivo.
+            Texto descriptivo de apoyo para la formulación del problema y resolución de la pregunta.
           </div>
         </div>
 
         <!-- Acción Docente Rápida: Editar en Banco -->
         <div class="card" style="padding:16px; border-radius:16px;">
           <div style="font-size:12px; font-weight:700; color:#0f172a; margin-bottom:6px; display:flex; align-items:center; gap:6px;">
-            <i data-lucide="tool" style="width:14px; height:14px; color:#186382;"></i> Gestión del Reactivo
+            <i data-lucide="tool" style="width:14px; height:14px; color:#186382;"></i> Gestión de la Pregunta
           </div>
           <p style="font-size:12px; color:#64748b; margin-bottom:12px;">
             ¿Detectaste un error tipográfico o deseas ajustar el enunciado?
@@ -106,7 +106,7 @@
         <div class="card" style="padding:32px; border-radius:20px; min-height:480px; display:flex; flex-direction:column; justify-content:space-between;">
           <div>
             <h2 id="enunciado-pregunta" class="section-title text-xl font-bold text-main" style="margin-bottom:28px; line-height:var(--leading-snug);">
-              Cargando reactivo...
+              Cargando pregunta...
             </h2>
 
             <!-- Contenedor dinámico de opciones A, B, C, D -->
@@ -120,7 +120,7 @@
                 <i data-lucide="check-circle" style="width:16px; height:16px;"></i> RETROALIMENTACIÓN PEDAGÓGICA (CLAVE OFICIAL)
               </div>
               <div id="texto-retroalimentacion" style="font-size:13px; color:#14532d; line-height:1.5;">
-                Sin retroalimentación registrada para este reactivo.
+                Sin retroalimentación registrada para esta pregunta.
               </div>
             </div>
           </div>
@@ -174,7 +174,7 @@
             <div style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; margin-bottom:8px;">Parámetros del Cuestionario</div>
             <div style="display:flex; flex-direction:column; gap:6px; font-size:12px; color:#475569;">
               <div style="display:flex; justify-content:space-between;">
-                <span>Total Reactivos:</span>
+                <span>Total Preguntas:</span>
                 <strong>{{ total_preguntas }}</strong>
               </div>
               <div style="display:flex; justify-content:space-between;">
@@ -257,7 +257,7 @@
     document.getElementById('resumen-mapeo-label').innerText = `Pregunta ${idx + 1} de ${preguntasData.length}`;
     document.getElementById('badge-competencia').innerText = p.categoria;
     document.getElementById('badge-puntaje').innerText = `Valor: ${p.puntaje} pt`;
-    document.getElementById('texto-contexto').innerText = p.texto_base || 'Sin contexto adicional para este reactivo.';
+    document.getElementById('texto-contexto').innerText = p.texto_base || 'Sin contexto adicional para esta pregunta.';
     document.getElementById('enunciado-pregunta').innerText = p.enunciado;
 
     // Actualizar link de edición directa en banco
@@ -322,7 +322,7 @@
     const textoRetro = document.getElementById('texto-retroalimentacion');
     if (mostrarClavesDocente) {
       panelRetro.style.display = 'block';
-      textoRetro.innerText = p.retroalimentacion || 'El autor no especificó una retroalimentación adicional para este reactivo.';
+      textoRetro.innerText = p.retroalimentacion || 'El autor no especificó una retroalimentación adicional para esta pregunta.';
     } else {
       panelRetro.style.display = 'none';
     }

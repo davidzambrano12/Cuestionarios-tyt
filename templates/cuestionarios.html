@@ -129,7 +129,7 @@
       <div class="text-xs text-muted" style="background:#f8fafc; border-radius:10px; padding:12px; margin-bottom:18px; display:grid; grid-template-columns:1fr 1fr; gap:10px;">
         <div style="display:flex; align-items:center; gap:6px;">
           <i data-lucide="help-circle" style="width:14px; height:14px; color:#186382;"></i>
-          <span><strong>{{ c.cuestionario_preguntas.count }}</strong> reactivos</span>
+          <span><strong>{{ c.cuestionario_preguntas.count }}</strong> preguntas</span>
         </div>
         <div style="display:flex; align-items:center; gap:6px;">
           <i data-lucide="users" style="width:14px; height:14px; color:#186382;"></i>
@@ -167,7 +167,7 @@
       <a href="/cuestionarios/{{ c.id }}/previsualizar/" class="btn btn-outline" style="flex:1; font-size:12px; padding:8px 6px; display:inline-flex; align-items:center; justify-content:center; gap:5px;" title="Probar examen en modo simulación">
         <i data-lucide="eye" style="width:13px; height:13px;"></i> Probar
       </a>
-      <a href="/cuestionarios/{{ c.id }}/editar/" class="btn btn-primary" style="flex:1; font-size:12px; padding:8px 6px; display:inline-flex; align-items:center; justify-content:center; gap:5px;" title="Editar políticas y reactivos">
+      <a href="/cuestionarios/{{ c.id }}/editar/" class="btn btn-primary" style="flex:1; font-size:12px; padding:8px 6px; display:inline-flex; align-items:center; justify-content:center; gap:5px;" title="Editar políticas y preguntas">
         <i data-lucide="settings" style="width:13px; height:13px;"></i> Configurar
       </a>
       {% else %}
@@ -195,7 +195,7 @@
     </div>
     <h3 style="font-size:18px; font-weight:800; color:#0f172a; margin-bottom:6px;">No hay cuestionarios registrados</h3>
     <p style="font-size:14px; color:#64748b; max-width:440px; margin:0 auto 20px;">
-      Comienza creando una evaluación para programar los reactivos institucionales del banco.
+      Comienza creando una evaluación para programar las preguntas institucionales del banco.
     </p>
     {% if user.is_superuser or user.perfil.es_admin or user.perfil.es_docente %}
     <a href="/cuestionarios/crear/" class="btn btn-primary" style="display:inline-flex; align-items:center; gap:8px;">

@@ -10,9 +10,9 @@
   <div class="dashboard-banner">
     <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:16px;">
       <div>
-        <div class="banner-badge">● Reactivos Institucionales Saber TyT</div>
+        <div class="banner-badge">● Preguntas Institucionales Saber TyT</div>
         <h1 class="banner-title">Banco de Preguntas</h1>
-        <p class="banner-subtitle">Gestión, edición y clasificación de reactivos por competencia evaluada</p>
+        <p class="banner-subtitle">Gestión, edición y clasificación de preguntas por competencia evaluada</p>
       </div>
       <div style="display:flex; gap:10px; flex-wrap:wrap;">
         <a href="/preguntas/importar/" class="btn btn-outline" style="padding:10px 16px; border-radius:10px; background:white; font-weight:600; display:inline-flex; align-items:center; gap:6px;">
@@ -370,12 +370,12 @@
         headers: { 'X-Requested-With': 'XMLHttpRequest' }
       });
       if (!resp.ok) {
-        mostrarNotificacion("Error al cargar los datos del reactivo.", "error", "Banco de Preguntas");
+        mostrarNotificacion("Error al cargar los datos de la pregunta.", "error", "Banco de Preguntas");
         return;
       }
       const data = await resp.json();
       document.getElementById('form-editar-pregunta').action = `/preguntas/${id}/editar/`;
-      document.getElementById('editar-pregunta-subtitulo').textContent = `Reactivo Cód. P-${id}`;
+      document.getElementById('editar-pregunta-subtitulo').textContent = `Pregunta Cód. P-${id}`;
       document.getElementById('editar-categoria-id').value = data.categoria_id;
       document.getElementById('editar-tipo-pregunta').value = data.tipo;
       document.getElementById('editar-texto-base').value = data.texto_base;
