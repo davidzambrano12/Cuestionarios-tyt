@@ -19,7 +19,7 @@
           <span class="badge badge-info">{{ user.perfil.rol.nombre|default:"Usuario" }}</span>
           <span class="badge badge-success">● Cuenta Activa y Verificada</span>
         </div>
-        <h1 style="font-size:20px; font-weight:800; color:#0f172a; margin-bottom:2px;">{{ user.get_full_name|default:user.username }}</h1>
+        <h1 class="page-title text-2xl font-extrabold text-main" style="margin-bottom:2px;">{{ user.get_full_name|default:user.username }}</h1>
         <div style="font-size:12px; color:#64748b;">Institución Universitaria del Putumayo · Mocoa</div>
       </div>
 
@@ -27,7 +27,7 @@
       <div style="border-top:1px solid #f1f5f9; padding-top:20px; margin-bottom:24px;">
         <div style="display:flex; align-items:center; gap:8px; margin-bottom:14px;">
           <i data-lucide="graduation-cap" style="width:16px; height:16px; color:#186382;"></i>
-          <h3 style="font-size:14px; font-weight:800; color:#0f172a; margin:0;">Datos Personales y Programa</h3>
+          <h3 class="card-title text-base font-bold text-main" style="margin:0;">Datos Personales y Programa</h3>
         </div>
 
         <form method="POST" action="/perfil/actualizar/">

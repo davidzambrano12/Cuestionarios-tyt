@@ -22,16 +22,16 @@
         <!-- 3 Stats cards -->
         <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:16px; background:white; border-radius:16px; padding:20px 24px; box-shadow:0 1px 3px rgba(0,0,0,0.05); text-align:center;">
           <div>
-            <div style="font-size:32px; font-weight:800; color:#0f172a;">{{ disponibles_count|default:"02" }}</div>
-            <div style="font-size:12px; color:#64748b; font-weight:600;">Disponibles</div>
+            <div class="metric-number">{{ disponibles_count|default:"02" }}</div>
+            <div class="metric-label">Disponibles</div>
           </div>
           <div style="border-left:1px solid #e2e8f0; border-right:1px solid #e2e8f0;">
-            <div style="font-size:32px; font-weight:800; color:#0f172a;">{{ intentos_estudiante.count|default:"01" }}</div>
-            <div style="font-size:12px; color:#64748b; font-weight:600;">Presentados</div>
+            <div class="metric-number">{{ intentos_estudiante.count|default:"01" }}</div>
+            <div class="metric-label">Presentados</div>
           </div>
           <div>
-            <div style="font-size:32px; font-weight:800; color:#16a34a;">{{ promedio_global|default:"4.00" }}<span style="font-size:16px; color:#94a3b8;">/5.0</span></div>
-            <div style="font-size:12px; color:#64748b; font-weight:600;">Promedio Global</div>
+            <div class="metric-number" style="color:var(--success-text);">{{ promedio_global|default:"4.00" }}<span class="text-sm text-subtle font-normal">/5.0</span></div>
+            <div class="metric-label">Promedio Global</div>
           </div>
         </div>
       </div>
@@ -47,7 +47,7 @@
           <i data-lucide="zap" style="color:#f59e0b; width:22px; height:22px;"></i>
         </div>
 
-        <h2 style="font-size:20px; font-weight:800; color:#0f172a; margin-bottom:6px;">
+        <h2 class="card-title text-xl font-extrabold text-main" style="margin-bottom:6px;">
           {{ cuestionario_destacado.nombre }}
         </h2>
         <div style="font-size:13px; color:#64748b; margin-bottom:16px; display:inline-flex; align-items:center; gap:6px;">
