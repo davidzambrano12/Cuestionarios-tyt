@@ -1,0 +1,13 @@
+{% load consultas %}
+{% if pagina.paginator.num_pages > 1 %}
+<nav class="paginacion" aria-label="Paginación">
+  <span class="texto-xs texto-suave">Registros {{ pagina.start_index }}–{{ pagina.end_index }} de {{ pagina.paginator.count }}</span>
+  <div class="paginacion__botones">
+    {% if pagina.has_previous %}<a href="{% con_filtros filtros page=pagina.previous_page_number %}" class="btn btn-outline btn-accion" rel="prev"><i data-lucide="chevron-left" aria-hidden="true"></i> Anterior</a>{% endif %}
+    <span class="texto-xs peso-semibold" aria-current="page">Página {{ pagina.number }} de {{ pagina.paginator.num_pages }}</span>
+    {% if pagina.has_next %}<a href="{% con_filtros filtros page=pagina.next_page_number %}" class="btn btn-outline btn-accion" rel="next">Siguiente <i data-lucide="chevron-right" aria-hidden="true"></i></a>{% endif %}
+  </div>
+</nav>
+{% elif pagina.paginator.count %}
+<p class="paginacion texto-xs texto-suave">{{ pagina.paginator.count }} registro{{ pagina.paginator.count|pluralize }}</p>
+{% endif %}

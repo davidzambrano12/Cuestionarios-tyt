@@ -7,6 +7,8 @@ app_name = "reportes"
 urlpatterns = [
     path("dashboard/admin/", views.panel_admin, name="panel_admin"),
     path("dashboard/docente/", views.panel_docente, name="panel_docente"),
+    path("reportes/consultas/", views.consultas, name="consultas"),
+    path("reportes/consultas/exportar/<str:reporte>/", views.exportar_consulta, name="exportar_consulta"),
     path("cuestionarios/<int:cuestionario_id>/intentos/", views.cuestionario_intentos, name="intentos"),
     path("cuestionarios/<int:cuestionario_id>/intentos/exportar/", views.exportar_intentos_excel, name="exportar_excel"),
     path(

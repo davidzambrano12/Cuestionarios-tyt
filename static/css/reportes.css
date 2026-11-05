@@ -78,3 +78,42 @@
 .tarjeta-modulo__cabecera { display: flex; align-items: center; gap: var(--espacio-3); margin-bottom: var(--espacio-2); }
 .tarjeta-modulo__acciones { display: flex; gap: var(--espacio-3); margin-top: var(--espacio-5); }
 .tarjeta-modulo__acciones .btn { flex: 1; }
+
+/* ==========================================================================
+   CONSULTAS Y REPORTES — filtros jerárquicos, indicadores y tablas
+   ========================================================================== */
+.filtros-consulta { padding: var(--espacio-5); margin-bottom: var(--espacio-5); }
+.filtros-consulta__titulo { display: flex; align-items: center; gap: var(--espacio-2); font-size: var(--texto-sm); font-weight: var(--peso-bold); margin-bottom: var(--espacio-4); }
+.filtros-consulta__titulo .lucide { width: 16px; height: 16px; color: var(--color-primario); }
+.filtros-consulta__campos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--espacio-4); }
+.filtros-consulta__acciones { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: var(--espacio-3); margin-top: var(--espacio-4); padding-top: var(--espacio-4); border-top: 1px solid var(--color-superficie-hundida); }
+.filtros-consulta__acciones p { margin-right: auto; }
+@media (max-width: 900px) { .filtros-consulta__campos { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .filtros-consulta__campos { grid-template-columns: 1fr; } }
+
+.metricas--consulta { margin-bottom: var(--espacio-2); }
+.regla-calculo { display: flex; align-items: flex-start; gap: var(--espacio-2); margin-bottom: var(--espacio-5); }
+.regla-calculo .lucide { width: 14px; height: 14px; flex-shrink: 0; margin-top: 1px; }
+
+.exportar-consulta { display: flex; align-items: center; flex-wrap: wrap; gap: var(--espacio-2); }
+.exportar-consulta .lucide, .paginacion .lucide { width: 14px; height: 14px; }
+.barra-herramientas .tabs-header a.tab-btn { text-decoration: none; }
+
+.tabla-cabecera { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--espacio-3); padding: var(--espacio-4) var(--espacio-5); border-bottom: 1px solid var(--color-borde); }
+.tabla-cabecera p { flex-basis: 100%; }
+.tabla--consulta { min-width: 760px; }
+.tabla--consulta th[scope="row"] { font-weight: var(--peso-semibold); text-align: left; }
+.form-select--compacto { width: auto; min-height: 34px; padding-top: 4px; padding-bottom: 4px; font-size: var(--texto-xs); }
+
+.paginacion { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--espacio-3); padding: var(--espacio-3) var(--espacio-5); border-top: 1px solid var(--color-borde); }
+.paginacion__botones { display: flex; align-items: center; gap: var(--espacio-3); }
+
+/* Porcentaje de aciertos: el ancho es un dato (única excepción a estilos en línea) */
+.barra-porcentaje { display: inline-block; vertical-align: middle; width: 90px; height: 8px; border-radius: var(--radio-pill); background: var(--color-superficie-hundida); overflow: hidden; margin-right: var(--espacio-2); }
+.barra-porcentaje__relleno { display: block; height: 100%; background: var(--color-primario); }
+
+.evolucion { display: inline-flex; align-items: center; gap: 4px; font-weight: var(--peso-bold); }
+.evolucion .lucide { width: 14px; height: 14px; }
+.evolucion--sube { color: var(--color-exito); }
+.evolucion--baja { color: var(--color-peligro); }
+.tabla--consulta .badge, .sin-salto { white-space: nowrap; }
