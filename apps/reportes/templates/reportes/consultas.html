@@ -26,62 +26,64 @@
   {{ catalogo|json_script:"catalogo-consultas" }}
 
   <!-- Filtros jerárquicos: año → período → curso → eje → estudiante -->
-  <form method="GET" action="{% url 'reportes:consultas' %}" class="card filtros-consulta" id="form-consultas" aria-labelledby="titulo-filtros">
-    <h2 class="filtros-consulta__titulo" id="titulo-filtros"><i data-lucide="filter" aria-hidden="true"></i> Filtros</h2>
+  <form method="GET" action="{% url 'reportes:consultas' %}" class="card filtros-consulta" id="form-consultas" aria-label="Filtros de la consulta" aria-describedby="ayuda-filtros">
     <input type="hidden" name="vista" value="{{ filtros.vista }}">
-    <div class="filtros-consulta__campos">
-      <div class="form-group mb-0">
-        <label class="form-label" for="f-anio">1. Año académico</label>
-        <select id="f-anio" name="anio" class="form-select" data-filtro="anio">
+    <p class="sr-only" id="ayuda-filtros">Los filtros van de lo general a lo particular; cada uno solo ofrece valores compatibles con el anterior. «Todos» consolida.</p>
+
+    <div class="filtros-consulta__cadena">
+      <div class="filtro">
+        <label class="filtro__etiqueta" for="f-anio">Año</label>
+        <select id="f-anio" name="anio" class="form-select filtro__control" data-filtro="anio">
           <option value="">Todos</option>
           {% for anio in catalogo.anios %}<option value="{{ anio }}"{% if anio == filtros.anio %} selected{% endif %}>{{ anio }}</option>{% endfor %}
         </select>
       </div>
-      <div class="form-group mb-0">
-        <label class="form-label" for="f-periodo">2. Período</label>
-        <select id="f-periodo" name="periodo" class="form-select" data-filtro="periodo">
+      <div class="filtro">
+        <label class="filtro__etiqueta" for="f-periodo">Período</label>
+        <select id="f-periodo" name="periodo" class="form-select filtro__control" data-filtro="periodo">
           <option value="">Todos</option>
           {% for p in catalogo.periodos %}<option value="{{ p.id }}" data-anio="{{ p.anio }}"{% if p.id == filtros.periodo %} selected{% endif %}>{{ p.nombre }}</option>{% endfor %}
         </select>
       </div>
-      <div class="form-group mb-0">
-        <label class="form-label" for="f-curso">3. Curso / grupo</label>
-        <select id="f-curso" name="curso" class="form-select" data-filtro="curso">
+      <div class="filtro filtro--ancho">
+        <label class="filtro__etiqueta" for="f-curso">Curso / grupo</label>
+        <select id="f-curso" name="curso" class="form-select filtro__control" data-filtro="curso">
           <option value="">Todos</option>
           {% for cu in catalogo.cursos %}<option value="{{ cu.id }}" data-periodo="{{ cu.periodo }}"{% if cu.id == filtros.curso %} selected{% endif %}>{{ cu.nombre }}</option>{% endfor %}
         </select>
       </div>
-      <div class="form-group mb-0">
-        <label class="form-label" for="f-eje">4. Eje temático</label>
-        <select id="f-eje" name="eje" class="form-select" data-filtro="eje">
+      <div class="filtro">
+        <label class="filtro__etiqueta" for="f-eje">Eje temático</label>
+        <select id="f-eje" name="eje" class="form-select filtro__control" data-filtro="eje">
           <option value="">Todos</option>
           {% for e in catalogo.ejes %}<option value="{{ e.id }}"{% if e.id == filtros.eje %} selected{% endif %}>{{ e.nombre }}</option>{% endfor %}
         </select>
       </div>
-      <div class="form-group mb-0">
-        <label class="form-label" for="f-estudiante">5. Estudiante</label>
-        <select id="f-estudiante" name="estudiante" class="form-select" data-filtro="estudiante">
+      <div class="filtro filtro--ancho">
+        <label class="filtro__etiqueta" for="f-estudiante">Estudiante</label>
+        <select id="f-estudiante" name="estudiante" class="form-select filtro__control" data-filtro="estudiante">
           <option value="">Todos</option>
           {% for est in catalogo.estudiantes %}<option value="{{ est.codigo }}"{% if est.codigo == filtros.estudiante %} selected{% endif %}>{{ est.nombre }} · {{ est.codigo }}</option>{% endfor %}
         </select>
       </div>
-      <div class="form-group mb-0">
-        <label class="form-label" for="f-visibilidad">Tipo de simulacro</label>
-        <select id="f-visibilidad" name="visibilidad" class="form-select">
-          <option value="">Todos</option>
-          <option value="institucional"{% if filtros.visibilidad == "institucional" %} selected{% endif %}>Institucionales</option>
-          <option value="privado"{% if filtros.visibilidad == "privado" %} selected{% endif %}>De curso</option>
-        </select>
-      </div>
-      <div class="form-group mb-0">
-        <label class="form-label" for="f-q">Buscar estudiante</label>
-        <input type="search" id="f-q" name="q" value="{{ filtros.q }}" class="form-input" placeholder="Nombre o identificación" autocomplete="off">
-      </div>
     </div>
-    <div class="filtros-consulta__acciones">
-      <p class="texto-xs texto-suave" id="ayuda-filtros">Cada filtro solo ofrece valores compatibles con el anterior. «Todos» consolida.</p>
-      <a href="{% url 'reportes:consultas' %}" class="btn btn-outline" data-accion="limpiar"><i data-lucide="eraser" aria-hidden="true"></i> Limpiar filtros</a>
-      <button type="submit" class="btn btn-primary"><i data-lucide="search" aria-hidden="true"></i> Consultar</button>
+
+    <div class="filtros-consulta__pie">
+      <div class="buscador filtros-consulta__buscar">
+        <label for="f-q" class="sr-only">Buscar estudiante por nombre o identificación</label>
+        <i data-lucide="search" aria-hidden="true" class="buscador__icono"></i>
+        <input type="search" id="f-q" name="q" value="{{ filtros.q }}" class="form-input" placeholder="Buscar estudiante por nombre o identificación" autocomplete="off">
+      </div>
+      <fieldset class="segmentado" aria-label="Tipo de simulacro">
+        <legend class="sr-only">Tipo de simulacro</legend>
+        <label class="segmentado__opcion"><input type="radio" name="visibilidad" value=""{% if not filtros.visibilidad %} checked{% endif %}><span>Todos</span></label>
+        <label class="segmentado__opcion"><input type="radio" name="visibilidad" value="institucional"{% if filtros.visibilidad == "institucional" %} checked{% endif %}><span>Institucionales</span></label>
+        <label class="segmentado__opcion"><input type="radio" name="visibilidad" value="privado"{% if filtros.visibilidad == "privado" %} checked{% endif %}><span>De curso</span></label>
+      </fieldset>
+      <div class="filtros-consulta__acciones">
+        {% if filtros.hay_filtros %}<a href="{% url 'reportes:consultas' %}?vista={{ filtros.vista }}" class="enlace-limpiar" data-accion="limpiar"><i data-lucide="x" aria-hidden="true"></i> Limpiar filtros</a>{% endif %}
+        <button type="submit" class="btn btn-primary btn-compacto"><i data-lucide="search" aria-hidden="true"></i> Consultar</button>
+      </div>
     </div>
   </form>
 

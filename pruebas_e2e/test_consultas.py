@@ -84,7 +84,9 @@ class ConsultasTests(PruebaNavegador):
 
         with pg.expect_navigation():
             pg.click("[data-accion='limpiar']")
-        self.assertTrue(pg.url.endswith("/reportes/consultas/"))
+        self.assertNotIn("curso=", pg.url)  # quita los filtros y conserva la pestaña
+        self.assertIn("vista=periodos", pg.url)
+        self.assertEqual(pg.locator("[data-accion='limpiar']").count(), 0)  # sin filtros no se ofrece
         self.assertEqual(errores, [])
 
     def test_movil(self):
