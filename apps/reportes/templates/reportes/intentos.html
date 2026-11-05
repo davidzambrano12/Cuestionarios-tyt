@@ -134,7 +134,7 @@
                   <i data-lucide="chevron-down" aria-hidden="true" class="icono-13 icono-giratorio"></i>
                 </button>
                 <form method="POST" action="{% url 'reportes:reiniciar_estudiante' cuestionario.id est.codigo %}" class="inline-flex"
-                      data-confirmar="¿Restablecer el cupo de {{ est.nombre }} ({{ est.codigo }})?&#10;&#10;Se eliminarán sus {{ est.total_intentos }} intento(s) y sus notas en este cuestionario. Esta acción no se puede deshacer.">
+                      data-confirmar-titulo="¿Restablecer el cupo de {{ est.nombre }}?" data-confirmar="Se eliminará{{ est.total_intentos|pluralize:'n' }} {{ est.total_intentos }} intento{{ est.total_intentos|pluralize }} y su{{ est.total_intentos|pluralize }} nota{{ est.total_intentos|pluralize }} en este cuestionario (código {{ est.codigo }}).&#10;Esta acción no se puede deshacer." data-confirmar-boton="Restablecer cupo" data-confirmar-tipo="peligro">
                   {% csrf_token %}
                   <button type="submit" class="btn btn-accion btn-peligro" title="Elimina todos sus intentos y le devuelve el cupo completo">
                     <i data-lucide="rotate-ccw" aria-hidden="true" class="icono-13"></i> Restablecer cupo
@@ -176,7 +176,7 @@
                         </a>
                         {% endif %}
                         <form method="POST" action="{% url 'reportes:reiniciar_intento' it.id %}" class="inline-flex"
-                              data-confirmar="¿Anular el intento {{ forloop.revcounter }} de {{ est.nombre }}?&#10;&#10;El intento y su nota se eliminarán y el estudiante recuperará ese cupo.">
+                              data-confirmar-titulo="¿Anular el intento {{ forloop.revcounter }} de {{ est.nombre }}?" data-confirmar="El intento y su nota se eliminarán, y el estudiante recuperará ese cupo.&#10;Esta acción no se puede deshacer." data-confirmar-boton="Anular intento" data-confirmar-tipo="peligro">
                           {% csrf_token %}
                           <button type="submit" class="btn btn-accion btn-peligro" title="Elimina solo este intento">
                             <i data-lucide="trash-2" aria-hidden="true" class="icono-12"></i> Anular
@@ -257,7 +257,7 @@
                 </a>
                 {% endif %}
                 <form method="POST" action="{% url 'reportes:reiniciar_intento' i.id %}" class="inline-flex"
-                      data-confirmar="¿Anular este intento de {{ i.participante_nombre }}?&#10;&#10;El intento y su nota se eliminarán y el estudiante recuperará ese cupo.">
+                      data-confirmar-titulo="¿Anular este intento de {{ i.participante_nombre }}?" data-confirmar="El intento y su nota se eliminarán, y el estudiante recuperará ese cupo.&#10;Esta acción no se puede deshacer." data-confirmar-boton="Anular intento" data-confirmar-tipo="peligro">
                   {% csrf_token %}
                   <button type="submit" class="btn btn-accion btn-peligro">
                     <i data-lucide="trash-2" aria-hidden="true" class="icono-12"></i> Anular

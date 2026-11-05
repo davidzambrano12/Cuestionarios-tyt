@@ -45,12 +45,34 @@ class ReporteIntentosTests(PruebaNavegador):
         self.capturar(pg, "reporte_intentos")
 
         # Anular pide confirmación; al cancelar no se borra nada
-        pg.click(".detalle-intentos__item:visible >> nth=0 >> text=Anular")
-        self.assertTrue(self.dialogos and "Anular el intento" in self.dialogos[-1])
+        anular = ".detalle-intentos__item:visible >> nth=0 >> text=Anular"
+        pg.click(anular)
+        # Acción destructiva: botón rojo y el foco arranca en Cancelar
+        self.assertIn("btn-danger", pg.get_attribute('dialog.confirmacion [data-ref="aceptar"]', "class"))
+        self.assertEqual(pg.evaluate("document.activeElement.dataset.ref"), "cancelar")
+        pg.wait_for_function("document.querySelector('dialog.confirmacion').getAnimations().length === 0")
+        self.capturar(pg, "confirmar_anular")
+        titulo, mensaje = self.responder_confirmacion(pg, aceptar=False)
+        self.assertIn("Anular el intento", titulo)
+        self.assertIn("no se puede deshacer", mensaje)
         self.assertEqual(Intento.objects.count(), 4)
+
+        # Clic en el fondo también cancela
+        pg.click(anular)
+        pg.mouse.click(5, 5)
+        pg.wait_for_selector("dialog.confirmacion[open]", state="hidden")
+        self.assertEqual(Intento.objects.count(), 4)
+
+        # Al aceptar, el formulario se envía y el intento se elimina
+        pg.click(anular)
+        with pg.expect_navigation():
+            self.responder_confirmacion(pg)
+        self.assertEqual(Intento.objects.count(), 3)
+        self.assertEqual(self.dialogos, [])  # ningún cuadro nativo del navegador
+        pg.fill("#filtro-busqueda", "ana")
 
         pg.focus("#btn-tab-estudiantes")
         pg.keyboard.press("ArrowRight")
         self.assertTrue(pg.is_visible("#vista-historial"))
-        self.assertEqual(visibles(".fila-historial"), 2)  # la búsqueda sigue aplicada
+        self.assertEqual(visibles(".fila-historial"), 1)  # la búsqueda sigue aplicada (a Ana le queda 1 intento)
         self.assertEqual(errores, [])
