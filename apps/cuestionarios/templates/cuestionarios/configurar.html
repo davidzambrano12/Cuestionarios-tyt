@@ -8,19 +8,19 @@
 <div style="max-width:1160px; margin:0 auto; padding-bottom:40px;">
 
   <!-- Navegación Superior y Volver -->
-  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+  <div class="flex justify-between items-center mb-4">
     <a href="{% url 'cuestionarios:listado' %}" style="display:inline-flex; align-items:center; gap:6px; font-size:var(--texto-sm); font-weight:600; color:var(--color-primario); text-decoration:none;">
-      <i data-lucide="arrow-left" style="width:16px; height:16px;"></i> Volver a Cuestionarios
+      <i data-lucide="arrow-left" class="icono-16"></i> Volver a Cuestionarios
     </a>
     {% if cuestionario %}
     <a href="{% url 'cuestionarios:previsualizar' cuestionario.id %}" class="btn btn-outline" style="font-size:var(--texto-xs); padding:6px 12px; gap:6px;">
-      <i data-lucide="eye" style="width:14px; height:14px;"></i> Previsualizar Examen
+      <i data-lucide="eye" class="icono-14"></i> Previsualizar Examen
     </a>
     {% endif %}
   </div>
 
   <!-- Header de Configuración -->
-  <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
+  <div class="flex justify-between items-start mb-5 flex-wrap gap-3">
     <div>
       <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
         {% if cuestionario %}
@@ -30,10 +30,10 @@
           <span class="badge badge-warning">● Nuevo Cuestionario (Borrador)</span>
         {% endif %}
       </div>
-      <h1 style="font-size:var(--texto-xl); font-weight:800; color:var(--color-texto); margin-bottom:4px;">
+      <h1 class="texto-xl peso-extrabold texto-principal mb-1">
         {% if cuestionario %}Editar: {{ cuestionario.nombre }}{% else %}Diseño y Configuración de Evaluación{% endif %}
       </h1>
-      <p style="font-size:var(--texto-sm); color:var(--color-texto-suave);">Configura el contenido pedagógico, programación temporal y banco de preguntas institucionales.</p>
+      <p class="texto-sm texto-suave">Configura el contenido pedagógico, programación temporal y banco de preguntas institucionales.</p>
     </div>
 
     <!-- Docente Responsable Badge -->
@@ -41,7 +41,7 @@
       <div class="user-avatar-circle" style="background:var(--color-primario); color:var(--color-texto-invertido); width:32px; height:32px; font-size:var(--texto-xs);">
         {{ user.first_name|default:user.username|slice:":2"|upper }}
       </div>
-      <div style="text-align:left;">
+      <div class="texto-izquierda">
         <div style="font-size:var(--texto-xs); font-weight:700; color:var(--azul-800);">{{ user.get_full_name|default:user.username }}</div>
         <div style="font-size:var(--texto-xs); color:var(--azul-700);">Docente IUP · Gestor de Evaluación</div>
       </div>
@@ -77,32 +77,32 @@
         <!-- PASO 1: INFORMACIÓN GENERAL Y FECHAS -->
         <div id="step-content-1" class="step-content">
           <!-- Card A: Datos Básicos -->
-          <div class="card" style="margin-bottom:20px; padding:24px;">
+          <div class="card mb-5 p-6">
             <div style="display:flex; align-items:center; gap:8px; margin-bottom:18px; border-bottom:1px solid var(--color-superficie-hundida); padding-bottom:12px;">
-              <i data-lucide="clipboard-list" style="color:var(--color-primario); width:20px; height:20px;"></i>
-              <h2 style="font-size:var(--texto-md); font-weight:800; color:var(--color-texto); margin:0;">Información General del Examen</h2>
+              <i data-lucide="clipboard-list" class="icono-20 texto-primario"></i>
+              <h2 class="texto-md peso-extrabold texto-principal m-0">Información General del Examen</h2>
             </div>
 
-            <div class="form-group" style="margin-bottom:16px;">
+            <div class="form-group mb-4">
               <label class="form-label">Nombre del Cuestionario *</label>
               <input type="text" id="input-nombre" name="nombre" value="{{ cuestionario.nombre|default:'' }}" required class="form-input" placeholder="ej. Simulacro Diagnóstico Saber TyT - Razonamiento Cuantitativo" oninput="actualizarResumen()">
-              <span style="font-size:var(--texto-xs); color:var(--color-texto-suave);">Debe ser claro y representativo de la competencia a evaluar.</span>
+              <span class="texto-xs texto-suave">Debe ser claro y representativo de la competencia a evaluar.</span>
             </div>
 
-            <div class="form-group" style="margin-bottom:0;">
+            <div class="form-group mb-0">
               <label class="form-label">Instrucciones Pedagógicas *</label>
               <textarea name="descripcion" required class="form-textarea" style="min-height:90px;" placeholder="Evaluación formativa para medir competencias... Lea atentamente cada pregunta y elija la mejor opción.">{{ cuestionario.descripcion|default:'' }}</textarea>
               <div style="font-size:var(--texto-xs); color:var(--color-texto-suave); margin-top:6px; display:inline-flex; align-items:center; gap:4px;">
-                <i data-lucide="eye" style="width:13px; height:13px; color:var(--color-primario);"></i> Visible para los estudiantes antes de comenzar el examen.
+                <i data-lucide="eye" class="icono-13 texto-primario"></i> Visible para los estudiantes antes de comenzar el examen.
               </div>
             </div>
           </div>
 
           <!-- Card B: Ventana de Acceso y Temporizador -->
-          <div class="card" style="margin-bottom:20px; padding:24px;">
+          <div class="card mb-5 p-6">
             <div style="display:flex; align-items:center; gap:8px; margin-bottom:18px; border-bottom:1px solid var(--color-superficie-hundida); padding-bottom:12px;">
-              <i data-lucide="calendar" style="color:var(--color-primario); width:20px; height:20px;"></i>
-              <h2 style="font-size:var(--texto-md); font-weight:800; color:var(--color-texto); margin:0;">Ventana Temporal y Duración</h2>
+              <i data-lucide="calendar" class="icono-20 texto-primario"></i>
+              <h2 class="texto-md peso-extrabold texto-principal m-0">Ventana Temporal y Duración</h2>
             </div>
 
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
@@ -116,25 +116,25 @@
               </div>
             </div>
 
-            <div class="form-group" style="margin-bottom:16px;">
+            <div class="form-group mb-4">
               <label class="form-label">Tiempo Límite de la Prueba (en minutos) *</label>
-              <div style="display:flex; align-items:center; gap:12px;">
+              <div class="flex items-center gap-3">
                 <input type="number" min="5" max="360" id="input-tiempo" name="tiempo_limite_minutos" value="{{ cuestionario.tiempo_limite_minutos|default:120 }}" required class="form-input" style="max-width:200px;" oninput="actualizarResumen()">
-                <span style="font-size:var(--texto-sm); color:var(--color-texto-suave);" id="tiempo-horas-label">Equivale a 2 horas</span>
+                <span id="tiempo-horas-label" class="texto-sm texto-suave">Equivale a 2 horas</span>
               </div>
-              <span style="font-size:var(--texto-xs); color:var(--color-texto-suave);">Rango permitido: 5 a 360 minutos (estándar oficial Saber TyT: 120-240 min).</span>
+              <span class="texto-xs texto-suave">Rango permitido: 5 a 360 minutos (estándar oficial Saber TyT: 120-240 min).</span>
             </div>
 
             <div style="display:flex; align-items:center; gap:8px; font-size:var(--texto-xs); color:var(--verde-800); background:var(--verde-100); padding:10px 14px; border-radius:8px;">
-              <i data-lucide="shield-check" style="width:16px; height:16px; flex-shrink:0;"></i>
+              <i data-lucide="shield-check" class="icono-16 shrink-0"></i>
               <span>El servidor valida y controla el tiempo real automáticamente (anti-fraude por desfase horario).</span>
             </div>
           </div>
 
           <!-- Botón de Avance Paso 1 -->
-          <div style="display:flex; justify-content:flex-end;">
+          <div class="flex justify-end">
             <button type="button" onclick="irAPaso(2)" class="btn btn-primary" style="padding:10px 24px; font-weight:700; display:inline-flex; align-items:center; gap:8px;">
-              Continuar a Políticas y Calificación <i data-lucide="arrow-right" style="width:16px; height:16px;"></i>
+              Continuar a Políticas y Calificación <i data-lucide="arrow-right" class="icono-16"></i>
             </button>
           </div>
         </div>
@@ -142,103 +142,103 @@
         <!-- PASO 2: POLÍTICAS Y EVALUACIÓN -->
         <div id="step-content-2" class="step-content" style="display:none;">
           <!-- Card C: Escala de Calificación e Intentos -->
-          <div class="card" style="margin-bottom:20px; padding:24px;">
+          <div class="card mb-5 p-6">
             <div style="display:flex; align-items:center; gap:8px; margin-bottom:18px; border-bottom:1px solid var(--color-superficie-hundida); padding-bottom:12px;">
-              <i data-lucide="award" style="color:var(--color-primario); width:20px; height:20px;"></i>
-              <h2 style="font-size:var(--texto-md); font-weight:800; color:var(--color-texto); margin:0;">Escala y Calificación</h2>
+              <i data-lucide="award" class="icono-20 texto-primario"></i>
+              <h2 class="texto-md peso-extrabold texto-principal m-0">Escala y Calificación</h2>
             </div>
 
             <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-bottom:16px;">
               <div class="form-group">
                 <label class="form-label">Intentos Permitidos *</label>
                 <input type="number" min="1" max="10" name="intentos_permitidos" value="{{ cuestionario.intentos_permitidos|default:5 }}" required class="form-input">
-                <span style="font-size:var(--texto-xs); color:var(--color-texto-suave);">Método: Nota más alta</span>
+                <span class="texto-xs texto-suave">Método: Nota más alta</span>
               </div>
               <div class="form-group">
                 <label class="form-label">Calificación Máxima *</label>
                 <input type="number" step="0.1" id="input-calif-max" name="calificacion_maxima" value="{{ cuestionario.calificacion_maxima|default:'5.00' }}" required class="form-input" oninput="actualizarResumen()">
-                <span style="font-size:var(--texto-xs); color:var(--color-texto-suave);">Escala superior (ej. 5.00)</span>
+                <span class="texto-xs texto-suave">Escala superior (ej. 5.00)</span>
               </div>
               <div class="form-group">
                 <label class="form-label">Nota Mínima Aprobación *</label>
                 <input type="number" step="0.1" id="input-calif-apr" name="calificacion_aprobacion" value="{{ cuestionario.calificacion_aprobacion|default:'3.00' }}" required class="form-input" oninput="actualizarResumen()">
-                <span style="font-size:var(--texto-xs); color:var(--color-texto-suave);">Umbral aprobatorio (ej. 3.00)</span>
+                <span class="texto-xs texto-suave">Umbral aprobatorio (ej. 3.00)</span>
               </div>
             </div>
 
             <div style="font-size:var(--texto-xs); color:var(--verde-700); background:var(--verde-50); border:1px solid var(--verde-200); padding:10px 14px; border-radius:8px; display:flex; align-items:center; gap:8px;">
-              <i data-lucide="check" style="width:16px; height:16px; flex-shrink:0;"></i>
+              <i data-lucide="check" class="icono-16 shrink-0"></i>
               <span>Fórmula determinista institucional: <strong>Nota = (Puntos Obtenidos / Puntos Posibles) &times; Calificación Máxima</strong></span>
             </div>
           </div>
 
           <!-- Card D: Opciones de Entrega y Aleatoriedad -->
-          <div class="card" style="margin-bottom:20px; padding:24px;">
+          <div class="card mb-5 p-6">
             <div style="display:flex; align-items:center; gap:8px; margin-bottom:18px; border-bottom:1px solid var(--color-superficie-hundida); padding-bottom:12px;">
-              <i data-lucide="shuffle" style="color:var(--color-primario); width:20px; height:20px;"></i>
-              <h2 style="font-size:var(--texto-md); font-weight:800; color:var(--color-texto); margin:0;">Opciones de Entrega y Retroalimentación</h2>
+              <i data-lucide="shuffle" class="icono-20 texto-primario"></i>
+              <h2 class="texto-md peso-extrabold texto-principal m-0">Opciones de Entrega y Retroalimentación</h2>
             </div>
 
-            <div style="display:flex; flex-direction:column; gap:16px;">
+            <div class="flex flex-col gap-4">
               <label style="display:flex; justify-content:space-between; align-items:center; cursor:pointer; padding:12px; border:1px solid var(--color-borde); border-radius:10px;">
                 <div>
-                  <div style="font-size:var(--texto-sm); font-weight:700; color:var(--color-texto);">Mezclar orden de las preguntas</div>
-                  <div style="font-size:var(--texto-xs); color:var(--color-texto-suave);">Secuencia aleatoria diferente para cada participante (dificulta copia).</div>
+                  <div class="texto-sm peso-bold texto-principal">Mezclar orden de las preguntas</div>
+                  <div class="texto-xs texto-suave">Secuencia aleatoria diferente para cada participante (dificulta copia).</div>
                 </div>
-                <input type="checkbox" name="mezclar_preguntas" {% if cuestionario.mezclar_preguntas %}checked{% endif %} style="width:20px; height:20px; accent-color:var(--color-primario);">
+                <input type="checkbox" name="mezclar_preguntas" {% if cuestionario.mezclar_preguntas %}checked{% endif %} class="icono-20">
               </label>
 
               <label style="display:flex; justify-content:space-between; align-items:center; cursor:pointer; padding:12px; border:1px solid var(--color-borde); border-radius:10px;">
                 <div>
-                  <div style="font-size:var(--texto-sm); font-weight:700; color:var(--color-texto);">Mezclar opciones de respuesta</div>
-                  <div style="font-size:var(--texto-xs); color:var(--color-texto-suave);">Permuta las alternativas A, B, C y D en cada intento.</div>
+                  <div class="texto-sm peso-bold texto-principal">Mezclar opciones de respuesta</div>
+                  <div class="texto-xs texto-suave">Permuta las alternativas A, B, C y D en cada intento.</div>
                 </div>
-                <input type="checkbox" name="mezclar_respuestas" {% if cuestionario.mezclar_respuestas %}checked{% endif %} style="width:20px; height:20px; accent-color:var(--color-primario);">
+                <input type="checkbox" name="mezclar_respuestas" {% if cuestionario.mezclar_respuestas %}checked{% endif %} class="icono-20">
               </label>
 
               <label style="display:flex; justify-content:space-between; align-items:center; cursor:pointer; padding:12px; border:1px solid var(--color-borde); border-radius:10px;">
                 <div>
-                  <div style="font-size:var(--texto-sm); font-weight:700; color:var(--color-texto);">Permitir revisión pedagógica</div>
-                  <div style="font-size:var(--texto-xs); color:var(--color-texto-suave);">Los estudiantes verán la justificación pedagógica y aciertos sólo al finalizar el intento.</div>
+                  <div class="texto-sm peso-bold texto-principal">Permitir revisión pedagógica</div>
+                  <div class="texto-xs texto-suave">Los estudiantes verán la justificación pedagógica y aciertos sólo al finalizar el intento.</div>
                 </div>
-                <input type="checkbox" name="permitir_revision" {% if cuestionario.permitir_revision or not cuestionario.id %}checked{% endif %} style="width:20px; height:20px; accent-color:var(--color-primario);">
+                <input type="checkbox" name="permitir_revision" {% if cuestionario.permitir_revision or not cuestionario.id %}checked{% endif %} class="icono-20">
               </label>
             </div>
           </div>
 
           <!-- Botones de Navegación Paso 2 -->
-          <div style="display:flex; justify-content:space-between;">
+          <div class="flex justify-between">
             <button type="button" onclick="irAPaso(1)" class="btn btn-outline" style="padding:10px 20px; display:inline-flex; align-items:center; gap:6px;">
-              <i data-lucide="arrow-left" style="width:16px; height:16px;"></i> Paso Anterior
+              <i data-lucide="arrow-left" class="icono-16"></i> Paso Anterior
             </button>
             <button type="button" onclick="irAPaso(3)" class="btn btn-primary" style="padding:10px 24px; font-weight:700; display:inline-flex; align-items:center; gap:8px;">
-              Continuar a Selección de Preguntas <i data-lucide="arrow-right" style="width:16px; height:16px;"></i>
+              Continuar a Selección de Preguntas <i data-lucide="arrow-right" class="icono-16"></i>
             </button>
           </div>
         </div>
 
         <!-- PASO 3: SELECCIÓN DE PREGUNTAS -->
         <div id="step-content-3" class="step-content" style="display:none;">
-          <div class="card" style="margin-bottom:20px; padding:24px;">
+          <div class="card mb-5 p-6">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; border-bottom:1px solid var(--color-superficie-hundida); padding-bottom:12px; flex-wrap:wrap; gap:10px;">
-              <div style="display:flex; align-items:center; gap:8px;">
-                <i data-lucide="book-open" style="color:var(--color-primario); width:20px; height:20px;"></i>
-                <h2 style="font-size:var(--texto-md); font-weight:800; color:var(--color-texto); margin:0;">Preguntas Asignadas a la Evaluación</h2>
+              <div class="flex items-center gap-2">
+                <i data-lucide="book-open" class="icono-20 texto-primario"></i>
+                <h2 class="texto-md peso-extrabold texto-principal m-0">Preguntas Asignadas a la Evaluación</h2>
               </div>
               <button type="button" onclick="openModal('modal-selector-preguntas')" class="btn btn-primary" style="font-size:var(--texto-sm); padding:8px 14px; display:inline-flex; align-items:center; gap:6px;">
-                <i data-lucide="plus" style="width:14px; height:14px;"></i> Añadir Preguntas del Banco
+                <i data-lucide="plus" class="icono-14"></i> Añadir Preguntas del Banco
               </button>
             </div>
 
             <!-- Métricas rápidas de las preguntas -->
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; background:var(--color-superficie-tenue); padding:14px; border-radius:10px; margin-bottom:18px; text-align:center;">
               <div>
-                <div style="font-size:var(--texto-xs); color:var(--color-texto-suave); font-weight:600; text-transform:uppercase;">Total Preguntas Asignadas</div>
-                <div id="conteo-preguntas" style="font-size:var(--texto-xl); font-weight:800; color:var(--color-texto);">{{ reactivos_asignados.count }} Preguntas</div>
+                <div class="texto-xs texto-suave peso-semibold mayusculas">Total Preguntas Asignadas</div>
+                <div id="conteo-preguntas" class="texto-xl peso-extrabold texto-principal">{{ reactivos_asignados.count }} Preguntas</div>
               </div>
               <div>
-                <div style="font-size:var(--texto-xs); color:var(--color-texto-suave); font-weight:600; text-transform:uppercase;">Puntaje Bruto Acumulado</div>
-                <div id="puntaje-acumulado" style="font-size:var(--texto-xl); font-weight:800; color:var(--color-primario);">{{ puntaje_total|default:"0.00" }} pts</div>
+                <div class="texto-xs texto-suave peso-semibold mayusculas">Puntaje Bruto Acumulado</div>
+                <div id="puntaje-acumulado" class="texto-xl peso-extrabold texto-primario">{{ puntaje_total|default:"0.00" }} pts</div>
               </div>
             </div>
 
@@ -253,15 +253,15 @@
                   </div>
                   <div style="flex:1; min-width:0;">
                     <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px; flex-wrap:wrap;">
-                      <span class="badge badge-info" style="font-size:var(--texto-xs); font-weight:700;">{{ cp.pregunta.categoria.nombre }}</span>
+                      <span class="badge badge-info texto-xs peso-bold">{{ cp.pregunta.categoria.nombre }}</span>
                       <span class="badge" style="background:var(--color-superficie-tenue); border:1px solid var(--color-borde); color:var(--color-texto-suave); font-size:var(--texto-xs); font-weight:600;">{{ cp.pregunta.get_tipo_display }}</span>
-                      <span style="font-size:var(--texto-xs); font-weight:700; color:var(--color-primario);">Valor: {{ cp.pregunta.puntaje }} pt</span>
+                      <span class="texto-xs peso-bold texto-primario">Valor: {{ cp.pregunta.puntaje }} pt</span>
                     </div>
                     <div style="font-size:var(--texto-sm); font-weight:600; color:var(--color-texto); line-height:1.45; word-break:break-word;">{{ cp.pregunta.enunciado }}</div>
                   </div>
                 </div>
                 <button type="button" onclick="removerPregunta(this)" style="width:34px; height:34px; border-radius:8px; border:1px solid var(--rojo-50); background:var(--rojo-50); color:var(--rojo-600); display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; transition:all 0.2s;" title="Remover del examen">
-                  <i data-lucide="trash-2" style="width:16px; height:16px;"></i>
+                  <i data-lucide="trash-2" class="icono-16"></i>
                 </button>
               </div>
               {% empty %}
@@ -278,9 +278,9 @@
           </div>
 
           <!-- Botones de Navegación Paso 3 -->
-          <div style="display:flex; justify-content:space-between;">
+          <div class="flex justify-between">
             <button type="button" onclick="irAPaso(2)" class="btn btn-outline" style="padding:10px 20px; display:inline-flex; align-items:center; gap:6px;">
-              <i data-lucide="arrow-left" style="width:16px; height:16px;"></i> Paso Anterior
+              <i data-lucide="arrow-left" class="icono-16"></i> Paso Anterior
             </button>
           </div>
         </div>
@@ -291,14 +291,14 @@
       <div style="position:sticky; top:20px;">
         <div class="card" style="padding:22px; border-radius:16px; box-shadow:var(--shadow-md);">
           <div style="display:flex; align-items:center; gap:8px; margin-bottom:14px; border-bottom:1px solid var(--color-superficie-hundida); padding-bottom:10px;">
-            <i data-lucide="file-text" style="width:18px; height:18px; color:var(--color-primario);"></i>
-            <h3 style="font-size:var(--texto-md); font-weight:800; color:var(--color-texto); margin:0;">Ficha Resumen</h3>
+            <i data-lucide="file-text" class="icono-18 texto-primario"></i>
+            <h3 class="texto-md peso-extrabold texto-principal m-0">Ficha Resumen</h3>
           </div>
 
           <!-- Resumen de Datos Clave -->
-          <div style="display:flex; flex-direction:column; gap:12px; font-size:var(--texto-xs); margin-bottom:20px;">
+          <div class="flex flex-col gap-3 texto-xs mb-5">
             <div>
-              <span style="color:var(--color-texto-suave); display:block; font-size:var(--texto-xs); font-weight:600; text-transform:uppercase;">Nombre de Evaluación</span>
+              <span class="texto-suave block texto-xs peso-semibold mayusculas">Nombre de Evaluación</span>
               <strong id="resumen-nombre" style="font-size:var(--texto-sm); color:var(--color-texto); word-break:break-word;">
                 {{ cuestionario.nombre|default:"Sin nombre asignado" }}
               </strong>
@@ -306,20 +306,20 @@
 
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; background:var(--color-superficie-tenue); padding:10px; border-radius:8px;">
               <div>
-                <span style="color:var(--color-texto-suave); font-size:var(--texto-xs);">Duración:</span>
-                <strong id="resumen-tiempo" style="display:block; color:var(--color-texto);">{{ cuestionario.tiempo_limite_minutos|default:120 }} min</strong>
+                <span class="texto-suave texto-xs">Duración:</span>
+                <strong id="resumen-tiempo" class="block texto-principal">{{ cuestionario.tiempo_limite_minutos|default:120 }} min</strong>
               </div>
               <div>
-                <span style="color:var(--color-texto-suave); font-size:var(--texto-xs);">Preguntas:</span>
-                <strong id="resumen-preguntas" style="display:block; color:var(--color-primario);">{{ reactivos_asignados.count }} preguntas</strong>
+                <span class="texto-suave texto-xs">Preguntas:</span>
+                <strong id="resumen-preguntas" class="block texto-primario">{{ reactivos_asignados.count }} preguntas</strong>
               </div>
               <div>
-                <span style="color:var(--color-texto-suave); font-size:var(--texto-xs);">Puntaje:</span>
-                <strong id="resumen-puntaje" style="display:block; color:var(--color-texto);">{{ puntaje_total|default:"0.00" }} pts</strong>
+                <span class="texto-suave texto-xs">Puntaje:</span>
+                <strong id="resumen-puntaje" class="block texto-principal">{{ puntaje_total|default:"0.00" }} pts</strong>
               </div>
               <div>
-                <span style="color:var(--color-texto-suave); font-size:var(--texto-xs);">Escala Max:</span>
-                <strong id="resumen-escala-max" style="display:block; color:var(--color-texto);">{{ cuestionario.calificacion_maxima|default:"5.00" }}</strong>
+                <span class="texto-suave texto-xs">Escala Max:</span>
+                <strong id="resumen-escala-max" class="block texto-principal">{{ cuestionario.calificacion_maxima|default:"5.00" }}</strong>
               </div>
             </div>
 
@@ -338,10 +338,10 @@
           <!-- Botones de Guardado y Publicación -->
           <div style="display:flex; flex-direction:column; gap:10px; border-top:1px solid var(--color-superficie-hundida); padding-top:16px;">
             <button type="submit" name="accion" value="borrador" class="btn btn-outline btn-full" style="padding:12px; font-size:var(--texto-sm); font-weight:700; display:inline-flex; align-items:center; justify-content:center; gap:8px;">
-              <i data-lucide="save" style="width:16px; height:16px;"></i> Guardar como Borrador
+              <i data-lucide="save" class="icono-16"></i> Guardar como Borrador
             </button>
             <button type="submit" name="accion" value="publicar" class="btn btn-primary btn-full" style="padding:12px; font-size:var(--texto-sm); font-weight:700; display:inline-flex; align-items:center; justify-content:center; gap:8px;">
-              <i data-lucide="send" style="width:16px; height:16px;"></i> Publicar y Habilitar
+              <i data-lucide="send" class="icono-16"></i> Publicar y Habilitar
             </button>
           </div>
 
@@ -358,14 +358,14 @@
   <div class="modal-box" style="max-width:760px; max-height:85vh; display:flex; flex-direction:column;">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; border-bottom:1px solid var(--color-superficie-hundida); padding-bottom:10px;">
       <div>
-        <h3 style="font-size:var(--texto-lg); font-weight:800; color:var(--color-texto); margin:0;">Banco Institucional de Preguntas</h3>
+        <h3 class="texto-lg peso-extrabold texto-principal m-0">Banco Institucional de Preguntas</h3>
         <p style="font-size:var(--texto-xs); color:var(--color-texto-suave); margin:2px 0 0;">Selecciona las preguntas activos para incluirlos en el cuestionario.</p>
       </div>
       <button type="button" onclick="closeModal('modal-selector-preguntas')" style="background:none; border:none; font-size:var(--texto-xl); cursor:pointer; color:var(--color-texto-suave);">&times;</button>
     </div>
 
     <!-- Buscador en tiempo real dentro del modal -->
-    <div style="margin-bottom:12px;">
+    <div class="mb-3">
       <div style="position:relative;">
         <i data-lucide="search" style="position:absolute; left:12px; top:11px; width:16px; height:16px; color:var(--color-texto-tenue);"></i>
         <input type="text" id="filtro-modal-preguntas" oninput="filtrarPreguntasModal()" placeholder="Buscar por palabra clave o competencia..." class="form-input" style="padding-left:36px; font-size:var(--texto-sm);">
@@ -377,10 +377,10 @@
       {% for p in todas_preguntas %}
       <label class="modal-pregunta-item" data-texto="{{ p.categoria.nombre|lower }} {{ p.enunciado|lower }}" style="display:flex; align-items:flex-start; gap:12px; padding:10px; border-radius:8px; cursor:pointer; background:var(--color-superficie-tenue); font-size:var(--texto-sm); border:1px solid transparent; transition:border-color 0.2s;">
         <input type="checkbox" class="chk-banco" value="{{ p.id }}" data-cat="{{ p.categoria.nombre }}" data-tipo="{{ p.get_tipo_display }}" data-puntaje="{{ p.puntaje }}" data-enunciado="{{ p.enunciado }}" style="margin-top:3px; accent-color:var(--color-primario); width:16px; height:16px;">
-        <div style="flex:1;">
+        <div class="flex-1">
           <div style="display:flex; align-items:center; gap:6px; margin-bottom:4px;">
-            <span class="badge badge-info" style="font-size:var(--texto-xs); font-weight:700;">{{ p.categoria.nombre }}</span>
-            <span style="font-size:var(--texto-xs); color:var(--color-texto-suave);">{{ p.puntaje }} pt</span>
+            <span class="badge badge-info texto-xs peso-bold">{{ p.categoria.nombre }}</span>
+            <span class="texto-xs texto-suave">{{ p.puntaje }} pt</span>
           </div>
           <div style="color:var(--color-texto); font-weight:500; line-height:1.4;">{{ p.enunciado }}</div>
         </div>
@@ -392,7 +392,7 @@
 
     <!-- Footer Modal -->
     <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--color-superficie-hundida); padding-top:12px;">
-      <span id="conteo-seleccionadas-modal" style="font-size:var(--texto-xs); color:var(--color-texto-suave);">0 seleccionadas</span>
+      <span id="conteo-seleccionadas-modal" class="texto-xs texto-suave">0 seleccionadas</span>
       <div style="display:flex; gap:10px;">
         <button type="button" onclick="closeModal('modal-selector-preguntas')" class="btn btn-outline" style="font-size:var(--texto-sm); padding:8px 16px;">Cancelar</button>
         <button type="button" onclick="agregarPreguntasSeleccionadas()" class="btn btn-primary" style="font-size:var(--texto-sm); padding:8px 20px;">Añadir al Cuestionario</button>
@@ -532,15 +532,15 @@
           </div>
           <div style="flex:1; min-width:0;">
             <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px; flex-wrap:wrap;">
-              <span class="badge badge-info" style="font-size:var(--texto-xs); font-weight:700;">${cat}</span>
+              <span class="badge badge-info texto-xs peso-bold">${cat}</span>
               <span class="badge" style="background:var(--color-superficie-tenue); border:1px solid var(--color-borde); color:var(--color-texto-suave); font-size:var(--texto-xs); font-weight:600;">${tipo}</span>
-              <span style="font-size:var(--texto-xs); font-weight:700; color:var(--color-primario);">Valor: ${puntaje} pt</span>
+              <span class="texto-xs peso-bold texto-primario">Valor: ${puntaje} pt</span>
             </div>
             <div style="font-size:var(--texto-sm); font-weight:600; color:var(--color-texto); line-height:1.45; word-break:break-word;">${enunciado}</div>
           </div>
         </div>
         <button type="button" onclick="removerPregunta(this)" style="width:34px; height:34px; border-radius:8px; border:1px solid var(--rojo-50); background:var(--rojo-50); color:var(--rojo-600); display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; transition:all 0.2s;" title="Remover del examen">
-          <i data-lucide="trash-2" style="width:16px; height:16px;"></i>
+          <i data-lucide="trash-2" class="icono-16"></i>
         </button>
       `;
       contenedor.appendChild(el);
