@@ -1,396 +1,42 @@
-{% extends 'layouts/base.html' %}
+{% extends 'examen/base_sala.html' %}
+{% load static %}
 
 {% block title %}{{ cuestionario.nombre }} - Simulador Saber TyT{% endblock %}
 
-{% block content %}
-<div style="background-color:var(--color-superficie-tenue); min-height:100vh; display:flex; flex-direction:column;">
+{% block modo %}examen{% endblock %}
+{% block atributos_sala %}data-url-guardar="{% url 'evaluaciones:guardar_respuesta' intento.id %}" data-segundos-restantes="{{ segundos_restantes }}" data-segundos-limite="{% widthratio cuestionario.tiempo_limite_minutos 1 60 %}"{% endblock %}
 
-  <!-- Header Superior -->
-  <header style="background:var(--color-superficie); border-bottom:1px solid var(--color-borde); padding:12px 32px; display:flex; justify-content:space-between; align-items:center;">
-    <div style="display:flex; align-items:center; gap:16px;">
-      <a href="{% url 'evaluaciones:panel_estudiante' %}" onclick="return confirm('¿Seguro que deseas salir? El temporizador seguirá corriendo.');" style="display:inline-flex; align-items:center; justify-content:center; width:36px; height:36px; border-radius:50%; background:var(--color-superficie-hundida); color:var(--color-texto); text-decoration:none;">
-        <i data-lucide="arrow-left" style="width:18px; height:18px;"></i>
-      </a>
-      <div>
-        <div style="font-size:var(--texto-xs); font-weight:700; color:var(--color-texto-suave); text-transform:uppercase; letter-spacing:0.5px;">SABER TYT 2026 · SESIÓN OFICIAL</div>
-        <div style="font-size:var(--texto-md); font-weight:800; color:var(--color-texto);">{{ cuestionario.nombre }}</div>
-      </div>
-    </div>
+{% block volver_url %}{% url 'evaluaciones:panel_estudiante' %}{% endblock %}
+{% block volver_confirmar %}data-confirmar-salida{% endblock %}
+{% block etiqueta_superior %}Saber TyT · Sesión de examen{% endblock %}
 
-    <!-- Temporizador Digital Flotante -->
-    <div style="display:flex; align-items:center; gap:12px;">
-      <div class="eval-timer-box" style="display:inline-flex; align-items:center; gap:6px;">
-        <i data-lucide="clock" style="width:16px; height:16px;"></i>
-        <span id="reloj-tiempo">--:--:--</span>
-      </div>
-      <button type="button" onclick="mostrarNotificacion('El temporizador continúa sincronizado en el servidor.', 'info', 'Sincronización');" style="background:var(--color-superficie-hundida); border:1px solid var(--color-borde-fuerte); width:36px; height:36px; border-radius:8px; cursor:pointer; display:inline-flex; align-items:center; justify-content:center;">
-        <i data-lucide="pause" style="width:16px; height:16px; color:var(--color-texto-suave);"></i>
-      </button>
-    </div>
-  </header>
-
-  <!-- Barra de Progreso Superior -->
-  <div style="background:var(--color-superficie); border-bottom:1px solid var(--color-borde); padding:8px 32px 14px;">
-    <div style="display:flex; justify-content:space-between; align-items:center; font-size:var(--texto-sm); font-weight:700; margin-bottom:8px;">
-      <span style="color:var(--color-primario);">Pregunta <span id="idx-pregunta-label">1</span> de {{ total_preguntas }}</span>
-      <span id="porcentaje-progreso" style="color:var(--verde-700);">0% completado</span>
-    </div>
-    <div class="progress-bar-container">
-      <div id="barra-progreso" class="progress-bar-fill" style="width: 5%;"></div>
-    </div>
-  </div>
-
-  <!-- Formulario que envuelve el examen -->
-  <form id="form-evaluacion" method="POST" action="{% url 'evaluaciones:finalizar' intento.id %}" style="flex-grow:1; display:flex; flex-direction:column;">
-    {% csrf_token %}
-    <input type="hidden" id="datos-respuestas-json" name="respuestas_json" value="{}">
-
-    <div class="eval-container" style="flex-grow:1; width:100%; padding:24px 32px;">
-      <div class="eval-grid">
-        
-        <!-- ================= COLUMNA 1: CONTEXTO OPERATIVO ================= -->
-        <div>
-          <!-- Badges de la pregunta actual -->
-          <div style="display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap;">
-            <span id="badge-competencia" class="badge badge-info" style="font-size:var(--texto-xs); padding:6px 12px;">Razonamiento Cuantitativo</span>
-            <span id="badge-puntaje" class="badge" style="background:var(--color-borde); color:var(--gris-700); font-size:var(--texto-xs); padding:6px 12px;">Valor: 1.00 pt</span>
-          </div>
-
-          <!-- Card Contexto Operativo -->
-          <div class="card" style="padding:20px; border-radius:16px; margin-bottom:16px;">
-            <div style="display:flex; align-items:center; gap:8px; font-size:var(--texto-xs); font-weight:800; color:var(--color-primario); margin-bottom:12px; text-transform:uppercase;">
-              <i data-lucide="file-text" style="width:16px; height:16px;"></i> CONTEXTO OPERATIVO
-            </div>
-            <div id="texto-contexto" class="text-reading text-main" style="line-height:var(--leading-relaxed);">
-              Texto descriptivo de apoyo para la formulación del problema y resolución de la pregunta.
-            </div>
-          </div>
-
-          <!-- Imagen o Referencia Contextual -->
-          <div style="background:var(--color-superficie); border:1px solid var(--color-borde); border-radius:16px; overflow:hidden; box-shadow:var(--shadow-sm);">
-            <div style="background:linear-gradient(135deg, var(--azul-800) 0%, var(--color-primario) 100%); height:120px; display:flex; align-items:center; justify-content:center; color:var(--color-texto-invertido);">
-              <i data-lucide="sprout" style="width:38px; height:38px;"></i>
-            </div>
-            <div style="padding:10px 14px; font-size:var(--texto-xs); color:var(--color-texto-suave); font-weight:600; text-align:center; display:flex; align-items:center; justify-content:center; gap:6px;">
-              <i data-lucide="leaf" style="width:14px; height:14px; color:var(--verde-700);"></i> Unidad de Aplicación Práctica · Uniputumayo
-            </div>
-          </div>
-        </div>
-
-        <!-- ================= COLUMNA 2: ENUNCIADO Y OPCIONES ================= -->
-        <div>
-          <div class="card" style="padding:32px; border-radius:20px; min-height:460px; display:flex; flex-direction:column; justify-content:space-between;">
-            <div>
-              <h2 id="enunciado-pregunta" class="section-title text-xl font-bold text-main" style="margin-bottom:28px; line-height:var(--leading-snug);">
-                Cargando pregunta...
-              </h2>
-
-              <!-- Contenedor dinámico de opciones A, B, C, D -->
-              <div id="contenedor-opciones" style="display:flex; flex-direction:column; gap:12px;">
-                <!-- Rellenado por JS -->
-              </div>
-            </div>
-
-            <!-- Navegación Anterior / Siguiente -->
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:32px; border-top:1px solid var(--color-superficie-hundida); padding-top:20px; gap:12px;">
-              <button type="button" id="btn-anterior" onclick="cambiarPregunta(preguntaActualIdx - 1)" class="btn btn-outline" style="padding:10px 22px; font-weight:600; display:inline-flex; align-items:center; gap:6px;">
-                <i data-lucide="chevron-left" style="width:16px; height:16px;"></i> Anterior
-              </button>
-
-              <button type="button" id="btn-siguiente" onclick="irSiguienteOTerminar()" class="btn btn-primary" style="padding:10px 24px; background:var(--color-primario); font-weight:700; display:inline-flex; align-items:center; gap:6px;">
-                <span>Siguiente</span> <i data-lucide="chevron-right" style="width:16px; height:16px;"></i>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- ================= COLUMNA 3: MAPEO DE PREGUNTAS ================= -->
-        <div>
-          <div class="card" style="padding:24px; border-radius:20px;">
-            <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
-              <i data-lucide="layout-grid" style="width:18px; height:18px; color:var(--color-primario);"></i>
-              <h3 style="font-size:var(--texto-md); font-weight:800; color:var(--color-texto); margin:0;">Mapeo de Preguntas</h3>
-            </div>
-            <div id="resumen-mapeo-label" style="font-size:var(--texto-xs); color:var(--color-texto-suave); margin-bottom:14px;">
-              0 respondidas · {{ total_preguntas }} faltantes
-            </div>
-
-            <!-- Grilla interactiva de botones numéricos -->
-            <div class="question-nav-grid" id="grilla-navegacion">
-              <!-- Rellenado por JS: 1 a N -->
-            </div>
-
-            <!-- Leyenda de colores -->
-            <div style="margin-top:20px; border-top:1px solid var(--color-superficie-hundida); padding-top:14px; font-size:var(--texto-xs); color:var(--color-texto-suave); display:flex; flex-direction:column; gap:6px;">
-              <div style="display:flex; align-items:center; gap:8px;">
-                <span style="width:12px; height:12px; background:var(--azul-200); border-radius:3px;"></span> Respondida
-              </div>
-              <div style="display:flex; align-items:center; gap:8px;">
-                <span style="width:12px; height:12px; background:var(--color-primario); border-radius:3px;"></span> Actual
-              </div>
-              <div style="display:flex; align-items:center; gap:8px;">
-                <span style="width:12px; height:12px; background:var(--color-superficie-hundida); border-radius:3px; border:1px solid var(--color-borde-fuerte);"></span> Pendiente
-              </div>
-            </div>
-
-            <!-- Botón Finalizar Examen -->
-            <button type="button" onclick="confirmarEntrega()" class="btn btn-full" style="margin-top:24px; background:var(--verde-700); color:var(--color-texto-invertido); font-size:var(--texto-base); padding:12px; border-radius:10px; font-weight:700; display:inline-flex; align-items:center; justify-content:center; gap:6px;">
-              <i data-lucide="check-circle-2"></i> Finalizar y Entregar Intento
-            </button>
-          </div>
-        </div>
-
-      </div>
-    </div>
-  </form>
-
+{% block acciones_encabezado %}
+<span class="sala-guardado" data-ref="guardado" aria-live="polite"></span>
+<div class="eval-timer-box" role="timer" aria-label="Tiempo restante">
+  <i data-lucide="clock" class="icono-16"></i>
+  <span data-ref="reloj" class="cifras">--:--:--</span>
 </div>
+<button type="button" class="sala-boton-icono" data-accion="sincronizacion" title="¿El tiempo se detiene?">
+  <i data-lucide="info" class="icono-16"></i>
+  <span class="sr-only">Información del temporizador</span>
+</button>
 {% endblock %}
 
-{% block extra_scripts %}
-<script>
-  // Datos del examen inyectados desde Django
-  const preguntasData = {{ preguntas_json|safe }};
-  const tiempoLimiteMinutos = {{ cuestionario.tiempo_limite_minutos }};
-  const segundosRestantesServidor = {{ segundos_restantes|default:7200 }};
-  const intentoId = {{ intento.id }};
-  
-  let preguntaActualIdx = 0;
-  // Cargar respuestas previas si existen (recuperación de sesión)
-  let respuestasUsuario = {};
-  try {
-    respuestasUsuario = {{ respuestas_previas_json|default:"{}"|safe }};
-  } catch(e) {
-    respuestasUsuario = {};
-  }
+{% block progreso_texto %}0% completado{% endblock %}
 
-  // Inicialización
-  document.addEventListener('DOMContentLoaded', () => {
-    // Sincronizar input oculto inicial
-    const inputHidden = document.getElementById('datos-respuestas-json');
-    if (inputHidden) {
-      inputHidden.value = JSON.stringify(respuestasUsuario);
-    }
-    construirGrillaNavegacion();
-    mostrarPregunta(0);
-    // Iniciar temporizador con los segundos reales restantes validados por backend
-    iniciarTemporizador(segundosRestantesServidor);
-  });
-
-  function construirGrillaNavegacion() {
-    const grilla = document.getElementById('grilla-navegacion');
-    grilla.innerHTML = '';
-    preguntasData.forEach((p, idx) => {
-      const btn = document.createElement('div');
-      btn.id = `nav-item-${idx}`;
-      btn.className = `q-nav-item ${idx === 0 ? 'current' : ''}`;
-      btn.innerText = idx + 1;
-      btn.onclick = () => cambiarPregunta(idx);
-      grilla.appendChild(btn);
-    });
-  }
-
-  function mostrarPregunta(idx) {
-    if (idx < 0 || idx >= preguntasData.length) return;
-    preguntaActualIdx = idx;
-
-    const p = preguntasData[idx];
-
-    // Actualizar labels superiores
-    document.getElementById('idx-pregunta-label').innerText = idx + 1;
-    document.getElementById('badge-competencia').innerText = p.categoria;
-    document.getElementById('badge-puntaje').innerText = `Valor: ${p.puntaje} pt`;
-    document.getElementById('texto-contexto').innerText = p.texto_base || 'Sin contexto adicional. Lea directamente el enunciado.';
-    document.getElementById('enunciado-pregunta').innerText = p.enunciado;
-
-    // Actualizar botones Anterior / Siguiente
-    document.getElementById('btn-anterior').style.visibility = idx === 0 ? 'hidden' : 'visible';
-    const btnSig = document.getElementById('btn-siguiente');
-    if (idx === preguntasData.length - 1) {
-      btnSig.innerHTML = '<i data-lucide="check-circle-2" style="width:16px; height:16px;"></i> Finalizar y Entregar Examen';
-      btnSig.style.background = 'var(--verde-700)';
-      btnSig.style.color = 'var(--color-superficie)';
-      btnSig.style.borderColor = 'var(--verde-700)';
-    } else {
-      btnSig.innerHTML = '<span>Siguiente</span> <i data-lucide="chevron-right" style="width:16px; height:16px;"></i>';
-      btnSig.style.background = 'var(--color-primario)';
-      btnSig.style.color = 'var(--color-superficie)';
-      btnSig.style.borderColor = 'var(--color-primario)';
-    }
-    if (window.lucide) {
-      lucide.createIcons({ root: btnSig });
-      lucide.createIcons({ root: document.getElementById('btn-anterior') });
-    }
-
-    // Renderizar opciones A, B, C, D
-    const contenedor = document.getElementById('contenedor-opciones');
-    contenedor.innerHTML = '';
-
-    const letras = ['A', 'B', 'C', 'D'];
-    p.opciones.forEach((op, oIdx) => {
-      const letra = letras[oIdx] || `${oIdx + 1}`;
-      const estaSeleccionada = respuestasUsuario[p.id] === op.id;
-
-      const card = document.createElement('div');
-      card.className = `option-card ${estaSeleccionada ? 'selected' : ''}`;
-      card.onclick = () => seleccionarOpcion(p.id, op.id);
-
-      card.innerHTML = `
-        <div class="option-letter-badge">${letra}</div>
-        <div style="flex-grow:1; font-size:var(--texto-base); color:var(--color-texto); font-weight:500;">${op.texto}</div>
-        <div style="width:20px; height:20px; border-radius:50%; border:2px solid ${estaSeleccionada ? 'var(--color-primario)' : 'var(--color-borde-fuerte)'}; display:flex; align-items:center; justify-content:center; background:${estaSeleccionada ? 'var(--color-primario)' : 'transparent'}; color:var(--color-texto-invertido); font-size:var(--texto-xs);">
-          ${estaSeleccionada ? '<i data-lucide="check" style="width:12px; height:12px;"></i>' : ''}
-        </div>
-      `;
-      contenedor.appendChild(card);
-      if (window.lucide) {
-        lucide.createIcons({ root: card });
-      }
-    });
-
-    actualizarEstadosGrilla();
-  }
-
-  function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-      const cookies = document.cookie.split(';');
-      for (let i = 0; i < cookies.length; i++) {
-        const cookie = cookies[i].trim();
-        if (cookie.substring(0, name.length + 1) === (name + '=')) {
-          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-          break;
-        }
-      }
-    }
-    return cookieValue;
-  }
-
-  function guardarRespuestaServidor(preguntaId, opcionId) {
-    const csrftoken = getCookie('csrftoken') || (document.querySelector('[name=csrfmiddlewaretoken]') ? document.querySelector('[name=csrfmiddlewaretoken]').value : '');
-    fetch(`/evaluacion/${intentoId}/guardar-respuesta/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRFToken': csrftoken
-      },
-      body: JSON.stringify({
-        pregunta_id: preguntaId,
-        opcion_id: opcionId
-      })
-    }).then(res => res.json()).then(data => {
-      if (data.status !== 'ok') {
-        console.warn('Advertencia al autoguardar:', data.mensaje);
-      }
-    }).catch(err => {
-      console.warn('Error de red al autoguardar respuesta:', err);
-    });
-  }
-
-  function seleccionarOpcion(preguntaId, opcionId) {
-    respuestasUsuario[preguntaId] = opcionId;
-    // Sincronizar en el input oculto
-    const inputHidden = document.getElementById('datos-respuestas-json');
-    if (inputHidden) {
-      inputHidden.value = JSON.stringify(respuestasUsuario);
-    }
-    mostrarPregunta(preguntaActualIdx);
-    // Persistencia asíncrona inmediata en backend MariaDB
-    guardarRespuestaServidor(preguntaId, opcionId);
-  }
-
-  function irSiguienteOTerminar() {
-    if (preguntaActualIdx >= preguntasData.length - 1) {
-      confirmarEntrega();
-    } else {
-      cambiarPregunta(preguntaActualIdx + 1);
-    }
-  }
-
-  function cambiarPregunta(nuevoIdx) {
-    if (nuevoIdx >= 0 && nuevoIdx < preguntasData.length) {
-      mostrarPregunta(nuevoIdx);
-    } else if (nuevoIdx >= preguntasData.length) {
-      confirmarEntrega();
-    }
-  }
-
-  function actualizarEstadosGrilla() {
-    let respondidas = 0;
-    preguntasData.forEach((p, idx) => {
-      const el = document.getElementById(`nav-item-${idx}`);
-      if (!el) return;
-      el.className = 'q-nav-item';
-      if (respuestasUsuario[p.id]) {
-        el.classList.add('answered');
-        respondidas++;
-      }
-      if (idx === preguntaActualIdx) {
-        el.classList.add('current');
-      }
-    });
-
-    const total = preguntasData.length;
-    const faltantes = total - respondidas;
-    document.getElementById('resumen-mapeo-label').innerText = `${respondidas} respondidas · ${faltantes} faltantes`;
-
-    const pct = Math.round((respondidas / total) * 100);
-    document.getElementById('porcentaje-progreso').innerText = `${pct}% completado`;
-    document.getElementById('barra-progreso').style.width = `${Math.max(pct, 5)}%`;
-  }
-
-  // Temporizador regresivo en vivo
-  function iniciarTemporizador(segundosTotales) {
-    let restantes = segundosTotales;
-    const reloj = document.getElementById('reloj-tiempo');
-
-    const intervalo = setInterval(() => {
-      if (restantes <= 0) {
-        clearInterval(intervalo);
-        mostrarNotificacion('El tiempo límite del cuestionario ha finalizado. Se enviará automáticamente tu intento.', 'warning', 'Tiempo Agotado');
-        setTimeout(() => {
-          const inputHidden = document.getElementById('datos-respuestas-json');
-          if (inputHidden) {
-            inputHidden.value = JSON.stringify(respuestasUsuario);
-          }
-          document.getElementById('form-evaluacion').submit();
-        }, 1200);
-        return;
-      }
-      restantes--;
-
-      const h = String(Math.floor(restantes / 3600)).padStart(2, '0');
-      const m = String(Math.floor((restantes % 3600) / 60)).padStart(2, '0');
-      const s = String(restantes % 60).padStart(2, '0');
-      reloj.innerText = `${h}:${m}:${s}`;
-    }, 1000);
-  }
-
-  function confirmarEntrega() {
-    const respondidas = Object.keys(respuestasUsuario).length;
-    const total = preguntasData.length;
-    const faltantes = total - respondidas;
-
-    let mensaje = `¿Estás seguro de finalizar y entregar tu examen?\n\n• Respondidas: ${respondidas} de ${total}\n• Pendientes: ${faltantes}`;
-    if (faltantes > 0) {
-      mensaje += `\n\nAtención: Aún tienes ${faltantes} pregunta(s) sin responder. Se calificarán con 0 puntos.`;
-    }
-
-    if (confirm(mensaje)) {
-      const inputHidden = document.getElementById('datos-respuestas-json');
-      if (inputHidden) {
-        inputHidden.value = JSON.stringify(respuestasUsuario);
-      }
-
-      // Deshabilitar botones para evitar envíos múltiples
-      const btnSig = document.getElementById('btn-siguiente');
-      if (btnSig) {
-        btnSig.disabled = true;
-        btnSig.innerText = 'Enviando y calificando...';
-      }
-
-      document.getElementById('form-evaluacion').submit();
-    }
-  }
-</script>
+{% block formulario_inicio %}
+<form id="form-evaluacion" method="POST" action="{% url 'evaluaciones:finalizar' intento.id %}" class="flex-grow flex flex-col">
+  {% csrf_token %}
+  <input type="hidden" id="datos-respuestas-json" name="respuestas_json" value="{}">
 {% endblock %}
+{% block formulario_fin %}</form>{% endblock %}
+
+{% block boton_final %}
+<button type="button" class="btn btn-success btn-full sala-entregar" data-accion="entregar">
+  <i data-lucide="check-circle-2" class="icono-16"></i> Finalizar y entregar intento
+</button>
+{% endblock %}
+
+{% block datos %}{{ respuestas_previas|json_script:"datos-respuestas" }}{% endblock %}
+
+{% block script_pagina %}<script src="{% static 'js/evaluaciones/sala.js' %}"></script>{% endblock %}

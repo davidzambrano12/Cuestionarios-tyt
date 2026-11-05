@@ -58,8 +58,8 @@ def evaluacion_en_vivo(request, intento_id):
         "intento": intento,
         "cuestionario": intento.cuestionario,
         "total_preguntas": len(preguntas),
-        "preguntas_json": json.dumps(preguntas),
-        "respuestas_previas_json": json.dumps(respuestas_previas),
+        "preguntas": preguntas,
+        "respuestas_previas": respuestas_previas,
         "segundos_restantes": servicio.segundos_restantes(intento),
     })
 
