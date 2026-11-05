@@ -83,7 +83,8 @@ class ConsultasTests(PruebaNavegador):
         archivo = descarga.value
         self.assertTrue(archivo.suggested_filename.startswith("reporte_consolidado_2026-2_electiva-profesional-iii-frameworks-g01"))
         libro = load_workbook(io.BytesIO(open(archivo.path(), "rb").read()))
-        self.assertEqual(libro.sheetnames, ["Calificaciones", "Promedio por estudiante", "Por período", "Por curso"])
+        self.assertEqual(libro.sheetnames, ["Calificaciones", "Resumen", "Por estudiante", "Por período",
+                                            "Por curso", "Acerca del reporte"])
 
         with pg.expect_navigation():
             pg.click("[data-accion='limpiar']")

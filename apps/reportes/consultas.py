@@ -129,6 +129,11 @@ class Filtros:
         ]
 
     @property
+    def activos(self) -> list[tuple[str, str]]:
+        """Solo los filtros aplicados (sin los «Todos»)."""
+        return [(n, v) for n, v in self.descripcion if v not in ("Todos", "—")]
+
+    @property
     def hay_filtros(self) -> bool:
         return any([self.anio, self.periodo, self.curso, self.eje, self.estudiante, self.visibilidad, self.q])
 
@@ -363,6 +368,7 @@ def por_curso(qs) -> list[dict]:
     return [{
         "curso_id": f["curso_id"],
         "curso": _nombre_curso(f["curso__asignatura"], f["curso__grupo"]),
+        "asignatura": f["curso__asignatura"] or "Sin curso asignado", "grupo": f["curso__grupo"] or "",
         "periodo": f"{f['curso__periodo__anio']}-{f['curso__periodo__numero']}" if f["curso__periodo__anio"] else "—",
         "anio": f["curso__periodo__anio"],
         "intentos": f["intentos"], "estudiantes": f["estudiantes"],
@@ -418,6 +424,8 @@ def por_eje(qs, filtros: Filtros, *, detallar_curso: bool = False) -> list[dict]
                 anio=anio or "—",
                 periodo=f"{anio}-{f['intento__periodo__numero']}" if anio else "—",
                 curso=_nombre_curso(f["intento__curso__asignatura"], f["intento__curso__grupo"]),
+                asignatura=f["intento__curso__asignatura"] or "Sin curso asignado",
+                grupo=f["intento__curso__grupo"] or "",
             )
         resultado.append(fila)
     return resultado

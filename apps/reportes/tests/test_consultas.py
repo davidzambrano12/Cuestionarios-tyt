@@ -210,12 +210,14 @@ class PermisosTests(BaseConsultas):
 
 
 class ExcelTests(BaseConsultas):
-    def _filas(self, respuesta, hoja=0):
-        ws = load_workbook(io.BytesIO(respuesta.content)).worksheets[hoja]
+    """Cada hoja: título (fila 1), fecha y filtros aplicados (fila 2) y la tabla desde la fila 4."""
+
+    def _hoja(self, respuesta, nombre=None):
+        libro = load_workbook(io.BytesIO(respuesta.content))
+        ws = libro[nombre] if nombre else libro.worksheets[0]
         filas = list(ws.iter_rows(values_only=True))
-        # La fila de encabezados de la tabla es la primera con 5 o más columnas llenas
-        cabecera = next(i for i, f in enumerate(filas) if sum(v is not None for v in f) >= 5)
-        return filas[:cabecera], filas[cabecera], [f for f in filas[cabecera + 1:] if any(v is not None for v in f)]
+        datos = [f for f in filas[4:] if any(v is not None for v in f)]
+        return libro, ws, filas[3], datos
 
     def test_consolidado_exporta_todo_con_los_filtros(self):
         for _ in range(12):
@@ -223,40 +225,69 @@ class ExcelTests(BaseConsultas):
         r = self.excel("consolidado", curso=self.sexto_a.id)
         self.assertEqual(r.status_code, 200)
         self.assertIn("reporte_consolidado_2026-2_frameworks-g01", r["Content-Disposition"])
-        encabezado, columnas, datos = self._filas(r)
-        self.assertEqual(columnas[:9], ("Año", "Período", "Curso", "Estudiante", "Identificación", "Simulacro",
-                                        "Fecha", "Calificación (/5,0)", "Estado"))
+        libro, ws, columnas, datos = self._hoja(r)
+        self.assertEqual(columnas[:10], ("Año", "Período", "Asignatura", "Grupo", "Estudiante", "Identificación",
+                                         "Simulacro", "Fecha", "Nota (0 a 5)", "Estado"))
         self.assertEqual(len(datos), 16)  # todas, no solo la primera página de 10 (incluye la en progreso)
-        texto = " ".join(str(v) for f in encabezado for v in f if v)
-        self.assertIn("Frameworks · G01", texto)
-        self.assertIn("Generado el", texto)
+        self.assertEqual({(f[2], f[3]) for f in datos}, {("Frameworks", "01")})  # asignatura y grupo separados
+        # Encabezado de dos líneas con solo los filtros aplicados
+        self.assertEqual(ws["A1"].value, "Reporte A · Consolidado general")
+        self.assertIn("Generado el", ws["A2"].value)
+        self.assertIn("Curso: Frameworks · G01", ws["A2"].value)
+        self.assertNotIn("Eje temático", ws["A2"].value)  # los filtros en «Todos» no se listan
+        self.assertEqual(ws.freeze_panes, "A5")
+        self.assertIn("Acerca del reporte", libro.sheetnames)
 
-    def test_reporte_por_eje(self):
-        _, columnas, datos = self._filas(self.excel("ejes"))
-        self.assertIn("% de aciertos", columnas)
-        self.assertEqual({(f[2], f[3]) for f in datos},
-                         {("Frameworks · G01", "Inglés"), ("Frameworks · G01", "Lectura Crítica"), ("Frameworks · G02", "Inglés"),
-                          ("Frameworks · G02", "Lectura Crítica"), ("Bases de Datos · G01", "Inglés"), ("Bases de Datos · G01", "Lectura Crítica")})
-
-    def test_historial_cronologico(self):
-        _, _, datos = self._filas(self.excel("historial", estudiante="E1"))
-        self.assertEqual([f[9] for f in datos], [0, 5, 2.5])
-        self.assertEqual([f[6] for f in datos], [4, 4, 4])  # respondidas
+    def test_resumen_en_dos_columnas(self):
+        _, _, columnas, datos = self._hoja(self.excel("consolidado"), "Resumen")
+        self.assertEqual(columnas[:2], ("Indicador", "Valor"))
+        valores = dict(f[:2] for f in datos)
+        self.assertEqual(valores["Estudiantes evaluados (distintos)"], 3)
+        self.assertEqual(valores["Intentos terminados"], 5)
+        self.assertEqual(valores["Porcentaje de aprobación"], 0.4)  # fracción con formato de porcentaje
 
     def test_consolidado_incluye_periodos_y_cursos(self):
-        libro = load_workbook(io.BytesIO(self.excel("consolidado").content))
-        self.assertEqual(libro.sheetnames, ["Calificaciones", "Promedio por estudiante", "Por período", "Por curso"])
-        _, _, datos = self._filas(self.excel("consolidado"), hoja=3)
-        self.assertEqual({f[0] for f in datos}, {"Frameworks · G01", "Frameworks · G02", "Bases de Datos · G01"})
+        libro, _, _, _ = self._hoja(self.excel("consolidado"))
+        self.assertEqual(libro.sheetnames, ["Calificaciones", "Resumen", "Por estudiante", "Por período",
+                                            "Por curso", "Acerca del reporte"])
+        _, _, columnas, datos = self._hoja(self.excel("consolidado"), "Por curso")
+        self.assertEqual(columnas[:3], ("Asignatura", "Grupo", "Período"))
+        self.assertEqual({(f[0], f[1]) for f in datos}, {("Frameworks", "01"), ("Frameworks", "02"), ("Bases de Datos", "01")})
+
+    def test_reporte_por_eje(self):
+        _, ws, columnas, datos = self._hoja(self.excel("ejes"))
+        self.assertEqual(columnas[:10], ("Año", "Período", "Asignatura", "Grupo", "Eje temático", "Respuestas registradas",
+                                         "Aciertos", "Errores", "Sin responder", "% de aciertos"))
+        self.assertNotIn("Nota promedio", columnas)  # no está definida: se explica en «Acerca del reporte»
+        self.assertEqual({(f[2], f[3], f[4]) for f in datos},
+                         {(a, g, e) for a, g in (("Frameworks", "01"), ("Frameworks", "02"), ("Bases de Datos", "01"))
+                          for e in ("Inglés", "Lectura Crítica")})
+        for f in datos:
+            self.assertEqual(f[5], f[6] + f[7] + f[8])  # registradas = aciertos + errores + sin responder
+            self.assertTrue(0 <= f[9] <= 1)
+        self.assertEqual(ws.cell(row=5, column=10).number_format, "0.0%")
+
+    def test_historial_cronologico(self):
+        _, _, columnas, datos = self._hoja(self.excel("historial", estudiante="E1"))
+        self.assertEqual(columnas[7:11], ("Preguntas respondidas", "Aciertos", "Errores", "Nota final (0 a 5)"))
+        self.assertEqual([f[10] for f in datos], [0, 5, 2.5])
+        self.assertEqual([f[7] for f in datos], [4, 4, 4])  # respondidas
 
     def test_reporte_de_preguntas_dificiles(self):
         r = self.excel("dificultad", eje=self.ingles.id)
         self.assertIn("reporte_dificultad", r["Content-Disposition"])
-        _, columnas, datos = self._filas(r)
+        _, _, columnas, datos = self._hoja(r)
         self.assertEqual(columnas[:7], ("N.º", "Eje temático", "Pregunta", "Respuestas", "Aciertos", "Errores", "% de acierto"))
         self.assertEqual({f[1] for f in datos}, {"Inglés"})
         tasas = [f[6] for f in datos]
         self.assertEqual(tasas, sorted(tasas))  # de la más difícil a la más fácil
+
+    def test_acerca_del_reporte_lista_filtros_y_reglas(self):
+        libro, _, _, _ = self._hoja(self.excel("ejes", eje=self.ingles.id))
+        textos = [v for fila in libro["Acerca del reporte"].iter_rows(values_only=True) for v in fila if v]
+        self.assertIn("Eje temático", textos)
+        self.assertIn("Inglés", textos)
+        self.assertTrue(any("No se incluye nota por eje" in t for t in textos))
 
     def test_cada_vista_ofrece_su_excel(self):
         for vista, reporte in (("calificaciones", "consolidado"), ("periodos", "consolidado"), ("cursos", "consolidado"),
@@ -270,7 +301,7 @@ class ExcelTests(BaseConsultas):
         for reporte in ("consolidado", "ejes", "historial", "dificultad"):
             r = self.excel(reporte, q="nadie")
             self.assertEqual(r.status_code, 200)
-            _, _, datos = self._filas(r)
+            _, _, _, datos = self._hoja(r)
             self.assertEqual(datos[0][0], "Sin registros para los filtros aplicados.")
 
     def test_reporte_desconocido(self):

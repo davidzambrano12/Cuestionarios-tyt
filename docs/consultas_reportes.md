@@ -71,10 +71,23 @@ Cada vista tiene su botón **"Descargar Excel"**, que baja lo que se está viend
 
 | Vista | Excel | Contenido |
 |---|---|---|
-| Calificaciones, Por período, Por curso | **A · Consolidado** | Año, período, curso, estudiante, identificación, simulacro, fecha, calificación y estado. Además, hojas con el promedio por estudiante, el resumen por período y el resumen por curso |
-| Por eje temático | **B · Por eje** | Año, período, curso, eje, respuestas registradas, contestadas, aciertos, errores, sin responder, % de aciertos y nota promedio ("No definida") |
-| Historial individual | **C · Historial** | Estudiante, curso, período, simulacro, fecha, respondidas, aciertos, errores y nota final. Un intento por fila, en orden cronológico |
+| Calificaciones, Por período, Por curso | **A · Consolidado** | Hoja *Calificaciones*: año, período, asignatura, grupo, estudiante, identificación, simulacro, fecha, nota y estado. Más las hojas *Resumen* (indicadores), *Por estudiante*, *Por período* y *Por curso* |
+| Por eje temático | **B · Por eje** | Año, período, asignatura, grupo, eje, respuestas registradas, aciertos, errores, sin responder y % de aciertos |
+| Historial individual | **C · Historial** | Estudiante, identificación, asignatura, grupo, período, simulacro, fecha, respondidas, aciertos, errores, nota final y estado. Un intento por fila, en orden cronológico |
 | Preguntas difíciles | Preguntas de mayor dificultad | Número, eje, enunciado, respuestas, aciertos, errores y % de acierto, de la más difícil a la más fácil |
+
+Formato de cada hoja de datos:
+
+| Fila | Contenido |
+|---|---|
+| 1 | Nombre del reporte |
+| 2 | Fecha de generación y **solo los filtros aplicados** |
+| 4 | Encabezados de la tabla, fijos al desplazarse y con autofiltro |
+| 5 en adelante | Un registro por fila y un dato por columna |
+
+- Las notas tienen dos decimales y los porcentajes son porcentajes reales de Excel, así se pueden ordenar y graficar.
+- El estado lleva color.
+- La hoja **"Acerca del reporte"** lista todos los filtros y explica cómo se calcula cada cifra. Por ejemplo, ahí se aclara que no hay nota por eje, en lugar de repetir "No definida" en cada fila.
 
 Cada archivo:
 - incluye el nombre del reporte, la fecha de generación, los filtros activos y las reglas de cálculo;
