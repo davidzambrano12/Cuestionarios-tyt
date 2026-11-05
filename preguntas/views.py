@@ -405,6 +405,7 @@ def previsualizar_cuestionario(request, cuestionario_id):
     })
 
 
+@login_required
 def iniciar_evaluacion(request, cuestionario_id):
     """
     Inicia un nuevo intento de examen con validación estricta en el servidor:
