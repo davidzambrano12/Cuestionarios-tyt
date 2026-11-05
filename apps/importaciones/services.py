@@ -14,7 +14,6 @@ validación nunca se desincroniza de lo que realmente se guarda.
 """
 from __future__ import annotations
 
-import hashlib
 import json
 import re
 from dataclasses import dataclass, field
@@ -23,7 +22,10 @@ from decimal import Decimal, InvalidOperation
 import openpyxl
 from django.db import IntegrityError, transaction
 
-from preguntas.models import Categoria, CuestionarioPregunta, Importacion, OpcionRespuesta, Pregunta
+from apps.banco_preguntas.services import calcular_huella
+from apps.banco_preguntas.models import Categoria, OpcionRespuesta, Pregunta
+from apps.cuestionarios.models import CuestionarioPregunta
+from apps.importaciones.models import Importacion
 
 COLUMNAS = [
     "categoria", "tipo", "texto_base", "pregunta",
@@ -38,17 +40,6 @@ def _texto(valor) -> str:
     if valor is None:
         return ""
     return str(valor).strip()
-
-
-def _normalizar(texto: str) -> str:
-    """Minúsculas y espacios colapsados, para que la huella no cambie por
-    mayúsculas o espacios de más."""
-    return re.sub(r"\s+", " ", texto.strip().lower())
-
-
-def calcular_huella(enunciado: str, opciones_texto: list[str]) -> str:
-    base = _normalizar(enunciado) + "|" + "|".join(_normalizar(o) for o in opciones_texto)
-    return hashlib.sha256(base.encode("utf-8")).hexdigest()
 
 
 @dataclass

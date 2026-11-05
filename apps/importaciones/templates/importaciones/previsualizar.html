@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'layouts/base.html' %}
 {% load static %}
 
 {% block title %}Auditoría y Corrección de Importación - Simulador Saber TyT{% endblock %}
@@ -9,7 +9,7 @@
 
     <!-- Topbar -->
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-      <a href="{% url 'preguntas:importar' %}" style="display:inline-flex; align-items:center; justify-content:center; width:38px; height:38px; border-radius:50%; background:white; border:1px solid #e2e8f0; color:#0f172a; text-decoration:none;" title="Volver a Carga">
+      <a href="{% url 'importaciones:importar' %}" style="display:inline-flex; align-items:center; justify-content:center; width:38px; height:38px; border-radius:50%; background:white; border:1px solid #e2e8f0; color:#0f172a; text-decoration:none;" title="Volver a Carga">
         <i data-lucide="arrow-left" style="width:18px; height:18px;"></i>
       </a>
       <h2 style="font-size:18px; font-weight:800; color:#0f172a; margin:0;">Validación y Auditoría de Ingesta</h2>
@@ -53,7 +53,7 @@
         </div>
       </div>
       <div style="display:flex; gap:8px;">
-        <a href="{% url 'preguntas:importar' %}" class="btn btn-outline" style="font-size:12px; padding:6px 12px; display:inline-flex; align-items:center; gap:6px;">
+        <a href="{% url 'importaciones:importar' %}" class="btn btn-outline" style="font-size:12px; padding:6px 12px; display:inline-flex; align-items:center; gap:6px;">
           <i data-lucide="rotate-cw" style="width:14px; height:14px;"></i> Subir Otro Archivo
         </a>
       </div>
@@ -202,7 +202,7 @@
 
       <!-- Acciones de Confirmación -->
       {% if resultado.validas %}
-      <form method="POST" action="{% url 'preguntas:confirmar' %}">
+      <form method="POST" action="{% url 'importaciones:confirmar' %}">
         {% csrf_token %}
         <button type="submit" class="btn btn-primary btn-full" style="padding:14px; font-size:15px; border-radius:12px; margin-bottom:12px; background:#186382; font-weight:700; display:inline-flex; align-items:center; justify-content:center; gap:8px;">
           <i data-lucide="check-circle-2" style="width:18px; height:18px;"></i> Confirmar e Importar {{ resultado.validas|length }} Pregunta(s) Válida(s)
@@ -219,7 +219,7 @@
         <a href="{% static 'plantillas/plantilla_preguntas_simulador_tyt.xlsx' %}" download class="btn btn-outline" style="flex:1; font-size:12px; padding:10px; text-align:center; display:inline-flex; align-items:center; justify-content:center; gap:6px;">
           <i data-lucide="download" style="width:14px; height:14px;"></i> Descargar Plantilla Oficial
         </a>
-        <form method="POST" action="{% url 'preguntas:cancelar' %}" style="flex:1;">
+        <form method="POST" action="{% url 'importaciones:cancelar' %}" style="flex:1;">
           {% csrf_token %}
           <button type="submit" class="btn btn-outline btn-full" style="font-size:12px; padding:10px; color:#b91c1c; border-color:#fca5a5; display:inline-flex; align-items:center; justify-content:center; gap:6px;">
             <i data-lucide="x" style="width:14px; height:14px;"></i> Cancelar Ingesta
@@ -256,7 +256,7 @@
     </div>
 
     <!-- Formulario de Corrección -->
-    <form method="POST" action="{% url 'preguntas:corregir_fila' %}" onsubmit="return validarFormularioCorreccion(event);" style="padding:20px 24px; display:flex; flex-direction:column; gap:16px;">
+    <form method="POST" action="{% url 'importaciones:corregir_fila' %}" onsubmit="return validarFormularioCorreccion(event);" style="padding:20px 24px; display:flex; flex-direction:column; gap:16px;">
       {% csrf_token %}
       <input type="hidden" name="fila_excel" id="input_fila_excel" value="">
 

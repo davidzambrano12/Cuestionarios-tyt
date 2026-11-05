@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'layouts/base.html' %}
 
 {% block title %}Importación Finalizada - Simulador Saber TyT{% endblock %}
 
@@ -34,10 +34,10 @@
       </div>
 
       <div style="display:flex; gap:12px;">
-        <a href="{% url 'preguntas:banco' %}" class="btn btn-primary" style="flex:1; padding:12px; font-size:14px;">
+        <a href="{% url 'banco_preguntas:banco' %}" class="btn btn-primary" style="flex:1; padding:12px; font-size:14px;">
           Ver Banco de Preguntas &rarr;
         </a>
-        <a href="{% url 'preguntas:importar' %}" class="btn btn-outline" style="flex:1; padding:12px; font-size:14px;">
+        <a href="{% url 'importaciones:importar' %}" class="btn btn-outline" style="flex:1; padding:12px; font-size:14px;">
           Importar Otro Archivo
         </a>
       </div>

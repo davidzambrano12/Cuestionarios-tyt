@@ -1,4 +1,4 @@
-{% extends 'app_base.html' %}
+{% extends 'layouts/app_base.html' %}
 {% load static %}
 
 {% block title %}Importar Preguntas - Simulador Saber TyT{% endblock %}
@@ -10,7 +10,7 @@
 
     <!-- Volver al Banco -->
     <div style="margin-bottom:16px;">
-      <a href="{% url 'preguntas:banco' %}" style="display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:600; color:#186382; text-decoration:none;">
+      <a href="{% url 'banco_preguntas:banco' %}" style="display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:600; color:#186382; text-decoration:none;">
         <i data-lucide="arrow-left" style="width:16px; height:16px;"></i> Volver al Banco de Preguntas
       </a>
     </div>
@@ -41,10 +41,10 @@
         </div>
       </div>
       <div style="display:flex; gap:8px;">
-        <a href="{% url 'preguntas:previsualizar' %}" class="btn btn-primary" style="font-size:12px; padding:8px 16px; background:#2563eb; font-weight:700;">
+        <a href="{% url 'importaciones:previsualizar' %}" class="btn btn-primary" style="font-size:12px; padding:8px 16px; background:#2563eb; font-weight:700;">
           Ir a Auditoría y Corrección &rarr;
         </a>
-        <form method="POST" action="{% url 'preguntas:cancelar' %}" style="margin:0;">
+        <form method="POST" action="{% url 'importaciones:cancelar' %}" style="margin:0;">
           {% csrf_token %}
           <button type="submit" class="btn btn-outline" style="font-size:12px; padding:8px 12px; color:#b91c1c; border-color:#fca5a5;">
             Descartar

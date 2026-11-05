@@ -1,6 +1,6 @@
 from django.core.exceptions import ValidationError
 from django import forms
-from .models import Cuestionario
+from apps.cuestionarios.models import Cuestionario
 
 EXTENSIONES_VALIDAS = (".xlsx", ".xlsm")
 

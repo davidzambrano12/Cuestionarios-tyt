@@ -7,9 +7,11 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase, override_settings
 from openpyxl import Workbook
 
-from preguntas.models import CuestionarioPregunta, Importacion, Pregunta
-from preguntas.services.importador_excel import COLUMNAS
-from .factories import crear_cuestionario, crear_usuario, sembrar_roles
+from apps.banco_preguntas.models import Pregunta
+from apps.cuestionarios.models import CuestionarioPregunta
+from apps.importaciones.models import Importacion
+from apps.importaciones.services import COLUMNAS
+from apps.core.tests.factories import crear_cuestionario, crear_usuario, sembrar_roles
 
 FILA_VALIDA = ["Lectura Crítica", "MULTIPLE", "", "¿Qué propone el autor?",
                "Uno", "Dos", "Tres", "Cuatro", "B", "Explicación", 1]
