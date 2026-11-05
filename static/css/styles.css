@@ -1169,3 +1169,64 @@ a:hover {
 .estado-vacio__titulo { font-size: var(--texto-md); font-weight: var(--peso-extrabold); color: var(--color-texto); margin-bottom: var(--espacio-1); }
 .estado-vacio__mensaje { font-size: var(--texto-sm); max-width: 48ch; margin: 0 auto; }
 .estado-vacio__acciones { margin-top: var(--espacio-4); display: flex; justify-content: center; gap: var(--espacio-3); }
+
+/* Botones compactos para tablas y botón destructivo */
+.btn-accion {
+  padding: 6px 12px;
+  font-size: var(--texto-xs);
+  border-radius: var(--radio-sm);
+  white-space: nowrap;
+  min-height: 32px;
+  gap: 5px;
+}
+.btn-peligro { background: var(--color-superficie); border: 1px solid var(--color-peligro-borde); color: var(--color-peligro-texto); }
+.btn-peligro:hover { background: var(--color-peligro-suave); color: var(--color-peligro-texto); }
+
+/* Chips de filtro */
+.chip-filtro {
+  padding: 6px 12px;
+  font-size: var(--texto-xs);
+  border-radius: var(--radio-pill);
+  font-weight: var(--peso-semibold);
+  min-height: 32px;
+  gap: 6px;
+}
+.chip-filtro.active { background: var(--color-primario); border-color: var(--color-primario); color: var(--color-texto-invertido); }
+.chip-filtro__cuenta { font-variant-numeric: tabular-nums; opacity: 0.85; }
+
+/* Barra de herramientas (pestañas, búsqueda, filtros) */
+.barra-herramientas { padding: var(--espacio-4) var(--espacio-5); }
+.barra-herramientas__fila { display: flex; justify-content: space-between; align-items: center; gap: var(--espacio-4); flex-wrap: wrap; }
+.barra-herramientas__fila + .barra-herramientas__fila { margin-top: var(--espacio-3); padding-top: var(--espacio-3); border-top: 1px solid var(--color-superficie-hundida); }
+.barra-herramientas .tabs-header { margin-bottom: 0; border-bottom: none; flex-wrap: wrap; }
+@media (max-width: 640px) { .barra-herramientas__fila { flex-direction: column; align-items: stretch; } }
+
+/* Campo de búsqueda con icono */
+.buscador { position: relative; width: 100%; max-width: 360px; }
+.buscador__icono { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 15px; height: 15px; color: var(--color-texto-tenue); pointer-events: none; }
+.buscador .form-input { padding-left: 36px; height: 40px; font-size: var(--texto-sm); }
+
+/* Tablas de datos */
+.tabla-contenedor { padding: 0; overflow: hidden; }
+.tabla-desplazable { overflow-x: auto; }
+.tabla { width: 100%; border-collapse: collapse; }
+.tabla thead { background: var(--color-superficie-tenue); border-bottom: 1px solid var(--color-borde); }
+/* :where() deja la especificidad en 0 para que las utilidades de alineación ganen */
+.tabla :where(th) {
+  padding: 14px 18px;
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-bold);
+  color: var(--color-texto-suave);
+  white-space: nowrap;
+  text-align: left;
+}
+.tabla :where(td) { padding: 16px 18px; vertical-align: middle; }
+.tabla tbody tr { border-bottom: 1px solid var(--color-superficie-hundida); }
+.tabla__vacia { padding: var(--espacio-10) var(--espacio-6); text-align: center; color: var(--color-texto-suave); font-size: var(--texto-sm); }
+.badge-neutro { background: var(--color-superficie-hundida); color: var(--color-texto-suave); }
+.badge-oscuro { background: var(--color-texto); color: var(--color-texto-invertido); }
+
+/* Fila de datos clave bajo un encabezado */
+.datos-clave { display: flex; gap: var(--espacio-4); flex-wrap: wrap; font-size: var(--texto-xs); color: var(--color-texto-suave); margin: calc(-1 * var(--espacio-3)) 0 var(--espacio-5); }
+.datos-clave li { display: inline-flex; align-items: center; gap: var(--espacio-1); list-style: none; }
+.datos-clave strong { color: var(--color-texto); }
