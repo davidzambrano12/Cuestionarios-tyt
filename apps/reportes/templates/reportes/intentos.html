@@ -31,7 +31,7 @@
 
   <!-- Encabezado del reporte -->
   <div class="dashboard-banner">
-    <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:16px;">
+    <div class="flex justify-between items-start flex-wrap gap-4">
       <div>
         <div class="banner-badge">Reporte de calificaciones</div>
         <h1 class="banner-title">{{ cuestionario.nombre }}</h1>
@@ -47,13 +47,13 @@
       </div>
       <div style="display:flex; gap:10px; flex-wrap:wrap;">
         <a id="btn-exportar" href="{% url 'reportes:exportar_excel' cuestionario.id %}" class="btn btn-outline" style="background:var(--color-superficie); color:var(--color-texto); padding:10px 16px; border-radius:10px; font-weight:600; display:inline-flex; align-items:center; gap:6px;" title="Descarga un libro .xlsx con resumen, notas definitivas e historial">
-          <i data-lucide="file-spreadsheet" aria-hidden="true" style="width:15px; height:15px;"></i> <span id="btn-exportar-texto">Exportar a Excel</span>
+          <i data-lucide="file-spreadsheet" aria-hidden="true" class="icono-15"></i> <span id="btn-exportar-texto">Exportar a Excel</span>
         </a>
         <a href="{% url 'cuestionarios:previsualizar' cuestionario.id %}" class="btn btn-outline" style="background:var(--color-superficie); color:var(--color-texto); padding:10px 16px; border-radius:10px; font-weight:600; display:inline-flex; align-items:center; gap:6px;">
-          <i data-lucide="eye" aria-hidden="true" style="width:15px; height:15px;"></i> Probar examen
+          <i data-lucide="eye" aria-hidden="true" class="icono-15"></i> Probar examen
         </a>
         <a href="{% url 'cuestionarios:listado' %}" class="btn btn-primary" style="padding:10px 18px; border-radius:10px; font-weight:700; display:inline-flex; align-items:center; gap:6px;">
-          <i data-lucide="arrow-left" aria-hidden="true" style="width:15px; height:15px;"></i> Volver
+          <i data-lucide="arrow-left" aria-hidden="true" class="icono-15"></i> Volver
         </a>
       </div>
     </div>
@@ -63,18 +63,18 @@
   <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:16px; margin-bottom:20px;">
 
     <div class="card metric-card">
-      <div class="metric-label" style="color:var(--color-texto-suave);">Estudiantes evaluados</div>
-      <div class="metric-value" style="color:var(--color-texto);">{{ total_estudiantes }}</div>
-      <div class="metric-help" style="color:var(--color-texto-suave);">
+      <div class="metric-label texto-suave">Estudiantes evaluados</div>
+      <div class="metric-value texto-principal">{{ total_estudiantes }}</div>
+      <div class="metric-help texto-suave">
         {{ total_intentos_registrados }} intento{{ total_intentos_registrados|pluralize }} registrado{{ total_intentos_registrados|pluralize }}
         {% if estudiantes_sin_nota_count %} · {{ estudiantes_sin_nota_count }} sin nota{% endif %}
       </div>
     </div>
 
     <div class="card metric-card" style="background:var(--verde-50); border:1px solid var(--verde-200);">
-      <div class="metric-label" style="color:var(--verde-700);">Aprobados</div>
-      <div class="metric-value" style="color:var(--verde-700);">{{ estudiantes_aprobados_count }}</div>
-      <div class="metric-help" style="color:var(--verde-700);">
+      <div class="metric-label texto-exito">Aprobados</div>
+      <div class="metric-value texto-exito">{{ estudiantes_aprobados_count }}</div>
+      <div class="metric-help texto-exito">
         {% if estudiantes_calificados_count %}
           <strong>{{ tasa_aprobacion }}%</strong> de {{ estudiantes_calificados_count }} con nota
         {% else %}
@@ -84,35 +84,35 @@
     </div>
 
     <div class="card metric-card" style="background:var(--rojo-50); border:1px solid var(--rojo-200);">
-      <div class="metric-label" style="color:var(--rojo-700);">Reprobados</div>
-      <div class="metric-value" style="color:var(--rojo-700);">{{ estudiantes_reprobados_count }}</div>
-      <div class="metric-help" style="color:var(--rojo-700);">
+      <div class="metric-label texto-peligro">Reprobados</div>
+      <div class="metric-value texto-peligro">{{ estudiantes_reprobados_count }}</div>
+      <div class="metric-help texto-peligro">
         Nota definitiva menor a {{ cuestionario.calificacion_aprobacion }}
       </div>
     </div>
 
     <div class="card metric-card" style="background:var(--azul-50); border:1px solid var(--azul-100);">
-      <div class="metric-label" style="color:var(--color-primario);">Promedio del grupo</div>
-      <div class="metric-value" style="color:var(--color-primario);">
+      <div class="metric-label texto-primario">Promedio del grupo</div>
+      <div class="metric-value texto-primario">
         {% if estudiantes_calificados_count %}{{ promedio_calif }}{% else %}—{% endif %}
-        <span style="font-size:var(--texto-sm); font-weight:600; color:var(--color-texto-suave);">/ {{ cuestionario.calificacion_maxima }}</span>
+        <span class="texto-sm peso-semibold texto-suave">/ {{ cuestionario.calificacion_maxima }}</span>
       </div>
-      <div class="metric-help" style="color:var(--color-primario);">Promedio de las notas definitivas</div>
+      <div class="metric-help texto-primario">Promedio de las notas definitivas</div>
     </div>
 
   </div>
 
   <!-- Barra de vistas y filtros -->
   <div class="card" style="padding:16px 20px; margin-bottom:20px; border-radius:14px;">
-    <div class="barra-filtros" style="display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap;">
+    <div class="barra-filtros flex justify-between items-center gap-4 flex-wrap">
 
       <div class="tabs-header" role="tablist" aria-label="Vistas del reporte" style="margin-bottom:0; border-bottom:none; flex-wrap:wrap;">
         <button type="button" class="tab-btn active" id="btn-tab-estudiantes" role="tab" aria-selected="true" aria-controls="vista-estudiantes" onclick="cambiarVista('estudiantes')">
-          <i data-lucide="users" aria-hidden="true" style="width:14px; height:14px;"></i>
+          <i data-lucide="users" aria-hidden="true" class="icono-14"></i>
           Por estudiante <span class="badge badge-info num">{{ total_estudiantes }}</span>
         </button>
         <button type="button" class="tab-btn" id="btn-tab-historial" role="tab" aria-selected="false" aria-controls="vista-historial" tabindex="-1" onclick="cambiarVista('historial')">
-          <i data-lucide="history" aria-hidden="true" style="width:14px; height:14px;"></i>
+          <i data-lucide="history" aria-hidden="true" class="icono-14"></i>
           Historial de intentos <span class="badge num" style="background:var(--color-borde); color:var(--gris-700);">{{ total_intentos_registrados }}</span>
         </button>
       </div>
@@ -125,7 +125,7 @@
     </div>
 
     <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-top:14px; padding-top:14px; border-top:1px solid var(--color-superficie-hundida);">
-      <div role="group" aria-label="Filtrar por resultado" style="display:flex; gap:8px; flex-wrap:wrap;">
+      <div role="group" aria-label="Filtrar por resultado" class="flex gap-2 flex-wrap">
         <button type="button" class="btn btn-outline chip-filtro active" data-filtro="todos" aria-pressed="true" onclick="seleccionarEstado('todos', this)">Todos</button>
         <button type="button" class="btn btn-outline chip-filtro" data-filtro="aprobado" aria-pressed="false" onclick="seleccionarEstado('aprobado', this)">
           Aprobados <span class="chip-count">{{ estudiantes_aprobados_count }}</span>
@@ -137,7 +137,7 @@
           Sin nota <span class="chip-count">{{ estudiantes_sin_nota_count }}</span>
         </button>
       </div>
-      <div id="contador-resultados" aria-live="polite" style="font-size:var(--texto-xs); color:var(--color-texto-suave);"></div>
+      <div id="contador-resultados" aria-live="polite" class="texto-xs texto-suave"></div>
     </div>
   </div>
 
@@ -155,11 +155,11 @@
         </colgroup>
         <thead style="background:var(--color-superficie-tenue); border-bottom:1px solid var(--color-borde);">
           <tr>
-            <th scope="col" class="th-cell" style="text-align:left;">Estudiante</th>
-            <th scope="col" class="th-cell" style="text-align:center;">Intentos</th>
-            <th scope="col" class="th-cell" style="text-align:center;" title="La nota más alta entre sus intentos calificados">Nota definitiva</th>
-            <th scope="col" class="th-cell" style="text-align:left;">Última actividad</th>
-            <th scope="col" class="th-cell" style="text-align:right;">Acciones</th>
+            <th scope="col" class="th-cell texto-izquierda">Estudiante</th>
+            <th scope="col" class="th-cell texto-centro">Intentos</th>
+            <th scope="col" class="th-cell texto-centro" title="La nota más alta entre sus intentos calificados">Nota definitiva</th>
+            <th scope="col" class="th-cell texto-izquierda">Última actividad</th>
+            <th scope="col" class="th-cell texto-derecha">Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -173,48 +173,48 @@
               </div>
             </td>
 
-            <td class="td-cell" style="text-align:center;">
+            <td class="td-cell texto-centro">
               <span class="badge badge-info num" style="font-weight:700; padding:4px 10px; white-space:nowrap;" title="Intentos usados de los permitidos">
                 {{ est.total_intentos }} de {{ cuestionario.intentos_permitidos }}
               </span>
             </td>
 
-            <td class="td-cell" style="text-align:center;">
+            <td class="td-cell texto-centro">
               {% if est.mejor_calificacion is not None %}
-                <div class="num" style="font-size:var(--texto-md); font-weight:800; color:var(--color-texto); white-space:nowrap;">
-                  {{ est.mejor_calificacion }} <span style="font-size:var(--texto-xs); color:var(--color-texto-suave); font-weight:500;">/ {{ cuestionario.calificacion_maxima }}</span>
+                <div class="num texto-md peso-extrabold texto-principal nowrap">
+                  {{ est.mejor_calificacion }} <span class="texto-xs texto-suave peso-medio">/ {{ cuestionario.calificacion_maxima }}</span>
                 </div>
-                <div style="margin-top:4px;">
+                <div class="mt-1">
                   {% if est.aprobado %}
-                    <span class="badge badge-success" style="font-size:var(--texto-xs); white-space:nowrap;"><i data-lucide="circle-check" aria-hidden="true" style="width:12px; height:12px;"></i> Aprobado</span>
+                    <span class="badge badge-success texto-xs nowrap"><i data-lucide="circle-check" aria-hidden="true" class="icono-12"></i> Aprobado</span>
                   {% else %}
-                    <span class="badge badge-danger" style="font-size:var(--texto-xs); white-space:nowrap;"><i data-lucide="circle-x" aria-hidden="true" style="width:12px; height:12px;"></i> Reprobado</span>
+                    <span class="badge badge-danger texto-xs nowrap"><i data-lucide="circle-x" aria-hidden="true" class="icono-12"></i> Reprobado</span>
                   {% endif %}
                 </div>
               {% elif est.estado_final == 'en_curso' %}
-                <span class="badge badge-warning" style="font-size:var(--texto-xs); white-space:nowrap;"><i data-lucide="loader" aria-hidden="true" style="width:12px; height:12px;"></i> En curso</span>
+                <span class="badge badge-warning texto-xs nowrap"><i data-lucide="loader" aria-hidden="true" class="icono-12"></i> En curso</span>
               {% else %}
                 <span class="badge" style="background:var(--color-superficie-hundida); color:var(--color-texto-suave); font-size:var(--texto-xs); white-space:nowrap;" title="Sus intentos vencieron sin ser entregados">Sin nota</span>
               {% endif %}
             </td>
 
-            <td class="td-cell" style="font-size:var(--texto-xs);">
+            <td class="td-cell texto-xs">
               {% with ult=est.ultimo_intento %}
                 {% if est.tiene_activo %}
-                  <div style="color:var(--color-texto); font-weight:600;">Presentando ahora</div>
-                  <div style="color:var(--color-texto-suave);">Inició {{ ult.fecha_inicio|date:"d M · H:i" }}</div>
+                  <div class="texto-principal peso-semibold">Presentando ahora</div>
+                  <div class="texto-suave">Inició {{ ult.fecha_inicio|date:"d M · H:i" }}</div>
                 {% elif ult.fecha_fin %}
-                  <div style="color:var(--color-texto); font-weight:600; white-space:nowrap;">{{ ult.fecha_fin|date:"d M Y · H:i" }}</div>
-                  <div style="color:var(--color-texto-suave);">Duración: {{ ult.duracion_segundos|duracion }}</div>
+                  <div class="texto-principal peso-semibold nowrap">{{ ult.fecha_fin|date:"d M Y · H:i" }}</div>
+                  <div class="texto-suave">Duración: {{ ult.duracion_segundos|duracion }}</div>
                 {% else %}
-                  <div style="color:var(--color-texto-suave); white-space:nowrap;">Inició {{ ult.fecha_inicio|date:"d M · H:i" }}</div>
+                  <div class="texto-suave nowrap">Inició {{ ult.fecha_inicio|date:"d M · H:i" }}</div>
                 {% endif %}
               {% endwith %}
             </td>
 
-            <td class="td-cell" style="text-align:right; white-space:nowrap;">
-              <div style="display:inline-flex; align-items:center; gap:8px;">
-                <button type="button" onclick="toggleAcordeon('detalles-est-{{ forloop.counter }}', this)" aria-expanded="false" aria-controls="detalles-est-{{ forloop.counter }}" class="btn btn-outline btn-accion" style="font-weight:600;">
+            <td class="td-cell texto-derecha nowrap">
+              <div class="inline-flex items-center gap-2">
+                <button type="button" onclick="toggleAcordeon('detalles-est-{{ forloop.counter }}', this)" aria-expanded="false" aria-controls="detalles-est-{{ forloop.counter }}" class="btn btn-outline btn-accion peso-semibold">
                   <span>Ver {{ est.total_intentos }} intento{{ est.total_intentos|pluralize }}</span>
                   <i data-lucide="chevron-down" aria-hidden="true" style="width:13px; height:13px; transition:transform 0.2s ease;"></i>
                 </button>
@@ -222,7 +222,7 @@
                 <form method="POST" action="{% url 'reportes:reiniciar_estudiante' cuestionario.id est.codigo %}" onsubmit="return confirm('¿Restablecer el cupo de {{ est.nombre|escapejs }} ({{ est.codigo|escapejs }})?\n\nSe eliminarán sus {{ est.total_intentos }} intento(s) y sus notas en este cuestionario. Esta acción no se puede deshacer.');" style="display:inline; margin:0;">
                   {% csrf_token %}
                   <button type="submit" class="btn btn-accion btn-peligro" title="Elimina todos sus intentos y le devuelve el cupo completo">
-                    <i data-lucide="rotate-ccw" aria-hidden="true" style="width:13px; height:13px;"></i> Restablecer cupo
+                    <i data-lucide="rotate-ccw" aria-hidden="true" class="icono-13"></i> Restablecer cupo
                   </button>
                 </form>
               </div>
@@ -234,14 +234,14 @@
             <td colspan="5" style="padding:16px 24px; border-bottom:2px solid var(--color-borde);">
               <div style="background:var(--color-superficie); border:1px solid var(--color-borde); border-radius:12px; padding:14px;">
                 <div style="font-size:var(--texto-xs); font-weight:700; color:var(--primary); margin-bottom:10px; display:flex; align-items:center; gap:6px;">
-                  <i data-lucide="layers" aria-hidden="true" style="width:14px; height:14px;"></i> Intentos de {{ est.nombre }}
+                  <i data-lucide="layers" aria-hidden="true" class="icono-14"></i> Intentos de {{ est.nombre }}
                 </div>
 
                 <ul style="list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px;">
                   {% for it in est.intentos %}
                   <li style="display:flex; justify-content:space-between; align-items:center; background:var(--color-superficie-tenue); border:1px solid var(--color-superficie-hundida); border-radius:8px; padding:10px 14px; font-size:var(--texto-xs); flex-wrap:wrap; gap:8px;">
 
-                    <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+                    <div class="flex items-center gap-3 flex-wrap">
                       <span class="badge" style="background:var(--color-texto); color:var(--color-texto-invertido); font-size:var(--texto-xs); font-weight:700;">
                         Intento {{ forloop.revcounter }}
                       </span>
@@ -250,17 +250,17 @@
                         {{ it.fecha_inicio|date:"d M Y · H:i" }}
                       </span>
                       {% if it.duracion_segundos %}
-                        <span class="num" style="color:var(--color-texto-suave);"><i data-lucide="timer" aria-hidden="true" style="width:12px; height:12px; vertical-align:middle;"></i> {{ it.duracion_segundos|duracion }}</span>
+                        <span class="num texto-suave"><i data-lucide="timer" aria-hidden="true" style="width:12px; height:12px; vertical-align:middle;"></i> {{ it.duracion_segundos|duracion }}</span>
                       {% endif %}
                     </div>
 
-                    <div style="display:flex; align-items:center; gap:16px; flex-wrap:wrap;">
+                    <div class="flex items-center gap-4 flex-wrap">
                       <div>
                         {% if it.dictamen == 'Aprobado' or it.dictamen == 'Reprobado' %}
                           <strong class="num">{{ it.calificacion }}</strong> / {{ cuestionario.calificacion_maxima }}
                           <span class="badge {% if it.dictamen == 'Aprobado' %}badge-success{% else %}badge-danger{% endif %}" style="font-size:var(--texto-xs); margin-left:4px;">{{ it.dictamen }}</span>
                         {% elif it.dictamen == 'En curso' %}
-                          <span class="badge badge-warning" style="font-size:var(--texto-xs);">En curso</span>
+                          <span class="badge badge-warning texto-xs">En curso</span>
                         {% else %}
                           <span class="badge" style="background:var(--color-superficie-hundida); color:var(--color-texto-suave); font-size:var(--texto-xs);">{{ it.dictamen }}</span>
                         {% endif %}
@@ -268,14 +268,14 @@
 
                       <div style="display:inline-flex; gap:6px;">
                         {% if it.estado != 'en_progreso' %}
-                        <a href="{% url 'evaluaciones:resultado' it.id %}" class="btn btn-outline btn-accion" style="font-size:var(--texto-xs);">
-                          <i data-lucide="eye" aria-hidden="true" style="width:12px; height:12px;"></i> Ver respuestas
+                        <a href="{% url 'evaluaciones:resultado' it.id %}" class="btn btn-outline btn-accion texto-xs">
+                          <i data-lucide="eye" aria-hidden="true" class="icono-12"></i> Ver respuestas
                         </a>
                         {% endif %}
                         <form method="POST" action="{% url 'reportes:reiniciar_intento' it.id %}" onsubmit="return confirm('¿Anular el intento {{ forloop.revcounter }} de {{ est.nombre|escapejs }}?\n\nEl intento y su nota se eliminarán y el estudiante recuperará ese cupo.');" style="display:inline;">
                           {% csrf_token %}
-                          <button type="submit" class="btn btn-accion btn-peligro" style="font-size:var(--texto-xs);" title="Elimina solo este intento">
-                            <i data-lucide="trash-2" aria-hidden="true" style="width:12px; height:12px;"></i> Anular
+                          <button type="submit" class="btn btn-accion btn-peligro texto-xs" title="Elimina solo este intento">
+                            <i data-lucide="trash-2" aria-hidden="true" class="icono-12"></i> Anular
                           </button>
                         </form>
                       </div>
@@ -290,10 +290,10 @@
           <tr>
             <td colspan="5" style="padding:48px 24px; text-align:center; color:var(--color-texto-suave);">
               <div style="width:48px; height:48px; border-radius:50%; background:var(--color-superficie-hundida); display:flex; align-items:center; justify-content:center; margin:0 auto 12px;">
-                <i data-lucide="users" aria-hidden="true" style="width:24px; height:24px; color:var(--color-texto-tenue);"></i>
+                <i data-lucide="users" aria-hidden="true" class="icono-24 texto-tenue"></i>
               </div>
-              <h3 style="font-size:var(--texto-md); font-weight:800; color:var(--color-texto); margin-bottom:4px;">Todavía no hay intentos</h3>
-              <p style="font-size:var(--texto-sm); color:var(--color-texto-suave); margin:0;">
+              <h3 class="texto-md peso-extrabold texto-principal mb-1">Todavía no hay intentos</h3>
+              <p class="texto-sm texto-suave m-0">
                 Cuando los estudiantes presenten el cuestionario, sus notas aparecerán aquí.
               </p>
             </td>
@@ -302,7 +302,7 @@
           <tr class="fila-sin-resultados" hidden>
             <td colspan="5" style="padding:36px 24px; text-align:center; color:var(--color-texto-suave); font-size:var(--texto-sm);">
               Ningún estudiante coincide con la búsqueda o el filtro.
-              <button type="button" onclick="limpiarFiltros()" class="btn btn-outline btn-accion" style="margin-left:8px;">Limpiar filtros</button>
+              <button type="button" onclick="limpiarFiltros()" class="btn btn-outline btn-accion ml-2">Limpiar filtros</button>
             </td>
           </tr>
         </tbody>
@@ -317,58 +317,58 @@
         <caption class="sr-only" style="position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0);">Historial cronológico de intentos</caption>
         <thead style="background:var(--color-superficie-tenue); border-bottom:1px solid var(--color-borde);">
           <tr>
-            <th scope="col" class="th-cell" style="text-align:left;">Estudiante</th>
-            <th scope="col" class="th-cell" style="text-align:left;">Inicio y entrega</th>
-            <th scope="col" class="th-cell" style="text-align:center;">Duración</th>
-            <th scope="col" class="th-cell" style="text-align:center;">Calificación</th>
-            <th scope="col" class="th-cell" style="text-align:center;">Resultado</th>
-            <th scope="col" class="th-cell" style="text-align:right;">Acciones</th>
+            <th scope="col" class="th-cell texto-izquierda">Estudiante</th>
+            <th scope="col" class="th-cell texto-izquierda">Inicio y entrega</th>
+            <th scope="col" class="th-cell texto-centro">Duración</th>
+            <th scope="col" class="th-cell texto-centro">Calificación</th>
+            <th scope="col" class="th-cell texto-centro">Resultado</th>
+            <th scope="col" class="th-cell texto-derecha">Acciones</th>
           </tr>
         </thead>
         <tbody>
           {% for i in intentos %}
           <tr class="fila-historial" data-texto="{{ i.participante_nombre|lower }} {{ i.participante_codigo|lower }}" data-estado="{% if i.dictamen == 'Aprobado' %}aprobado{% elif i.dictamen == 'Reprobado' %}reprobado{% else %}pendiente{% endif %}" style="border-bottom:1px solid var(--color-superficie-hundida);">
             <td class="td-cell">
-              <div style="font-weight:700; font-size:var(--texto-base); color:var(--color-texto);">{{ i.participante_nombre }}</div>
-              <div style="font-size:var(--texto-xs); color:var(--color-texto-suave);">Código: <strong class="num" style="color:var(--primary);">{{ i.participante_codigo }}</strong></div>
+              <div class="peso-bold texto-base texto-principal">{{ i.participante_nombre }}</div>
+              <div class="texto-xs texto-suave">Código: <strong class="num" style="color:var(--primary);">{{ i.participante_codigo }}</strong></div>
             </td>
             <td class="td-cell num" style="font-size:var(--texto-sm); color:var(--gris-700);">
               <div>{{ i.fecha_inicio|date:"d M Y · H:i" }}</div>
               {% if i.fecha_fin %}
-                <div style="font-size:var(--texto-xs); color:var(--color-texto-suave);">Entregó {{ i.fecha_fin|date:"H:i" }}</div>
+                <div class="texto-xs texto-suave">Entregó {{ i.fecha_fin|date:"H:i" }}</div>
               {% endif %}
             </td>
-            <td class="td-cell num" style="font-size:var(--texto-sm); text-align:center;">{{ i.duracion_segundos|duracion }}</td>
-            <td class="td-cell num" style="text-align:center;">
+            <td class="td-cell num texto-sm texto-centro">{{ i.duracion_segundos|duracion }}</td>
+            <td class="td-cell num texto-centro">
               {% if i.dictamen == 'Aprobado' or i.dictamen == 'Reprobado' %}
-                <strong style="font-size:var(--texto-md); color:var(--color-texto);">{{ i.calificacion }}</strong>
-                <span style="font-size:var(--texto-xs); color:var(--color-texto-suave);">/ {{ cuestionario.calificacion_maxima }}</span>
+                <strong class="texto-md texto-principal">{{ i.calificacion }}</strong>
+                <span class="texto-xs texto-suave">/ {{ cuestionario.calificacion_maxima }}</span>
               {% else %}
-                <span style="color:var(--color-texto-suave);">—</span>
+                <span class="texto-suave">—</span>
               {% endif %}
             </td>
-            <td class="td-cell" style="text-align:center;">
+            <td class="td-cell texto-centro">
               {% if i.dictamen == 'Aprobado' %}
-                <span class="badge badge-success" style="font-size:var(--texto-xs);">Aprobado</span>
+                <span class="badge badge-success texto-xs">Aprobado</span>
               {% elif i.dictamen == 'Reprobado' %}
-                <span class="badge badge-danger" style="font-size:var(--texto-xs);">Reprobado</span>
+                <span class="badge badge-danger texto-xs">Reprobado</span>
               {% elif i.dictamen == 'En curso' %}
-                <span class="badge badge-warning" style="font-size:var(--texto-xs);">En curso</span>
+                <span class="badge badge-warning texto-xs">En curso</span>
               {% else %}
                 <span class="badge" style="background:var(--color-superficie-hundida); color:var(--color-texto-suave); font-size:var(--texto-xs);">{{ i.dictamen }}</span>
               {% endif %}
             </td>
-            <td class="td-cell" style="text-align:right;">
+            <td class="td-cell texto-derecha">
               <div style="display:inline-flex; align-items:center; gap:6px;">
                 {% if i.estado != 'en_progreso' %}
-                <a href="{% url 'evaluaciones:resultado' i.id %}" class="btn btn-outline btn-accion" style="font-size:var(--texto-xs);">
-                  <i data-lucide="eye" aria-hidden="true" style="width:12px; height:12px;"></i> Ver respuestas
+                <a href="{% url 'evaluaciones:resultado' i.id %}" class="btn btn-outline btn-accion texto-xs">
+                  <i data-lucide="eye" aria-hidden="true" class="icono-12"></i> Ver respuestas
                 </a>
                 {% endif %}
                 <form method="POST" action="{% url 'reportes:reiniciar_intento' i.id %}" onsubmit="return confirm('¿Anular este intento de {{ i.participante_nombre|escapejs }}?\n\nEl intento y su nota se eliminarán y el estudiante recuperará ese cupo.');" style="display:inline;">
                   {% csrf_token %}
-                  <button type="submit" class="btn btn-accion btn-peligro" style="font-size:var(--texto-xs);">
-                    <i data-lucide="trash-2" aria-hidden="true" style="width:12px; height:12px;"></i> Anular
+                  <button type="submit" class="btn btn-accion btn-peligro texto-xs">
+                    <i data-lucide="trash-2" aria-hidden="true" class="icono-12"></i> Anular
                   </button>
                 </form>
               </div>
@@ -382,7 +382,7 @@
           <tr class="fila-sin-resultados" hidden>
             <td colspan="6" style="padding:36px 24px; text-align:center; color:var(--color-texto-suave); font-size:var(--texto-sm);">
               Ningún intento coincide con la búsqueda o el filtro.
-              <button type="button" onclick="limpiarFiltros()" class="btn btn-outline btn-accion" style="margin-left:8px;">Limpiar filtros</button>
+              <button type="button" onclick="limpiarFiltros()" class="btn btn-outline btn-accion ml-2">Limpiar filtros</button>
             </td>
           </tr>
         </tbody>

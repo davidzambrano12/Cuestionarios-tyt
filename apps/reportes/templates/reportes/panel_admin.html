@@ -7,14 +7,14 @@
 {% block app_content %}
 <!-- Header Banner -->
       <div class="dashboard-banner">
-        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+        <div class="flex justify-between items-start">
           <div>
             <div class="banner-badge">● Gestión Docente IUP</div>
             <h1 class="banner-title">Panel de Administración</h1>
             <p class="banner-subtitle">Monitoreo de banco de preguntas y cuestionarios Saber TyT</p>
           </div>
           <div style="font-size:var(--texto-sm); font-weight:700; color:var(--azul-700); background:rgba(255,255,255,0.7); padding:6px 14px; border-radius:9999px; display:inline-flex; align-items:center; gap:6px;">
-            <i data-lucide="calendar" style="width:15px; height:15px;"></i> 2026-II
+            <i data-lucide="calendar" class="icono-15"></i> 2026-II
           </div>
         </div>
       </div>
@@ -27,26 +27,26 @@
 
       <div class="quick-actions-bar">
         <a href="{% url 'banco_preguntas:banco' %}#nueva" class="action-card-btn">
-          <div class="action-icon-box" style="background:var(--color-primario);"><i data-lucide="plus" style="color:var(--color-texto-invertido);"></i></div>
+          <div class="action-icon-box" style="background:var(--color-primario);"><i data-lucide="plus" class="texto-invertido"></i></div>
           <div>
-            <div style="font-weight:700; font-size:var(--texto-base);">Nueva Pregunta</div>
-            <div style="font-size:var(--texto-xs); color:var(--color-texto-suave);">Banco IUP</div>
+            <div class="peso-bold texto-base">Nueva Pregunta</div>
+            <div class="texto-xs texto-suave">Banco IUP</div>
           </div>
         </a>
 
         <a href="{% url 'cuestionarios:crear' %}" class="action-card-btn">
-          <div class="action-icon-box" style="background:var(--azul-600);"><i data-lucide="file-text" style="color:var(--color-texto-invertido);"></i></div>
+          <div class="action-icon-box" style="background:var(--azul-600);"><i data-lucide="file-text" class="texto-invertido"></i></div>
           <div>
-            <div style="font-weight:700; font-size:var(--texto-base);">Crear Examen</div>
-            <div style="font-size:var(--texto-xs); color:var(--color-texto-suave);">Cuestionario</div>
+            <div class="peso-bold texto-base">Crear Examen</div>
+            <div class="texto-xs texto-suave">Cuestionario</div>
           </div>
         </a>
 
         <a href="{% url 'importaciones:importar' %}" class="action-card-btn">
-          <div class="action-icon-box" style="background:var(--verde-700);"><i data-lucide="upload" style="color:var(--color-texto-invertido);"></i></div>
+          <div class="action-icon-box" style="background:var(--verde-700);"><i data-lucide="upload" class="texto-invertido"></i></div>
           <div>
-            <div style="font-weight:700; font-size:var(--texto-base);">Importar</div>
-            <div style="font-size:var(--texto-xs); color:var(--color-texto-suave);">Archivo Excel</div>
+            <div class="peso-bold texto-base">Importar</div>
+            <div class="texto-xs texto-suave">Archivo Excel</div>
           </div>
         </a>
       </div>
@@ -102,7 +102,7 @@
         <div class="card">
           <div class="card-header">
             <span class="card-title">Banco por Competencia</span>
-            <span style="font-size:var(--texto-xs); font-weight:700; color:var(--verde-700);">100% Cobertura</span>
+            <span class="texto-xs peso-bold texto-exito">100% Cobertura</span>
           </div>
 
           <!-- Multi-colored progress bar -->
@@ -117,48 +117,48 @@
           <!-- Lista de competencias con conteo -->
           <div style="display:flex; flex-direction:column; gap:10px; font-size:var(--texto-sm);">
             {% for cat in categorias_list %}
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-              <div style="display:flex; align-items:center; gap:8px;">
+            <div class="flex justify-between items-center">
+              <div class="flex items-center gap-2">
                 <span style="width:8px; height:8px; border-radius:50%; background:var(--color-primario);"></span>
                 <span>{{ cat.nombre }}</span>
               </div>
-              <span style="font-weight:700; color:var(--color-texto-suave);">({{ cat.preguntas.count }})</span>
+              <span class="peso-bold texto-suave">({{ cat.preguntas.count }})</span>
             </div>
             {% empty %}
-            <div style="color:var(--color-texto-suave);">Aún no hay categorías registradas.</div>
+            <div class="texto-suave">Aún no hay categorías registradas.</div>
             {% endfor %}
           </div>
         </div>
 
         <!-- Columna Derecha: Cuestionarios Recientes -->
         <div>
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-            <span style="font-size:var(--texto-md); font-weight:700; color:var(--color-texto);">Cuestionarios Recientes ({{ cuestionarios_recientes|length }})</span>
-            <a href="{% url 'cuestionarios:listado' %}" style="font-size:var(--texto-sm); font-weight:600; color:var(--color-primario);">Ver todos &rarr;</a>
+          <div class="flex justify-between items-center mb-4">
+            <span class="texto-md peso-bold texto-principal">Cuestionarios Recientes ({{ cuestionarios_recientes|length }})</span>
+            <a href="{% url 'cuestionarios:listado' %}" class="texto-sm peso-semibold texto-primario">Ver todos &rarr;</a>
           </div>
 
           <div style="display:flex; flex-direction:column; gap:14px;">
             {% for c in cuestionarios_recientes %}
-            <div class="card" style="margin-bottom:0; padding:20px;">
-              <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
+            <div class="card mb-0 p-5">
+              <div class="flex justify-between items-start mb-2">
                 <div>
                   <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
                     <span class="badge {% if c.estado == 'disponible' %}badge-success{% elif c.estado == 'programado' %}badge-info{% else %}badge-warning{% endif %}">
                       ● {{ c.get_estado_display|upper }}
                     </span>
-                    <span style="font-size:var(--texto-xs); color:var(--color-texto-suave);">Práctica libre Saber TyT</span>
+                    <span class="texto-xs texto-suave">Práctica libre Saber TyT</span>
                   </div>
-                  <h3 style="font-size:var(--texto-md); font-weight:800; color:var(--color-texto);">{{ c.nombre }}</h3>
+                  <h3 class="texto-md peso-extrabold texto-principal">{{ c.nombre }}</h3>
                 </div>
               </div>
 
-              <div style="display:flex; gap:16px; font-size:var(--texto-xs); color:var(--color-texto-suave); margin-bottom:12px;">
-                <span style="display:inline-flex; align-items:center; gap:4px;"><i data-lucide="calendar" style="width:14px; height:14px;"></i> {{ c.fecha_apertura|date:"d M" }} - {{ c.fecha_cierre|date:"d M Y" }}</span>
-                <span style="display:inline-flex; align-items:center; gap:4px;"><i data-lucide="clock" style="width:14px; height:14px;"></i> {{ c.tiempo_limite_minutos }} min</span>
+              <div class="flex gap-4 texto-xs texto-suave mb-3">
+                <span class="inline-flex items-center gap-1"><i data-lucide="calendar" class="icono-14"></i> {{ c.fecha_apertura|date:"d M" }} - {{ c.fecha_cierre|date:"d M Y" }}</span>
+                <span class="inline-flex items-center gap-1"><i data-lucide="clock" class="icono-14"></i> {{ c.tiempo_limite_minutos }} min</span>
               </div>
 
               <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--color-superficie-hundida); padding-top:12px;">
-                <span style="font-size:var(--texto-xs); color:var(--color-texto-suave); display:inline-flex; align-items:center; gap:4px;"><i data-lucide="users" style="width:14px; height:14px;"></i> {{ c.intentos.count }} estudiantes presentaron</span>
+                <span class="texto-xs texto-suave inline-flex items-center gap-1"><i data-lucide="users" class="icono-14"></i> {{ c.intentos.count }} estudiantes presentaron</span>
                 <a href="{% url 'cuestionarios:editar' c.id %}" class="btn btn-outline" style="padding:6px 14px; font-size:var(--texto-xs);">
                   Editar preguntas
                 </a>
