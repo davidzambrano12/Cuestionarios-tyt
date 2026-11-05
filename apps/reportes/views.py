@@ -6,7 +6,6 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
 from apps.core.decorators import requiere_permiso, solo_roles
-from apps.banco_preguntas.models import Categoria, Pregunta
 from apps.cuestionarios.models import Cuestionario
 from apps.evaluaciones.models import Intento
 from apps.reportes import services as reportes
@@ -78,34 +77,12 @@ def reiniciar_intento(request, intento_id):
 @login_required
 @solo_roles("admin")
 def panel_admin(request):
-    """Dashboard para el Administrador del Sistema."""
-    preguntas_activas = Pregunta.objects.filter(activa=True).count()
-    categorias = Categoria.objects.all()
-    cuestionarios_count = Cuestionario.objects.count()
-    intentos_count = Intento.objects.count()
-    cuestionarios_recientes = Cuestionario.objects.all().order_by("-id")[:5]
-
-    return render(request, "reportes/panel_admin.html", {
-        "preguntas_activas": preguntas_activas,
-        "categorias_count": categorias.count(),
-        "categorias_list": categorias,
-        "cuestionarios_count": cuestionarios_count,
-        "intentos_count": intentos_count,
-        "cuestionarios_recientes": cuestionarios_recientes,
-    })
+    """Panel del administrador con métricas globales del sistema."""
+    return render(request, "reportes/panel_admin.html", reportes.panel_admin())
 
 
 @login_required
 @requiere_permiso("preguntas.gestionar")
 def panel_docente(request):
-    """Dashboard para Docentes y Evaluadores."""
-    cuestionarios = Cuestionario.objects.all().order_by("-id")
-    preguntas_count = Pregunta.objects.filter(activa=True).count()
-    publicados_count = Cuestionario.objects.filter(estado="disponible").count()
-
-    return render(request, "reportes/panel_docente.html", {
-        "cuestionarios": cuestionarios,
-        "preguntas_count": preguntas_count,
-        "publicados_count": publicados_count,
-        "cuestionarios_recientes": cuestionarios[:4],
-    })
+    """Panel del docente con su resumen de cuestionarios y banco."""
+    return render(request, "reportes/panel_docente.html", reportes.panel_docente())

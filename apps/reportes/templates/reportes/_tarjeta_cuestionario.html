@@ -1,0 +1,19 @@
+{% comment %}Tarjeta resumida de un cuestionario (paneles). Espera `c` anotado con num_preguntas y num_participantes.{% endcomment %}
+<article class="card tarjeta-cuestionario">
+  <div class="flex justify-between items-start gap-3">
+    <h3 class="texto-md peso-extrabold">{{ c.nombre }}</h3>
+    <span class="badge {% if c.estado == 'disponible' %}badge-success{% elif c.estado == 'programado' %}badge-info{% elif c.estado == 'cerrado' %}badge-neutro{% else %}badge-warning{% endif %} nowrap">{{ c.get_estado_display }}</span>
+  </div>
+  <ul class="tarjeta-cuestionario__datos">
+    <li><i data-lucide="calendar" class="icono-14"></i> {{ c.fecha_apertura|date:"d M" }} – {{ c.fecha_cierre|date:"d M Y" }}</li>
+    <li><i data-lucide="help-circle" class="icono-14"></i> {{ c.num_preguntas }} pregunta{{ c.num_preguntas|pluralize }}</li>
+    <li><i data-lucide="clock" class="icono-14"></i> {{ c.tiempo_limite_minutos }} min</li>
+  </ul>
+  <div class="tarjeta-cuestionario__pie">
+    <span class="texto-xs texto-suave inline-flex items-center gap-1"><i data-lucide="users" class="icono-14"></i> {{ c.num_participantes }} estudiante{{ c.num_participantes|pluralize }}</span>
+    <span class="inline-flex gap-2">
+      <a href="{% url 'reportes:intentos' c.id %}" class="btn btn-outline btn-accion">Resultados</a>
+      <a href="{% url 'cuestionarios:editar' c.id %}" class="btn btn-outline btn-accion">Editar</a>
+    </span>
+  </div>
+</article>

@@ -5,12 +5,17 @@ definitiva, métricas del grupo y exportación a Excel.
 from collections import OrderedDict
 from decimal import Decimal
 
-from django.db.models import Q
+from django.db.models import Count, Q
 from django.utils import timezone
+from django.utils.formats import number_format
 from django.utils.text import slugify
 from openpyxl import Workbook
 from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 from openpyxl.utils import get_column_letter
+
+from apps.banco_preguntas.models import Categoria, Pregunta
+from apps.cuestionarios.models import Cuestionario
+from apps.evaluaciones.models import Intento
 
 ESTADOS_CERRADOS = ("finalizado", "vencido")
 
@@ -92,7 +97,13 @@ def reporte_intentos(cuestionario) -> dict:
     for intento in intentos:
         intento.dictamen = dictamen_intento(intento, cuestionario)
     estudiantes, metricas = resumen_por_estudiante(cuestionario, intentos)
+    calificados = metricas["estudiantes_calificados_count"]
+    resumen_aprobacion = (
+        f"{number_format(metricas['tasa_aprobacion'], 1, use_l10n=True)} % de {calificados} con nota"
+        if calificados else "Aún no hay estudiantes con nota"
+    )
     return {
+        "resumen_aprobacion": resumen_aprobacion,
         "estudiantes_agrupados": estudiantes,
         "intentos": intentos,
         "total_intentos_registrados": len(intentos),
@@ -257,3 +268,66 @@ def libro_excel_intentos(cuestionario, q: str = ""):
 
     nombre_archivo = f"notas_{slugify(cuestionario.nombre) or cuestionario.id}_{timezone.localdate():%Y%m%d}.xlsx"
     return wb, nombre_archivo
+
+
+# ------------------------------------------------------------------------------
+# Paneles de inicio
+# ------------------------------------------------------------------------------
+
+def periodo_academico(fecha=None) -> str:
+    """Periodo semestral en curso, p. ej. 2026-II (julio a diciembre)."""
+    fecha = fecha or timezone.localdate()
+    return f"{fecha.year}-{'I' if fecha.month <= 6 else 'II'}"
+
+
+def _cuestionarios_recientes(limite):
+    return list(
+        Cuestionario.objects.annotate(
+            num_preguntas=Count("cuestionario_preguntas", distinct=True),
+            num_participantes=Count("intentos__participante_codigo", distinct=True),
+        ).order_by("-id")[:limite]
+    )
+
+
+def panel_admin() -> dict:
+    """Métricas globales y cobertura del banco por competencia."""
+    categorias = list(
+        Categoria.objects.annotate(
+            num_preguntas=Count("preguntas", filter=Q(preguntas__activa=True))
+        ).order_by("-num_preguntas", "nombre")
+    )
+    total_preguntas = sum(c.num_preguntas for c in categorias)
+    for categoria in categorias:
+        categoria.porcentaje = round(categoria.num_preguntas / total_preguntas * 100, 1) if total_preguntas else 0
+    con_preguntas = sum(1 for c in categorias if c.num_preguntas)
+
+    return {
+        "periodo": periodo_academico(),
+        "preguntas_activas": total_preguntas,
+        "categorias": categorias,
+        "categorias_count": len(categorias),
+        "categorias_con_preguntas": con_preguntas,
+        "cobertura": round(con_preguntas / len(categorias) * 100) if categorias else 0,
+        "cuestionarios_count": Cuestionario.objects.count(),
+        "intentos_count": Intento.objects.count(),
+        "intentos_finalizados": Intento.objects.filter(estado="finalizado").count(),
+        "preguntas_inactivas": Pregunta.objects.filter(activa=False).count(),
+        "cuestionarios_recientes": _cuestionarios_recientes(5),
+    }
+
+
+def panel_docente() -> dict:
+    """Resumen de trabajo del docente: cuestionarios y banco de preguntas."""
+    por_estado = dict(
+        Cuestionario.objects.values_list("estado").annotate(total=Count("id")).values_list("estado", "total")
+    )
+    return {
+        "periodo": periodo_academico(),
+        "cuestionarios_count": sum(por_estado.values()),
+        "publicados_count": por_estado.get("disponible", 0),
+        "borradores_count": por_estado.get("borrador", 0),
+        "preguntas_count": Pregunta.objects.filter(activa=True).count(),
+        "preguntas_inactivas": Pregunta.objects.filter(activa=False).count(),
+        "categorias_count": Categoria.objects.count(),
+        "cuestionarios_recientes": _cuestionarios_recientes(4),
+    }

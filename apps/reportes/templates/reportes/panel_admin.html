@@ -1,176 +1,84 @@
 {% extends 'layouts/app_base.html' %}
+{% load static componentes %}
 
-{% block title %}Dashboard de Administración - Simulador Saber TyT{% endblock %}
-
-{% block nav_title %}Dashboard de Administración{% endblock %}
+{% block title %}Panel de administración - Simulador Saber TyT{% endblock %}
+{% block nav_title %}Panel de administración{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'css/reportes.css' %}">{% endblock %}
 
 {% block app_content %}
-<!-- Header Banner -->
-      <div class="dashboard-banner">
-        <div class="flex justify-between items-start">
-          <div>
-            <div class="banner-badge">● Gestión Docente IUP</div>
-            <h1 class="banner-title">Panel de Administración</h1>
-            <p class="banner-subtitle">Monitoreo de banco de preguntas y cuestionarios Saber TyT</p>
-          </div>
-          <div style="font-size:var(--texto-sm); font-weight:700; color:var(--azul-700); background:rgba(255,255,255,0.7); padding:6px 14px; border-radius:9999px; display:inline-flex; align-items:center; gap:6px;">
-            <i data-lucide="calendar" class="icono-15"></i> 2026-II
-          </div>
-        </div>
-      </div>
+{% componente "componentes/encabezado.html" etiqueta="Administración institucional" titulo="Panel de administración" subtitulo="Estado del banco de preguntas, los cuestionarios y los intentos del simulador." %}
+  <span class="badge badge-info periodo"><i data-lucide="calendar" class="icono-14"></i> Periodo {{ periodo }}</span>
+{% fincomponente %}
 
-      <!-- Acciones Rápidas -->
-      <div class="section-header">
-        <h2 class="section-title">Acciones Rápidas</h2>
-        <span class="section-subtitle">Atajos de edición</span>
-      </div>
+<section aria-labelledby="titulo-acciones">
+  <div class="section-header">
+    <h2 class="section-title" id="titulo-acciones">Acciones rápidas</h2>
+  </div>
+  <div class="quick-actions-bar">
+    <a href="{% url 'banco_preguntas:banco' %}#nueva" class="action-card-btn">
+      <span class="action-icon-box"><i data-lucide="plus"></i></span>
+      <span><span class="block peso-bold texto-base">Nueva pregunta</span><span class="texto-xs texto-suave">Banco de preguntas</span></span>
+    </a>
+    <a href="{% url 'cuestionarios:crear' %}" class="action-card-btn">
+      <span class="action-icon-box"><i data-lucide="file-text"></i></span>
+      <span><span class="block peso-bold texto-base">Crear cuestionario</span><span class="texto-xs texto-suave">Configurar un simulacro</span></span>
+    </a>
+    <a href="{% url 'importaciones:importar' %}" class="action-card-btn">
+      <span class="action-icon-box action-icon-box--exito"><i data-lucide="upload"></i></span>
+      <span><span class="block peso-bold texto-base">Importar preguntas</span><span class="texto-xs texto-suave">Desde Excel</span></span>
+    </a>
+  </div>
+</section>
 
-      <div class="quick-actions-bar">
-        <a href="{% url 'banco_preguntas:banco' %}#nueva" class="action-card-btn">
-          <div class="action-icon-box" style="background:var(--color-primario);"><i data-lucide="plus" class="texto-invertido"></i></div>
-          <div>
-            <div class="peso-bold texto-base">Nueva Pregunta</div>
-            <div class="texto-xs texto-suave">Banco IUP</div>
-          </div>
-        </a>
+<section aria-labelledby="titulo-metricas">
+  <div class="section-header">
+    <h2 class="section-title" id="titulo-metricas">Métricas de la plataforma</h2>
+  </div>
+  <div class="metricas">
+    {% componente "componentes/metrica.html" etiqueta="Preguntas activas" valor=preguntas_activas icono="help-circle" ayuda=preguntas_inactivas|stringformat:"s"|add:" desactivadas" %}{% fincomponente %}
+    {% componente "componentes/metrica.html" etiqueta="Competencias" valor=categorias_count icono="landmark" ayuda=categorias_con_preguntas|stringformat:"s"|add:" con preguntas" %}{% fincomponente %}
+    {% componente "componentes/metrica.html" etiqueta="Cuestionarios" valor=cuestionarios_count icono="clipboard-list" variante="info" %}{% fincomponente %}
+    {% componente "componentes/metrica.html" etiqueta="Intentos" valor=intentos_count icono="users" variante="exito" ayuda=intentos_finalizados|stringformat:"s"|add:" finalizados" %}{% fincomponente %}
+  </div>
+</section>
 
-        <a href="{% url 'cuestionarios:crear' %}" class="action-card-btn">
-          <div class="action-icon-box" style="background:var(--azul-600);"><i data-lucide="file-text" class="texto-invertido"></i></div>
-          <div>
-            <div class="peso-bold texto-base">Crear Examen</div>
-            <div class="texto-xs texto-suave">Cuestionario</div>
-          </div>
-        </a>
+<div class="panel-columnas">
+  <section class="card" aria-labelledby="titulo-cobertura">
+    <div class="card-header">
+      <h2 class="card-title" id="titulo-cobertura">Banco por competencia</h2>
+      <span class="texto-xs peso-bold {% if cobertura == 100 %}texto-exito{% else %}texto-aviso{% endif %}">{{ cobertura }} % de cobertura</span>
+    </div>
+    {% if preguntas_activas %}
+    <div class="barra-distribucion" role="img" aria-label="Distribución de preguntas activas por competencia">
+      {% for cat in categorias %}{% if cat.num_preguntas %}<span class="barra-distribucion__tramo" style="flex-grow: {{ cat.num_preguntas }};" title="{{ cat.nombre }}: {{ cat.porcentaje }} %"></span>{% endif %}{% endfor %}
+    </div>
+    {% endif %}
+    <ul class="lista-competencias">
+      {% for cat in categorias %}
+      <li>
+        <span>{{ cat.nombre }}</span>
+        <span class="cifras peso-bold {% if cat.num_preguntas %}texto-suave{% else %}texto-aviso{% endif %}">{{ cat.num_preguntas }}{% if not cat.num_preguntas %} · sin preguntas{% endif %}</span>
+      </li>
+      {% empty %}
+      <li class="texto-suave">Aún no hay competencias registradas.</li>
+      {% endfor %}
+    </ul>
+  </section>
 
-        <a href="{% url 'importaciones:importar' %}" class="action-card-btn">
-          <div class="action-icon-box" style="background:var(--verde-700);"><i data-lucide="upload" class="texto-invertido"></i></div>
-          <div>
-            <div class="peso-bold texto-base">Importar</div>
-            <div class="texto-xs texto-suave">Archivo Excel</div>
-          </div>
-        </a>
-      </div>
-
-      <!-- Métricas de la Plataforma -->
-      <div class="section-header">
-        <h2 class="section-title">Métricas de la Plataforma</h2>
-        <span class="section-subtitle">Tiempo real</span>
-      </div>
-
-      <div class="metrics-grid">
-        <div class="metric-card">
-          <div class="metric-header">
-            <div class="metric-icon" style="background:var(--azul-50); color:var(--azul-600);"><i data-lucide="help-circle"></i></div>
-            <span class="badge badge-success">+{{ preguntas_activas }} activas</span>
-          </div>
-          <div class="metric-number">{{ preguntas_activas|default:0 }}</div>
-          <div class="metric-label">Preguntas Activas</div>
-        </div>
-
-        <div class="metric-card">
-          <div class="metric-header">
-            <div class="metric-icon" style="background:var(--color-superficie-hundida); color:var(--color-texto-suave);"><i data-lucide="landmark"></i></div>
-            <span class="badge badge-info">Módulos</span>
-          </div>
-          <div class="metric-number">{{ categorias_count|default:0 }}</div>
-          <div class="metric-label">Competencias TyT</div>
-        </div>
-
-        <div class="metric-card">
-          <div class="metric-header">
-            <div class="metric-icon" style="background:var(--verde-50); color:var(--verde-700);"><i data-lucide="clipboard-list"></i></div>
-            <span class="badge badge-success">Activos</span>
-          </div>
-          <div class="metric-number">{{ cuestionarios_count|default:0 }}</div>
-          <div class="metric-label">Cuestionarios</div>
-        </div>
-
-        <div class="metric-card">
-          <div class="metric-header">
-            <div class="metric-icon" style="background:var(--naranja-50); color:var(--naranja-700);"><i data-lucide="users"></i></div>
-            <span class="badge badge-info">Completados</span>
-          </div>
-          <div class="metric-number">{{ intentos_count|default:0 }}</div>
-          <div class="metric-label">Intentos Estudiantiles</div>
-        </div>
-      </div>
-
-      <!-- Grid de 2 Columnas: Cobertura y Cuestionarios Recientes -->
-      <div style="display:grid; grid-template-columns: 360px 1fr; gap:24px; align-items:start;">
-        
-        <!-- Columna Izquierda: Banco por Competencia -->
+  <section aria-labelledby="titulo-recientes">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="texto-md peso-bold" id="titulo-recientes">Cuestionarios recientes</h2>
+      <a href="{% url 'cuestionarios:listado' %}" class="texto-sm peso-semibold">Ver todos &rarr;</a>
+    </div>
+    <div class="flex flex-col gap-3">
+      {% for c in cuestionarios_recientes %}
+        {% include "reportes/_tarjeta_cuestionario.html" %}
+      {% empty %}
         <div class="card">
-          <div class="card-header">
-            <span class="card-title">Banco por Competencia</span>
-            <span class="texto-xs peso-bold texto-exito">100% Cobertura</span>
-          </div>
-
-          <!-- Multi-colored progress bar -->
-          <div style="display:flex; height:10px; border-radius:9999px; overflow:hidden; margin-bottom:16px;">
-            <div style="width:25%; background:var(--azul-600);" title="Lectura Crítica"></div>
-            <div style="width:23%; background:var(--azul-500);" title="Raz. Cuantitativo"></div>
-            <div style="width:20%; background:var(--verde-600);" title="C. Ciudadanas"></div>
-            <div style="width:17%; background:var(--azul-300);" title="Com. Escrita"></div>
-            <div style="width:15%; background:var(--azul-200);" title="Inglés"></div>
-          </div>
-
-          <!-- Lista de competencias con conteo -->
-          <div style="display:flex; flex-direction:column; gap:10px; font-size:var(--texto-sm);">
-            {% for cat in categorias_list %}
-            <div class="flex justify-between items-center">
-              <div class="flex items-center gap-2">
-                <span style="width:8px; height:8px; border-radius:50%; background:var(--color-primario);"></span>
-                <span>{{ cat.nombre }}</span>
-              </div>
-              <span class="peso-bold texto-suave">({{ cat.preguntas.count }})</span>
-            </div>
-            {% empty %}
-            <div class="texto-suave">Aún no hay categorías registradas.</div>
-            {% endfor %}
-          </div>
+          {% componente "componentes/estado_vacio.html" icono="clipboard-list" titulo="No hay cuestionarios" mensaje="Crea el primero con la acción rápida «Crear cuestionario»." %}{% fincomponente %}
         </div>
-
-        <!-- Columna Derecha: Cuestionarios Recientes -->
-        <div>
-          <div class="flex justify-between items-center mb-4">
-            <span class="texto-md peso-bold texto-principal">Cuestionarios Recientes ({{ cuestionarios_recientes|length }})</span>
-            <a href="{% url 'cuestionarios:listado' %}" class="texto-sm peso-semibold texto-primario">Ver todos &rarr;</a>
-          </div>
-
-          <div style="display:flex; flex-direction:column; gap:14px;">
-            {% for c in cuestionarios_recientes %}
-            <div class="card mb-0 p-5">
-              <div class="flex justify-between items-start mb-2">
-                <div>
-                  <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
-                    <span class="badge {% if c.estado == 'disponible' %}badge-success{% elif c.estado == 'programado' %}badge-info{% else %}badge-warning{% endif %}">
-                      ● {{ c.get_estado_display|upper }}
-                    </span>
-                    <span class="texto-xs texto-suave">Práctica libre Saber TyT</span>
-                  </div>
-                  <h3 class="texto-md peso-extrabold texto-principal">{{ c.nombre }}</h3>
-                </div>
-              </div>
-
-              <div class="flex gap-4 texto-xs texto-suave mb-3">
-                <span class="inline-flex items-center gap-1"><i data-lucide="calendar" class="icono-14"></i> {{ c.fecha_apertura|date:"d M" }} - {{ c.fecha_cierre|date:"d M Y" }}</span>
-                <span class="inline-flex items-center gap-1"><i data-lucide="clock" class="icono-14"></i> {{ c.tiempo_limite_minutos }} min</span>
-              </div>
-
-              <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--color-superficie-hundida); padding-top:12px;">
-                <span class="texto-xs texto-suave inline-flex items-center gap-1"><i data-lucide="users" class="icono-14"></i> {{ c.intentos.count }} estudiantes presentaron</span>
-                <a href="{% url 'cuestionarios:editar' c.id %}" class="btn btn-outline" style="padding:6px 14px; font-size:var(--texto-xs);">
-                  Editar preguntas
-                </a>
-              </div>
-            </div>
-            {% empty %}
-            <div class="card" style="text-align:center; padding:30px; color:var(--color-texto-suave);">
-              No hay cuestionarios creados aún. Haz clic en "Crear Examen" arriba para comenzar.
-            </div>
-            {% endfor %}
-          </div>
-        </div>
-
-      </div>
+      {% endfor %}
+    </div>
+  </section>
+</div>
 {% endblock %}
