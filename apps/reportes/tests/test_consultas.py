@@ -45,9 +45,9 @@ class BaseConsultas(TestCase):
 
         cls.p2025 = PeriodoAcademico.objects.create(anio=2025, numero=2, fecha_inicio=date(2025, 7, 1), fecha_fin=date(2025, 12, 15))
         cls.p2026 = PeriodoAcademico.objects.create(anio=2026, numero=2, fecha_inicio=date(2026, 7, 1), fecha_fin=date(2026, 12, 15))
-        cls.sexto_a = Curso.objects.create(periodo=cls.p2026, nombre="Sexto A", docente=cls.docente)
-        cls.sexto_b = Curso.objects.create(periodo=cls.p2026, nombre="Sexto B", docente=cls.otro_docente)
-        cls.quinto = Curso.objects.create(periodo=cls.p2025, nombre="Quinto A", docente=cls.docente)
+        cls.sexto_a = Curso.objects.create(periodo=cls.p2026, asignatura="Frameworks", grupo="01", semestre=6, docente=cls.docente)
+        cls.sexto_b = Curso.objects.create(periodo=cls.p2026, asignatura="Frameworks", grupo="02", semestre=6, docente=cls.otro_docente)
+        cls.quinto = Curso.objects.create(periodo=cls.p2025, asignatura="Bases de Datos", grupo="01", semestre=5, docente=cls.docente)
 
         cls.ana = crear_usuario("ana", "estudiante", codigo="E1", first_name="Ana", last_name="Gómez")
         cls.beto = crear_usuario("beto", "estudiante", codigo="E2", first_name="Beto", last_name="Ruiz")
@@ -154,7 +154,7 @@ class FiltrosTests(BaseConsultas):
         self.assertEqual(periodos["2026-2"]["intentos"], 4)
         self.assertEqual(periodos["2025-2"]["promedio"], Decimal("0.00"))
         cursos = {f["curso"]: f for f in self.consultar(vista="cursos").context["filas"]}
-        self.assertEqual((cursos["Sexto A"]["minima"], cursos["Sexto A"]["maxima"]), (Decimal("2.50"), Decimal("5.00")))
+        self.assertEqual((cursos["Frameworks · G01"]["minima"], cursos["Frameworks · G01"]["maxima"]), (Decimal("2.50"), Decimal("5.00")))
 
     def test_historial_individual_en_orden_y_con_evolucion(self):
         historial = self.consultar(estudiante="E1", vista="historial").context["historial"]
@@ -181,7 +181,7 @@ class PermisosTests(BaseConsultas):
 
     def test_docente_solo_ve_sus_cursos(self):
         r = self.consultar(self.docente)
-        self.assertEqual({c["nombre"] for c in r.context["catalogo"]["cursos"]}, {"Sexto A", "Quinto A"})
+        self.assertEqual({c["nombre"] for c in r.context["catalogo"]["cursos"]}, {"Frameworks · G01", "Bases de Datos · G01"})
         self.assertEqual(r.context["indicadores"]["estudiantes"], 2)  # Ana y Beto, no Caro
 
     def test_docente_no_descarga_curso_ajeno_cambiando_la_url(self):
@@ -208,21 +208,21 @@ class ExcelTests(BaseConsultas):
             presentar(self.beto, self.simulacro, self.sexto_a, 2)
         r = self.excel("consolidado", curso=self.sexto_a.id)
         self.assertEqual(r.status_code, 200)
-        self.assertIn("reporte_consolidado_2026-2_sexto-a", r["Content-Disposition"])
+        self.assertIn("reporte_consolidado_2026-2_frameworks-g01", r["Content-Disposition"])
         encabezado, columnas, datos = self._filas(r)
         self.assertEqual(columnas[:9], ("Año", "Período", "Curso", "Estudiante", "Identificación", "Simulacro",
                                         "Fecha", "Calificación (/5,0)", "Estado"))
         self.assertEqual(len(datos), 16)  # todas, no solo la primera página de 10 (incluye la en progreso)
         texto = " ".join(str(v) for f in encabezado for v in f if v)
-        self.assertIn("Sexto A", texto)
+        self.assertIn("Frameworks · G01", texto)
         self.assertIn("Generado el", texto)
 
     def test_reporte_por_eje(self):
         _, columnas, datos = self._filas(self.excel("ejes"))
         self.assertIn("% de aciertos", columnas)
         self.assertEqual({(f[2], f[3]) for f in datos},
-                         {("Sexto A", "Inglés"), ("Sexto A", "Lectura Crítica"), ("Sexto B", "Inglés"),
-                          ("Sexto B", "Lectura Crítica"), ("Quinto A", "Inglés"), ("Quinto A", "Lectura Crítica")})
+                         {("Frameworks · G01", "Inglés"), ("Frameworks · G01", "Lectura Crítica"), ("Frameworks · G02", "Inglés"),
+                          ("Frameworks · G02", "Lectura Crítica"), ("Bases de Datos · G01", "Inglés"), ("Bases de Datos · G01", "Lectura Crítica")})
 
     def test_historial_cronologico(self):
         _, _, datos = self._filas(self.excel("historial", estudiante="E1"))
@@ -244,7 +244,7 @@ class AsignacionCursoTests(BaseConsultas):
     def test_intento_nuevo_queda_en_el_curso_vigente(self):
         hoy = timezone.localdate()
         actual = PeriodoAcademico.objects.create(anio=2099, numero=1, fecha_inicio=hoy - timedelta(days=1), fecha_fin=hoy + timedelta(days=1))
-        curso = Curso.objects.create(periodo=actual, nombre="Vigente")
+        curso = Curso.objects.create(periodo=actual, asignatura="Vigente")
         Matricula.objects.create(estudiante=self.caro, curso=curso)
         resultado = iniciar_intento(self.caro, crear_cuestionario(num_preguntas=1, nombre="Hoy"))
         self.assertEqual(resultado.intento.curso, curso)

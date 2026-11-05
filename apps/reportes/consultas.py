@@ -131,7 +131,7 @@ class Filtros:
 
 def catalogo(alcance: Alcance) -> dict:
     """Opciones de cada filtro dentro del alcance (base de los filtros dependientes)."""
-    cursos = list(alcance.cursos.order_by("-periodo__anio", "-periodo__numero", "nombre"))
+    cursos = list(alcance.cursos.order_by("-periodo__anio", "-periodo__numero", "asignatura", "grupo"))
     periodos_ids = {c.periodo_id for c in cursos}
     periodos = PeriodoAcademico.objects.all() if alcance.es_admin else PeriodoAcademico.objects.filter(id__in=periodos_ids)
     periodos = list(periodos.order_by("-anio", "-numero"))
@@ -345,23 +345,27 @@ def por_curso(qs) -> list[dict]:
     """Consulta 3: estudiantes, promedio, mínima y máxima por curso."""
     filas = (
         terminados(qs)
-        .values("curso_id", "curso__nombre", "curso__periodo__anio", "curso__periodo__numero")
+        .values("curso_id", "curso__asignatura", "curso__grupo", "curso__periodo__anio", "curso__periodo__numero")
         .annotate(
             intentos=Count("id"), estudiantes=Count("participante_codigo", distinct=True),
             promedio=Avg("nota"), minima=Min("nota"), maxima=Max("nota"),
             aprobados=Count("id", filter=Q(aprobado=True)),
         )
-        .order_by("-curso__periodo__anio", "-curso__periodo__numero", "curso__nombre")
+        .order_by("-curso__periodo__anio", "-curso__periodo__numero", "curso__asignatura", "curso__grupo")
     )
     return [{
         "curso_id": f["curso_id"],
-        "curso": f["curso__nombre"] or "Sin curso asignado",
+        "curso": _nombre_curso(f["curso__asignatura"], f["curso__grupo"]),
         "periodo": f"{f['curso__periodo__anio']}-{f['curso__periodo__numero']}" if f["curso__periodo__anio"] else "—",
         "anio": f["curso__periodo__anio"],
         "intentos": f["intentos"], "estudiantes": f["estudiantes"],
         "promedio": _redondear(f["promedio"]), "minima": _redondear(f["minima"]), "maxima": _redondear(f["maxima"]),
         "porcentaje_aprobacion": _porcentaje(f["aprobados"], f["intentos"]),
     } for f in filas]
+
+
+def _nombre_curso(asignatura, grupo) -> str:
+    return f"{asignatura} · G{grupo}" if asignatura else "Sin curso asignado"
 
 
 def _respuestas(qs, filtros: Filtros):
@@ -390,7 +394,8 @@ def por_eje(qs, filtros: Filtros, *, detallar_curso: bool = False) -> list[dict]
     """Consulta 4 (y Reporte B si `detallar_curso`): aciertos por eje temático."""
     campos = ["pregunta__categoria__nombre"]
     if detallar_curso:
-        campos = ["intento__curso__periodo__anio", "intento__curso__periodo__numero", "intento__curso__nombre", *campos]
+        campos = ["intento__curso__periodo__anio", "intento__curso__periodo__numero",
+                  "intento__curso__asignatura", "intento__curso__grupo", *campos]
     filas = _respuestas(qs, filtros).values(*campos).annotate(**_CONTEO_RESPUESTAS).order_by(*[
         f"-{c}" if "periodo" in c else c for c in campos
     ])
@@ -405,7 +410,7 @@ def por_eje(qs, filtros: Filtros, *, detallar_curso: bool = False) -> list[dict]
             fila.update(
                 anio=anio or "—",
                 periodo=f"{anio}-{f['intento__curso__periodo__numero']}" if anio else "—",
-                curso=f["intento__curso__nombre"] or "Sin curso asignado",
+                curso=_nombre_curso(f["intento__curso__asignatura"], f["intento__curso__grupo"]),
             )
         resultado.append(fila)
     return resultado

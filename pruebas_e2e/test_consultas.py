@@ -36,10 +36,10 @@ class ConsultasTests(PruebaNavegador):
         periodos = pg.eval_on_selector_all("#f-periodo option:not([hidden])", "o => o.map(x => x.textContent.trim())")
         self.assertEqual(periodos, ["Todos", "2025-2"])
         cursos = pg.eval_on_selector_all("#f-curso option:not([hidden])", "o => o.map(x => x.textContent.trim())")
-        self.assertEqual(cursos, ["Todos", "Cuarto A"])
+        self.assertEqual(cursos, ["Todos", "Electiva Profesional I – Fundamentos Web · G01"])
 
         # Cambiar el año limpia el curso que ya no corresponde
-        sexto = Curso.objects.get(nombre="Sexto A")
+        sexto = Curso.objects.get(periodo__anio=2026, periodo__numero=2, grupo="01")
         pg.select_option("#f-anio", "2026")
         pg.select_option("#f-curso", str(sexto.id))
         pg.select_option("#f-anio", "2025")
@@ -78,7 +78,7 @@ class ConsultasTests(PruebaNavegador):
         with pg.expect_download() as descarga:
             pg.click("[data-ref='exportar-consolidado']")
         archivo = descarga.value
-        self.assertTrue(archivo.suggested_filename.startswith("reporte_consolidado_2026-2_sexto-a"))
+        self.assertTrue(archivo.suggested_filename.startswith("reporte_consolidado_2026-2_electiva-profesional-iii-frameworks-g01"))
         libro = load_workbook(io.BytesIO(open(archivo.path(), "rb").read()))
         self.assertIn("Calificaciones", libro.sheetnames)
 
