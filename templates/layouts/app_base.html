@@ -64,13 +64,13 @@
     </nav>
 
     <!-- Footer del Sidebar con Identidad del Usuario -->
-    <div style="padding-top:16px; border-top:1px solid var(--color-borde); margin-top:auto;" class="text-xs text-muted">
+    <div class="sidebar-pie texto-xs texto-suave">
       <div class="flex items-center justify-between">
-        <div style="overflow:hidden; padding-right:8px;">
-          <div style="text-overflow:ellipsis; overflow:hidden; white-space:nowrap;" class="text-sm font-bold text-main">
+        <div class="sidebar-pie__usuario">
+          <div class="sidebar-pie__nombre texto-sm peso-bold texto-principal">
             {{ user.get_full_name|default:user.username }}
           </div>
-          <div style="color:var(--primary);" class="text-2xs font-semibold">
+          <div class="texto-xs peso-semibold texto-primario">
             {% if user.is_superuser or user.perfil.es_admin %}
               Administrador
             {% elif user.perfil.es_docente %}
@@ -80,7 +80,7 @@
             {% endif %}
           </div>
         </div>
-        <a href="{% url 'cuentas:perfil' %}" title="Ver mi perfil" style="display:inline-flex; align-items:center; justify-content:center; width:30px; height:30px; border-radius:8px; background:var(--color-superficie-hundida); color:var(--color-texto-suave); text-decoration:none; flex-shrink:0;">
+        <a href="{% url 'cuentas:perfil' %}" title="Ver mi perfil" class="sidebar-pie__perfil"><span class="sr-only">Ver mi perfil</span>
           <i data-lucide="user" class="icono-15"></i>
         </a>
       </div>
@@ -96,8 +96,8 @@
         Simulador Saber TyT / <span class="text-muted font-normal">{% block nav_title %}Plataforma Institucional{% endblock %}</span>
       </div>
       <div class="navbar-user-info">
-        <a href="{% url 'cuentas:perfil' %}" title="Mi Perfil" style="display:flex; align-items:center; gap:8px; color:var(--color-texto); text-decoration:none;">
-          <div class="user-avatar-circle" style="background:var(--color-primario); color:var(--color-texto-invertido);">
+        <a href="{% url 'cuentas:perfil' %}" title="Mi perfil" class="navbar-perfil">
+          <div class="user-avatar-circle user-avatar-circle--solido">
             {{ user.first_name|default:user.username|slice:":1"|upper }}
           </div>
           <span class="text-base font-semibold text-main">{{ user.get_full_name|default:user.username }}</span>
