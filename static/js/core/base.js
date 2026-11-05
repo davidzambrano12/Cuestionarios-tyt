@@ -11,6 +11,8 @@
  *   <a data-ancla-local="seccion">          si ya estás en esa página, desplaza
  *                                           hasta #seccion en vez de recargar
  *   <button data-notificar="texto" data-notificar-titulo="…" data-notificar-tipo="info">
+ *   <div data-menu-desplegable>             menú desplegable: un <button aria-controls>
+ *                                           y una lista role="menu" con role="menuitem"
  *
  * API global usada por los scripts de página:
  *   window.mostrarNotificacion(mensaje, tipo, titulo)
@@ -133,6 +135,82 @@
     document.cookie = 'refresh_token=; path=/; max-age=0;';
     window.location.href = cuerpo.urlLogout || '/logout/';
   }
+
+  /* ---------------------------------------------------------------- Menús desplegables */
+
+  function itemsDeMenu(menu) {
+    return Array.from(menu.querySelectorAll('[role="menuitem"]'));
+  }
+
+  function abrirMenu(menu, enfocar) {
+    cerrarMenus(menu);
+    const boton = menu.querySelector('[aria-haspopup]');
+    const lista = menu.querySelector('[role="menu"]');
+    boton.setAttribute('aria-expanded', 'true');
+    lista.hidden = false;
+    const items = itemsDeMenu(menu);
+    if (enfocar === 'primero' && items.length) items[0].focus();
+    if (enfocar === 'ultimo' && items.length) items[items.length - 1].focus();
+  }
+
+  function cerrarMenu(menu, devolverFoco) {
+    const boton = menu.querySelector('[aria-haspopup]');
+    const lista = menu.querySelector('[role="menu"]');
+    if (!lista || lista.hidden) return;
+    lista.hidden = true;
+    boton.setAttribute('aria-expanded', 'false');
+    if (devolverFoco) boton.focus();
+  }
+
+  function cerrarMenus(excepto) {
+    document.querySelectorAll('[data-menu-desplegable]').forEach((m) => {
+      if (m !== excepto) cerrarMenu(m, false);
+    });
+  }
+
+  document.addEventListener('click', (evento) => {
+    const boton = evento.target.closest('[data-menu-desplegable] > [aria-haspopup]');
+    if (boton) {
+      const menu = boton.closest('[data-menu-desplegable]');
+      if (boton.getAttribute('aria-expanded') === 'true') cerrarMenu(menu, false);
+      // evento.detail === 0: activado con teclado (Enter/Espacio) → enfocar la primera opción
+      else abrirMenu(menu, evento.detail === 0 ? 'primero' : null);
+      return;
+    }
+    if (!evento.target.closest('[data-menu-desplegable]')) cerrarMenus(null);
+  });
+
+  document.addEventListener('keydown', (evento) => {
+    const menu = evento.target.closest && evento.target.closest('[data-menu-desplegable]');
+    if (!menu) return;
+    const items = itemsDeMenu(menu);
+    const indice = items.indexOf(document.activeElement);
+    const enBoton = evento.target.matches('[aria-haspopup]');
+
+    if (evento.key === 'Escape') {
+      cerrarMenu(menu, true);
+    } else if (evento.key === 'ArrowDown') {
+      evento.preventDefault();
+      if (enBoton) abrirMenu(menu, 'primero');
+      else items[(indice + 1) % items.length].focus();
+    } else if (evento.key === 'ArrowUp') {
+      evento.preventDefault();
+      if (enBoton) abrirMenu(menu, 'ultimo');
+      else items[(indice - 1 + items.length) % items.length].focus();
+    } else if (evento.key === 'Home' && !enBoton) {
+      evento.preventDefault();
+      items[0].focus();
+    } else if (evento.key === 'End' && !enBoton) {
+      evento.preventDefault();
+      items[items.length - 1].focus();
+    }
+  });
+
+  // Al salir con Tab, el menú se cierra
+  document.addEventListener('focusout', (evento) => {
+    const menu = evento.target.closest && evento.target.closest('[data-menu-desplegable]');
+    if (menu && evento.relatedTarget && !menu.contains(evento.relatedTarget)) cerrarMenu(menu, false);
+  });
 
   /* ---------------------------------------------------------------- Delegación */
 

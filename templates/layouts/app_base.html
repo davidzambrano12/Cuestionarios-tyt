@@ -57,34 +57,8 @@
         <a href="{% url 'evaluaciones:panel_estudiante' %}#cuestionarios" data-ancla-local="cuestionarios" class="nav-item {% if '/cuestionarios/' in request.path or active_tab == 'cuestionarios' %}active{% endif %}">
           <i data-lucide="clipboard-list"></i> Cuestionarios
         </a>
-        <a href="{% url 'cuentas:perfil' %}" class="nav-item {% if '/perfil/' in request.path or active_tab == 'perfil' %}active{% endif %}">
-          <i data-lucide="user"></i> Mi Perfil
-        </a>
       {% endif %}
     </nav>
-
-    <!-- Footer del Sidebar con Identidad del Usuario -->
-    <div class="sidebar-pie texto-xs texto-suave">
-      <div class="flex items-center justify-between">
-        <div class="sidebar-pie__usuario">
-          <div class="sidebar-pie__nombre texto-sm peso-bold texto-principal">
-            {{ user.get_full_name|default:user.username }}
-          </div>
-          <div class="texto-xs peso-semibold texto-primario">
-            {% if user.is_superuser or user.perfil.es_admin %}
-              Administrador
-            {% elif user.perfil.es_docente %}
-              {{ user.perfil.rol.nombre|default:"Docente Evaluador" }}
-            {% else %}
-              Cód: {{ user.perfil.codigo_institucional|default:user.username }}
-            {% endif %}
-          </div>
-        </div>
-        <a href="{% url 'cuentas:perfil' %}" title="Ver mi perfil" class="sidebar-pie__perfil"><span class="sr-only">Ver mi perfil</span>
-          <i data-lucide="user" class="icono-15"></i>
-        </a>
-      </div>
-    </div>
   </aside>
 
   <!-- Contenido Principal -->
@@ -95,16 +69,31 @@
       <div class="navbar-brand-title">
         {{ config.nombre_sistema }} / <span class="text-muted font-normal">{% block nav_title %}Plataforma Institucional{% endblock %}</span>
       </div>
-      <div class="navbar-user-info">
-        <a href="{% url 'cuentas:perfil' %}" title="Mi perfil" class="navbar-perfil">
-          <div class="user-avatar-circle user-avatar-circle--solido">
-            {{ user.first_name|default:user.username|slice:":1"|upper }}
-          </div>
-          <span class="text-base font-semibold text-main">{{ user.get_full_name|default:user.username }}</span>
-        </a>
-        <a href="{% url 'logout' %}" data-cerrar-sesion title="Cerrar sesión" class="btn btn-outline btn-sm texto-peligro">
-          <i data-lucide="log-out"></i> Salir
-        </a>
+      <div class="menu-cuenta" data-menu-desplegable>
+        <button type="button" class="menu-cuenta__boton" aria-haspopup="menu" aria-expanded="false" aria-controls="menu-cuenta-lista">
+          <span class="user-avatar-circle user-avatar-circle--solido" aria-hidden="true">{{ user.first_name|default:user.username|slice:":1"|upper }}</span>
+          <span class="menu-cuenta__texto">
+            <span class="menu-cuenta__nombre">{{ user.get_full_name|default:user.username }}</span>
+            <span class="menu-cuenta__rol">
+              {% if user.is_superuser or user.perfil.es_admin %}
+                Administrador
+              {% elif user.perfil.es_docente %}
+                {{ user.perfil.rol.nombre|default:"Docente" }}
+              {% else %}
+                Cód. {{ user.perfil.codigo_institucional|default:user.username }}
+              {% endif %}
+            </span>
+          </span>
+          <i data-lucide="chevron-down" class="menu-cuenta__flecha" aria-hidden="true"></i>
+        </button>
+        <div class="menu-cuenta__lista" id="menu-cuenta-lista" role="menu" hidden>
+          <a href="{% url 'cuentas:perfil' %}" role="menuitem" class="menu-cuenta__item{% if '/perfil/' in request.path %} menu-cuenta__item--activo{% endif %}">
+            <i data-lucide="user" aria-hidden="true"></i> Mi perfil
+          </a>
+          <a href="{% url 'logout' %}" role="menuitem" data-cerrar-sesion class="menu-cuenta__item menu-cuenta__item--peligro">
+            <i data-lucide="log-out" aria-hidden="true"></i> Cerrar sesión
+          </a>
+        </div>
       </div>
     </header>
 
