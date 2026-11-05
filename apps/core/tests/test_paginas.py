@@ -25,6 +25,8 @@ class PaginasTests(TestCase):
         cls.admin = crear_usuario("jefe", "admin", is_superuser=True, is_staff=True)
         cls.estudiante = crear_usuario("alumno", "estudiante", codigo="EST-001")
         cls.cuestionario = crear_cuestionario(num_preguntas=2)
+        # Un cuestionario de curso del docente: lo edita y ve sus intentos
+        cls.propio = crear_cuestionario(num_preguntas=2, visibilidad="privado", creado_por=cls.docente)
 
     def _ok(self, user, urls):
         self.client.force_login(user)
@@ -38,13 +40,16 @@ class PaginasTests(TestCase):
                 self.assertEqual(self.client.get(url).status_code, 200)
 
     def test_paginas_docente(self):
-        cid = self.cuestionario.id
+        cid = self.propio.id
         self._ok(self.docente, [
             "/dashboard/docente/", "/preguntas/", "/preguntas/importar/",
             "/cuestionarios/", "/cuestionarios/crear/", f"/cuestionarios/{cid}/editar/",
             f"/cuestionarios/{cid}/previsualizar/", f"/cuestionarios/{cid}/intentos/",
-            "/perfil/", "/ajustes/",
+            "/perfil/", "/ajustes/", f"/cuestionarios/{self.cuestionario.id}/previsualizar/",
         ])
+        # El institucional lo previsualiza, pero no lo edita ni ve su reporte
+        self.assertEqual(self.client.get(f"/cuestionarios/{self.cuestionario.id}/editar/").status_code, 403)
+        self.assertEqual(self.client.get(f"/cuestionarios/{self.cuestionario.id}/intentos/").status_code, 403)
 
     def test_paginas_admin(self):
         self._ok(self.admin, ["/dashboard/admin/", "/usuarios/"])

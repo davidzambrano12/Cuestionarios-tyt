@@ -89,6 +89,7 @@ def crear_cuestionario(num_preguntas=2, **campos):
         "calificacion_aprobacion": Decimal("3.00"),
         "permitir_revision": True,
         "estado": "disponible",
+        "visibilidad": "institucional",  # cualquier estudiante puede presentarlo
     }
     datos.update(campos)
     cuestionario = Cuestionario.objects.create(**datos)

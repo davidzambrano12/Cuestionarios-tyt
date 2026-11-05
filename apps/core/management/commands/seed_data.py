@@ -287,6 +287,7 @@ class Command(BaseCommand):
                     "mezclar_respuestas": True,
                     "permitir_revision": True,
                     "estado": "disponible",
+                    "visibilidad": "institucional",
                 }
             )
             for idx, p_obj in enumerate(preguntas_creadas, 1):
