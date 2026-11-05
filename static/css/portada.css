@@ -1,0 +1,136 @@
+/* ==========================================================================
+   PORTADA PÚBLICA
+   ========================================================================== */
+
+.portada { background: var(--color-superficie-tenue); min-height: 100vh; }
+
+.portada-cabecera {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--espacio-4);
+  flex-wrap: wrap;
+  padding: var(--espacio-4) var(--espacio-10);
+  background: var(--color-superficie);
+  border-bottom: 1px solid var(--color-borde);
+}
+.portada-marca__logo {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radio-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-primario);
+  color: var(--color-texto-invertido);
+  font-family: var(--fuente-titulos);
+  font-weight: var(--peso-extrabold);
+  font-size: var(--texto-lg);
+}
+.portada-marca__nombre { font-family: var(--fuente-titulos); font-size: var(--texto-md); font-weight: var(--peso-extrabold); color: var(--color-primario); line-height: 1.1; }
+
+.portada-heroe { text-align: center; padding: 72px var(--espacio-5) var(--espacio-10); max-width: 900px; margin: 0 auto; }
+.portada-heroe__titulo { font-size: var(--texto-4xl); font-weight: var(--peso-extrabold); line-height: var(--interlineado-ajustado); margin-bottom: var(--espacio-4); }
+.portada-heroe__texto { font-size: var(--texto-lg); color: var(--color-texto-suave); max-width: 700px; margin: 0 auto var(--espacio-8); }
+.btn-grande { padding: 14px 28px; font-size: var(--texto-md); }
+
+.portada-seccion { max-width: 1200px; margin: 0 auto 72px; padding: 0 var(--espacio-6); }
+.portada-seccion--angosta { max-width: 1100px; }
+.portada-seccion__cabecera { text-align: center; margin-bottom: var(--espacio-8); }
+.portada-seccion__titulo { font-size: var(--texto-3xl); font-weight: var(--peso-extrabold); margin-top: 6px; }
+.portada-antetitulo { font-size: var(--texto-xs); font-weight: var(--peso-bold); color: var(--color-primario); text-transform: uppercase; letter-spacing: var(--tracking-mayus); }
+
+.portada-rejilla { display: grid; gap: var(--espacio-5); }
+.portada-rejilla--250 { grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
+.portada-rejilla--320 { grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: var(--espacio-6); }
+
+.caracteristica__icono {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radio-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--espacio-4);
+  background: var(--color-superficie-hundida);
+  color: var(--color-texto-suave);
+}
+.caracteristica__icono--azul { background: var(--azul-50); color: var(--azul-600); }
+.caracteristica__icono--verde { background: var(--verde-50); color: var(--verde-700); }
+.caracteristica__icono--naranja { background: var(--naranja-50); color: var(--naranja-700); }
+.icono-22 { width: 22px; height: 22px; }
+
+/* Portales de ingreso */
+.portal { position: relative; overflow: hidden; border: 2px solid var(--color-borde-fuerte); }
+.portal--destacado { border-color: var(--azul-200); }
+.portal__etiqueta { position: absolute; top: var(--espacio-4); left: var(--espacio-5); }
+.portal__cuerpo { margin: 36px 0 var(--espacio-5); }
+.portal__icono {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radio-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-superficie-hundida);
+  color: var(--color-texto-suave);
+}
+.portal__icono--azul { background: var(--azul-50); color: var(--color-primario); }
+.portal__ventajas {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: var(--color-superficie-tenue);
+  border-radius: var(--radio-sm);
+  padding: var(--espacio-3);
+  font-size: var(--texto-xs);
+  color: var(--color-texto-suave);
+}
+.portal__boton { padding: var(--espacio-3); font-size: var(--texto-base); }
+
+/* Simulacros abiertos */
+.simulacro { margin-bottom: 0; display: flex; flex-direction: column; justify-content: space-between; border-top: 4px solid var(--color-primario); }
+.simulacro__pie { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--color-superficie-hundida); padding-top: 14px; }
+
+/* Llamado a la acción (fondo azul: texto blanco 10.39:1) */
+.portada-cta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--espacio-6);
+  padding: var(--espacio-10) 48px;
+  border-radius: var(--radio-xl);
+  background: var(--degradado-marca);
+  color: var(--color-texto-invertido);
+}
+.portada-cta__contenido { max-width: 600px; }
+.portada-cta__etiqueta { background: rgb(255 255 255 / 0.15); color: var(--color-texto-invertido); margin-bottom: var(--espacio-3); }
+.portada-cta__titulo { font-size: var(--texto-2xl); font-weight: var(--peso-extrabold); margin-bottom: 10px; color: var(--color-texto-invertido); }
+.portada-cta__texto { font-size: var(--texto-base); color: var(--color-texto-invertido); opacity: 0.92; }
+.portada-cta__principal { background: var(--color-superficie); color: var(--azul-800); padding: var(--espacio-3) var(--espacio-5); font-weight: var(--peso-bold); }
+.portada-cta__principal:hover { background: var(--azul-50); color: var(--azul-800); }
+.portada-cta__secundario { background: rgb(255 255 255 / 0.15); color: var(--color-texto-invertido); border: 1px solid rgb(255 255 255 / 0.35); padding: var(--espacio-3) var(--espacio-5); }
+.portada-cta__secundario:hover { background: rgb(255 255 255 / 0.25); color: var(--color-texto-invertido); }
+
+.portada-pie {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--espacio-4);
+  padding: var(--espacio-8) 48px;
+  background: var(--color-superficie);
+  border-top: 1px solid var(--color-borde);
+  font-size: var(--texto-xs);
+  color: var(--color-texto-suave);
+}
+
+@media (max-width: 700px) {
+  .portada-cabecera, .portada-pie { padding-left: var(--espacio-4); padding-right: var(--espacio-4); }
+  .portada-cta { padding: var(--espacio-6); }
+  .portada-heroe__titulo { font-size: var(--texto-3xl); }
+}

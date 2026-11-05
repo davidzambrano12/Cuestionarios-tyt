@@ -1,30 +1,32 @@
 {% extends 'layouts/base.html' %}
 {% load static %}
 
+{% block extra_head %}<link rel="stylesheet" href="{% static 'css/cuestionarios.css' %}"><link rel="stylesheet" href="{% static 'css/portada.css' %}">{% endblock %}
+
 {% block title %}Simulador Saber TyT - Uniputumayo{% endblock %}
 
 {% block content %}
-<div style="background-color: var(--color-superficie-tenue); min-height: 100vh;">
+<div class="portada">
 
   <!-- Header Institucional -->
-  <header style="background:var(--color-superficie); border-bottom:1px solid var(--color-borde); padding:16px 48px; display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; z-index:30;">
+  <header class="portada-cabecera">
     <div class="flex items-center gap-3">
-      <div style="background:var(--color-primario); color:var(--color-texto-invertido); width:36px; height:36px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:var(--texto-lg);">U</div>
+      <div class="portada-marca__logo">U</div>
       <div>
-        <div style="font-size:var(--texto-md); font-weight:800; color:var(--color-primario); line-height:1.1;">Simulador Saber TyT</div>
+        <div class="portada-marca__nombre">Simulador Saber TyT</div>
         <div class="texto-xs texto-suave">Institución Universitaria del Putumayo</div>
       </div>
     </div>
     <div class="flex items-center gap-4">
-      <a href="mailto:soporte.sistemas@uniputumayo.edu.co" class="btn btn-outline" style="font-size:var(--texto-sm); padding:8px 16px; display:inline-flex; align-items:center; gap:6px;">
+      <a href="mailto:soporte.sistemas@uniputumayo.edu.co" class="btn btn-outline">
         <i data-lucide="headphones" class="icono-15"></i> Mesa de Ayuda
       </a>
       {% if user.is_authenticated %}
-        <a href="{% if user.is_superuser or user.perfil.rol.codigo == 'admin' %}/dashboard/admin/{% elif user.perfil.rol.codigo == 'docente' %}/dashboard/docente/{% else %}/dashboard/estudiante/{% endif %}" class="btn btn-primary" style="font-size:var(--texto-sm); padding:8px 18px;">
+        <a href="{% url 'login' %}" class="btn btn-primary">
           Mi Panel ({{ user.username }})
         </a>
       {% else %}
-        <a href="{% url 'login' %}" class="btn btn-primary" style="font-size:var(--texto-sm); padding:8px 18px; display:inline-flex; align-items:center; gap:6px;">
+        <a href="{% url 'login' %}" class="btn btn-primary">
           <i data-lucide="lock" class="icono-15"></i> Iniciar sesión
         </a>
       {% endif %}
@@ -32,53 +34,53 @@
   </header>
 
   <!-- Hero Section -->
-  <section style="text-align:center; padding:70px 20px 40px; max-width:900px; margin:0 auto;">
-    <h1 style="font-size:var(--texto-4xl); font-weight:800; color:var(--color-texto); line-height:1.2; margin-bottom:16px;">
+  <section class="portada-heroe">
+    <h1 class="portada-heroe__titulo">
       Entrena y Valida tus <span class="texto-primario">Competencias</span>
     </h1>
-    <p style="font-size:var(--texto-lg); color:var(--color-texto-suave); max-width:700px; margin:0 auto 32px;">
+    <p class="portada-heroe__texto">
       Plataforma oficial de simulación con preguntas diseñada para la comunidad Uniputumayo.
     </p>
     <div class="flex justify-center gap-4 flex-wrap">
-      <a href="#simulacros" class="btn btn-primary" style="padding:14px 28px; font-size:var(--texto-md); border-radius:10px;">
+      <a href="#simulacros" class="btn btn-primary btn-grande">
         Ver Simulacros Disponibles ↓
       </a>
-      <a href="#modalidades" class="btn btn-outline" style="padding:14px 28px; font-size:var(--texto-md); border-radius:10px; background:var(--color-superficie); display:inline-flex; align-items:center; gap:6px;">
+      <a href="#modalidades" class="btn btn-outline btn-grande">
         <i data-lucide="book-open" class="icono-16"></i> Conocer Modalidad
       </a>
     </div>
   </section>
 
   <!-- 4 Feature Cards -->
-  <section style="max-width:1200px; margin:0 auto 60px; padding:0 24px;">
-    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(250px, 1fr)); gap:20px;">
+  <section class="portada-seccion">
+    <div class="portada-rejilla portada-rejilla--250">
       <div class="card mb-0 p-6">
-        <div style="width:44px; height:44px; border-radius:10px; background:var(--azul-50); color:var(--azul-600); display:flex; align-items:center; justify-content:center; margin-bottom:16px;">
-          <i data-lucide="book-open" style="width:22px; height:22px;"></i>
+        <div class="caracteristica__icono caracteristica__icono--azul">
+          <i data-lucide="book-open" class="icono-22"></i>
         </div>
         <h3 class="texto-md peso-bold mb-2">5 Módulos Saber TyT</h3>
         <p class="texto-sm texto-suave">Lectura Crítica, Cuantitativo, Ciudadanas, Inglés y Comunicación Escrita.</p>
       </div>
 
       <div class="card mb-0 p-6">
-        <div style="width:44px; height:44px; border-radius:10px; background:var(--verde-50); color:var(--verde-700); display:flex; align-items:center; justify-content:center; margin-bottom:16px;">
-          <i data-lucide="clock" style="width:22px; height:22px;"></i>
+        <div class="caracteristica__icono caracteristica__icono--verde">
+          <i data-lucide="clock" class="icono-22"></i>
         </div>
         <h3 class="texto-md peso-bold mb-2">Temporizador Sincronizado</h3>
         <p class="texto-sm texto-suave">Control estricto de tiempo estilo ICFES y plataforma de evaluación continua.</p>
       </div>
 
       <div class="card mb-0 p-6">
-        <div style="width:44px; height:44px; border-radius:10px; background:var(--naranja-50); color:var(--naranja-700); display:flex; align-items:center; justify-content:center; margin-bottom:16px;">
-          <i data-lucide="bar-chart-2" style="width:22px; height:22px;"></i>
+        <div class="caracteristica__icono caracteristica__icono--naranja">
+          <i data-lucide="bar-chart-2" class="icono-22"></i>
         </div>
         <h3 class="texto-md peso-bold mb-2">Calificación Determinista</h3>
         <p class="texto-sm texto-suave">Escala 0.00 a 5.00 con cálculo automático de puntajes e informe instantáneo.</p>
       </div>
 
       <div class="card mb-0 p-6">
-        <div style="width:44px; height:44px; border-radius:10px; background:var(--color-superficie-hundida); color:var(--color-texto-suave); display:flex; align-items:center; justify-content:center; margin-bottom:16px;">
-          <i data-lucide="shield-check" style="width:22px; height:22px;"></i>
+        <div class="caracteristica__icono">
+          <i data-lucide="shield-check" class="icono-22"></i>
         </div>
         <h3 class="texto-md peso-bold mb-2">Banco Actualizado 2026</h3>
         <p class="texto-sm texto-suave">Preguntas oficiales con huella SHA-256 única para prevenir duplicados.</p>
@@ -87,50 +89,50 @@
   </section>
 
   <!-- Portales de Ingreso Diferenciados -->
-  <section id="modalidades" style="max-width:1100px; margin:0 auto 70px; padding:0 24px;">
-    <div style="text-align:center; margin-bottom:36px;">
-      <span style="font-size:var(--texto-xs); font-weight:700; color:var(--azul-600); text-transform:uppercase; letter-spacing:1px;">Portales de Ingreso Diferenciados</span>
-      <h2 style="font-size:var(--texto-3xl); font-weight:800; color:var(--color-texto); margin-top:6px;">Selecciona tu Modalidad de Acceso Institucional</h2>
+  <section id="modalidades" class="portada-seccion portada-seccion--angosta">
+    <div class="portada-seccion__cabecera">
+      <span class="portada-antetitulo">Portales de Ingreso Diferenciados</span>
+      <h2 class="portada-seccion__titulo">Selecciona tu Modalidad de Acceso Institucional</h2>
       <p class="texto-base texto-suave mt-2">Diseñado para optimizar el tiempo de los estudiantes de Uniputumayo y brindar control integral al equipo docente.</p>
     </div>
 
-    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:24px;">
+    <div class="portada-rejilla portada-rejilla--320">
       <!-- Tarjeta Estudiante -->
-      <div class="card" style="border:2px solid var(--azul-200); position:relative; overflow:hidden;">
-        <div style="position:absolute; top:16px; left:20px;">
-          <span class="badge" style="background:var(--verde-100); color:var(--verde-800); font-size:var(--texto-xs);">ACCESO DIRECTO SIN CLAVE</span>
+      <div class="card portal portal--destacado">
+        <div class="portal__etiqueta">
+          <span class="badge badge-success">ACCESO DIRECTO SIN CLAVE</span>
         </div>
-        <div style="margin-top:36px; margin-bottom:20px;">
+        <div class="portal__cuerpo">
           <div class="flex items-center gap-3 mb-3">
-            <div style="width:40px; height:40px; border-radius:10px; background:var(--azul-50); color:var(--color-primario); display:flex; align-items:center; justify-content:center;">
+            <div class="portal__icono portal__icono--azul">
               <i data-lucide="graduation-cap" class="icono-24"></i>
             </div>
             <div>
               <h3 class="texto-lg peso-extrabold texto-principal">Portal Estudiantes - Acceso Rápido</h3>
-              <span style="font-size:var(--texto-xs); color:var(--azul-600); font-weight:600;">Estudiantes activos Uniputumayo</span>
+              <span class="texto-xs texto-primario peso-semibold">Estudiantes activos Uniputumayo</span>
             </div>
           </div>
-          <p style="font-size:var(--texto-sm); color:var(--color-texto-suave); line-height:1.6; margin-bottom:18px;">
+          <p class="texto-sm texto-suave mb-4">
             Ingreso ágil: ingresa directamente con tu Nombre Completo y Código Estudiantil activo para iniciar tu simulacro inmediatamente.
           </p>
-          <div style="background:var(--color-superficie-tenue); border-radius:8px; padding:12px; font-size:var(--texto-xs); color:var(--color-texto-suave); display:flex; flex-direction:column; gap:6px;">
-            <div style="display:inline-flex; align-items:center; gap:6px;"><i data-lucide="credit-card" class="icono-14"></i> Identificación inmediata con código institucional</div>
-            <div style="display:inline-flex; align-items:center; gap:6px;"><i data-lucide="zap" style="width:14px; height:14px; color:var(--naranja-500);"></i> Sin demoras de restablecimiento de contraseña</div>
+          <div class="portal__ventajas">
+            <div class="inline-flex items-center gap-2"><i data-lucide="credit-card" class="icono-14"></i> Identificación inmediata con código institucional</div>
+            <div class="inline-flex items-center gap-2"><i data-lucide="zap" class="icono-14 texto-aviso"></i> Sin demoras de restablecimiento de contraseña</div>
           </div>
         </div>
-        <a href="{% url 'login' %}" class="btn btn-primary btn-full" style="padding:12px; font-size:var(--texto-base);">
+        <a href="{% url 'login' %}" class="btn btn-primary btn-full portal__boton">
           Ingresar como Estudiante &rarr;
         </a>
       </div>
 
       <!-- Tarjeta Docente y Evaluadores -->
-      <div class="card" style="border:2px solid var(--color-borde-fuerte); position:relative; overflow:hidden;">
-        <div style="position:absolute; top:16px; left:20px;">
-          <span class="badge" style="background:var(--color-superficie-hundida); color:var(--color-texto-suave); font-size:var(--texto-xs);">CREDENCIALES INSTITUCIONALES</span>
+      <div class="card portal">
+        <div class="portal__etiqueta">
+          <span class="badge badge-neutro">CREDENCIALES INSTITUCIONALES</span>
         </div>
-        <div style="margin-top:36px; margin-bottom:20px;">
+        <div class="portal__cuerpo">
           <div class="flex items-center gap-3 mb-3">
-            <div style="width:40px; height:40px; border-radius:10px; background:var(--color-superficie-hundida); color:var(--color-texto-suave); display:flex; align-items:center; justify-content:center;">
+            <div class="portal__icono">
               <i data-lucide="briefcase" class="icono-24"></i>
             </div>
             <div>
@@ -138,15 +140,15 @@
               <span class="texto-xs texto-suave peso-semibold">Gestión Académica & Analítica</span>
             </div>
           </div>
-          <p style="font-size:var(--texto-sm); color:var(--color-texto-suave); line-height:1.6; margin-bottom:18px;">
+          <p class="texto-sm texto-suave mb-4">
             Gestión de preguntas, parametrización de cuestionarios, seguimiento de cohortes y reportes pedagógicos con credenciales @uniputumayo.edu.co.
           </p>
-          <div style="background:var(--color-superficie-tenue); border-radius:8px; padding:12px; font-size:var(--texto-xs); color:var(--color-texto-suave); display:flex; flex-direction:column; gap:6px;">
-            <div style="display:inline-flex; align-items:center; gap:6px;"><i data-lucide="bar-chart-2" class="icono-14"></i> Métricas por cohorte, programa y competencia</div>
-            <div style="display:inline-flex; align-items:center; gap:6px;"><i data-lucide="download" class="icono-14"></i> Exportación de informes consolidados y auditoría</div>
+          <div class="portal__ventajas">
+            <div class="inline-flex items-center gap-2"><i data-lucide="bar-chart-2" class="icono-14"></i> Métricas por cohorte, programa y competencia</div>
+            <div class="inline-flex items-center gap-2"><i data-lucide="download" class="icono-14"></i> Exportación de informes consolidados y auditoría</div>
           </div>
         </div>
-        <a href="{% url 'login' %}" class="btn btn-outline btn-full" style="padding:12px; font-size:var(--texto-base); display:inline-flex; align-items:center; justify-content:center; gap:6px;">
+        <a href="{% url 'login' %}" class="btn btn-outline btn-full portal__boton">
           <i data-lucide="lock" class="icono-14"></i> Acceso Docente y Directivos &rarr;
         </a>
       </div>
@@ -154,42 +156,42 @@
   </section>
 
   <!-- Entorno de Evaluación Abierto / Cuestionarios Oficiales -->
-  <section id="simulacros" style="max-width:1200px; margin:0 auto 80px; padding:0 24px;">
+  <section id="simulacros" class="portada-seccion">
     <div class="mb-6">
-      <span style="font-size:var(--texto-xs); font-weight:700; color:var(--color-primario); text-transform:uppercase; display:inline-flex; align-items:center; gap:6px;">
+      <span class="portada-antetitulo inline-flex items-center gap-2">
         <i data-lucide="landmark" class="icono-14"></i> ENTORNO DE EVALUACIÓN ABIERTO
       </span>
       <h2 class="texto-2xl peso-extrabold texto-principal mt-1">Cuestionarios Oficiales Saber TyT Uniputumayo</h2>
       <p class="texto-base texto-suave">Acceso ágil: los estudiantes ingresan directamente con su Nombre y Código Estudiantil para comenzar la prueba de inmediato.</p>
     </div>
 
-    <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(340px, 1fr)); gap:20px;">
+    <div class="rejilla-cuestionarios">
       {% for c in cuestionarios %}
-      <div class="card" style="margin-bottom:0; display:flex; flex-direction:column; justify-content:space-between; border-top:4px solid var(--color-primario);">
+      <div class="card simulacro">
         <div>
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+          <div class="flex justify-between items-center mb-2">
             <span class="badge badge-success">● DISPONIBLE</span>
             <span class="texto-xs texto-tenue peso-semibold">Cód: TYT-{{ c.id }}</span>
           </div>
           <h3 class="texto-lg peso-extrabold texto-principal mb-2">{{ c.nombre }}</h3>
           <div class="flex gap-3 texto-xs texto-suave mb-3 flex-wrap">
-            <span class="inline-flex items-center gap-1"><i data-lucide="help-circle" class="icono-13"></i> {{ c.cuestionario_preguntas.count }} preguntas</span>
+            <span class="inline-flex items-center gap-1"><i data-lucide="help-circle" class="icono-13"></i> {{ c.cuestionario_preguntas.all|length }} preguntas</span>
             <span class="inline-flex items-center gap-1"><i data-lucide="clock" class="icono-13"></i> {{ c.tiempo_limite_minutos }} minutos</span>
             <span class="inline-flex items-center gap-1"><i data-lucide="star" class="icono-13"></i> Escala {{ c.calificacion_maxima }}</span>
           </div>
-          <p style="font-size:var(--texto-sm); color:var(--color-texto-suave); line-height:1.5; margin-bottom:16px;">
+          <p class="texto-sm texto-suave mb-4">
             {{ c.descripcion|default:"Evaluación integral alineada con los lineamientos técnicos del examen de estado Saber TyT." }}
           </p>
         </div>
-        <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--color-superficie-hundida); padding-top:14px;">
+        <div class="simulacro__pie">
           <span class="texto-xs texto-suave">Estándar Saber TyT</span>
-          <a href="{% url 'evaluaciones:iniciar' c.id %}" class="btn btn-primary" style="padding:6px 18px; font-size:var(--texto-sm); display:inline-flex; align-items:center; gap:6px;">
+          <a href="{% url 'evaluaciones:iniciar' c.id %}" class="btn btn-primary">
             Iniciar <i data-lucide="play" class="icono-13"></i>
           </a>
         </div>
       </div>
       {% empty %}
-      <div class="card" style="grid-column: 1 / -1; text-align:center; padding:40px;">
+      <div class="card rejilla-cuestionarios__completa">
         <p class="texto-suave">No hay cuestionarios disponibles en este momento.</p>
       </div>
       {% endfor %}
@@ -197,20 +199,20 @@
   </section>
 
   <!-- Banner Azul Acompañamiento Académico -->
-  <section style="max-width:1200px; margin:0 auto 80px; padding:0 24px;">
-    <div class="banner-dark" style="background:linear-gradient(135deg, var(--azul-800) 0%, var(--color-primario) 100%); border-radius:24px; padding:40px 48px; color:var(--color-texto-invertido); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:24px;">
-      <div style="max-width:600px;">
-        <span class="badge" style="background:rgba(255,255,255,0.15); color:var(--color-texto-invertido); margin-bottom:12px; display:inline-flex; align-items:center; gap:6px;">
+  <section class="portada-seccion">
+    <div class="banner-dark portada-cta">
+      <div class="portada-cta__contenido">
+        <span class="badge portada-cta__etiqueta">
           <i data-lucide="headphones" class="icono-14"></i> Acompañamiento Académico Permanente
         </span>
-        <h2 style="font-size:var(--texto-2xl); font-weight:800; margin-bottom:10px; color:var(--color-texto-invertido);">¿Requieres orientación con las pruebas o asistencia en el campus Uniputumayo?</h2>
-        <p style="font-size:var(--texto-base); color:var(--color-texto-invertido); opacity:0.9;">Comunícate con la Coordinación TyT de Uniputumayo o acércate a la Dirección Académica en la Sede Principal Mocoa o extensiones Sibundoy y Puerto Asís.</p>
+        <h2 class="portada-cta__titulo">¿Requieres orientación con las pruebas o asistencia en el campus Uniputumayo?</h2>
+        <p class="portada-cta__texto">Comunícate con la Coordinación TyT de Uniputumayo o acércate a la Dirección Académica en la Sede Principal Mocoa o extensiones Sibundoy y Puerto Asís.</p>
       </div>
       <div class="flex gap-3 flex-wrap">
-        <a href="mailto:soporte.sistemas@uniputumayo.edu.co" class="btn" style="background:var(--color-superficie); color:var(--azul-800); padding:12px 20px; font-weight:700; display:inline-flex; align-items:center; gap:6px;">
+        <a href="mailto:soporte.sistemas@uniputumayo.edu.co" class="btn portada-cta__principal">
           <i data-lucide="mail" class="icono-16"></i> Contactar Coordinación TyT
         </a>
-        <a href="{% static 'plantillas/plantilla_preguntas_simulador_tyt.xlsx' %}" download class="btn" style="background:rgba(255,255,255,0.15); color:var(--color-texto-invertido); border:1px solid rgba(255,255,255,0.3); padding:12px 20px; display:inline-flex; align-items:center; gap:6px;">
+        <a href="{% static 'plantillas/plantilla_preguntas_simulador_tyt.xlsx' %}" download class="btn portada-cta__secundario">
           <i data-lucide="download" class="icono-16"></i> Guía y Plantilla 2026
         </a>
       </div>
@@ -218,7 +220,7 @@
   </section>
 
   <!-- Footer Oficial -->
-  <footer style="background:var(--color-superficie); border-top:1px solid var(--color-borde); padding:32px 48px; font-size:var(--texto-xs); color:var(--color-texto-suave); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
+  <footer class="portada-pie">
     <div>
       <div class="peso-bold texto-principal">© 2026 Institución Universitaria del Putumayo (Uniputumayo).</div>
       <div>Vigilada Mineducación. Todos los derechos reservados. Mocoa, Putumayo - Colombia • NIT: 800.125.845-1</div>

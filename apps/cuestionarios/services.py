@@ -165,9 +165,9 @@ def preguntas_asignadas(cuestionario: Cuestionario | None):
 def resumen_listado(cuestionarios) -> dict:
     return {
         "total_count": len(cuestionarios),
-        "disponibles_count": sum(1 for c in cuestionarios if c.esta_vigente),
-        "borradores_count": sum(1 for c in cuestionarios if c.estado == "borrador"),
-        "cerrados_count": sum(1 for c in cuestionarios if c.esta_vencido),
+        "disponibles_count": sum(1 for c in cuestionarios if c.estado_temporal == "disponible"),
+        "borradores_count": sum(1 for c in cuestionarios if c.estado_temporal == "borrador"),
+        "cerrados_count": sum(1 for c in cuestionarios if c.estado_temporal == "cerrado"),
     }
 
 

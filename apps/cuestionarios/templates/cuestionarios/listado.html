@@ -1,274 +1,91 @@
 {% extends 'layouts/app_base.html' %}
+{% load static componentes %}
 
-{% block title %}Gestión de Cuestionarios - Simulador Saber TyT{% endblock %}
-
+{% block title %}Cuestionarios - Simulador Saber TyT{% endblock %}
 {% block nav_title %}Cuestionarios{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'css/cuestionarios.css' %}">{% endblock %}
 
 {% block app_content %}
+<div id="listado-cuestionarios">
 
-<!-- Header Banner -->
-<div class="dashboard-banner">
-  <div class="flex justify-between items-start flex-wrap gap-4">
-    <div>
-      <div class="banner-badge">● Evaluaciones y Exámenes Saber TyT</div>
-      <h1 class="banner-title">Gestión de Cuestionarios</h1>
-      <p class="banner-subtitle">Configuración, publicación y estado de evaluaciones institucionales</p>
-    </div>
-    {% if user.is_superuser or user.perfil.es_admin or user.perfil.es_docente %}
-    <a href="{% url 'cuestionarios:crear' %}" class="btn btn-primary" style="padding:10px 18px; border-radius:10px; font-weight:700; display:inline-flex; align-items:center; gap:8px;">
-      <i data-lucide="plus"></i> Crear Cuestionario
-    </a>
-    {% endif %}
-  </div>
-</div>
+  {% componente "componentes/encabezado.html" etiqueta="Evaluaciones Saber TyT" titulo="Cuestionarios" subtitulo="Configuración, publicación y estado de las evaluaciones." %}
+    <a href="{% url 'cuestionarios:crear' %}" class="btn btn-primary"><i data-lucide="plus"></i> Crear cuestionario</a>
+  {% fincomponente %}
 
-<!-- Métricas Resumen -->
-<div class="metrics-grid">
-  <div class="metric-card">
-    <div class="metric-header">
-      <div class="metric-icon" style="background:var(--azul-50); color:var(--azul-600);"><i data-lucide="clipboard-list"></i></div>
-      <span class="badge badge-info">Total</span>
-    </div>
-    <div class="metric-value">{{ total_count|default:"0" }}</div>
-    <div class="metric-label">Cuestionarios en Sistema</div>
+  <div class="metricas">
+    {% componente "componentes/metrica.html" etiqueta="Total" valor=total_count icono="clipboard-list" %}{% fincomponente %}
+    {% componente "componentes/metrica.html" etiqueta="Disponibles" valor=disponibles_count icono="check-circle-2" variante="exito" ayuda="Abiertos para presentar" %}{% fincomponente %}
+    {% componente "componentes/metrica.html" etiqueta="Borradores" valor=borradores_count icono="pencil" variante="aviso" ayuda="Sin publicar" %}{% fincomponente %}
+    {% componente "componentes/metrica.html" etiqueta="Cerrados" valor=cerrados_count icono="archive" ayuda="Plazo finalizado" %}{% fincomponente %}
   </div>
 
-  <div class="metric-card">
-    <div class="metric-header">
-      <div class="metric-icon" style="background:var(--verde-100); color:var(--verde-800);"><i data-lucide="check-circle-2"></i></div>
-      <span class="badge badge-success">Activos</span>
+  <div class="card barra-herramientas">
+    <div class="barra-herramientas__fila">
+      <div class="buscador">
+        <label for="filtro-texto" class="sr-only">Buscar cuestionario</label>
+        <i data-lucide="search" class="buscador__icono"></i>
+        <input type="search" id="filtro-texto" placeholder="Buscar por título o descripción…" class="form-input" autocomplete="off">
+      </div>
+      <div role="group" aria-label="Filtrar por estado" class="flex gap-2 flex-wrap">
+        <button type="button" class="btn btn-outline chip-filtro active" data-filtro="todos" aria-pressed="true">Todos</button>
+        <button type="button" class="btn btn-outline chip-filtro" data-filtro="disponible" aria-pressed="false">Disponibles</button>
+        <button type="button" class="btn btn-outline chip-filtro" data-filtro="programado" aria-pressed="false">Programados</button>
+        <button type="button" class="btn btn-outline chip-filtro" data-filtro="borrador" aria-pressed="false">Borradores</button>
+        <button type="button" class="btn btn-outline chip-filtro" data-filtro="cerrado" aria-pressed="false">Cerrados</button>
+      </div>
     </div>
-    <div class="metric-value">{{ disponibles_count|default:"0" }}</div>
-    <div class="metric-label">Publicados y Disponibles</div>
   </div>
 
-  <div class="metric-card">
-    <div class="metric-header">
-      <div class="metric-icon" style="background:var(--naranja-50); color:var(--naranja-700);"><i data-lucide="clock"></i></div>
-      <span class="badge badge-warning">En Espera</span>
-    </div>
-    <div class="metric-value">{{ borradores_count|default:"0" }}</div>
-    <div class="metric-label">Borradores en Edición</div>
-  </div>
-
-  <div class="metric-card">
-    <div class="metric-header">
-      <div class="metric-icon" style="background:var(--rojo-50); color:var(--rojo-600);"><i data-lucide="archive"></i></div>
-      <span class="badge badge-danger">Finalizados</span>
-    </div>
-    <div class="metric-value">{{ cerrados_count|default:"0" }}</div>
-    <div class="metric-label">Cuestionarios Cerrados</div>
-  </div>
-</div>
-
-<!-- Filtros y Buscador Dinámico -->
-<div class="card" style="padding:16px 20px; margin-bottom:24px;">
-  <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px;">
-    
-    <!-- Input de Búsqueda -->
-    <div style="flex:1; min-width:260px; position:relative;">
-      <i data-lucide="search" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--color-texto-tenue); width:16px; height:16px;"></i>
-      <input type="text" id="filtro-cuestionario-texto" onkeyup="filtrarCuestionarios()" placeholder="Buscar por título o descripción..." class="form-input" style="padding-left:38px;">
-    </div>
-
-    <!-- Botones de Filtro por Estado -->
-    <div id="filtro-estados-container" class="flex gap-2 flex-wrap">
-      <button type="button" class="btn btn-outline btn-sm filtro-btn active" data-estado="todos" onclick="seleccionarFiltroEstado('todos', this)">
-        Todos
-      </button>
-      <button type="button" class="btn btn-outline btn-sm filtro-btn" data-estado="disponible" onclick="seleccionarFiltroEstado('disponible', this)">
-        Disponibles
-      </button>
-      <button type="button" class="btn btn-outline btn-sm filtro-btn" data-estado="borrador" onclick="seleccionarFiltroEstado('borrador', this)">
-        Borradores
-      </button>
-      <button type="button" class="btn btn-outline btn-sm filtro-btn" data-estado="cerrado" onclick="seleccionarFiltroEstado('cerrado', this)">
-        Cerrados
-      </button>
-    </div>
-
-  </div>
-</div>
-
-<!-- Grilla de Tarjetas de Cuestionarios -->
-<div id="cuestionarios-grid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(340px, 1fr)); gap:20px;">
-  {% for c in cuestionarios %}
-  <div class="card cuestionario-card" data-estado="{{ c.estado }}" data-texto="{{ c.nombre|lower }} {{ c.descripcion|lower }}" style="margin-bottom:0; display:flex; flex-direction:column; justify-content:space-between; padding:22px; border-radius:16px; transition:transform 0.15s ease, box-shadow 0.15s ease;">
-    
-    <div>
-      <!-- Cabecera de la Tarjeta: Badges a la izquierda y Vista Previa a la derecha -->
-      <div class="flex justify-between items-center mb-3 gap-2">
-        <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
-          {% if c.esta_vencido %}
-            <span class="badge badge-danger">● Cerrado</span>
-          {% elif c.esta_vigente %}
-            <span class="badge badge-success">● Disponible</span>
-          {% elif c.estado_temporal == 'programado' %}
-            <span class="badge badge-info">● Programado</span>
-          {% else %}
-            <span class="badge badge-warning">● Borrador</span>
-          {% endif %}
-          <span class="badge {{ c.tiempo_restante_info.clase }} texto-xs">
-            {{ c.tiempo_restante_info.texto }}
-          </span>
+  <div class="rejilla-cuestionarios">
+    {% for c in cuestionarios %}
+    <article class="card tarjeta-listado" data-estado="{{ c.estado_temporal }}" data-texto="{{ c.nombre|lower }} {{ c.descripcion|default:''|lower }}">
+      <div>
+        <div class="flex justify-between items-center gap-2 mb-3">
+          <div class="flex items-center gap-2 flex-wrap">
+            {% if c.estado_temporal == 'cerrado' %}<span class="badge badge-neutro">Cerrado</span>
+            {% elif c.estado_temporal == 'disponible' %}<span class="badge badge-success">Disponible</span>
+            {% elif c.estado_temporal == 'programado' %}<span class="badge badge-info">Programado</span>
+            {% else %}<span class="badge badge-warning">Borrador</span>{% endif %}
+            <span class="badge {{ c.tiempo_restante_info.clase }}">{{ c.tiempo_restante_info.texto }}</span>
+          </div>
+          <a href="{% url 'cuestionarios:previsualizar' c.id %}" class="btn btn-outline btn-accion"><i data-lucide="eye" class="icono-13"></i> Vista previa</a>
         </div>
 
-        {% if user.is_superuser or user.perfil.es_admin or user.perfil.es_docente %}
-        <a href="{% url 'cuestionarios:previsualizar' c.id %}" class="btn btn-outline" style="padding:4px 9px; font-size:var(--texto-xs); border-radius:8px; display:inline-flex; align-items:center; gap:4px; color:var(--color-texto-suave); border-color:var(--color-borde); background:var(--color-superficie-tenue);" title="Previsualizar cuestionario como estudiante">
-          <i data-lucide="eye" class="icono-13 texto-primario"></i> Vista previa
-        </a>
-        {% endif %}
+        <h3 class="tarjeta-listado__titulo">{{ c.nombre }}</h3>
+        <p class="card-subtitle mb-3">{{ c.descripcion|default:"Sin instrucciones."|truncatewords:18 }}</p>
+
+        <ul class="tarjeta-cuestionario__datos">
+          <li><i data-lucide="help-circle" class="icono-13"></i> <strong>{{ c.cuestionario_preguntas.all|length }}</strong> preguntas</li>
+          <li><i data-lucide="clock" class="icono-13"></i> <strong>{{ c.tiempo_limite_minutos }}</strong> min</li>
+          <li><i data-lucide="award" class="icono-13"></i> Aprueba con <strong>{{ c.calificacion_aprobacion }}</strong> / {{ c.calificacion_maxima }}</li>
+          <li><i data-lucide="shuffle" class="icono-13"></i> {% if c.mezclar_preguntas %}Orden aleatorio{% else %}Orden fijo{% endif %}</li>
+        </ul>
+
+        <div class="tarjeta-listado__fechas">
+          <span class="inline-flex items-center gap-1"><i data-lucide="calendar" class="icono-13"></i> Cierre: <strong class="{% if c.estado_temporal == 'cerrado' %}texto-peligro{% endif %}">{{ c.fecha_cierre|date:"d M Y · H:i" }}</strong></span>
+          <span class="texto-tenue">Inicio: {{ c.fecha_apertura|date:"d M" }}</span>
+        </div>
       </div>
 
-      <!-- Título y Descripción -->
-      <h3 class="card-title text-xl font-bold text-main" style="margin-bottom:6px; line-height:1.3;">
-        {{ c.nombre }}
-      </h3>
-      <p class="card-subtitle text-sm" style="margin-bottom:14px; line-height:1.5;">
-        {{ c.descripcion|default:"Evaluación estandarizada por competencias para el fortalecimiento académico institucional Saber TyT."|truncatewords:18 }}
-      </p>
-
-      <!-- Micro-métricas de Evaluación (Línea limpia y horizontal) -->
-      <div style="display:flex; align-items:center; gap:10px; font-size:var(--texto-xs); color:var(--color-texto-suave); flex-wrap:wrap; margin-bottom:14px;">
-        <span class="inline-flex items-center gap-1">
-          <i data-lucide="help-circle" class="icono-13 texto-primario"></i>
-          <strong>{{ c.cuestionario_preguntas.count }}</strong> preguntas
-        </span>
-        <span style="color:var(--color-borde-fuerte);">&middot;</span>
-        <span class="inline-flex items-center gap-1">
-          <i data-lucide="clock" class="icono-13 texto-primario"></i>
-          <strong>{{ c.tiempo_limite_minutos }}</strong> min
-        </span>
-        <span style="color:var(--color-borde-fuerte);">&middot;</span>
-        <span class="inline-flex items-center gap-1">
-          <i data-lucide="award" class="icono-13 texto-primario"></i>
-          Mín: <strong>{{ c.calificacion_aprobacion }}</strong>/{{ c.calificacion_maxima }}
-        </span>
-        <span style="color:var(--color-borde-fuerte);">&middot;</span>
-        <span class="inline-flex items-center gap-1">
-          <i data-lucide="shuffle" class="icono-13 texto-primario"></i>
-          {% if c.mezclar_preguntas %}Aleatorio{% else %}Fijo{% endif %}
-        </span>
+      <div class="tarjeta-listado__acciones">
+        <a href="{% url 'reportes:intentos' c.id %}" class="btn btn-secondary"><i data-lucide="users" class="icono-15"></i> Intentos ({{ c.intentos.all|length }})</a>
+        <a href="{% url 'cuestionarios:editar' c.id %}" class="btn btn-primary"><i data-lucide="settings" class="icono-15"></i> Configurar</a>
       </div>
-
-      <!-- Fecha en 1 sola línea sutil -->
-      <div style="font-size:var(--texto-xs); color:var(--color-texto-suave); border-top:1px solid var(--color-superficie-hundida); padding-top:10px; margin-bottom:16px; display:flex; justify-content:space-between; align-items:center;">
-        <span style="display:inline-flex; align-items:center; gap:6px; color:var(--color-texto-suave);">
-          <i data-lucide="calendar" class="icono-13 texto-suave"></i>
-          Cierre: <strong style="color:{% if c.esta_vencido %}var(--rojo-600){% else %}var(--color-texto){% endif %};">{{ c.fecha_cierre|date:"d M Y · H:i" }}</strong>
-        </span>
-        <span class="texto-xs texto-tenue">
-          Inicio: {{ c.fecha_apertura|date:"d M" }}
-        </span>
-      </div>
+    </article>
+    {% empty %}
+    <div class="card rejilla-cuestionarios__completa">
+      {% componente "componentes/estado_vacio.html" icono="clipboard-x" titulo="No hay cuestionarios registrados" mensaje="Crea una evaluación y asígnale preguntas del banco." %}
+        <a href="{% url 'cuestionarios:crear' %}" class="btn btn-primary"><i data-lucide="plus"></i> Crear el primer cuestionario</a>
+      {% fincomponente %}
     </div>
-
-    <!-- Botones de Acción Segregados por Rol: 2 Botones Balanceados y Anchos -->
-    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:auto;">
-      {% if user.is_superuser or user.perfil.es_admin or user.perfil.es_docente %}
-      <a href="{% url 'reportes:intentos' c.id %}" class="btn btn-outline" style="font-size:var(--texto-sm); padding:10px 14px; display:inline-flex; align-items:center; justify-content:center; gap:6px; color:var(--color-primario); font-weight:700; border-color:var(--color-borde-fuerte); border-radius:10px;" title="Ver calificaciones y estudiantes que presentaron">
-        <i data-lucide="users" class="icono-15 texto-primario"></i>
-        Intentos ({{ c.intentos.count }})
-      </a>
-      <a href="{% url 'cuestionarios:editar' c.id %}" class="btn btn-primary" style="font-size:var(--texto-sm); padding:10px 14px; display:inline-flex; align-items:center; justify-content:center; gap:6px; font-weight:700; border-radius:10px;" title="Configurar parámetros y preguntas">
-        <i data-lucide="settings" class="icono-15"></i>
-        Configurar
-      </a>
-      {% else %}
-        {% if c.esta_vigente %}
-        <a href="{% url 'evaluaciones:iniciar' c.id %}" class="btn btn-primary" style="grid-column:1 / -1; font-size:var(--texto-sm); padding:10px; display:inline-flex; align-items:center; justify-content:center; gap:6px; border-radius:10px;">
-          <i data-lucide="play" class="icono-14"></i> Iniciar Evaluación
-        </a>
-        {% elif c.esta_vencido %}
-        <button disabled class="btn btn-outline" style="grid-column:1 / -1; font-size:var(--texto-xs); padding:10px; opacity:0.6; cursor:not-allowed; display:inline-flex; align-items:center; justify-content:center; gap:6px; border-radius:10px;">
-          <i data-lucide="lock" class="icono-13"></i> Plazo Vencido
-        </button>
-        {% else %}
-        <button disabled class="btn btn-outline" style="grid-column:1 / -1; font-size:var(--texto-xs); padding:10px; opacity:0.6; cursor:not-allowed; display:inline-flex; align-items:center; justify-content:center; gap:6px; border-radius:10px;">
-          <i data-lucide="calendar" class="icono-13"></i> Programado ({{ c.fecha_apertura|date:"d M" }})
-        </button>
-        {% endif %}
-      {% endif %}
+    {% endfor %}
+    <div class="card rejilla-cuestionarios__completa" id="sin-resultados" hidden>
+      {% componente "componentes/estado_vacio.html" icono="search-x" titulo="No se encontraron cuestionarios" mensaje="Ajusta la búsqueda o el filtro de estado." %}
+        <button type="button" class="btn btn-outline" data-accion="limpiar-filtros">Limpiar filtros</button>
+      {% fincomponente %}
     </div>
-
   </div>
-  {% empty %}
-  <div style="grid-column:1 / -1; text-align:center; padding:60px 20px; background:var(--color-superficie); border-radius:16px; border:1px solid var(--color-borde);">
-    <div style="width:56px; height:56px; border-radius:50%; background:var(--color-superficie-hundida); color:var(--color-texto-tenue); display:flex; align-items:center; justify-content:center; margin:0 auto 16px;">
-      <i data-lucide="clipboard-x" style="width:28px; height:28px;"></i>
-    </div>
-    <h3 style="font-size:var(--texto-lg); font-weight:800; color:var(--color-texto); margin-bottom:6px;">No hay cuestionarios registrados</h3>
-    <p style="font-size:var(--texto-base); color:var(--color-texto-suave); max-width:440px; margin:0 auto 20px;">
-      Comienza creando una evaluación para programar las preguntas institucionales del banco.
-    </p>
-    {% if user.is_superuser or user.perfil.es_admin or user.perfil.es_docente %}
-    <a href="{% url 'cuestionarios:crear' %}" class="btn btn-primary inline-flex items-center gap-2">
-      <i data-lucide="plus"></i> Crear Primer Cuestionario
-    </a>
-    {% endif %}
-  </div>
-  {% endfor %}
 </div>
-
-<!-- Mensaje cuando la búsqueda no produce resultados -->
-<div id="no-cuestionarios-busqueda" style="display:none; text-align:center; padding:50px 20px; background:var(--color-superficie); border-radius:16px; border:1px solid var(--color-borde); margin-top:16px;">
-  <i data-lucide="search-x" style="width:36px; height:36px; color:var(--color-texto-tenue); margin-bottom:12px;"></i>
-  <h4 class="texto-md peso-bold texto-principal mb-1">No se encontraron cuestionarios</h4>
-  <p class="texto-sm texto-suave">Prueba ajustando los términos de búsqueda o el filtro de estado.</p>
-</div>
-
 {% endblock %}
 
-{% block extra_scripts %}
-<script>
-  let estadoSeleccionado = 'todos';
-
-  function seleccionarFiltroEstado(estado, btn) {
-    estadoSeleccionado = estado;
-    document.querySelectorAll('#filtro-estados-container .filtro-btn').forEach(b => {
-      b.classList.remove('active');
-      b.style.background = '';
-      b.style.color = '';
-    });
-    btn.classList.add('active');
-    btn.style.background = 'var(--color-primario)';
-    btn.style.color = 'var(--color-superficie)';
-    filtrarCuestionarios();
-  }
-
-  function filtrarCuestionarios() {
-    const query = document.getElementById('filtro-cuestionario-texto').value.toLowerCase().trim();
-    const cards = document.querySelectorAll('.cuestionario-card');
-    let visibles = 0;
-
-    cards.forEach(card => {
-      const cardEstado = card.getAttribute('data-estado');
-      const cardTexto = card.getAttribute('data-texto');
-
-      const coincideTexto = !query || cardTexto.includes(query);
-      const coincideEstado = (estadoSeleccionado === 'todos') || (cardEstado === estadoSeleccionado);
-
-      if (coincideTexto && coincideEstado) {
-        card.style.display = 'flex';
-        visibles++;
-      } else {
-        card.style.display = 'none';
-      }
-    });
-
-    const noResultados = document.getElementById('no-cuestionarios-busqueda');
-    if (noResultados) {
-      noResultados.style.display = (visibles === 0 && cards.length > 0) ? 'block' : 'none';
-    }
-  }
-
-  // Estilos iniciales para el botón activo de filtro
-  document.addEventListener('DOMContentLoaded', () => {
-    const btnTodos = document.querySelector('#filtro-estados-container .filtro-btn.active');
-    if (btnTodos) {
-      btnTodos.style.background = 'var(--color-primario)';
-      btnTodos.style.color = 'var(--color-superficie)';
-    }
-  });
-</script>
-{% endblock %}
+{% block extra_scripts %}<script src="{% static 'js/cuestionarios/listado.js' %}"></script>{% endblock %}
