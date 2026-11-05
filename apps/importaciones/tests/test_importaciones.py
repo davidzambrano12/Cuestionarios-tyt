@@ -110,3 +110,110 @@ class ImportacionExcelTests(TestCase):
         r = self.client.post("/preguntas/importar/confirmar/")
         self.assertEqual(Pregunta.objects.count(), 0)
         self.assertEqual(r.status_code, 302)
+
+
+class RevisionImportacionTests(TestCase):
+    """Revisión antes de guardar: ver cada pregunta completa, editarla o excluirla."""
+
+    URL = "/preguntas/importar/previsualizar/"
+
+    @classmethod
+    def setUpTestData(cls):
+        sembrar_roles()
+        cls.docente = crear_usuario("prof", "docente")
+
+    def setUp(self):
+        self.media = tempfile.mkdtemp()
+        self.override = override_settings(MEDIA_ROOT=self.media)
+        self.override.enable()
+        self.client.force_login(self.docente)
+
+    def tearDown(self):
+        self.override.disable()
+        shutil.rmtree(self.media, ignore_errors=True)
+
+    def _subir(self, *filas):
+        self.client.post("/preguntas/importar/", {"archivo": excel(*filas)})
+
+    def _resultado(self):
+        return self.client.get(self.URL).context["resultado"]
+
+    def test_muestra_la_pregunta_completa_con_la_respuesta_correcta(self):
+        con_contexto = ["Lectura Crítica", "MULTIPLE", "Texto de apoyo largo", "¿Cuál es la tesis?",
+                        "Uno", "Dos", "Tres", "Cuatro", "C", "Porque sí", 1]
+        self._subir(con_contexto)
+        r = self.client.get(self.URL)
+        self.assertContains(r, "Texto de apoyo largo")
+        self.assertContains(r, "Porque sí")
+        fila = r.context["resultado"].validas[0]
+        self.assertEqual([o["letra"] for o in fila.opciones_vista if o["es_correcta"]], ["C"])
+        self.assertContains(r, "opcion-importada--correcta", count=1)
+
+    def test_resalta_los_campos_con_error(self):
+        sin_opciones = ["Lectura Crítica", "MULTIPLE", "", "Enunciado", "Uno", "", "Tres", "", "Z", "", 0]
+        self._subir(sin_opciones)
+        fila = self._resultado().con_error[0]
+        self.assertEqual(fila.campos_con_error, {"opcion_b", "opcion_d", "respuesta_correcta", "puntaje"})
+        self.assertContains(self.client.get(self.URL), "campo-error", count=4)
+
+    def test_contenido_del_excel_se_muestra_como_texto(self):
+        self._subir(["Inglés", "MULTIPLE", "", "<script>alert(1)</script>", "<b>A</b>", "B", "C", "D", "A", "", 1])
+        r = self.client.get(self.URL)
+        self.assertNotContains(r, "<script>alert(1)</script>")
+        self.assertContains(r, "&lt;script&gt;alert(1)&lt;/script&gt;")
+        self.assertNotContains(r, "<b>A</b>")
+
+    def test_excluir_e_incluir_una_fila(self):
+        self._subir(FILA_VALIDA, FILA_VF)
+        r = self.client.post("/preguntas/importar/excluir/", {"fila_excel": 2, "accion": "excluir"})
+        self.assertRedirects(r, f"{self.URL}#fila-2", fetch_redirect_response=False)
+        resultado = self._resultado()
+        self.assertEqual([f.fila_excel for f in resultado.excluidas], [2])
+        self.assertEqual(len(resultado.validas), 1)
+        self.assertContains(self.client.get(self.URL), "Se guardarán <strong>1</strong> de 2")
+
+        self.client.post("/preguntas/importar/excluir/", {"fila_excel": 2, "accion": "incluir"})
+        self.assertEqual(len(self._resultado().validas), 2)
+
+    def test_confirmar_no_guarda_las_excluidas(self):
+        self._subir(FILA_VALIDA, FILA_VF)
+        self.client.post("/preguntas/importar/excluir/", {"fila_excel": 3, "accion": "excluir"})
+        self.client.post("/preguntas/importar/confirmar/")
+        self.assertEqual(list(Pregunta.objects.values_list("tipo", flat=True)), ["MULTIPLE"])
+        importacion = Importacion.objects.get()
+        self.assertEqual((importacion.total_filas, importacion.filas_validas), (2, 1))
+        self.assertEqual(importacion.resultado, "exitosa")  # excluir es una decisión, no un fallo
+
+    def test_excluir_la_original_libera_a_su_duplicada(self):
+        self._subir(FILA_VALIDA, FILA_VALIDA)
+        duplicada = self._resultado().duplicadas[0]
+        self.assertEqual((duplicada.fila_excel, duplicada.duplicada_de_fila), (3, 2))
+        self.client.post("/preguntas/importar/excluir/", {"fila_excel": 2})
+        resultado = self._resultado()
+        self.assertEqual([f.fila_excel for f in resultado.validas], [3])
+
+    def test_duplicada_del_banco_enlaza_la_pregunta_existente(self):
+        self._subir(FILA_VALIDA)
+        self.client.post("/preguntas/importar/confirmar/")
+        existente = Pregunta.objects.get()
+        self._subir(FILA_VALIDA)
+        r = self.client.get(self.URL)
+        self.assertEqual(r.context["resultado"].duplicadas[0].duplicada_de_id, existente.id)
+        self.assertContains(r, f'href="/preguntas/{existente.id}/editar/"')
+
+    def test_editar_vuelve_a_la_misma_fila(self):
+        self._subir(FILA_VALIDA, FILA_ERROR)
+        datos = dict(zip(COLUMNAS, FILA_ERROR))
+        datos.update(tipo="MULTIPLE", opcion_a="A1", opcion_b="B1", opcion_c="C1", opcion_d="D1", fila_excel=3)
+        r = self.client.post("/preguntas/importar/corregir/", datos)
+        self.assertRedirects(r, f"{self.URL}#fila-3", fetch_redirect_response=False)
+        self.assertEqual(len(self._resultado().validas), 2)
+
+    def test_errores_aparecen_primero(self):
+        self._subir(FILA_VALIDA, FILA_VF, FILA_ERROR)
+        orden = [f.estado for f in self._resultado().filas_para_revision]
+        self.assertEqual(orden, ["error", "valida", "valida"])
+
+    def test_excluir_sin_importacion_en_curso(self):
+        r = self.client.post("/preguntas/importar/excluir/", {"fila_excel": 2})
+        self.assertRedirects(r, "/preguntas/importar/", fetch_redirect_response=False)

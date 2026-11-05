@@ -45,7 +45,7 @@ def _texto(valor) -> str:
 @dataclass
 class FilaImportacion:
     fila_excel: int
-    estado: str  # "valida" | "duplicada" | "error"
+    estado: str  # "valida" | "duplicada" | "error" | "excluida"
     categoria: str = ""
     tipo: str = ""
     enunciado: str = ""
@@ -57,6 +57,40 @@ class FilaImportacion:
     opciones: list[tuple[str, bool]] = field(default_factory=list)  # (texto, es_correcta)
     huella: str = ""
     valores_crudos: dict = field(default_factory=dict)
+    # Columnas que provocaron errores, para resaltarlas en la revisión
+    campos_con_error: set[str] = field(default_factory=set)
+    # Si es duplicada: pregunta del banco o fila del archivo con la que coincide
+    duplicada_de_id: int | None = None
+    duplicada_de_fila: int | None = None
+    # Estado que tendría si el usuario no la hubiera excluido
+    estado_original: str = ""
+
+    @property
+    def opciones_vista(self) -> list[dict]:
+        """Opciones tal como se mostrarán en la revisión, también en filas con error."""
+        tipo = (self.valores_crudos.get("tipo", "") or "").upper()
+        correcta = (self.valores_crudos.get("respuesta_correcta", "") or "").upper()
+        letras = ["A", "B"] if tipo == "V_F" else LETRAS_OPCION
+        vista = []
+        for letra in letras:
+            columna = f"opcion_{letra.lower()}"
+            texto = self.valores_crudos.get(columna, "")
+            if tipo not in TIPOS_VALIDOS and not texto:
+                continue
+            vista.append({
+                "letra": letra,
+                "texto": texto,
+                "es_correcta": letra == correcta,
+                "con_error": columna in self.campos_con_error,
+            })
+        return vista
+
+    @property
+    def texto_busqueda(self) -> str:
+        """Texto en minúsculas para el buscador de la revisión."""
+        columnas = ("categoria", "texto_base", "pregunta", "opcion_a", "opcion_b",
+                    "opcion_c", "opcion_d", "retroalimentacion")
+        return " ".join(v for v in (self.valores_crudos.get(c, "") for c in columnas) if v).lower()
 
     @property
     def json_data(self) -> str:
@@ -114,6 +148,20 @@ class ResultadoImportacion:
         return [f for f in self.filas if f.estado == "error"]
 
     @property
+    def excluidas(self):
+        return [f for f in self.filas if f.estado == "excluida"]
+
+    @property
+    def categorias(self) -> list[str]:
+        return sorted({f.valores_crudos.get("categoria", "") for f in self.filas} - {""}, key=str.lower)
+
+    @property
+    def filas_para_revision(self):
+        """Primero lo que necesita atención: errores, duplicadas, válidas y excluidas."""
+        orden = {"error": 0, "duplicada": 1, "valida": 2, "excluida": 3}
+        return sorted(self.filas, key=lambda f: (orden[f.estado], f.fila_excel))
+
+    @property
     def resultado_global(self) -> str:
         if not self.validas:
             return "fallida"
@@ -125,6 +173,7 @@ class ResultadoImportacion:
 def _validar_fila(valores: dict) -> FilaImportacion:
     """Valida una fila ya leída del Excel (sin tocar la base de datos)."""
     errores = []
+    campos: set[str] = set()
 
     categoria = _texto(valores["categoria"])
     tipo = _texto(valores["tipo"]).upper()
@@ -137,36 +186,46 @@ def _validar_fila(valores: dict) -> FilaImportacion:
 
     if not categoria:
         errores.append("falta la categoría")
+        campos.add("categoria")
     if tipo not in TIPOS_VALIDOS:
         errores.append("tipo inválido (usa MULTIPLE o V_F)")
+        campos.add("tipo")
     if not enunciado:
         errores.append("falta el enunciado de la pregunta")
+        campos.add("pregunta")
 
     puntaje = None
     if puntaje_crudo in (None, ""):
         errores.append("falta el puntaje")
+        campos.add("puntaje")
     else:
         try:
             puntaje = Decimal(str(puntaje_crudo))
             if puntaje <= 0:
                 errores.append("el puntaje debe ser mayor que cero")
+                campos.add("puntaje")
         except (InvalidOperation, ValueError):
             errores.append("el puntaje no es un número válido")
+            campos.add("puntaje")
 
     opciones: list[tuple[str, bool]] = []
     if tipo == "MULTIPLE":
         faltantes = [l for l in LETRAS_OPCION if not opciones_crudas[l]]
         if faltantes:
             errores.append(f"faltan opciones: {', '.join(opciones_crudas[l] or l for l in faltantes)}")
+            campos.update(f"opcion_{l.lower()}" for l in faltantes)
         if respuesta_correcta not in LETRAS_OPCION:
             errores.append("respuesta_correcta debe ser A, B, C o D")
+            campos.add("respuesta_correcta")
         if not errores:
             opciones = [(opciones_crudas[l], l == respuesta_correcta) for l in LETRAS_OPCION]
     elif tipo == "V_F":
         if not opciones_crudas["A"] or not opciones_crudas["B"]:
             errores.append("faltan opcion_a / opcion_b (Verdadero/Falso)")
+            campos.update(f"opcion_{l.lower()}" for l in ("A", "B") if not opciones_crudas[l])
         if respuesta_correcta not in ("A", "B"):
             errores.append("respuesta_correcta debe ser A o B en preguntas V_F")
+            campos.add("respuesta_correcta")
         if not errores:
             opciones = [
                 (opciones_crudas["A"], respuesta_correcta == "A"),
@@ -186,6 +245,7 @@ def _validar_fila(valores: dict) -> FilaImportacion:
         puntaje=puntaje,
         opciones=opciones,
         valores_crudos={k: _texto(valores.get(k, "")) for k in COLUMNAS},
+        campos_con_error=campos,
     )
     if not errores:
         fila.huella = calcular_huella(enunciado, [o[0] for o in opciones])
@@ -193,15 +253,20 @@ def _validar_fila(valores: dict) -> FilaImportacion:
 
 
 def procesar_archivo(ruta_archivo: str, nombre_archivo: str, *, commit: bool = False,
-                      cuestionario_id: int | None = None) -> ResultadoImportacion:
+                      cuestionario_id: int | None = None,
+                      excluidas: set[int] | frozenset[int] = frozenset()) -> ResultadoImportacion:
     """Lee y valida el Excel. Si commit=True, además guarda en la base de
-    datos dentro de una transacción y registra la fila en `importaciones`."""
+    datos dentro de una transacción y registra la fila en `importaciones`.
+
+    `excluidas` son filas de Excel que el usuario decidió no importar: se
+    validan y se muestran, pero no se guardan ni cuentan para detectar
+    duplicadas dentro del archivo."""
     wb = openpyxl.load_workbook(ruta_archivo, data_only=True)
     ws = wb["preguntas"] if "preguntas" in wb.sheetnames else wb.active
 
     resultado = ResultadoImportacion(nombre_archivo=nombre_archivo)
     huellas_vistas_en_archivo: dict[str, int] = {}
-    huellas_existentes = set(Pregunta.objects.values_list("huella_contenido", flat=True))
+    huellas_existentes = dict(Pregunta.objects.values_list("huella_contenido", "id"))
 
     for fila_excel, row in enumerate(ws.iter_rows(min_row=2, max_col=len(COLUMNAS), values_only=True), start=2):
         if row is None or all(v in (None, "") for v in row):
@@ -212,13 +277,18 @@ def procesar_archivo(ruta_archivo: str, nombre_archivo: str, *, commit: bool = F
         fila.fila_excel = fila_excel
         resultado.total_filas += 1
 
-        if fila.estado == "valida":
+        if fila_excel in excluidas:
+            fila.estado_original = fila.estado
+            fila.estado = "excluida"
+        elif fila.estado == "valida":
             if fila.huella in huellas_existentes or fila.huella in huellas_vistas_en_archivo:
                 origen = huellas_vistas_en_archivo.get(fila.huella)
                 fila.estado = "duplicada"
                 if origen:
+                    fila.duplicada_de_fila = origen
                     fila.errores = [f"misma pregunta que la fila {origen} de este archivo"]
                 else:
+                    fila.duplicada_de_id = huellas_existentes[fila.huella]
                     fila.errores = ["esta pregunta ya existe en el banco de preguntas"]
             else:
                 huellas_vistas_en_archivo[fila.huella] = fila_excel

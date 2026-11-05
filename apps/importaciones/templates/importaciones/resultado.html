@@ -17,7 +17,7 @@
       <span class="resultado-importacion__icono resultado-importacion__icono--aviso"><i data-lucide="alert-triangle" class="icono-24"></i></span>
       <h1 class="texto-xl peso-extrabold mb-1">No se guardó ninguna pregunta</h1>
     {% endif %}
-    <p class="texto-sm texto-suave mb-5">Archivo: {{ resultado.nombre_archivo }}</p>
+    <p class="texto-sm texto-suave mb-5">Archivo: {{ resultado.nombre_archivo }}{% if resultado.excluidas %} · {{ resultado.excluidas|length }} fila{{ resultado.excluidas|length|pluralize }} que decidiste no importar{% endif %}</p>
 
     <div class="metricas metricas--3">
       {% componente "componentes/metrica.html" etiqueta="Guardadas" valor=resultado.validas|length variante="exito" %}{% fincomponente %}
