@@ -16,7 +16,7 @@
         <p style="font-size:12px; color:#64748b;">Ajuste de parámetros institucionales, identidad visual, zona horaria y canales oficiales de soporte.</p>
       </div>
 
-      <form method="POST" action="/ajustes/guardar/">
+      <form method="POST" action="{% url 'core:guardar_ajustes' %}">
         {% csrf_token %}
 
         <!-- Identidad Institucional -->

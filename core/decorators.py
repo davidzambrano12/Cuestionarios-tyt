@@ -1,4 +1,6 @@
 from functools import wraps
+
+from django.contrib.auth.views import redirect_to_login
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponseForbidden, JsonResponse
@@ -17,13 +19,13 @@ def requiere_permiso(codigo_permiso: str):
                 if request.headers.get("x-requested-with") == "XMLHttpRequest" or request.path.startswith("/api/"):
                     return JsonResponse({"detail": "Autenticación requerida."}, status=401)
                 messages.warning(request, "Debe iniciar sesión para acceder a este recurso.")
-                return redirect(f"/login/?next={request.path}")
+                return redirect_to_login(request.get_full_path())
 
             if not request.user.is_active:
                 if request.headers.get("x-requested-with") == "XMLHttpRequest" or request.path.startswith("/api/"):
                     return JsonResponse({"detail": "Su cuenta está desactivada o suspendida."}, status=403)
                 messages.error(request, "Su cuenta institucional ha sido suspendida. Contacte al administrador.")
-                return redirect("/login/")
+                return redirect("login")
 
             # Superusuarios de Django tienen acceso total
             if request.user.is_superuser:
@@ -61,7 +63,7 @@ def solo_roles(*codigos_roles):
         @wraps(view_func)
         def _wrapped_view(request, *args, **kwargs):
             if not request.user.is_authenticated:
-                return redirect(f"/login/?next={request.path}")
+                return redirect_to_login(request.get_full_path())
             if request.user.is_superuser:
                 return view_func(request, *args, **kwargs)
             perfil = getattr(request.user, "perfil", None)

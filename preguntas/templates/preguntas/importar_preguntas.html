@@ -1,4 +1,5 @@
 {% extends 'app_base.html' %}
+{% load static %}
 
 {% block title %}Importar Preguntas - Simulador Saber TyT{% endblock %}
 
@@ -9,7 +10,7 @@
 
     <!-- Volver al Banco -->
     <div style="margin-bottom:16px;">
-      <a href="/preguntas/" style="display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:600; color:#186382; text-decoration:none;">
+      <a href="{% url 'preguntas:banco' %}" style="display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:600; color:#186382; text-decoration:none;">
         <i data-lucide="arrow-left" style="width:16px; height:16px;"></i> Volver al Banco de Preguntas
       </a>
     </div>
@@ -112,7 +113,7 @@
           Validar y Previsualizar Archivo &rarr;
         </button>
 
-        <a href="/static/plantillas/plantilla_preguntas_simulador_tyt.xlsx" download class="btn btn-outline btn-full" style="padding:10px; font-size:13px; color:#186382; border-color:#93c5fd; display:inline-flex; align-items:center; justify-content:center; gap:6px;">
+        <a href="{% static 'plantillas/plantilla_preguntas_simulador_tyt.xlsx' %}" download class="btn btn-outline btn-full" style="padding:10px; font-size:13px; color:#186382; border-color:#93c5fd; display:inline-flex; align-items:center; justify-content:center; gap:6px;">
           <i data-lucide="download" style="width:15px; height:15px;"></i> Descargar Plantilla Oficial Excel
         </a>
       </form>

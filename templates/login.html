@@ -7,7 +7,7 @@
 
   <!-- Header con botón volver -->
   <div style="padding:20px 32px;">
-    <a href="/" style="display:inline-flex; align-items:center; justify-content:center; width:40px; height:40px; border-radius:50%; background:white; border:1px solid #e2e8f0; color:#0f172a; text-decoration:none; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+    <a href="{% url 'landing' %}" style="display:inline-flex; align-items:center; justify-content:center; width:40px; height:40px; border-radius:50%; background:white; border:1px solid #e2e8f0; color:#0f172a; text-decoration:none; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
       <i data-lucide="arrow-left" style="width:18px; height:18px;"></i>
     </a>
   </div>
@@ -32,7 +32,7 @@
         <div id="login-error" style="display:none; background:#fee2e2; border:1px solid #fca5a5; color:#b91c1c; padding:10px 14px; border-radius:8px; font-size:13px; margin-bottom:18px;"></div>
 
         <!-- Formulario Login con soporte dual: AJAX JWT y POST tradicional -->
-        <form id="form-login" method="POST" action="/login/" onsubmit="handleLogin(event)">
+        <form id="form-login" method="POST" action="{% url 'login' %}" onsubmit="handleLogin(event)">
           {% csrf_token %}
           
           <div class="form-group">
@@ -129,7 +129,7 @@
     btn.innerText = 'Validando credenciales JWT...';
 
     try {
-      const response = await fetch('/api/auth/token/', {
+      const response = await fetch('{% url 'core:token_obtain_pair' %}', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

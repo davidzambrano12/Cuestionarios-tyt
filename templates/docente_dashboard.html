@@ -49,10 +49,10 @@
           </div>
           <p class="card-subtitle" style="margin-bottom:20px;">8 cuestionarios · 2 borradores por completar</p>
           <div style="display:flex; gap:10px;">
-            <a href="/cuestionarios/crear/" class="btn btn-primary" style="flex:1; font-size:13px; padding:10px;">
+            <a href="{% url 'preguntas:cuestionario_crear' %}" class="btn btn-primary" style="flex:1; font-size:13px; padding:10px;">
               <i data-lucide="plus"></i> Crear cuestionario
             </a>
-            <a href="/cuestionarios/" class="btn btn-secondary" style="flex:1; font-size:13px; padding:10px;">
+            <a href="{% url 'preguntas:cuestionarios_list' %}" class="btn btn-secondary" style="flex:1; font-size:13px; padding:10px;">
               <i data-lucide="settings"></i> Administrar
             </a>
           </div>
@@ -69,10 +69,10 @@
           </div>
           <p class="card-subtitle" style="margin-bottom:20px;">64 preguntas · 6 pendientes de revisión</p>
           <div style="display:flex; gap:10px;">
-            <a href="/preguntas/#nueva" class="btn btn-primary" style="flex:1; font-size:13px; padding:10px;">
+            <a href="{% url 'preguntas:banco' %}#nueva" class="btn btn-primary" style="flex:1; font-size:13px; padding:10px;">
               <i data-lucide="plus"></i> Nueva pregunta
             </a>
-            <a href="/preguntas/" class="btn btn-secondary" style="flex:1; font-size:13px; padding:10px;">
+            <a href="{% url 'preguntas:banco' %}" class="btn btn-secondary" style="flex:1; font-size:13px; padding:10px;">
               <i data-lucide="settings"></i> Administrar
             </a>
           </div>
@@ -82,7 +82,7 @@
       <!-- Cuestionarios Recientes -->
       <div class="section-header">
         <h2 class="section-title">Cuestionarios recientes</h2>
-        <a href="/cuestionarios/" class="section-subtitle font-semibold text-primary">Ver todos &rarr;</a>
+        <a href="{% url 'preguntas:cuestionarios_list' %}" class="section-subtitle font-semibold text-primary">Ver todos &rarr;</a>
       </div>
 
       <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(340px, 1fr)); gap:20px;">
@@ -99,7 +99,7 @@
           </div>
           <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid #f1f5f9; padding-top:12px;">
             <span style="font-size:12px; color:#64748b; display:inline-flex; align-items:center; gap:4px;"><i data-lucide="users" style="width:14px; height:14px;"></i> {{ c.intentos.count }} participantes</span>
-            <a href="/cuestionarios/{{ c.id }}/editar/" style="font-size:13px; font-weight:700; color:#186382;">
+            <a href="{% url 'preguntas:cuestionario_editar' c.id %}" style="font-size:13px; font-weight:700; color:#186382;">
               Administrar &rarr;
             </a>
           </div>

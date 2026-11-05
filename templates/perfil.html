@@ -30,7 +30,7 @@
           <h3 class="card-title text-base font-bold text-main" style="margin:0;">Datos Personales y Programa</h3>
         </div>
 
-        <form method="POST" action="/perfil/actualizar/">
+        <form method="POST" action="{% url 'core:actualizar_perfil' %}">
           {% csrf_token %}
           <div class="form-group">
             <label class="form-label">Código Institucional</label>
@@ -65,7 +65,7 @@
           <h3 style="font-size:14px; font-weight:800; color:#0f172a; margin:0;">Seguridad y Credenciales</h3>
         </div>
 
-        <form method="POST" action="/perfil/cambiar-password/">
+        <form method="POST" action="{% url 'core:cambiar_password' %}">
           {% csrf_token %}
           <div class="form-group">
             <label class="form-label">Nueva Contraseña</label>
@@ -88,7 +88,7 @@
           <span style="display:inline-flex; align-items:center; gap:4px;"><i data-lucide="globe" style="width:13px; height:13px;"></i> Red IUP Campus Mocoa</span>
           <span style="color:#16a34a; font-weight:700;">● Sesión Activa Segura</span>
         </div>
-        <a href="/logout/" onclick="cerrarSesion(); return false;" class="btn btn-danger btn-full" style="padding:10px; font-size:13px; text-decoration:none; display:inline-flex; align-items:center; justify-content:center; gap:8px;">
+        <a href="{% url 'logout' %}" onclick="cerrarSesion(); return false;" class="btn btn-danger btn-full" style="padding:10px; font-size:13px; text-decoration:none; display:inline-flex; align-items:center; justify-content:center; gap:8px;">
           <i data-lucide="log-out" style="width:15px; height:15px;"></i> Cerrar Sesión Segura (Revocar JWT)
         </a>
       </div>

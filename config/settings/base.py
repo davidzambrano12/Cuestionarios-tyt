@@ -143,7 +143,7 @@ MAILERS = {
 }
 
 # Redirecciones de Autenticación
-LOGIN_URL = "/login/"
-LOGIN_REDIRECT_URL = "/dashboard/estudiante/"
-LOGOUT_REDIRECT_URL = "/login/"
+LOGIN_URL = "login"
+LOGIN_REDIRECT_URL = "core:estudiante_dashboard"
+LOGOUT_REDIRECT_URL = "login"
 

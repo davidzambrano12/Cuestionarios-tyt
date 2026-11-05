@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -11,7 +12,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300;1,400&display=swap" rel="stylesheet">
   
   <!-- Estilos globales del sistema de diseño -->
-  <link rel="stylesheet" href="/static/css/styles.css">
+  <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 
   <!-- Estilos para iconos vectoriales Lucide -->
   <style>
@@ -85,7 +86,7 @@
       const refresh = localStorage.getItem('refresh_token') || getCookie('refresh_token');
       try {
         if (refresh) {
-          await fetch('/api/auth/logout/', {
+          await fetch('{% url 'core:jwt_logout' %}', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -106,7 +107,7 @@
       document.cookie = "refresh_token=; path=/; max-age=0;";
       
       // Redirigir al endpoint de Django /logout/ para destruir la sesión en el servidor y mostrar /login/
-      window.location.href = '/logout/';
+      window.location.href = '{% url 'logout' %}';
     }
 
     // Sistema de Alertas / Notificaciones Dinámicas

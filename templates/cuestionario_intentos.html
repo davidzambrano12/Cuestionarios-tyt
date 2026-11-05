@@ -46,13 +46,13 @@
         </div>
       </div>
       <div style="display:flex; gap:10px; flex-wrap:wrap;">
-        <a id="btn-exportar" href="/cuestionarios/{{ cuestionario.id }}/intentos/exportar/" class="btn btn-outline" style="background:white; color:#0f172a; padding:10px 16px; border-radius:10px; font-weight:600; display:inline-flex; align-items:center; gap:6px;" title="Descarga un libro .xlsx con resumen, notas definitivas e historial">
+        <a id="btn-exportar" href="{% url 'preguntas:exportar_intentos_excel' cuestionario.id %}" class="btn btn-outline" style="background:white; color:#0f172a; padding:10px 16px; border-radius:10px; font-weight:600; display:inline-flex; align-items:center; gap:6px;" title="Descarga un libro .xlsx con resumen, notas definitivas e historial">
           <i data-lucide="file-spreadsheet" aria-hidden="true" style="width:15px; height:15px;"></i> <span id="btn-exportar-texto">Exportar a Excel</span>
         </a>
-        <a href="/cuestionarios/{{ cuestionario.id }}/previsualizar/" class="btn btn-outline" style="background:white; color:#0f172a; padding:10px 16px; border-radius:10px; font-weight:600; display:inline-flex; align-items:center; gap:6px;">
+        <a href="{% url 'preguntas:cuestionario_previsualizar' cuestionario.id %}" class="btn btn-outline" style="background:white; color:#0f172a; padding:10px 16px; border-radius:10px; font-weight:600; display:inline-flex; align-items:center; gap:6px;">
           <i data-lucide="eye" aria-hidden="true" style="width:15px; height:15px;"></i> Probar examen
         </a>
-        <a href="/cuestionarios/" class="btn btn-primary" style="padding:10px 18px; border-radius:10px; font-weight:700; display:inline-flex; align-items:center; gap:6px;">
+        <a href="{% url 'preguntas:cuestionarios_list' %}" class="btn btn-primary" style="padding:10px 18px; border-radius:10px; font-weight:700; display:inline-flex; align-items:center; gap:6px;">
           <i data-lucide="arrow-left" aria-hidden="true" style="width:15px; height:15px;"></i> Volver
         </a>
       </div>
@@ -219,7 +219,7 @@
                   <i data-lucide="chevron-down" aria-hidden="true" style="width:13px; height:13px; transition:transform 0.2s ease;"></i>
                 </button>
 
-                <form method="POST" action="/cuestionarios/{{ cuestionario.id }}/intentos/reiniciar-estudiante/{{ est.codigo }}/" onsubmit="return confirm('¿Restablecer el cupo de {{ est.nombre|escapejs }} ({{ est.codigo|escapejs }})?\n\nSe eliminarán sus {{ est.total_intentos }} intento(s) y sus notas en este cuestionario. Esta acción no se puede deshacer.');" style="display:inline; margin:0;">
+                <form method="POST" action="{% url 'preguntas:reiniciar_estudiante_cuestionario' cuestionario.id est.codigo %}" onsubmit="return confirm('¿Restablecer el cupo de {{ est.nombre|escapejs }} ({{ est.codigo|escapejs }})?\n\nSe eliminarán sus {{ est.total_intentos }} intento(s) y sus notas en este cuestionario. Esta acción no se puede deshacer.');" style="display:inline; margin:0;">
                   {% csrf_token %}
                   <button type="submit" class="btn btn-accion btn-peligro" title="Elimina todos sus intentos y le devuelve el cupo completo">
                     <i data-lucide="rotate-ccw" aria-hidden="true" style="width:13px; height:13px;"></i> Restablecer cupo
@@ -268,11 +268,11 @@
 
                       <div style="display:inline-flex; gap:6px;">
                         {% if it.estado != 'en_progreso' %}
-                        <a href="/evaluacion/{{ it.id }}/resultado/" class="btn btn-outline btn-accion" style="font-size:11px;">
+                        <a href="{% url 'preguntas:resultado_evaluacion' it.id %}" class="btn btn-outline btn-accion" style="font-size:11px;">
                           <i data-lucide="eye" aria-hidden="true" style="width:12px; height:12px;"></i> Ver respuestas
                         </a>
                         {% endif %}
-                        <form method="POST" action="/cuestionarios/intentos/{{ it.id }}/reiniciar/" onsubmit="return confirm('¿Anular el intento {{ forloop.revcounter }} de {{ est.nombre|escapejs }}?\n\nEl intento y su nota se eliminarán y el estudiante recuperará ese cupo.');" style="display:inline;">
+                        <form method="POST" action="{% url 'preguntas:reiniciar_intento' it.id %}" onsubmit="return confirm('¿Anular el intento {{ forloop.revcounter }} de {{ est.nombre|escapejs }}?\n\nEl intento y su nota se eliminarán y el estudiante recuperará ese cupo.');" style="display:inline;">
                           {% csrf_token %}
                           <button type="submit" class="btn btn-accion btn-peligro" style="font-size:11px;" title="Elimina solo este intento">
                             <i data-lucide="trash-2" aria-hidden="true" style="width:12px; height:12px;"></i> Anular
@@ -361,11 +361,11 @@
             <td class="td-cell" style="text-align:right;">
               <div style="display:inline-flex; align-items:center; gap:6px;">
                 {% if i.estado != 'en_progreso' %}
-                <a href="/evaluacion/{{ i.id }}/resultado/" class="btn btn-outline btn-accion" style="font-size:11px;">
+                <a href="{% url 'preguntas:resultado_evaluacion' i.id %}" class="btn btn-outline btn-accion" style="font-size:11px;">
                   <i data-lucide="eye" aria-hidden="true" style="width:12px; height:12px;"></i> Ver respuestas
                 </a>
                 {% endif %}
-                <form method="POST" action="/cuestionarios/intentos/{{ i.id }}/reiniciar/" onsubmit="return confirm('¿Anular este intento de {{ i.participante_nombre|escapejs }}?\n\nEl intento y su nota se eliminarán y el estudiante recuperará ese cupo.');" style="display:inline;">
+                <form method="POST" action="{% url 'preguntas:reiniciar_intento' i.id %}" onsubmit="return confirm('¿Anular este intento de {{ i.participante_nombre|escapejs }}?\n\nEl intento y su nota se eliminarán y el estudiante recuperará ese cupo.');" style="display:inline;">
                   {% csrf_token %}
                   <button type="submit" class="btn btn-accion btn-peligro" style="font-size:11px;">
                     <i data-lucide="trash-2" aria-hidden="true" style="width:12px; height:12px;"></i> Anular
@@ -395,7 +395,7 @@
 
 {% block extra_scripts %}
 <script>
-  const URL_EXPORTAR = '/cuestionarios/{{ cuestionario.id }}/intentos/exportar/';
+  const URL_EXPORTAR = '{% url 'preguntas:exportar_intentos_excel' cuestionario.id %}';
   let vistaActual = 'estudiantes';
   let estadoActual = 'todos';
 

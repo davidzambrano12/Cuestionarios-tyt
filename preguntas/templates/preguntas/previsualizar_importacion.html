@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Auditoría y Corrección de Importación - Simulador Saber TyT{% endblock %}
 
@@ -8,7 +9,7 @@
 
     <!-- Topbar -->
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-      <a href="/preguntas/importar/" style="display:inline-flex; align-items:center; justify-content:center; width:38px; height:38px; border-radius:50%; background:white; border:1px solid #e2e8f0; color:#0f172a; text-decoration:none;" title="Volver a Carga">
+      <a href="{% url 'preguntas:importar' %}" style="display:inline-flex; align-items:center; justify-content:center; width:38px; height:38px; border-radius:50%; background:white; border:1px solid #e2e8f0; color:#0f172a; text-decoration:none;" title="Volver a Carga">
         <i data-lucide="arrow-left" style="width:18px; height:18px;"></i>
       </a>
       <h2 style="font-size:18px; font-weight:800; color:#0f172a; margin:0;">Validación y Auditoría de Ingesta</h2>
@@ -52,7 +53,7 @@
         </div>
       </div>
       <div style="display:flex; gap:8px;">
-        <a href="/preguntas/importar/" class="btn btn-outline" style="font-size:12px; padding:6px 12px; display:inline-flex; align-items:center; gap:6px;">
+        <a href="{% url 'preguntas:importar' %}" class="btn btn-outline" style="font-size:12px; padding:6px 12px; display:inline-flex; align-items:center; gap:6px;">
           <i data-lucide="rotate-cw" style="width:14px; height:14px;"></i> Subir Otro Archivo
         </a>
       </div>
@@ -215,7 +216,7 @@
       {% endif %}
 
       <div style="display:flex; gap:10px;">
-        <a href="/static/plantillas/plantilla_preguntas_simulador_tyt.xlsx" download class="btn btn-outline" style="flex:1; font-size:12px; padding:10px; text-align:center; display:inline-flex; align-items:center; justify-content:center; gap:6px;">
+        <a href="{% static 'plantillas/plantilla_preguntas_simulador_tyt.xlsx' %}" download class="btn btn-outline" style="flex:1; font-size:12px; padding:10px; text-align:center; display:inline-flex; align-items:center; justify-content:center; gap:6px;">
           <i data-lucide="download" style="width:14px; height:14px;"></i> Descargar Plantilla Oficial
         </a>
         <form method="POST" action="{% url 'preguntas:cancelar' %}" style="flex:1;">

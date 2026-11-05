@@ -26,7 +26,7 @@
       </div>
 
       <div class="quick-actions-bar">
-        <a href="/preguntas/#nueva" class="action-card-btn">
+        <a href="{% url 'preguntas:banco' %}#nueva" class="action-card-btn">
           <div class="action-icon-box" style="background:#186382;"><i data-lucide="plus" style="color:#fff;"></i></div>
           <div>
             <div style="font-weight:700; font-size:14px;">Nueva Pregunta</div>
@@ -34,7 +34,7 @@
           </div>
         </a>
 
-        <a href="/cuestionarios/crear/" class="action-card-btn">
+        <a href="{% url 'preguntas:cuestionario_crear' %}" class="action-card-btn">
           <div class="action-icon-box" style="background:#0284c7;"><i data-lucide="file-text" style="color:#fff;"></i></div>
           <div>
             <div style="font-weight:700; font-size:14px;">Crear Examen</div>
@@ -42,7 +42,7 @@
           </div>
         </a>
 
-        <a href="/preguntas/importar/" class="action-card-btn">
+        <a href="{% url 'preguntas:importar' %}" class="action-card-btn">
           <div class="action-icon-box" style="background:#16a34a;"><i data-lucide="upload" style="color:#fff;"></i></div>
           <div>
             <div style="font-weight:700; font-size:14px;">Importar</div>
@@ -138,7 +138,7 @@
         <div>
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
             <span style="font-size:15px; font-weight:700; color:#0f172a;">Cuestionarios Recientes ({{ cuestionarios_recientes.count|default:3 }})</span>
-            <a href="/cuestionarios/" style="font-size:13px; font-weight:600; color:#186382;">Ver todos &rarr;</a>
+            <a href="{% url 'preguntas:cuestionarios_list' %}" style="font-size:13px; font-weight:600; color:#186382;">Ver todos &rarr;</a>
           </div>
 
           <div style="display:flex; flex-direction:column; gap:14px;">
@@ -163,7 +163,7 @@
 
               <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid #f1f5f9; padding-top:12px;">
                 <span style="font-size:12px; color:#475569; display:inline-flex; align-items:center; gap:4px;"><i data-lucide="users" style="width:14px; height:14px;"></i> {{ c.intentos.count }} estudiantes presentaron</span>
-                <a href="/cuestionarios/{{ c.id }}/editar/" class="btn btn-outline" style="padding:6px 14px; font-size:12px;">
+                <a href="{% url 'preguntas:cuestionario_editar' c.id %}" class="btn btn-outline" style="padding:6px 14px; font-size:12px;">
                   Editar preguntas
                 </a>
               </div>
