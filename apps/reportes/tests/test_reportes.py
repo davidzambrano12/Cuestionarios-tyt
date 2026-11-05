@@ -5,8 +5,8 @@ from decimal import Decimal
 from django.test import TestCase
 from openpyxl import load_workbook
 
-from preguntas.models import Intento
-from .factories import crear_cuestionario, crear_usuario, sembrar_roles
+from apps.evaluaciones.models import Intento
+from apps.core.tests.factories import crear_cuestionario, crear_usuario, sembrar_roles
 
 
 class ReportesTests(TestCase):
