@@ -34,7 +34,7 @@
           <div class="form-group">
             <div class="flex justify-between items-center mb-1">
               <label class="form-label mb-0" for="password">Contraseña</label>
-              <a href="#" class="texto-xs peso-semibold" data-notificar="Escribe a la Dirección de Sistemas: soporte.sistemas@uniputumayo.edu.co" data-notificar-titulo="Recuperación de contraseña">¿Olvidaste tu contraseña?</a>
+              <a href="#" class="texto-xs peso-semibold" data-notificar="Escribe a la mesa de ayuda: {{ config.correo_soporte }}" data-notificar-titulo="Recuperación de contraseña">¿Olvidaste tu contraseña?</a>
             </div>
             <div class="campo-icono">
               <i data-lucide="lock" class="campo-icono__icono"></i>
@@ -62,7 +62,7 @@
 
       <div class="texto-centro mt-6 texto-sm texto-suave">
         <div class="inline-flex items-center gap-2 peso-semibold"><i data-lucide="headphones" class="icono-14"></i> Soporte técnico: Dirección de Sistemas</div>
-        <div>Mesa de ayuda: <a href="mailto:soporte.sistemas@uniputumayo.edu.co" class="peso-medio">soporte.sistemas@uniputumayo.edu.co</a></div>
+        <div>Mesa de ayuda: <a href="mailto:{{ config.correo_soporte }}" class="peso-medio">{{ config.correo_soporte }}</a></div>
       </div>
     </div>
   </main>

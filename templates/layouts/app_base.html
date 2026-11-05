@@ -8,7 +8,7 @@
   <!-- Sidebar Persistente Dinámico según Rol -->
   <aside class="sidebar">
     <div class="sidebar-header">
-      <div class="sidebar-title">Simulador Saber TyT</div>
+      <div class="sidebar-title">{{ config.nombre_sistema }}</div>
       <div class="sidebar-subtitle">
         {% if user.is_superuser or user.perfil.es_admin %}
           Dashboard de Administración
@@ -93,7 +93,7 @@
     <!-- Topbar Persistente Compartido -->
     <header class="top-navbar">
       <div class="navbar-brand-title">
-        Simulador Saber TyT / <span class="text-muted font-normal">{% block nav_title %}Plataforma Institucional{% endblock %}</span>
+        {{ config.nombre_sistema }} / <span class="text-muted font-normal">{% block nav_title %}Plataforma Institucional{% endblock %}</span>
       </div>
       <div class="navbar-user-info">
         <a href="{% url 'cuentas:perfil' %}" title="Mi perfil" class="navbar-perfil">

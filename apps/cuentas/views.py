@@ -4,16 +4,16 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.http import JsonResponse
+from django.http import HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
 from apps.core.decorators import requiere_permiso
-from apps.core.models import PerfilUsuario, PermisoSistema, Rol
+from apps.core.models import ConfiguracionSistema, PerfilUsuario, PermisoSistema, Rol
 from . import tokens
+from .forms import AjustesForm
 from .services import url_panel
 
 LONGITUD_MINIMA_CLAVE = 8
-CORREO_SOPORTE = "soporte.sistemas@uniputumayo.edu.co"
 
 
 def login_view(request):
@@ -258,12 +258,36 @@ def cambiar_password_view(request):
     return redirect("cuentas:perfil")
 
 
+def _puede_editar_ajustes(user) -> bool:
+    perfil = getattr(user, "perfil", None)
+    return user.is_superuser or bool(perfil and perfil.es_admin)
+
+
 @login_required
 def ajustes_view(request):
-    """Información de la configuración vigente del sistema (solo lectura)."""
+    """Datos institucionales: el administrador los edita; los demás roles los consultan."""
+    configuracion = ConfiguracionSistema.actual()
+    puede_editar = _puede_editar_ajustes(request.user)
+
+    if request.method == "POST":
+        if not puede_editar:
+            return HttpResponseForbidden("Solo un administrador puede cambiar los ajustes del sistema.")
+        form = AjustesForm(request.POST, instance=configuracion)
+        if form.is_valid():
+            configuracion = form.save(commit=False)
+            configuracion.actualizado_por = request.user
+            configuracion.save()
+            messages.success(request, "Ajustes del sistema guardados.")
+            return redirect("cuentas:ajustes")
+        messages.error(request, "Revisa los campos marcados.")
+    else:
+        form = AjustesForm(instance=configuracion)
+
     return render(request, "cuentas/ajustes.html", {
+        "form": form,
+        "puede_editar": puede_editar,
+        "configuracion": configuracion,
         "zona_horaria": settings.TIME_ZONE,
         "idioma": settings.LANGUAGE_CODE,
         "entorno": "Desarrollo" if settings.DEBUG else "Producción",
-        "correo_soporte": CORREO_SOPORTE,
     })

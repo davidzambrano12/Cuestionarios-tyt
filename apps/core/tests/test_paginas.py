@@ -106,10 +106,45 @@ class AccesosDemoTests(TestCase):
         with self.settings(MOSTRAR_ACCESOS_DEMO=True):
             self.assertContains(self.client.get("/login/"), "data-demo-usuario")
 
-    def test_ajustes_es_de_solo_lectura(self):
+
+
+class AjustesTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
         sembrar_roles()
-        self.client.force_login(crear_usuario("prof", "docente"))
+        cls.admin = crear_usuario("jefe", "admin")
+        cls.docente = crear_usuario("prof", "docente")
+
+    def _datos(self, **extra):
+        datos = {"nombre_sistema": "Simulador TyT", "institucion": "Uniputumayo", "sigla": "IUP",
+                 "correo_soporte": "ayuda@uniputumayo.edu.co", "telefono_soporte": "123", "ubicacion": "Mocoa"}
+        datos.update(extra)
+        return datos
+
+    def test_admin_guarda_y_se_refleja_en_la_portada(self):
+        from apps.core.models import ConfiguracionSistema
+        self.client.force_login(self.admin)
+        r = self.client.post("/ajustes/", self._datos())
+        self.assertRedirects(r, "/ajustes/", fetch_redirect_response=False)
+        config = ConfiguracionSistema.actual()
+        self.assertEqual(config.correo_soporte, "ayuda@uniputumayo.edu.co")
+        self.assertEqual(config.actualizado_por, self.admin)
+        self.assertEqual(ConfiguracionSistema.objects.count(), 1)
+        self.client.logout()
+        portada = self.client.get("/")
+        self.assertContains(portada, "ayuda@uniputumayo.edu.co")
+        self.assertNotContains(portada, 'href="#"')
+
+    def test_correo_invalido_no_se_guarda(self):
+        from apps.core.models import ConfiguracionSistema
+        self.client.force_login(self.admin)
+        r = self.client.post("/ajustes/", self._datos(correo_soporte="no-es-correo"))
+        self.assertEqual(r.status_code, 200)
+        self.assertNotEqual(ConfiguracionSistema.actual().correo_soporte, "no-es-correo")
+
+    def test_docente_solo_consulta(self):
+        self.client.force_login(self.docente)
         r = self.client.get("/ajustes/")
-        self.assertContains(r, "America/Bogota")
-        self.assertNotContains(r, "<form")
-        self.assertEqual(self.client.post("/ajustes/guardar/").status_code, 404)
+        self.assertContains(r, "Solo lectura")
+        self.assertContains(r, "<fieldset disabled")
+        self.assertEqual(self.client.post("/ajustes/", self._datos()).status_code, 403)

@@ -106,3 +106,7 @@
 
 .alerta { padding: 10px 14px; border-radius: var(--radio-sm); font-size: var(--texto-sm); margin-bottom: var(--espacio-4); }
 .alerta--error { background: var(--color-peligro-suave); border: 1px solid var(--color-peligro-borde); color: var(--color-peligro-texto); }
+
+fieldset.sin-borde { border: 0; padding: 0; margin: 0; min-width: 0; }
+fieldset:disabled .form-input { background: var(--color-superficie-tenue); color: var(--color-texto-suave); }
+.error-campo { font-size: var(--texto-xs); color: var(--color-peligro-texto); margin-top: var(--espacio-1); font-weight: var(--peso-semibold); }
