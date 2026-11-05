@@ -67,11 +67,14 @@ AÑO → PERÍODO → CURSO → EJE → ESTUDIANTE, cada uno con la opción "Tod
 | 6 | Historial individual (con evolución) | Pestaña "Historial individual" |
 | 7 | Preguntas de mayor dificultad | Pestaña "Preguntas difíciles" |
 
-| Excel | Contenido |
-|---|---|
-| A · Consolidado | Año, período, curso, estudiante, identificación, simulacro, fecha, calificación y estado. Hoja adicional con el promedio por estudiante |
-| B · Por eje | Año, período, curso, eje, respuestas registradas, contestadas, aciertos, errores, sin responder, % de aciertos y nota promedio ("No definida") |
-| C · Historial | Estudiante, curso, período, simulacro, fecha, respondidas, aciertos, errores y nota final. Un intento por fila, en orden cronológico |
+Cada vista tiene su botón **"Descargar Excel"**, que baja lo que se está viendo con los mismos filtros:
+
+| Vista | Excel | Contenido |
+|---|---|---|
+| Calificaciones, Por período, Por curso | **A · Consolidado** | Año, período, curso, estudiante, identificación, simulacro, fecha, calificación y estado. Además, hojas con el promedio por estudiante, el resumen por período y el resumen por curso |
+| Por eje temático | **B · Por eje** | Año, período, curso, eje, respuestas registradas, contestadas, aciertos, errores, sin responder, % de aciertos y nota promedio ("No definida") |
+| Historial individual | **C · Historial** | Estudiante, curso, período, simulacro, fecha, respondidas, aciertos, errores y nota final. Un intento por fila, en orden cronológico |
+| Preguntas difíciles | Preguntas de mayor dificultad | Número, eje, enunciado, respuestas, aciertos, errores y % de acierto, de la más difícil a la más fácil |
 
 Cada archivo:
 - incluye el nombre del reporte, la fecha de generación, los filtros activos y las reglas de cálculo;

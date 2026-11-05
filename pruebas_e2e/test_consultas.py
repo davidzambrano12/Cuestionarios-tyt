@@ -74,13 +74,16 @@ class ConsultasTests(PruebaNavegador):
             self.assertTrue(pg.is_visible(f"{selector} tbody tr"))
         self.capturar(pg, "consultas_periodos")
 
-        # Excel con los filtros activos
+        # Cada vista descarga su propio Excel, con los filtros activos (aquí «Por período»)
+        self.assertEqual(pg.locator("[data-ref='descargar-excel']").count(), 1)
+        self.assertEqual(pg.get_attribute("[data-ref='descargar-excel']", "data-reporte"), "consolidado")
+        self.assertIn("período académico", pg.inner_text("#descripcion-vista"))
         with pg.expect_download() as descarga:
-            pg.click("[data-ref='exportar-consolidado']")
+            pg.click("[data-ref='descargar-excel']")
         archivo = descarga.value
         self.assertTrue(archivo.suggested_filename.startswith("reporte_consolidado_2026-2_electiva-profesional-iii-frameworks-g01"))
         libro = load_workbook(io.BytesIO(open(archivo.path(), "rb").read()))
-        self.assertIn("Calificaciones", libro.sheetnames)
+        self.assertEqual(libro.sheetnames, ["Calificaciones", "Promedio por estudiante", "Por período", "Por curso"])
 
         with pg.expect_navigation():
             pg.click("[data-accion='limpiar']")

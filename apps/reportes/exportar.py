@@ -27,6 +27,7 @@ REPORTES = {
     "consolidado": "Reporte A · Consolidado general",
     "ejes": "Reporte B · Desempeño por eje temático",
     "historial": "Reporte C · Historial individual",
+    "dificultad": "Preguntas de mayor dificultad",
 }
 
 
@@ -146,6 +147,23 @@ def libro_consolidado(filtros: c.Filtros, alcance: c.Alcance) -> Workbook:
         ("Promedio (/5,0)", 14, FMT_NOTA), ("Mejor nota (/5,0)", 14, FMT_NOTA),
     ], [[r["nombre"], r["participante_codigo"], r["intentos"], c._redondear(r["promedio"]), c._redondear(r["mejor"])]
         for r in resumen], VACIO)
+
+    # Hojas 3 y 4: los resúmenes de las vistas «Por período» y «Por curso»
+    qs = c.intentos_filtrados(filtros, alcance)
+    ws3 = wb.create_sheet("Por período")
+    inicio = _encabezado(ws3, "Resultados por año y período", filtros, [NOTA_ESCALA])
+    _tabla(ws3, inicio, [
+        ("Período", 16, None), ("Intentos terminados", 12, "0"), ("Estudiantes", 12, "0"),
+        ("Promedio (/5,0)", 14, FMT_NOTA), ("% de aprobación", 14, FMT_PCT),
+    ], [[f["periodo"], f["intentos"], f["estudiantes"], f["promedio"], f["porcentaje_aprobacion"]]
+        for f in c.por_periodo(qs)], VACIO)
+    ws4 = wb.create_sheet("Por curso")
+    inicio = _encabezado(ws4, "Resultados por curso", filtros, [NOTA_ESCALA])
+    _tabla(ws4, inicio, [
+        ("Curso", 36, None), ("Período", 10, None), ("Estudiantes", 12, "0"), ("Intentos", 10, "0"),
+        ("Promedio (/5,0)", 14, FMT_NOTA), ("Mínima", 10, FMT_NOTA), ("Máxima", 10, FMT_NOTA), ("% de aprobación", 14, FMT_PCT),
+    ], [[f["curso"], f["periodo"], f["estudiantes"], f["intentos"], f["promedio"], f["minima"], f["maxima"],
+         f["porcentaje_aprobacion"]] for f in c.por_curso(qs)], VACIO)
     return wb
 
 
@@ -193,4 +211,21 @@ def libro_historial(filtros: c.Filtros, alcance: c.Alcance) -> Workbook:
     return wb
 
 
-LIBROS = {"consolidado": libro_consolidado, "ejes": libro_ejes, "historial": libro_historial}
+def libro_dificultad(filtros: c.Filtros, alcance: c.Alcance) -> Workbook:
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Preguntas difíciles"
+    inicio = _encabezado(ws, REPORTES["dificultad"], filtros, [
+        "De menor a mayor porcentaje de acierto, sobre las respuestas contestadas en intentos terminados.",
+    ])
+    filas = [[f["id"], f["eje"], f["enunciado"], f["respondidas"], f["aciertos"], f["errores"], f["porcentaje_aciertos"]]
+             for f in map(c.fila_dificultad, c.dificultad(c.intentos_filtrados(filtros, alcance), filtros))]
+    _tabla(ws, inicio, [
+        ("N.º", 8, "0"), ("Eje temático", 24, None), ("Pregunta", 70, None), ("Respuestas", 12, "0"),
+        ("Aciertos", 10, "0"), ("Errores", 10, "0"), ("% de acierto", 12, FMT_PCT),
+    ], filas, VACIO)
+    return wb
+
+
+LIBROS = {"consolidado": libro_consolidado, "ejes": libro_ejes, "historial": libro_historial,
+          "dificultad": libro_dificultad}

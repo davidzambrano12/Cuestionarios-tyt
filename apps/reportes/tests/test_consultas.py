@@ -243,8 +243,31 @@ class ExcelTests(BaseConsultas):
         self.assertEqual([f[9] for f in datos], [0, 5, 2.5])
         self.assertEqual([f[6] for f in datos], [4, 4, 4])  # respondidas
 
+    def test_consolidado_incluye_periodos_y_cursos(self):
+        libro = load_workbook(io.BytesIO(self.excel("consolidado").content))
+        self.assertEqual(libro.sheetnames, ["Calificaciones", "Promedio por estudiante", "Por período", "Por curso"])
+        _, _, datos = self._filas(self.excel("consolidado"), hoja=3)
+        self.assertEqual({f[0] for f in datos}, {"Frameworks · G01", "Frameworks · G02", "Bases de Datos · G01"})
+
+    def test_reporte_de_preguntas_dificiles(self):
+        r = self.excel("dificultad", eje=self.ingles.id)
+        self.assertIn("reporte_dificultad", r["Content-Disposition"])
+        _, columnas, datos = self._filas(r)
+        self.assertEqual(columnas[:7], ("N.º", "Eje temático", "Pregunta", "Respuestas", "Aciertos", "Errores", "% de acierto"))
+        self.assertEqual({f[1] for f in datos}, {"Inglés"})
+        tasas = [f[6] for f in datos]
+        self.assertEqual(tasas, sorted(tasas))  # de la más difícil a la más fácil
+
+    def test_cada_vista_ofrece_su_excel(self):
+        for vista, reporte in (("calificaciones", "consolidado"), ("periodos", "consolidado"), ("cursos", "consolidado"),
+                               ("ejes", "ejes"), ("dificultad", "dificultad")):
+            with self.subTest(vista):
+                self.assertContains(self.consultar(vista=vista), f'data-reporte="{reporte}"', count=1)
+        self.assertNotContains(self.consultar(vista="historial"), "data-reporte=")  # sin estudiante elegido
+        self.assertContains(self.consultar(vista="historial", estudiante="E1"), 'data-reporte="historial"', count=1)
+
     def test_exportar_sin_registros_no_falla(self):
-        for reporte in ("consolidado", "ejes", "historial"):
+        for reporte in ("consolidado", "ejes", "historial", "dificultad"):
             r = self.excel(reporte, q="nadie")
             self.assertEqual(r.status_code, 200)
             _, _, datos = self._filas(r)

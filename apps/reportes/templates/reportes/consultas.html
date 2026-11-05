@@ -115,13 +115,16 @@
         <a href="{% con_filtros filtros vista='historial' %}" class="tab-btn{% if filtros.vista == 'historial' %} active{% endif %}"{% if filtros.vista == 'historial' %} aria-current="page"{% endif %}><i data-lucide="history" aria-hidden="true"></i> Historial individual</a>
         <a href="{% con_filtros filtros vista='dificultad' %}" class="tab-btn{% if filtros.vista == 'dificultad' %} active{% endif %}"{% if filtros.vista == 'dificultad' %} aria-current="page"{% endif %}><i data-lucide="alert-triangle" aria-hidden="true"></i> Preguntas difíciles</a>
       </nav>
-      <div class="exportar-consulta" role="group" aria-label="Exportar a Excel">
-        <span class="texto-xs texto-suave">Exportar a Excel:</span>
-        <a href="{% url 'reportes:exportar_consulta' 'consolidado' %}{% con_filtros filtros %}" class="btn btn-outline btn-accion" data-ref="exportar-consolidado"><i data-lucide="file-spreadsheet" aria-hidden="true"></i> A · Consolidado</a>
-        <a href="{% url 'reportes:exportar_consulta' 'ejes' %}{% con_filtros filtros %}" class="btn btn-outline btn-accion" data-ref="exportar-ejes"><i data-lucide="file-spreadsheet" aria-hidden="true"></i> B · Por eje</a>
-        <a href="{% url 'reportes:exportar_consulta' 'historial' %}{% con_filtros filtros %}" class="btn btn-outline btn-accion" data-ref="exportar-historial"><i data-lucide="file-spreadsheet" aria-hidden="true"></i> C · Historial</a>
-      </div>
     </div>
+    <p class="vista-descripcion" id="descripcion-vista">
+      <i data-lucide="info" aria-hidden="true"></i>
+      {% if filtros.vista == "calificaciones" %}Una fila por intento, con la nota sobre 5,0. Desde aquí abres el historial de cada estudiante.
+      {% elif filtros.vista == "periodos" %}Compara cuántos simulacros se presentaron y el promedio en cada período académico.
+      {% elif filtros.vista == "cursos" %}Estudiantes evaluados, promedio, nota mínima y máxima de cada curso.
+      {% elif filtros.vista == "ejes" %}Aciertos y errores por competencia (Lectura Crítica, Inglés…): muestra en qué temas falla más el grupo.
+      {% elif filtros.vista == "historial" %}Todos los intentos de un estudiante en orden y cómo cambió su nota de uno a otro.
+      {% else %}Las preguntas que más se fallan, de menor a mayor porcentaje de acierto: sirven para reforzar temas o revisar el enunciado.{% endif %}
+    </p>
   </div>
 
   {% if filtros.vista == "calificaciones" %}
@@ -129,6 +132,7 @@
   <div class="card tabla-contenedor" id="vista-calificaciones">
     <div class="tabla-cabecera">
       <h2 class="texto-sm peso-bold">Calificaciones por estudiante</h2>
+      <div class="tabla-cabecera__acciones">
       <form method="GET" class="inline-flex items-center gap-2">
         {% for clave, valor in filtros.params.items %}{% if clave != 'orden' %}<input type="hidden" name="{{ clave }}" value="{{ valor }}">{% endif %}{% endfor %}
         <label for="f-orden" class="texto-xs texto-suave">Ordenar por</label>
@@ -137,6 +141,8 @@
         </select>
         <noscript><button type="submit" class="btn btn-outline btn-accion">Ordenar</button></noscript>
       </form>
+      {% include "reportes/_descargar.html" with reporte="consolidado" %}
+      </div>
     </div>
     <div class="tabla-desplazable">
       <table class="tabla tabla--consulta">
@@ -170,7 +176,7 @@
   {% elif filtros.vista == "periodos" %}
   <!-- Consulta 2 -->
   <div class="card tabla-contenedor" id="vista-periodos">
-    <div class="tabla-cabecera"><h2 class="texto-sm peso-bold">Resultados por año y período</h2></div>
+    <div class="tabla-cabecera"><h2 class="texto-sm peso-bold">Resultados por año y período</h2>{% include "reportes/_descargar.html" with reporte="consolidado" %}</div>
     <div class="tabla-desplazable">
       <table class="tabla tabla--consulta">
         <thead><tr><th scope="col">Período</th><th scope="col" class="texto-derecha">Intentos terminados</th><th scope="col" class="texto-derecha">Estudiantes</th><th scope="col" class="texto-derecha">Promedio / 5,0</th><th scope="col" class="texto-derecha">Aprobación</th></tr></thead>
@@ -188,7 +194,7 @@
   {% elif filtros.vista == "cursos" %}
   <!-- Consulta 3 -->
   <div class="card tabla-contenedor" id="vista-cursos">
-    <div class="tabla-cabecera"><h2 class="texto-sm peso-bold">Resultados por curso</h2></div>
+    <div class="tabla-cabecera"><h2 class="texto-sm peso-bold">Resultados por curso</h2>{% include "reportes/_descargar.html" with reporte="consolidado" %}</div>
     <div class="tabla-desplazable">
       <table class="tabla tabla--consulta">
         <thead><tr><th scope="col">Curso</th><th scope="col">Período</th><th scope="col" class="texto-derecha">Estudiantes</th><th scope="col" class="texto-derecha">Intentos</th><th scope="col" class="texto-derecha">Promedio</th><th scope="col" class="texto-derecha">Mínima</th><th scope="col" class="texto-derecha">Máxima</th><th scope="col" class="texto-derecha">Aprobación</th></tr></thead>
@@ -208,6 +214,7 @@
   <div class="card tabla-contenedor" id="vista-ejes">
     <div class="tabla-cabecera">
       <h2 class="texto-sm peso-bold">Desempeño por eje temático</h2>
+      {% include "reportes/_descargar.html" with reporte="ejes" %}
       <p class="texto-xs texto-suave">Calculado con las respuestas contestadas. No se muestra nota por eje: el sistema no define cómo convertir aciertos de un eje en calificación.</p>
     </div>
     <div class="tabla-desplazable">
@@ -233,7 +240,7 @@
     {% if not filtros.estudiante %}
       {% componente "componentes/estado_vacio.html" icono="user-search" titulo="Elige un estudiante" mensaje="El historial individual muestra todos los intentos de un estudiante y la evolución de su nota. Selecciónalo en el filtro 5 o con «Historial» en la tabla de calificaciones." %}{% fincomponente %}
     {% else %}
-    <div class="tabla-cabecera"><h2 class="texto-sm peso-bold">Historial de {{ filtros.etiquetas.estudiante }}</h2></div>
+    <div class="tabla-cabecera"><h2 class="texto-sm peso-bold">Historial de {{ filtros.etiquetas.estudiante }}</h2>{% include "reportes/_descargar.html" with reporte="historial" %}</div>
     <div class="tabla-desplazable">
       <table class="tabla tabla--consulta">
         <thead><tr><th scope="col">Fecha</th><th scope="col">Simulacro</th><th scope="col">Curso</th><th scope="col">Aciertos</th><th scope="col" class="texto-derecha">Nota / 5,0</th><th scope="col" class="texto-derecha">Evolución</th><th scope="col">Estado</th></tr></thead>
@@ -262,6 +269,7 @@
   <div class="card tabla-contenedor" id="vista-dificultad">
     <div class="tabla-cabecera">
       <h2 class="texto-sm peso-bold">Preguntas de mayor dificultad</h2>
+      {% include "reportes/_descargar.html" with reporte="dificultad" %}
       <p class="texto-xs texto-suave">Ordenadas de menor a mayor porcentaje de acierto, sobre las respuestas contestadas.</p>
     </div>
     <div class="tabla-desplazable">

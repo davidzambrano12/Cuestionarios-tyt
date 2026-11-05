@@ -118,8 +118,7 @@
 .regla-calculo { display: flex; align-items: flex-start; gap: var(--espacio-2); margin-bottom: var(--espacio-5); }
 .regla-calculo .lucide { width: 14px; height: 14px; flex-shrink: 0; margin-top: 1px; }
 
-.exportar-consulta { display: flex; align-items: center; flex-wrap: wrap; gap: var(--espacio-2); }
-.exportar-consulta .lucide, .paginacion .lucide { width: 14px; height: 14px; }
+.paginacion .lucide, [data-ref="descargar-excel"] .lucide { width: 14px; height: 14px; }
 .barra-herramientas .tabs-header a.tab-btn { text-decoration: none; }
 
 .tabla-cabecera p { flex-basis: 100%; }
@@ -145,3 +144,8 @@
 .tabla--consulta :where(td, th) { padding: 12px 14px; }
 .celda-linea { display: block; max-width: 190px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .celda-detalle { display: block; margin-top: 2px; font-size: var(--texto-xs); color: var(--color-texto-suave); white-space: nowrap; }
+
+/* Qué muestra la vista activa */
+.vista-descripcion { display: flex; align-items: flex-start; gap: var(--espacio-2); margin-top: var(--espacio-3); padding-top: var(--espacio-3); border-top: 1px solid var(--color-superficie-hundida); font-size: var(--texto-sm); color: var(--color-texto-suave); }
+.vista-descripcion .lucide { width: 15px; height: 15px; flex-shrink: 0; margin-top: 2px; color: var(--color-primario); }
+.tabla-cabecera__acciones { display: flex; align-items: center; flex-wrap: wrap; gap: var(--espacio-3); }
