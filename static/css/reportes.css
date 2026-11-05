@@ -72,8 +72,6 @@
 .lista-competencias li { display: flex; justify-content: space-between; gap: var(--espacio-3); }
 
 .tarjeta-cuestionario { margin-bottom: 0; padding: var(--espacio-5); }
-.tarjeta-cuestionario__datos { list-style: none; display: flex; flex-wrap: wrap; gap: var(--espacio-2) var(--espacio-4); font-size: var(--texto-xs); color: var(--color-texto-suave); margin: var(--espacio-2) 0 var(--espacio-3); }
-.tarjeta-cuestionario__datos li { display: inline-flex; align-items: center; gap: var(--espacio-1); }
 .tarjeta-cuestionario__pie { display: flex; justify-content: space-between; align-items: center; gap: var(--espacio-2); flex-wrap: wrap; padding-top: var(--espacio-3); border-top: 1px solid var(--color-superficie-hundida); }
 
 .tarjeta-modulo { margin-bottom: 0; padding: var(--espacio-6); }

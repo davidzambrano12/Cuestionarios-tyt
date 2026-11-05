@@ -1253,3 +1253,7 @@ a:hover {
 .grid-1-2 { display: grid; grid-template-columns: 1fr 2fr; gap: var(--espacio-3); }
 @media (max-width: 600px) { .grid-2, .grid-1-2 { grid-template-columns: 1fr; } }
 .form-textarea--alto { min-height: 90px; }
+
+/* Lista horizontal de datos con icono (tarjetas de cuestionario) */
+.tarjeta-cuestionario__datos { list-style: none; display: flex; flex-wrap: wrap; gap: var(--espacio-2) var(--espacio-4); font-size: var(--texto-xs); color: var(--color-texto-suave); margin: var(--espacio-2) 0 var(--espacio-3); }
+.tarjeta-cuestionario__datos li { display: inline-flex; align-items: center; gap: var(--espacio-1); }
