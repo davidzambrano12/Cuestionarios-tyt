@@ -11,6 +11,7 @@ from django.db import transaction
 from django.db.models import Count, Q
 from django.utils import timezone
 
+from apps.academico.services import curso_vigente
 from apps.core.services.acceso import codigo_participante
 from apps.banco_preguntas.models import OpcionRespuesta, Pregunta
 from apps.cuestionarios.models import Cuestionario, CuestionarioPregunta
@@ -133,6 +134,7 @@ def iniciar_intento(user, cuestionario: Cuestionario, ahora=None) -> ResultadoIn
 
     intento = Intento.objects.create(
         cuestionario=cuestionario,
+        curso=curso_vigente(user, ahora),
         participante_nombre=user.get_full_name() or user.username,
         participante_codigo=codigo,
         estado="en_progreso",

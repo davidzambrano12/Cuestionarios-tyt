@@ -14,6 +14,11 @@ class Intento(models.Model):
         "cuestionarios.Cuestionario", on_delete=models.CASCADE, db_column="cuestionario_id",
         related_name="intentos",
     )
+    # Curso del estudiante al presentar el intento (base de los reportes por período y curso)
+    curso = models.ForeignKey(
+        "academico.Curso", on_delete=models.PROTECT, db_column="curso_id",
+        related_name="intentos", blank=True, null=True,
+    )
     participante_nombre = models.CharField(max_length=150)
     participante_codigo = models.CharField(max_length=50)
     fecha_inicio = models.DateTimeField(auto_now_add=True)
