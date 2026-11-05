@@ -7,17 +7,17 @@
   <div style="max-width:880px; margin:0 auto;">
 
     <!-- Barra de Navegación Superior -->
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+    <div class="flex justify-between items-center mb-6">
       {% if es_auditor %}
       <a href="{% url 'reportes:intentos' cuestionario.id %}" class="btn btn-outline" style="font-size:var(--texto-sm); padding:8px 16px; border-radius:10px; display:inline-flex; align-items:center; gap:6px;">
-        <i data-lucide="arrow-left" style="width:15px; height:15px;"></i> Volver al reporte de intentos
+        <i data-lucide="arrow-left" class="icono-15"></i> Volver al reporte de intentos
       </a>
       {% else %}
       <a href="{% url 'evaluaciones:panel_estudiante' %}" class="btn btn-outline" style="font-size:var(--texto-sm); padding:8px 16px; border-radius:10px; display:inline-flex; align-items:center; gap:6px;">
-        <i data-lucide="arrow-left" style="width:15px; height:15px;"></i> Volver al Panel de Estudiante
+        <i data-lucide="arrow-left" class="icono-15"></i> Volver al Panel de Estudiante
       </a>
       {% endif %}
-      <div style="font-size:var(--texto-xs); color:var(--color-texto-suave); font-weight:600;">
+      <div class="texto-xs texto-suave peso-semibold">
         Sesión Finalizada · {{ intento.fecha_fin|date:"d/m/Y H:i" }}
       </div>
     </div>
@@ -34,16 +34,16 @@
         {% endif %}
       </div>
 
-      <div style="margin-bottom:8px;">
+      <div class="mb-2">
         <span class="badge {% if intento.aprobado %}badge-success{% else %}badge-danger{% endif %}" style="font-size:var(--texto-base); padding:6px 20px; letter-spacing:0.5px;">
           ● {% if intento.aprobado %}APROBADO{% else %}NO APROBADO{% endif %}
         </span>
       </div>
 
-      <h1 style="font-size:var(--texto-2xl); font-weight:800; color:var(--color-texto); margin-bottom:4px;">
+      <h1 class="texto-2xl peso-extrabold texto-principal mb-1">
         Evaluación Finalizada
       </h1>
-      <p style="font-size:var(--texto-md); color:var(--color-texto-suave); margin-bottom:24px;">
+      <p class="texto-md texto-suave mb-6">
         {{ intento.cuestionario.nombre }}
       </p>
 
@@ -53,9 +53,9 @@
           Calificación Institucional Obtenida
         </div>
         <div style="font-size:var(--texto-display); font-weight:900; color:var(--color-primario); line-height:1; margin-bottom:6px;">
-          {{ intento.calificacion|default:"0.00" }} <span style="font-size:var(--texto-xl); color:var(--color-texto-tenue); font-weight:600;">/ {{ intento.cuestionario.calificacion_maxima }}</span>
+          {{ intento.calificacion|default:"0.00" }} <span class="texto-xl texto-tenue peso-semibold">/ {{ intento.cuestionario.calificacion_maxima }}</span>
         </div>
-        <div style="font-size:var(--texto-sm); color:var(--color-texto-suave); font-weight:500;">
+        <div class="texto-sm texto-suave peso-medio">
           Puntaje acumulado: <strong>{{ intento.puntaje_obtenido|default:"0" }}</strong> de {{ intento.puntaje_total_posible|default:"0" }} puntos posibles &middot; <span style="color:var(--azul-600); font-weight:700;">{{ porcentaje_acierto }}% de efectividad</span>
         </div>
       </div>
@@ -64,32 +64,32 @@
       <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(160px, 1fr)); gap:12px; margin-bottom:16px;">
         
         <div style="background:var(--verde-50); border:1px solid var(--verde-200); border-radius:14px; padding:16px 12px; text-align:center;">
-          <div style="font-size:var(--texto-2xl); font-weight:800; color:var(--verde-700);">{{ total_correctas }}</div>
+          <div class="texto-2xl peso-extrabold texto-exito">{{ total_correctas }}</div>
           <div style="font-size:var(--texto-xs); color:var(--verde-800); font-weight:700; margin-top:2px; display:inline-flex; align-items:center; gap:4px;">
-            <i data-lucide="check-circle" style="width:14px; height:14px;"></i> Preguntas Correctas
+            <i data-lucide="check-circle" class="icono-14"></i> Preguntas Correctas
           </div>
         </div>
 
         <div style="background:var(--rojo-50); border:1px solid var(--rojo-200); border-radius:14px; padding:16px 12px; text-align:center;">
-          <div style="font-size:var(--texto-2xl); font-weight:800; color:var(--rojo-700);">{{ total_incorrectas }}</div>
+          <div class="texto-2xl peso-extrabold texto-peligro">{{ total_incorrectas }}</div>
           <div style="font-size:var(--texto-xs); color:var(--rojo-700); font-weight:700; margin-top:2px; display:inline-flex; align-items:center; gap:4px;">
-            <i data-lucide="x-circle" style="width:14px; height:14px;"></i> Preguntas Incorrectas
+            <i data-lucide="x-circle" class="icono-14"></i> Preguntas Incorrectas
           </div>
         </div>
 
         <div style="background:var(--color-superficie-tenue); border:1px solid var(--color-borde); border-radius:14px; padding:16px 12px; text-align:center;">
-          <div style="font-size:var(--texto-2xl); font-weight:800; color:var(--color-texto-suave);">{{ total_sin_responder }}</div>
+          <div class="texto-2xl peso-extrabold texto-suave">{{ total_sin_responder }}</div>
           <div style="font-size:var(--texto-xs); color:var(--color-texto-suave); font-weight:700; margin-top:2px; display:inline-flex; align-items:center; gap:4px;">
-            <i data-lucide="alert-circle" style="width:14px; height:14px;"></i> Sin Responder
+            <i data-lucide="alert-circle" class="icono-14"></i> Sin Responder
           </div>
         </div>
 
         <div style="background:var(--color-superficie-tenue); border:1px solid var(--color-borde); border-radius:14px; padding:16px 12px; text-align:center;">
-          <div style="font-size:var(--texto-2xl); font-weight:800; color:var(--color-texto);">
+          <div class="texto-2xl peso-extrabold texto-principal">
             {% if intento.duracion_segundos %}{{ intento.duracion_segundos }} s{% else %}Calculado{% endif %}
           </div>
           <div style="font-size:var(--texto-xs); color:var(--color-texto-suave); font-weight:700; margin-top:2px; display:inline-flex; align-items:center; gap:4px;">
-            <i data-lucide="clock" style="width:14px; height:14px;"></i> Tiempo Empleado
+            <i data-lucide="clock" class="icono-14"></i> Tiempo Empleado
           </div>
         </div>
 
@@ -104,9 +104,9 @@
 
     {% if permitir_revision %}
     <!-- ================= BARRA DE FILTROS INTERACTIVOS ================= -->
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:12px;">
+    <div class="flex justify-between items-center mb-4 flex-wrap gap-3">
       <div>
-        <h2 style="font-size:var(--texto-lg); font-weight:800; color:var(--color-texto); margin:0;">
+        <h2 class="texto-lg peso-extrabold texto-principal m-0">
           Desglose y Revisión de Preguntas
         </h2>
         <p style="font-size:var(--texto-sm); color:var(--color-texto-suave); margin:2px 0 0 0;">
@@ -120,46 +120,46 @@
           Todas ({{ total_preguntas }})
         </button>
         <button type="button" class="btn-filtro" onclick="filtrarPreguntas('correcta', this)" style="padding:6px 12px; font-size:var(--texto-xs); font-weight:700; border:none; border-radius:8px; cursor:pointer; background:transparent; color:var(--verde-700); display:inline-flex; align-items:center; gap:4px;">
-          <i data-lucide="check" style="width:13px; height:13px;"></i> Correctas ({{ total_correctas }})
+          <i data-lucide="check" class="icono-13"></i> Correctas ({{ total_correctas }})
         </button>
         <button type="button" class="btn-filtro" onclick="filtrarPreguntas('incorrecta', this)" style="padding:6px 12px; font-size:var(--texto-xs); font-weight:700; border:none; border-radius:8px; cursor:pointer; background:transparent; color:var(--rojo-700); display:inline-flex; align-items:center; gap:4px;">
-          <i data-lucide="x" style="width:13px; height:13px;"></i> Incorrectas ({{ total_incorrectas }})
+          <i data-lucide="x" class="icono-13"></i> Incorrectas ({{ total_incorrectas }})
         </button>
         {% if total_sin_responder > 0 %}
         <button type="button" class="btn-filtro" onclick="filtrarPreguntas('sin_responder', this)" style="padding:6px 12px; font-size:var(--texto-xs); font-weight:700; border:none; border-radius:8px; cursor:pointer; background:transparent; color:var(--color-texto-suave); display:inline-flex; align-items:center; gap:4px;">
-          <i data-lucide="alert-circle" style="width:13px; height:13px;"></i> Omitidas ({{ total_sin_responder }})
+          <i data-lucide="alert-circle" class="icono-13"></i> Omitidas ({{ total_sin_responder }})
         </button>
         {% endif %}
       </div>
     </div>
 
     <!-- ================= LISTADO DE PREGUNTAS (PREVISUALIZACIÓN) ================= -->
-    <div id="lista-preguntas-revision" style="display:flex; flex-direction:column; gap:20px;">
+    <div id="lista-preguntas-revision" class="flex flex-col gap-5">
       
       {% for item in detalles_respuestas %}
       <div class="card card-pregunta-revision" data-estado="{{ item.estado }}" style="padding:24px 28px; border-radius:18px; border-left:6px solid {% if item.estado == 'correcta' %}var(--verde-600){% elif item.estado == 'incorrecta' %}var(--rojo-600){% else %}var(--color-borde-fuerte){% endif %}; box-shadow:var(--shadow-sm); transition:all 0.2s ease;">
         
         <!-- Header de la Pregunta -->
         <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:14px; gap:12px; flex-wrap:wrap;">
-          <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-            <span style="font-size:var(--texto-md); font-weight:800; color:var(--color-texto);">Pregunta {{ item.numero }}</span>
+          <div class="flex items-center gap-2 flex-wrap">
+            <span class="texto-md peso-extrabold texto-principal">Pregunta {{ item.numero }}</span>
             <span class="badge badge-info" style="font-size:var(--texto-xs); padding:4px 10px;">
               {{ item.pregunta.categoria.nombre|default:"General" }}
             </span>
           </div>
 
-          <div style="display:flex; align-items:center; gap:8px;">
+          <div class="flex items-center gap-2">
             {% if item.estado == 'correcta' %}
               <span class="badge badge-success" style="font-size:var(--texto-xs); padding:6px 14px; font-weight:700; display:inline-flex; align-items:center; gap:4px;">
-                <i data-lucide="check" style="width:13px; height:13px;"></i> Respuesta Correcta (+{{ item.puntaje_obtenido }} pts)
+                <i data-lucide="check" class="icono-13"></i> Respuesta Correcta (+{{ item.puntaje_obtenido }} pts)
               </span>
             {% elif item.estado == 'incorrecta' %}
               <span class="badge badge-danger" style="font-size:var(--texto-xs); padding:6px 14px; font-weight:700; display:inline-flex; align-items:center; gap:4px;">
-                <i data-lucide="x" style="width:13px; height:13px;"></i> Respuesta Incorrecta (0.00 pts de {{ item.peso_total }})
+                <i data-lucide="x" class="icono-13"></i> Respuesta Incorrecta (0.00 pts de {{ item.peso_total }})
               </span>
             {% else %}
               <span class="badge" style="background:var(--color-borde); color:var(--color-texto-suave); font-size:var(--texto-xs); padding:6px 14px; font-weight:700; display:inline-flex; align-items:center; gap:4px;">
-                <i data-lucide="alert-circle" style="width:13px; height:13px;"></i> No respondida (0.00 pts)
+                <i data-lucide="alert-circle" class="icono-13"></i> No respondida (0.00 pts)
               </span>
             {% endif %}
           </div>
@@ -169,7 +169,7 @@
         {% if item.pregunta.texto_base %}
         <div style="background:var(--color-superficie-tenue); border:1px solid var(--color-borde); border-radius:12px; padding:14px 16px; margin-bottom:16px;">
           <div style="font-size:var(--texto-xs); font-weight:800; color:var(--color-primario); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px; display:flex; align-items:center; gap:6px;">
-            <i data-lucide="file-text" style="width:14px; height:14px;"></i> CONTEXTO / TEXTO BASE
+            <i data-lucide="file-text" class="icono-14"></i> CONTEXTO / TEXTO BASE
           </div>
           <div style="font-size:var(--texto-sm); color:var(--gris-700); line-height:1.5;">
             {{ item.pregunta.texto_base }}
@@ -217,15 +217,15 @@
             <div>
               {% if op.es_correcta and op.es_seleccionada %}
                 <span class="badge badge-success" style="font-size:var(--texto-xs); padding:4px 10px; display:inline-flex; align-items:center; gap:4px;">
-                  <i data-lucide="check" style="width:12px; height:12px;"></i> {% if es_auditor %}Respuesta del estudiante{% else %}Tu respuesta{% endif %} (correcta)
+                  <i data-lucide="check" class="icono-12"></i> {% if es_auditor %}Respuesta del estudiante{% else %}Tu respuesta{% endif %} (correcta)
                 </span>
               {% elif op.es_correcta %}
                 <span class="badge" style="background:var(--verde-100); color:var(--verde-800); border:1px solid var(--verde-200); font-size:var(--texto-xs); padding:4px 10px; font-weight:700; display:inline-flex; align-items:center; gap:4px;">
-                  <i data-lucide="check" style="width:12px; height:12px;"></i> Respuesta Correcta
+                  <i data-lucide="check" class="icono-12"></i> Respuesta Correcta
                 </span>
               {% elif op.es_seleccionada and not op.es_correcta %}
                 <span class="badge badge-danger" style="font-size:var(--texto-xs); padding:4px 10px; display:inline-flex; align-items:center; gap:4px;">
-                  <i data-lucide="x" style="width:12px; height:12px;"></i> {% if es_auditor %}Selección del estudiante{% else %}Tu selección{% endif %} (incorrecta)
+                  <i data-lucide="x" class="icono-12"></i> {% if es_auditor %}Selección del estudiante{% else %}Tu selección{% endif %} (incorrecta)
                 </span>
               {% endif %}
             </div>
@@ -238,7 +238,7 @@
         {% if item.retroalimentacion %}
         <div style="background:var(--azul-50); border:1px solid var(--azul-100); border-radius:12px; padding:14px 16px; margin-top:8px;">
           <div style="font-size:var(--texto-xs); font-weight:800; color:var(--azul-700); margin-bottom:4px; display:flex; align-items:center; gap:6px;">
-            <i data-lucide="lightbulb" style="width:16px; height:16px;"></i> JUSTIFICACIÓN / RETROALIMENTACIÓN PEDAGÓGICA
+            <i data-lucide="lightbulb" class="icono-16"></i> JUSTIFICACIÓN / RETROALIMENTACIÓN PEDAGÓGICA
           </div>
           <div style="font-size:var(--texto-sm); color:var(--azul-900); line-height:1.5;">
             {{ item.retroalimentacion }}
@@ -257,7 +257,7 @@
       <div style="width:52px; height:52px; border-radius:50%; background:var(--color-superficie-hundida); color:var(--color-texto-suave); display:flex; align-items:center; justify-content:center; margin:0 auto 14px;">
         <i data-lucide="lock" style="width:26px; height:26px; color:var(--color-primario);"></i>
       </div>
-      <h3 style="font-size:var(--texto-lg); font-weight:800; color:var(--color-texto); margin-bottom:8px;">Revisión Pedagógica no Habilitada</h3>
+      <h3 class="texto-lg peso-extrabold texto-principal mb-2">Revisión Pedagógica no Habilitada</h3>
       <p style="font-size:var(--texto-sm); color:var(--color-texto-suave); max-width:500px; margin:0 auto 16px; line-height:1.6;">
         El docente responsable ha configurado esta evaluación para mantener confidencial el desglose detallado de preguntas y claves correctas. Tu calificación oficial y dictamen de aprobación han quedado debidamente asentados en el sistema.
       </p>
@@ -268,15 +268,15 @@
     <div style="margin-top:36px; display:flex; justify-content:center; gap:16px; flex-wrap:wrap;">
       {% if es_auditor %}
       <a href="{% url 'reportes:intentos' cuestionario.id %}" class="btn btn-primary" style="padding:12px 28px; font-size:var(--texto-base); border-radius:12px; display:inline-flex; align-items:center; gap:8px;">
-        <i data-lucide="arrow-left" style="width:16px; height:16px;"></i> Volver al reporte de intentos
+        <i data-lucide="arrow-left" class="icono-16"></i> Volver al reporte de intentos
       </a>
       {% else %}
       <a href="{% url 'evaluaciones:panel_estudiante' %}" class="btn btn-primary" style="padding:12px 28px; font-size:var(--texto-base); border-radius:12px; display:inline-flex; align-items:center; gap:8px;">
-        <i data-lucide="arrow-left" style="width:16px; height:16px;"></i> Volver al Dashboard de Estudiante
+        <i data-lucide="arrow-left" class="icono-16"></i> Volver al Dashboard de Estudiante
       </a>
       {% endif %}
       <button type="button" onclick="window.print()" class="btn btn-outline" style="padding:12px 24px; font-size:var(--texto-base); border-radius:12px; display:inline-flex; align-items:center; gap:8px;">
-        <i data-lucide="printer" style="width:16px; height:16px;"></i> Imprimir / Guardar Resumen
+        <i data-lucide="printer" class="icono-16"></i> Imprimir / Guardar Resumen
       </button>
     </div>
 
