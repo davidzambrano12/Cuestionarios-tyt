@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'layouts/base.html' %}
 
 {% block title %}Previsualización: {{ cuestionario.nombre }} - Simulador Saber TyT{% endblock %}
 
@@ -8,7 +8,7 @@
   <!-- Header Superior de Previsualización Docente -->
   <header style="background:white; border-bottom:1px solid #e2e8f0; padding:12px 32px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
     <div style="display:flex; align-items:center; gap:16px;">
-      <a href="{% url 'preguntas:cuestionarios_list' %}" style="display:inline-flex; align-items:center; justify-content:center; width:36px; height:36px; border-radius:50%; background:#f1f5f9; color:#0f172a; text-decoration:none;" title="Volver al listado de cuestionarios">
+      <a href="{% url 'cuestionarios:listado' %}" style="display:inline-flex; align-items:center; justify-content:center; width:36px; height:36px; border-radius:50%; background:#f1f5f9; color:#0f172a; text-decoration:none;" title="Volver al listado de cuestionarios">
         <i data-lucide="arrow-left" style="width:18px; height:18px;"></i>
       </a>
       <div>
@@ -29,11 +29,11 @@
         <span id="label-toggle-clave">Revelar Claves y Retroalimentación</span>
       </button>
 
-      <a href="{% url 'preguntas:cuestionario_editar' cuestionario.id %}" class="btn btn-outline" style="font-size:13px; padding:8px 14px; display:inline-flex; align-items:center; gap:6px;">
+      <a href="{% url 'cuestionarios:editar' cuestionario.id %}" class="btn btn-outline" style="font-size:13px; padding:8px 14px; display:inline-flex; align-items:center; gap:6px;">
         <i data-lucide="settings" style="width:15px; height:15px;"></i> Configuración
       </a>
 
-      <a href="{% url 'preguntas:cuestionarios_list' %}" class="btn btn-primary" style="font-size:13px; padding:8px 16px; display:inline-flex; align-items:center; gap:6px;">
+      <a href="{% url 'cuestionarios:listado' %}" class="btn btn-primary" style="font-size:13px; padding:8px 16px; display:inline-flex; align-items:center; gap:6px;">
         <i data-lucide="check" style="width:15px; height:15px;"></i> Salir de Vista Previa
       </a>
     </div>
@@ -335,7 +335,7 @@
 
   function irSiguiente() {
     if (preguntaActualIdx >= preguntasData.length - 1) {
-      window.location.href = '{% url 'preguntas:cuestionarios_list' %}';
+      window.location.href = '{% url 'cuestionarios:listado' %}';
     } else {
       cambiarPregunta(preguntaActualIdx + 1);
     }

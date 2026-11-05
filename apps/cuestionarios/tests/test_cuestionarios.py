@@ -3,8 +3,9 @@ from decimal import Decimal
 
 from django.test import TestCase
 
-from preguntas.models import Categoria, Cuestionario
-from .factories import crear_pregunta, crear_usuario, sembrar_roles
+from apps.banco_preguntas.models import Categoria
+from apps.cuestionarios.models import Cuestionario
+from apps.core.tests.factories import crear_pregunta, crear_usuario, sembrar_roles
 
 
 class ConfigurarCuestionarioTests(TestCase):

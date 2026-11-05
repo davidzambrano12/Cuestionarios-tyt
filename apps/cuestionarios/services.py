@@ -8,7 +8,8 @@ from decimal import Decimal
 
 from django.db import transaction
 
-from preguntas.models import Cuestionario, CuestionarioPregunta, Pregunta
+from apps.banco_preguntas.models import Pregunta
+from apps.cuestionarios.models import Cuestionario, CuestionarioPregunta
 
 CAMPOS_CONFIGURABLES = (
     "nombre", "descripcion", "fecha_apertura", "fecha_cierre",

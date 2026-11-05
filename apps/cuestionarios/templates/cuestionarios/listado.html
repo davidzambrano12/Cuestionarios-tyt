@@ -1,4 +1,4 @@
-{% extends 'app_base.html' %}
+{% extends 'layouts/app_base.html' %}
 
 {% block title %}Gestión de Cuestionarios - Simulador Saber TyT{% endblock %}
 
@@ -15,7 +15,7 @@
       <p class="banner-subtitle">Configuración, publicación y estado de evaluaciones institucionales</p>
     </div>
     {% if user.is_superuser or user.perfil.es_admin or user.perfil.es_docente %}
-    <a href="{% url 'preguntas:cuestionario_crear' %}" class="btn btn-primary" style="padding:10px 18px; border-radius:10px; font-weight:700; display:inline-flex; align-items:center; gap:8px;">
+    <a href="{% url 'cuestionarios:crear' %}" class="btn btn-primary" style="padding:10px 18px; border-radius:10px; font-weight:700; display:inline-flex; align-items:center; gap:8px;">
       <i data-lucide="plus"></i> Crear Cuestionario
     </a>
     {% endif %}
@@ -114,7 +114,7 @@
         </div>
 
         {% if user.is_superuser or user.perfil.es_admin or user.perfil.es_docente %}
-        <a href="{% url 'preguntas:cuestionario_previsualizar' c.id %}" class="btn btn-outline" style="padding:4px 9px; font-size:11px; border-radius:8px; display:inline-flex; align-items:center; gap:4px; color:#475569; border-color:#e2e8f0; background:#f8fafc;" title="Previsualizar cuestionario como estudiante">
+        <a href="{% url 'cuestionarios:previsualizar' c.id %}" class="btn btn-outline" style="padding:4px 9px; font-size:11px; border-radius:8px; display:inline-flex; align-items:center; gap:4px; color:#475569; border-color:#e2e8f0; background:#f8fafc;" title="Previsualizar cuestionario como estudiante">
           <i data-lucide="eye" style="width:13px; height:13px; color:#186382;"></i> Vista previa
         </a>
         {% endif %}
@@ -166,17 +166,17 @@
     <!-- Botones de Acción Segregados por Rol: 2 Botones Balanceados y Anchos -->
     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:auto;">
       {% if user.is_superuser or user.perfil.es_admin or user.perfil.es_docente %}
-      <a href="{% url 'preguntas:cuestionario_intentos' c.id %}" class="btn btn-outline" style="font-size:13px; padding:10px 14px; display:inline-flex; align-items:center; justify-content:center; gap:6px; color:#186382; font-weight:700; border-color:#cbd5e1; border-radius:10px;" title="Ver calificaciones y estudiantes que presentaron">
+      <a href="{% url 'reportes:intentos' c.id %}" class="btn btn-outline" style="font-size:13px; padding:10px 14px; display:inline-flex; align-items:center; justify-content:center; gap:6px; color:#186382; font-weight:700; border-color:#cbd5e1; border-radius:10px;" title="Ver calificaciones y estudiantes que presentaron">
         <i data-lucide="users" style="width:15px; height:15px; color:#186382;"></i>
         Intentos ({{ c.intentos.count }})
       </a>
-      <a href="{% url 'preguntas:cuestionario_editar' c.id %}" class="btn btn-primary" style="font-size:13px; padding:10px 14px; display:inline-flex; align-items:center; justify-content:center; gap:6px; font-weight:700; border-radius:10px;" title="Configurar parámetros y preguntas">
+      <a href="{% url 'cuestionarios:editar' c.id %}" class="btn btn-primary" style="font-size:13px; padding:10px 14px; display:inline-flex; align-items:center; justify-content:center; gap:6px; font-weight:700; border-radius:10px;" title="Configurar parámetros y preguntas">
         <i data-lucide="settings" style="width:15px; height:15px;"></i>
         Configurar
       </a>
       {% else %}
         {% if c.esta_vigente %}
-        <a href="{% url 'preguntas:iniciar_evaluacion' c.id %}" class="btn btn-primary" style="grid-column:1 / -1; font-size:13px; padding:10px; display:inline-flex; align-items:center; justify-content:center; gap:6px; border-radius:10px;">
+        <a href="{% url 'evaluaciones:iniciar' c.id %}" class="btn btn-primary" style="grid-column:1 / -1; font-size:13px; padding:10px; display:inline-flex; align-items:center; justify-content:center; gap:6px; border-radius:10px;">
           <i data-lucide="play" style="width:14px; height:14px;"></i> Iniciar Evaluación
         </a>
         {% elif c.esta_vencido %}
@@ -202,7 +202,7 @@
       Comienza creando una evaluación para programar las preguntas institucionales del banco.
     </p>
     {% if user.is_superuser or user.perfil.es_admin or user.perfil.es_docente %}
-    <a href="{% url 'preguntas:cuestionario_crear' %}" class="btn btn-primary" style="display:inline-flex; align-items:center; gap:8px;">
+    <a href="{% url 'cuestionarios:crear' %}" class="btn btn-primary" style="display:inline-flex; align-items:center; gap:8px;">
       <i data-lucide="plus"></i> Crear Primer Cuestionario
     </a>
     {% endif %}

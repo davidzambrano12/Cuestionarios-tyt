@@ -1,4 +1,4 @@
-{% extends 'app_base.html' %}
+{% extends 'layouts/app_base.html' %}
 
 {% block title %}{% if cuestionario %}Editar Cuestionario: {{ cuestionario.nombre }}{% else %}Crear Cuestionario{% endif %} - Simulador Saber TyT{% endblock %}
 
@@ -9,11 +9,11 @@
 
   <!-- Navegación Superior y Volver -->
   <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-    <a href="{% url 'preguntas:cuestionarios_list' %}" style="display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:600; color:#186382; text-decoration:none;">
+    <a href="{% url 'cuestionarios:listado' %}" style="display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:600; color:#186382; text-decoration:none;">
       <i data-lucide="arrow-left" style="width:16px; height:16px;"></i> Volver a Cuestionarios
     </a>
     {% if cuestionario %}
-    <a href="{% url 'preguntas:cuestionario_previsualizar' cuestionario.id %}" class="btn btn-outline" style="font-size:12px; padding:6px 12px; gap:6px;">
+    <a href="{% url 'cuestionarios:previsualizar' cuestionario.id %}" class="btn btn-outline" style="font-size:12px; padding:6px 12px; gap:6px;">
       <i data-lucide="eye" style="width:14px; height:14px;"></i> Previsualizar Examen
     </a>
     {% endif %}

@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'layouts/base.html' %}
 {% load static %}
 
 {% block title %}Simulador Saber TyT - Uniputumayo{% endblock %}
@@ -183,7 +183,7 @@
         </div>
         <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid #f1f5f9; padding-top:14px;">
           <span style="font-size:12px; color:#64748b;">Estándar Saber TyT</span>
-          <a href="{% url 'preguntas:iniciar_evaluacion' c.id %}" class="btn btn-primary" style="padding:6px 18px; font-size:13px; display:inline-flex; align-items:center; gap:6px;">
+          <a href="{% url 'evaluaciones:iniciar' c.id %}" class="btn btn-primary" style="padding:6px 18px; font-size:13px; display:inline-flex; align-items:center; gap:6px;">
             Iniciar <i data-lucide="play" style="width:13px; height:13px;"></i>
           </a>
         </div>
