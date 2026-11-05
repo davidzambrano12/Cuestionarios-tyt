@@ -105,3 +105,6 @@
 
 /* Casillas y radios con el color institucional */
 input[type="checkbox"], input[type="radio"] { accent-color: var(--color-primario); }
+
+/* El atributo hidden siempre oculta, aunque una clase defina display */
+[hidden] { display: none !important; }

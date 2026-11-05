@@ -1230,3 +1230,26 @@ a:hover {
 .datos-clave { display: flex; gap: var(--espacio-4); flex-wrap: wrap; font-size: var(--texto-xs); color: var(--color-texto-suave); margin: calc(-1 * var(--espacio-3)) 0 var(--espacio-5); }
 .datos-clave li { display: inline-flex; align-items: center; gap: var(--espacio-1); list-style: none; }
 .datos-clave strong { color: var(--color-texto); }
+
+/* Modal: cabecera, cierre y acciones */
+.modal-box--ancho { max-width: 680px; }
+.modal-cabecera { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--espacio-3); margin-bottom: var(--espacio-5); }
+.modal-cerrar {
+  background: none;
+  border: none;
+  font-size: var(--texto-2xl);
+  line-height: 1;
+  color: var(--color-texto-suave);
+  cursor: pointer;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radio-sm);
+}
+.modal-cerrar:hover { background: var(--color-superficie-hundida); color: var(--color-texto); }
+.modal-acciones { display: flex; justify-content: flex-end; gap: var(--espacio-3); margin-top: var(--espacio-6); }
+
+/* Rejillas de formulario */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: var(--espacio-3); }
+.grid-1-2 { display: grid; grid-template-columns: 1fr 2fr; gap: var(--espacio-3); }
+@media (max-width: 600px) { .grid-2, .grid-1-2 { grid-template-columns: 1fr; } }
+.form-textarea--alto { min-height: 90px; }
