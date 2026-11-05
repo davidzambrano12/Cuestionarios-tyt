@@ -1314,3 +1314,148 @@ a:hover {
 .menu-cuenta__item--peligro:focus-visible { background: var(--color-peligro-suave); color: var(--color-peligro-texto); }
 @media (max-width: 640px) { .menu-cuenta__texto, .menu-cuenta__flecha { display: none; } }
 .user-avatar-circle--solido { background: var(--color-primario); color: var(--color-texto-invertido); }
+
+/* Íconos Lucide (antes en un <style> de layouts/base.html) */
+.lucide { width: 1.15em; height: 1.15em; display: inline-block; vertical-align: -0.2em; stroke-width: 2; stroke: currentColor; }
+.btn .lucide { margin-right: 6px; }
+.sidebar-nav .nav-item .lucide { width: 18px; height: 18px; flex-shrink: 0; }
+
+/* ---------------------------------------------------------------- Barra lateral contraíble
+   data-barra en .app-container: "auto" (según el ancho), "contraida" o "expandida"
+   (preferencia guardada en la cookie barra_lateral; ver static/js/core/base.js).
+   ≥1280 px: expandida · 768–1279 px: contraída · <768 px: panel deslizable. */
+.sidebar { transition: width var(--transicion-normal), padding var(--transicion-normal); }
+.sidebar-header { display: flex; align-items: center; gap: var(--espacio-3); }
+.sidebar-header__texto { min-width: 0; }
+.sidebar-marca {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radio-md);
+  background: var(--color-primario);
+  color: var(--color-sobre-primario);
+}
+.sidebar-marca .lucide { width: 22px; height: 22px; vertical-align: 0; }
+.nav-item { position: relative; }
+.nav-item__texto { white-space: nowrap; }
+.barra-alternar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  margin-top: var(--espacio-4);
+  padding: 10px 14px;
+  border: 0;
+  border-radius: var(--radio-md);
+  background: none;
+  color: var(--color-texto-suave);
+  font: inherit;
+  font-size: var(--texto-sm);
+  cursor: pointer;
+}
+.barra-alternar:hover { background: var(--color-superficie-tenue); color: var(--color-primario); }
+.barra-alternar .lucide { width: 18px; height: 18px; flex-shrink: 0; transition: transform var(--transicion-normal); }
+.btn-menu-movil {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+  background: var(--color-superficie);
+  color: var(--color-texto);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.btn-menu-movil .lucide { width: 20px; height: 20px; vertical-align: 0; }
+.barra-fondo { position: fixed; inset: 0; background: rgb(35 31 32 / 0.45); z-index: 40; }
+.barra-fondo[hidden] { display: none; }
+
+/* Contraída por preferencia del usuario */
+@media (min-width: 768px) {
+.app-container[data-barra="contraida"] .sidebar { width: 72px; padding-left: 12px; padding-right: 12px; overflow: visible; }
+.app-container[data-barra="contraida"] .sidebar-header { justify-content: center; padding-left: 0; padding-right: 0; }
+.app-container[data-barra="contraida"] .sidebar-header__texto { display: none; }
+.app-container[data-barra="contraida"] .nav-item,
+.app-container[data-barra="contraida"] .barra-alternar { justify-content: center; gap: 0; padding-left: 0; padding-right: 0; }
+.app-container[data-barra="contraida"] .nav-item__texto {
+  position: absolute;
+  left: calc(100% + 14px);
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 6px 10px;
+  border-radius: var(--radio-sm);
+  background: var(--gris-900);
+  color: var(--color-texto-invertido);
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
+  box-shadow: var(--sombra-md);
+  opacity: 0;
+  pointer-events: none;
+  transition: none; /* al contraer u ocultar: sin parpadeo de etiquetas */
+  z-index: 50;
+}
+.app-container[data-barra="contraida"] .nav-item:hover .nav-item__texto,
+.app-container[data-barra="contraida"] .nav-item:focus-visible .nav-item__texto,
+.app-container[data-barra="contraida"] .barra-alternar:hover .nav-item__texto,
+.app-container[data-barra="contraida"] .barra-alternar:focus-visible .nav-item__texto { opacity: 1; transition: opacity var(--transicion-rapida); }
+.app-container[data-barra="contraida"] .barra-alternar .lucide { transform: rotate(180deg); }
+}
+
+/* Contraída por defecto en laptop pequeña y tablet */
+@media (min-width: 768px) and (max-width: 1279.98px) {
+.app-container[data-barra="auto"] .sidebar { width: 72px; padding-left: 12px; padding-right: 12px; overflow: visible; }
+.app-container[data-barra="auto"] .sidebar-header { justify-content: center; padding-left: 0; padding-right: 0; }
+.app-container[data-barra="auto"] .sidebar-header__texto { display: none; }
+.app-container[data-barra="auto"] .nav-item,
+.app-container[data-barra="auto"] .barra-alternar { justify-content: center; gap: 0; padding-left: 0; padding-right: 0; }
+.app-container[data-barra="auto"] .nav-item__texto {
+  position: absolute;
+  left: calc(100% + 14px);
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 6px 10px;
+  border-radius: var(--radio-sm);
+  background: var(--gris-900);
+  color: var(--color-texto-invertido);
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-medio);
+  box-shadow: var(--sombra-md);
+  opacity: 0;
+  pointer-events: none;
+  transition: none; /* al contraer u ocultar: sin parpadeo de etiquetas */
+  z-index: 50;
+}
+.app-container[data-barra="auto"] .nav-item:hover .nav-item__texto,
+.app-container[data-barra="auto"] .nav-item:focus-visible .nav-item__texto,
+.app-container[data-barra="auto"] .barra-alternar:hover .nav-item__texto,
+.app-container[data-barra="auto"] .barra-alternar:focus-visible .nav-item__texto { opacity: 1; transition: opacity var(--transicion-rapida); }
+.app-container[data-barra="auto"] .barra-alternar .lucide { transform: rotate(180deg); }
+}
+
+/* Celular: la barra es un panel que se abre con el botón de menú */
+@media (max-width: 767.98px) {
+  .sidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 280px;
+    max-width: 85vw;
+    height: auto;
+    z-index: 50;
+    transform: translateX(-100%);
+    transition: transform var(--transicion-normal);
+  }
+  /* Cerrada queda fuera de pantalla e inert (lo aplica base.js): no recibe foco ni la leen */
+  .app-container.barra-abierta .sidebar { transform: none; box-shadow: var(--sombra-lg); }
+  .barra-alternar { display: none; }
+  .btn-menu-movil { display: inline-flex; }
+  .top-navbar { padding: 0 var(--espacio-4); gap: var(--espacio-3); }
+  .navbar-brand-title { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+}

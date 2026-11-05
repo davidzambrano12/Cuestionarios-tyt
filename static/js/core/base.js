@@ -11,6 +11,8 @@
  *   <a data-ancla-local="seccion">          si ya estás en esa página, desplaza
  *                                           hasta #seccion en vez de recargar
  *   <button data-notificar="texto" data-notificar-titulo="…" data-notificar-tipo="info">
+ *   <button data-alternar-barra>            contrae o expande la barra lateral (se recuerda)
+ *   <button data-abrir-barra>               abre la barra lateral en celular
  *   <div data-menu-desplegable>             menú desplegable: un <button aria-controls>
  *                                           y una lista role="menu" con role="menuitem"
  *
@@ -135,6 +137,86 @@
     document.cookie = 'refresh_token=; path=/; max-age=0;';
     window.location.href = cuerpo.urlLogout || '/logout/';
   }
+
+  /* ---------------------------------------------------------------- Barra lateral */
+
+  const ES_MOVIL = window.matchMedia('(max-width: 767.98px)');
+  const ES_MEDIANA = window.matchMedia('(max-width: 1279.98px)');
+  const UN_ANIO = 60 * 60 * 24 * 365;
+
+  function contenedorApp() {
+    return document.querySelector('.app-container[data-barra]');
+  }
+
+  function barraContraida(contenedor) {
+    const estado = contenedor.dataset.barra;
+    return estado === 'contraida' || (estado === 'auto' && ES_MEDIANA.matches);
+  }
+
+  // Mantiene el botón coherente con lo que se ve (en "auto" depende del ancho)
+  function sincronizarBarra() {
+    const contenedor = contenedorApp();
+    const boton = contenedor && contenedor.querySelector('[data-alternar-barra]');
+    if (!boton) return;
+    const contraida = barraContraida(contenedor);
+    boton.setAttribute('aria-expanded', String(!contraida));
+    boton.querySelector('.nav-item__texto').textContent = contraida ? 'Expandir menú' : 'Contraer menú';
+  }
+
+  function alternarBarra() {
+    const contenedor = contenedorApp();
+    contenedor.dataset.barra = barraContraida(contenedor) ? 'expandida' : 'contraida';
+    document.cookie = `barra_lateral=${contenedor.dataset.barra}; path=/; max-age=${UN_ANIO}; SameSite=Lax`;
+    sincronizarBarra();
+  }
+
+  // En celular, la barra cerrada está fuera de pantalla: inert la saca del orden de Tab
+  function aplicarInertBarra() {
+    const contenedor = contenedorApp();
+    if (!contenedor) return;
+    contenedor.querySelector('.sidebar').inert = ES_MOVIL.matches && !contenedor.classList.contains('barra-abierta');
+  }
+
+  function abrirBarraMovil() {
+    const contenedor = contenedorApp();
+    contenedor.classList.add('barra-abierta');
+    contenedor.querySelector('[data-cerrar-barra]').hidden = false;
+    contenedor.querySelector('[data-abrir-barra]').setAttribute('aria-expanded', 'true');
+    // Primero el foco y después inert: al revés, el foco del botón se pierde en <body>
+    aplicarInertBarra();
+    const primero = contenedor.querySelector('.sidebar .nav-item');
+    if (primero) primero.focus();
+    contenedor.querySelector('.main-content').inert = true;
+  }
+
+  function cerrarBarraMovil(devolverFoco) {
+    const contenedor = contenedorApp();
+    if (!contenedor || !contenedor.classList.contains('barra-abierta')) return;
+    contenedor.classList.remove('barra-abierta');
+    contenedor.querySelector('[data-cerrar-barra]').hidden = true;
+    contenedor.querySelector('.main-content').inert = false;
+    const boton = contenedor.querySelector('[data-abrir-barra]');
+    boton.setAttribute('aria-expanded', 'false');
+    if (devolverFoco) boton.focus();
+    aplicarInertBarra();
+  }
+
+  document.addEventListener('click', (evento) => {
+    if (evento.target.closest('[data-alternar-barra]')) alternarBarra();
+    else if (evento.target.closest('[data-abrir-barra]')) abrirBarraMovil();
+    else if (evento.target.closest('[data-cerrar-barra]')) cerrarBarraMovil(true);
+    else if (evento.target.closest('.sidebar .nav-item') && ES_MOVIL.matches) cerrarBarraMovil(false);
+  });
+
+  document.addEventListener('keydown', (evento) => {
+    if (evento.key === 'Escape') cerrarBarraMovil(true);
+  });
+
+  ES_MOVIL.addEventListener('change', () => {
+    cerrarBarraMovil(false);
+    aplicarInertBarra();
+  });
+  ES_MEDIANA.addEventListener('change', sincronizarBarra);
 
   /* ---------------------------------------------------------------- Menús desplegables */
 
@@ -269,6 +351,8 @@
 
   document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('#toast-container .toast-item').forEach(programarCierre);
+    sincronizarBarra();
+    aplicarInertBarra();
     refrescarIconos();
   });
 
