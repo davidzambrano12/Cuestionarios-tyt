@@ -1,0 +1,7 @@
+{% load consultas %}{% comment %}
+  Botón para descargar en Excel lo que muestra la vista, con los mismos filtros.
+  Parámetro: reporte = consolidado | ejes | historial | dificultad
+{% endcomment %}<a href="{% url 'reportes:exportar_consulta' reporte %}{% con_filtros filtros %}" class="btn btn-outline btn-accion" data-ref="descargar-excel" data-reporte="{{ reporte }}"
+   title="{% if reporte == 'consolidado' %}Calificaciones, promedio por estudiante, resumen por período y por curso{% elif reporte == 'ejes' %}Aciertos y errores por eje, período y curso{% elif reporte == 'historial' %}Un intento por fila, en orden cronológico{% else %}Todas las preguntas con su porcentaje de acierto{% endif %} · con los filtros aplicados">
+  <i data-lucide="download" aria-hidden="true"></i> Descargar Excel
+</a>

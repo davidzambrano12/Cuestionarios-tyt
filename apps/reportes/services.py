@@ -264,9 +264,9 @@ def periodo_academico(fecha=None) -> str:
     return f"{fecha.year}-{'I' if fecha.month <= 6 else 'II'}"
 
 
-def _cuestionarios_recientes(limite):
+def _cuestionarios_recientes(limite, base=None):
     return list(
-        Cuestionario.objects.annotate(
+        (base if base is not None else Cuestionario.objects.all()).annotate(
             num_preguntas=Count("cuestionario_preguntas", distinct=True),
             num_participantes=Count("intentos__participante_codigo", distinct=True),
         ).order_by("-id")[:limite]
@@ -300,10 +300,13 @@ def panel_admin() -> dict:
     }
 
 
-def panel_docente() -> dict:
-    """Resumen de trabajo del docente: cuestionarios y banco de preguntas."""
+def panel_docente(user) -> dict:
+    """Resumen de trabajo del docente: sus cuestionarios y el banco de preguntas."""
+    from apps.cuestionarios.acceso import editables
+
+    propios = editables(user)
     por_estado = dict(
-        Cuestionario.objects.values_list("estado").annotate(total=Count("id")).values_list("estado", "total")
+        propios.values_list("estado").annotate(total=Count("id")).values_list("estado", "total")
     )
     return {
         "periodo": periodo_academico(),
@@ -313,5 +316,5 @@ def panel_docente() -> dict:
         "preguntas_count": Pregunta.objects.filter(activa=True).count(),
         "preguntas_inactivas": Pregunta.objects.filter(activa=False).count(),
         "categorias_count": Categoria.objects.count(),
-        "cuestionarios_recientes": _cuestionarios_recientes(4),
+        "cuestionarios_recientes": _cuestionarios_recientes(4, propios),
     }

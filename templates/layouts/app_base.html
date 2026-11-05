@@ -37,6 +37,12 @@
         <a href="{% url 'cuestionarios:listado' %}" class="nav-item {% if '/cuestionarios/' in request.path or active_tab == 'cuestionarios' %}active{% endif %}"{% if '/cuestionarios/' in request.path or active_tab == 'cuestionarios' %} aria-current="page"{% endif %}>
           <i data-lucide="clipboard-list" aria-hidden="true"></i><span class="nav-item__texto">Cuestionarios</span>
         </a>
+        <a href="{% url 'academico:listado' %}" class="nav-item {% if '/cursos/' in request.path or active_tab == 'cursos' %}active{% endif %}"{% if '/cursos/' in request.path or active_tab == 'cursos' %} aria-current="page"{% endif %}>
+          <i data-lucide="book-open" aria-hidden="true"></i><span class="nav-item__texto">Cursos</span>
+        </a>
+        <a href="{% url 'reportes:consultas' %}" class="nav-item {% if '/reportes/consultas/' in request.path or active_tab == 'consultas' %}active{% endif %}"{% if '/reportes/consultas/' in request.path or active_tab == 'consultas' %} aria-current="page"{% endif %}>
+          <i data-lucide="bar-chart-3" aria-hidden="true"></i><span class="nav-item__texto">Consultas y reportes</span>
+        </a>
         <a href="{% url 'cuentas:ajustes' %}" class="nav-item {% if '/ajustes/' in request.path or active_tab == 'ajustes' %}active{% endif %}"{% if '/ajustes/' in request.path or active_tab == 'ajustes' %} aria-current="page"{% endif %}>
           <i data-lucide="settings" aria-hidden="true"></i><span class="nav-item__texto">Ajustes</span>
         </a>
@@ -49,6 +55,12 @@
         </a>
         <a href="{% url 'cuestionarios:listado' %}" class="nav-item {% if '/cuestionarios/' in request.path or active_tab == 'cuestionarios' %}active{% endif %}"{% if '/cuestionarios/' in request.path or active_tab == 'cuestionarios' %} aria-current="page"{% endif %}>
           <i data-lucide="clipboard-list" aria-hidden="true"></i><span class="nav-item__texto">Cuestionarios</span>
+        </a>
+        <a href="{% url 'academico:listado' %}" class="nav-item {% if '/cursos/' in request.path or active_tab == 'cursos' %}active{% endif %}"{% if '/cursos/' in request.path or active_tab == 'cursos' %} aria-current="page"{% endif %}>
+          <i data-lucide="book-open" aria-hidden="true"></i><span class="nav-item__texto">Cursos</span>
+        </a>
+        <a href="{% url 'reportes:consultas' %}" class="nav-item {% if '/reportes/consultas/' in request.path or active_tab == 'consultas' %}active{% endif %}"{% if '/reportes/consultas/' in request.path or active_tab == 'consultas' %} aria-current="page"{% endif %}>
+          <i data-lucide="bar-chart-3" aria-hidden="true"></i><span class="nav-item__texto">Consultas y reportes</span>
         </a>
         <a href="{% url 'cuentas:ajustes' %}" class="nav-item {% if '/ajustes/' in request.path or active_tab == 'ajustes' %}active{% endif %}"{% if '/ajustes/' in request.path or active_tab == 'ajustes' %} aria-current="page"{% endif %}>
           <i data-lucide="settings" aria-hidden="true"></i><span class="nav-item__texto">Ajustes</span>

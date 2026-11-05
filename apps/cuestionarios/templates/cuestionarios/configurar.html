@@ -49,6 +49,42 @@
             </div>
           </div>
 
+          {% with vis=cuestionario.visibilidad|default:"privado" %}
+          <div class="card bloque-formulario" id="bloque-visibilidad">
+            <h2 class="bloque-formulario__titulo"><i data-lucide="users" class="icono-20"></i> ¿Quién puede presentarlo?</h2>
+            <fieldset class="opciones-visibilidad">
+              <legend class="sr-only">Visibilidad del cuestionario</legend>
+              <label class="opcion-visibilidad">
+                <input type="radio" name="visibilidad" value="privado" data-visibilidad {% if vis == "privado" %}checked{% endif %}>
+                <span><span class="peso-bold texto-sm">De curso</span><span class="texto-xs texto-suave">Solo los estudiantes matriculados en los cursos que elijas. Sus intentos cuentan en ese curso.</span></span>
+              </label>
+              <label class="opcion-visibilidad{% if not puede_institucional %} opcion-visibilidad--bloqueada{% endif %}">
+                <input type="radio" name="visibilidad" value="institucional" data-visibilidad {% if vis == "institucional" %}checked{% endif %} {% if not puede_institucional %}disabled{% endif %}>
+                <span><span class="peso-bold texto-sm">Institucional</span><span class="texto-xs texto-suave">{% if puede_institucional %}Cualquier estudiante puede presentarlo; si está en varios cursos, elige para cuál.{% else %}Solo un administrador o quien tenga el permiso de publicar cuestionarios institucionales.{% endif %}</span></span>
+              </label>
+            </fieldset>
+
+            <div class="cursos-asignados" data-ref="cursos-asignados" {% if vis == "institucional" %}hidden{% endif %}>
+              <p class="form-label">Cursos asignados</p>
+              {% if cursos_asignables %}
+              <ul class="lista-cursos">
+                {% for curso in cursos_asignables %}
+                <li><label class="lista-cursos__item">
+                  <input type="checkbox" name="cursos" value="{{ curso.id }}" {% if curso.id in cursos_seleccionados %}checked{% endif %}>
+                  <span><span class="texto-sm peso-semibold">{{ curso.asignatura }}</span> <span class="texto-xs texto-suave">· G{{ curso.grupo }} · {{ curso.periodo }}</span></span>
+                </label></li>
+                {% endfor %}
+              </ul>
+              {% else %}
+              <p class="nota"><i data-lucide="info" class="icono-16 shrink-0"></i> No tienes cursos activos. <a href="{% url 'academico:crear' %}">Crea tu curso</a> y matricula a los estudiantes para poder publicarlo.</p>
+              {% endif %}
+              {% if cursos_ajenos %}
+              <p class="texto-xs texto-suave mt-2">También está asignado a {% for c in cursos_ajenos %}{{ c.nombre }} ({{ c.periodo }}){% if not forloop.last %}, {% endif %}{% endfor %}, de otro docente; se conserva.</p>
+              {% endif %}
+            </div>
+          </div>
+          {% endwith %}
+
           <div class="card bloque-formulario">
             <h2 class="bloque-formulario__titulo"><i data-lucide="calendar" class="icono-20"></i> Ventana de acceso y duración</h2>
             <div class="grid-2">

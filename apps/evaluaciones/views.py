@@ -27,7 +27,14 @@ def iniciar_evaluacion(request, cuestionario_id):
         messages.info(request, "Acceso como docente: Has sido redirigido al modo de previsualización para no alterar las estadísticas estudiantiles.")
         return redirect("cuestionarios:previsualizar", cuestionario_id=cuestionario.id)
 
-    resultado = servicio.iniciar_intento(request.user, cuestionario)
+    curso_id = request.POST.get("curso") if request.method == "POST" else None
+    resultado = servicio.iniciar_intento(request.user, cuestionario, curso_id=curso_id)
+    if resultado.tipo == "elegir_curso":
+        if curso_id:
+            messages.error(request, "Elige uno de tus cursos de la lista.")
+        return render(request, "evaluaciones/elegir_curso.html", {
+            "cuestionario": cuestionario, "cursos": resultado.cursos, "active_tab": "inicio",
+        })
     if resultado.tipo == "rechazado":
         messages.error(request, resultado.mensaje)
         return redirect("evaluaciones:panel_estudiante")

@@ -1,0 +1,103 @@
+{% extends 'layouts/app_base.html' %}
+{% load static componentes %}
+
+{% block title %}Cursos - {{ config.nombre_sistema }}{% endblock %}
+{% block nav_title %}Cursos y matrículas{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'css/academico.css' %}">{% endblock %}
+
+{% block app_content %}
+<div class="academico">
+  {% componente "componentes/encabezado.html" etiqueta="Estructura académica" titulo="Cursos y matrículas" subtitulo="Cada curso es una asignatura dictada a un grupo en un período. Los resultados de los simulacros se consultan por curso." %}
+    {% if es_admin %}<button type="button" class="btn btn-outline" data-abrir-modal="modal-periodo"><i data-lucide="calendar-plus" aria-hidden="true"></i> Nuevo período</button>{% endif %}
+    <a href="{% url 'academico:crear' %}" class="btn btn-primary"><i data-lucide="plus" aria-hidden="true"></i> Nuevo curso</a>
+  {% fincomponente %}
+
+  {% if sin_curso and sin_curso.intentos %}
+  <div class="alerta alerta--info aviso-sin-curso" role="status" data-ref="aviso-sin-curso">
+    <i data-lucide="alert-circle" aria-hidden="true"></i>
+    <div>
+      <strong>{{ sin_curso.intentos }} intento{{ sin_curso.intentos|pluralize }} terminado{{ sin_curso.intentos|pluralize }} sin curso</strong>
+      de {{ sin_curso.estudiantes }} estudiante{{ sin_curso.estudiantes|pluralize }}.
+      No aparecen en los filtros por período y curso de los reportes. Al matricular a esos estudiantes en su curso del período, sus intentos se asocian solos.
+    </div>
+  </div>
+  {% endif %}
+
+  <form method="GET" class="card barra-herramientas mb-5" role="search">
+    <div class="barra-herramientas__fila">
+      <div class="filtros-cursos">
+        <label for="f-periodo" class="sr-only">Período</label>
+        <select id="f-periodo" name="periodo" class="form-select" data-enviar-al-cambiar>
+          <option value="">Todos los períodos</option>
+          {% for p in periodos %}<option value="{{ p.id }}"{% if p.id == periodo_id %} selected{% endif %}>{{ p }}</option>{% endfor %}
+        </select>
+        <label for="f-q" class="sr-only">Buscar curso</label>
+        <input type="search" id="f-q" name="q" value="{{ q }}" class="form-input" placeholder="Buscar asignatura, grupo o programa">
+        <button type="submit" class="btn btn-outline">Buscar</button>
+      </div>
+      <span class="texto-xs texto-suave">{{ cursos|length }} curso{{ cursos|length|pluralize }}{% if not es_admin %} a tu cargo{% endif %}</span>
+    </div>
+  </form>
+
+  {% if cursos %}
+  <div class="card tabla-contenedor">
+    <div class="tabla-desplazable">
+      <table class="tabla tabla--cursos">
+        <caption class="sr-only">Cursos</caption>
+        <thead>
+          <tr><th scope="col">Asignatura</th><th scope="col">Período</th><th scope="col">Programa</th><th scope="col">Docente</th><th scope="col" class="texto-derecha">Matriculados</th><th scope="col" class="texto-derecha">Intentos</th><th scope="col"><span class="sr-only">Acciones</span></th></tr>
+        </thead>
+        <tbody>
+          {% for c in cursos %}
+          <tr class="fila-curso{% if not c.activo %} fila-curso--inactivo{% endif %}">
+            <td>
+              <a href="{% url 'academico:detalle' c.id %}" class="peso-semibold">{{ c.asignatura }}</a>
+              <div class="texto-xs texto-suave">Grupo {{ c.grupo }}{% if not c.activo %} · <span class="badge badge-neutro">Inactivo</span>{% endif %}</div>
+            </td>
+            <td class="cifras">{{ c.periodo }}</td>
+            <td>{{ c.programa }}{% if c.semestre %}<div class="texto-xs texto-suave">{{ c.semestre }}.° semestre</div>{% endif %}</td>
+            <td>{% if c.docente %}{{ c.docente.get_full_name|default:c.docente.username }}{% else %}<span class="texto-suave">Sin asignar</span>{% endif %}</td>
+            <td class="texto-derecha cifras">{{ c.num_matriculados }}</td>
+            <td class="texto-derecha cifras">{{ c.num_intentos }}</td>
+            <td class="texto-derecha"><a href="{% url 'academico:detalle' c.id %}" class="btn btn-outline btn-accion"><i data-lucide="users" aria-hidden="true"></i> Matrículas</a></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% else %}
+    {% if q or periodo_id %}
+      {% componente "componentes/estado_vacio.html" icono="search-x" titulo="Ningún curso coincide" mensaje="Prueba con otro período o término de búsqueda." %}<a href="{% url 'academico:listado' %}" class="btn btn-outline">Limpiar filtros</a>{% fincomponente %}
+    {% else %}
+      {% componente "componentes/estado_vacio.html" icono="book-open" titulo="Aún no hay cursos" mensaje="Crea el curso (asignatura y grupo) y matricula a sus estudiantes para que sus simulacros aparezcan en los reportes." %}<a href="{% url 'academico:crear' %}" class="btn btn-primary">Crear el primer curso</a>{% fincomponente %}
+    {% endif %}
+  {% endif %}
+</div>
+
+{% if es_admin %}
+<div id="modal-periodo" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="titulo-periodo">
+  <div class="modal-box">
+    <div class="modal-cabecera">
+      <h2 class="texto-md peso-extrabold" id="titulo-periodo">Nuevo período académico</h2>
+      <button type="button" class="modal-cerrar" data-cerrar-modal aria-label="Cerrar">&times;</button>
+    </div>
+    <form method="POST" action="{% url 'academico:crear_periodo' %}">
+      {% csrf_token %}
+      <div class="grid-2">
+        {% include "componentes/campo.html" with campo=form_periodo.anio %}
+        {% include "componentes/campo.html" with campo=form_periodo.numero %}
+        {% include "componentes/campo.html" with campo=form_periodo.fecha_inicio %}
+        {% include "componentes/campo.html" with campo=form_periodo.fecha_fin %}
+      </div>
+      <div class="modal-acciones">
+        <button type="button" class="btn btn-outline" data-cerrar-modal>Cancelar</button>
+        <button type="submit" class="btn btn-primary">Crear período</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_scripts %}<script src="{% static 'js/academico/cursos.js' %}"></script>{% endblock %}

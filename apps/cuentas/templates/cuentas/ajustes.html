@@ -18,17 +18,17 @@
     <fieldset {% if not puede_editar %}disabled{% endif %} class="sin-borde">
       <section class="card bloque-formulario">
         <h2 class="bloque-formulario__titulo"><i data-lucide="landmark" class="icono-16"></i> Identidad institucional</h2>
-        {% include "cuentas/_campo.html" with campo=form.nombre_sistema %}
-        {% include "cuentas/_campo.html" with campo=form.institucion %}
-        {% include "cuentas/_campo.html" with campo=form.sigla %}
+        {% include "componentes/campo.html" with campo=form.nombre_sistema %}
+        {% include "componentes/campo.html" with campo=form.institucion %}
+        {% include "componentes/campo.html" with campo=form.sigla %}
       </section>
 
       <section class="card bloque-formulario">
         <h2 class="bloque-formulario__titulo"><i data-lucide="headphones" class="icono-16"></i> Mesa de ayuda</h2>
-        {% include "cuentas/_campo.html" with campo=form.correo_soporte %}
+        {% include "componentes/campo.html" with campo=form.correo_soporte %}
         <div class="grid-2">
-          {% include "cuentas/_campo.html" with campo=form.telefono_soporte %}
-          {% include "cuentas/_campo.html" with campo=form.ubicacion %}
+          {% include "componentes/campo.html" with campo=form.telefono_soporte %}
+          {% include "componentes/campo.html" with campo=form.ubicacion %}
         </div>
       </section>
     </fieldset>

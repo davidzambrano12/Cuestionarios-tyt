@@ -195,3 +195,18 @@
   margin-bottom: var(--espacio-4);
 }
 .tarjeta-listado__acciones { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: auto; }
+
+/* Visibilidad: de curso o institucional */
+.opciones-visibilidad { border: 0; padding: 0; margin: 0 0 var(--espacio-4); display: grid; grid-template-columns: 1fr 1fr; gap: var(--espacio-3); }
+@media (max-width: 640px) { .opciones-visibilidad { grid-template-columns: 1fr; } }
+.opcion-visibilidad { display: flex; align-items: flex-start; gap: var(--espacio-3); padding: 12px 14px; border: 1px solid var(--color-borde); border-radius: var(--radio-md); cursor: pointer; }
+.opcion-visibilidad > span { display: flex; flex-direction: column; gap: 2px; }
+.opcion-visibilidad input { margin-top: 3px; accent-color: var(--color-primario); }
+.opcion-visibilidad:has(input:checked) { border-color: var(--color-primario); background: var(--color-primario-suave); }
+.opcion-visibilidad--bloqueada { cursor: not-allowed; background: var(--color-superficie-tenue); }
+.opcion-visibilidad--bloqueada .peso-bold { color: var(--color-texto-suave); }
+.lista-cursos { list-style: none; display: flex; flex-direction: column; gap: 6px; max-height: 260px; overflow-y: auto; }
+.lista-cursos__item { display: flex; align-items: center; gap: var(--espacio-3); padding: 8px 12px; border: 1px solid var(--color-borde); border-radius: var(--radio-sm); cursor: pointer; }
+.lista-cursos__item:has(input:checked) { border-color: var(--color-primario); background: var(--color-primario-suave); }
+.lista-cursos__item input { accent-color: var(--color-primario); width: 16px; height: 16px; }
+.badge-visibilidad .lucide { width: 12px; height: 12px; margin-right: 2px; }

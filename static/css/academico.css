@@ -1,0 +1,44 @@
+/* ==========================================================================
+   CURSOS Y MATRÍCULAS
+   ========================================================================== */
+.academico--angosto { max-width: 720px; margin: 0 auto; }
+.academico .enlace-volver { display: inline-flex; align-items: center; gap: 6px; font-size: var(--texto-sm); font-weight: var(--peso-semibold); }
+.academico .enlace-volver .lucide { width: 16px; height: 16px; }
+.academico .lucide { flex-shrink: 0; }
+
+.aviso-sin-curso { display: flex; align-items: flex-start; gap: var(--espacio-3); }
+.aviso-sin-curso .lucide { width: 18px; height: 18px; margin-top: 2px; }
+
+.filtros-cursos { display: flex; flex-wrap: wrap; gap: var(--espacio-2); flex: 1; }
+.filtros-cursos .form-select { width: auto; min-width: 190px; }
+.filtros-cursos .form-input { flex: 1; min-width: 200px; }
+.tabla--cursos { min-width: 820px; }
+.fila-curso--inactivo td { color: var(--color-texto-suave); }
+
+.bloque-curso { padding: var(--espacio-5); }
+.bloque-curso__titulo { display: flex; align-items: center; gap: var(--espacio-2); font-size: var(--texto-sm); font-weight: var(--peso-bold); margin-bottom: var(--espacio-4); }
+.bloque-curso__titulo .lucide { width: 16px; height: 16px; color: var(--color-primario); }
+.grid-asignatura { display: grid; grid-template-columns: 1fr 120px; gap: var(--espacio-4); }
+@media (max-width: 560px) { .grid-asignatura { grid-template-columns: 1fr; } }
+
+.campo-casilla { display: flex; flex-wrap: wrap; align-items: center; gap: var(--espacio-2); margin-bottom: var(--espacio-4); font-size: var(--texto-sm); cursor: pointer; }
+.campo-casilla p { flex-basis: 100%; }
+.form-check { width: 18px; height: 18px; accent-color: var(--color-primario); cursor: pointer; }
+.acciones-formulario { display: flex; justify-content: flex-end; gap: var(--espacio-3); padding-top: var(--espacio-4); border-top: 1px solid var(--color-superficie-hundida); }
+
+.curso-columnas { display: grid; grid-template-columns: minmax(280px, 380px) 1fr; gap: var(--espacio-5); align-items: start; }
+@media (max-width: 1000px) { .curso-columnas { grid-template-columns: 1fr; } }
+
+.buscar-estudiante { display: flex; gap: var(--espacio-2); margin-bottom: var(--espacio-3); }
+.buscar-estudiante .form-input { flex: 1; min-width: 0; }
+.candidatos__cabecera { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--espacio-2); margin-bottom: var(--espacio-2); }
+.candidatos__cabecera .campo-casilla { margin-bottom: 0; }
+.candidatos { list-style: none; display: flex; flex-direction: column; gap: 6px; max-height: 420px; overflow-y: auto; margin-bottom: var(--espacio-4); }
+.candidato { display: flex; align-items: flex-start; gap: var(--espacio-3); padding: 10px 12px; border: 1px solid var(--color-borde); border-radius: var(--radio-sm); cursor: pointer; }
+.candidato:hover { border-color: var(--color-primario); }
+.candidato:has(input:checked) { background: var(--color-primario-suave); border-color: var(--color-primario); }
+.candidato input { margin-top: 2px; }
+.candidato__datos { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.candidato__datos .lucide { width: 12px; height: 12px; vertical-align: -1px; }
+
+.form-input--compacto { width: auto; min-width: 180px; min-height: 34px; padding-top: 4px; padding-bottom: 4px; font-size: var(--texto-xs); }

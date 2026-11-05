@@ -17,7 +17,7 @@ CAMPOS_CONFIGURABLES = (
     "nombre", "descripcion", "fecha_apertura", "fecha_cierre",
     "tiempo_limite_minutos", "intentos_permitidos",
     "calificacion_maxima", "calificacion_aprobacion",
-    "mezclar_preguntas", "mezclar_respuestas", "permitir_revision", "estado",
+    "mezclar_preguntas", "mezclar_respuestas", "permitir_revision", "estado", "visibilidad",
 )
 
 
@@ -35,7 +35,9 @@ class DatosCuestionario:
     mezclar_respuestas: bool
     permitir_revision: bool
     estado: str
+    visibilidad: str = Cuestionario.PRIVADO
     preguntas_ids: list = field(default_factory=list)
+    cursos_ids: list = field(default_factory=list)
 
 
 class DatosInvalidos(Exception):
@@ -54,8 +56,14 @@ def _fecha(valor):
     return fecha
 
 
-def datos_desde_formulario(post) -> DatosCuestionario:
-    """Traduce el POST del editor y valida las reglas de la tabla cuestionarios."""
+def datos_desde_formulario(post, *, puede_institucional: bool = True, cursos_permitidos=None,
+                           cursos_actuales=()) -> DatosCuestionario:
+    """
+    Traduce el POST del editor y valida las reglas de la tabla cuestionarios,
+    además de la visibilidad: un institucional exige permiso para publicarlo y
+    uno de curso solo puede asignarse a cursos que el usuario gestiona
+    (`cursos_permitidos`; los ya asignados por otra persona se conservan).
+    """
     errores = []
 
     def numero(campo, tipo, por_defecto, etiqueta):
@@ -78,7 +86,10 @@ def datos_desde_formulario(post) -> DatosCuestionario:
         mezclar_respuestas=bool(post.get("mezclar_respuestas")),
         permitir_revision=bool(post.get("permitir_revision")),
         estado="disponible" if post.get("accion") == "publicar" else "borrador",
+        visibilidad=(post.get("visibilidad") if post.get("visibilidad") in dict(Cuestionario.VISIBILIDAD_CHOICES)
+                     else Cuestionario.PRIVADO),
         preguntas_ids=post.getlist("preguntas_ids"),
+        cursos_ids=sorted({int(i) for i in post.getlist("cursos") if str(i).isdigit()}),
     )
 
     # Reglas R01-R04: las mismas CHECK de la tabla cuestionarios en MariaDB
@@ -98,6 +109,19 @@ def datos_desde_formulario(post) -> DatosCuestionario:
         errores.append("Debe permitirse al menos un intento.")
     if datos.estado == "disponible" and not datos.preguntas_ids:
         errores.append("No se puede publicar un cuestionario sin preguntas.")
+
+    # Visibilidad
+    if datos.visibilidad == Cuestionario.INSTITUCIONAL:
+        datos.cursos_ids = []
+        if not puede_institucional:
+            errores.append("No tienes permiso para publicar cuestionarios institucionales; elige «De curso».")
+    else:
+        validos = set(cursos_permitidos or []) | set(cursos_actuales)
+        if cursos_permitidos is not None and not set(datos.cursos_ids) <= validos:
+            errores.append("Uno de los cursos elegidos no está a tu cargo.")
+            datos.cursos_ids = [i for i in datos.cursos_ids if i in validos]
+        if datos.estado == "disponible" and not datos.cursos_ids:
+            errores.append("Para publicar un cuestionario de curso, asígnalo al menos a un curso.")
 
     if errores:
         raise DatosInvalidos(errores, datos)
@@ -125,12 +149,14 @@ def preguntas_por_ids(ids):
 
 
 @transaction.atomic
-def guardar_cuestionario(datos: DatosCuestionario, cuestionario: Cuestionario | None = None) -> Cuestionario:
-    """Crea o actualiza el cuestionario y sincroniza sus preguntas (N:M) en orden."""
-    cuestionario = cuestionario or Cuestionario()
+def guardar_cuestionario(datos: DatosCuestionario, cuestionario: Cuestionario | None = None,
+                         usuario=None) -> Cuestionario:
+    """Crea o actualiza el cuestionario y sincroniza sus preguntas (N:M), en orden, y sus cursos."""
+    cuestionario = cuestionario or Cuestionario(creado_por=usuario)
     for campo in CAMPOS_CONFIGURABLES:
         setattr(cuestionario, campo, getattr(datos, campo))
     cuestionario.save()
+    cuestionario.cursos.set(datos.cursos_ids)
 
     preguntas = Pregunta.objects.in_bulk(datos.preguntas_ids)
     CuestionarioPregunta.objects.filter(cuestionario=cuestionario).delete()

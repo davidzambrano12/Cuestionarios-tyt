@@ -1,0 +1,293 @@
+{% extends 'layouts/app_base.html' %}
+{% load static componentes consultas %}
+
+{% block title %}Consultas y reportes - Simulador Saber TyT{% endblock %}
+{% block nav_title %}Consultas y reportes{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'css/reportes.css' %}">{% endblock %}
+
+{% block app_content %}
+<div id="consultas" class="consultas">
+  {% componente "componentes/encabezado.html" etiqueta="Módulo de consultas" titulo="Consultas y reportes" subtitulo="Resultados de los simulacros por año, período, curso, eje temático y estudiante, con descarga a Excel." %}{% fincomponente %}
+
+  {% if not alcance.es_admin and not catalogo.cursos %}
+  <div class="alerta alerta--info mb-5" role="status">
+    <strong>Aún no tienes cursos a cargo.</strong> Solo puedes consultar los resultados de los cursos que el administrador te asigne.
+  </div>
+  {% endif %}
+
+  {% if sin_curso and sin_curso.intentos %}
+  <div class="alerta alerta--info mb-5" role="status" data-ref="aviso-sin-curso">
+    <strong>{{ sin_curso.intentos }} intento{{ sin_curso.intentos|pluralize }} terminado{{ sin_curso.intentos|pluralize }} sin curso</strong>
+    ({{ sin_curso.estudiantes }} estudiante{{ sin_curso.estudiantes|pluralize }} sin matrícula en ese período). Cuentan por año y período, pero no por curso.
+    <a href="{% url 'academico:listado' %}">Matricularlos en su curso</a>.
+  </div>
+  {% endif %}
+
+  {{ catalogo|json_script:"catalogo-consultas" }}
+
+  <!-- Filtros jerárquicos: año → período → curso → eje → estudiante -->
+  <form method="GET" action="{% url 'reportes:consultas' %}" class="card filtros-consulta" id="form-consultas" aria-label="Filtros de la consulta" aria-describedby="ayuda-filtros">
+    <input type="hidden" name="vista" value="{{ filtros.vista }}">
+    <p class="sr-only" id="ayuda-filtros">Los filtros van de lo general a lo particular; cada uno solo ofrece valores compatibles con el anterior. «Todos» consolida.</p>
+
+    <div class="filtros-consulta__cadena">
+      <div class="filtro">
+        <label class="filtro__etiqueta" for="f-anio">Año</label>
+        <select id="f-anio" name="anio" class="form-select filtro__control" data-filtro="anio">
+          <option value="">Todos</option>
+          {% for anio in catalogo.anios %}<option value="{{ anio }}"{% if anio == filtros.anio %} selected{% endif %}>{{ anio }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="filtro">
+        <label class="filtro__etiqueta" for="f-periodo">Período</label>
+        <select id="f-periodo" name="periodo" class="form-select filtro__control" data-filtro="periodo">
+          <option value="">Todos</option>
+          {% for p in catalogo.periodos %}<option value="{{ p.id }}" data-anio="{{ p.anio }}"{% if p.id == filtros.periodo %} selected{% endif %}>{{ p.nombre }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="filtro filtro--ancho">
+        <label class="filtro__etiqueta" for="f-curso">Curso / grupo</label>
+        <select id="f-curso" name="curso" class="form-select filtro__control" data-filtro="curso">
+          <option value="">Todos</option>
+          {% for cu in catalogo.cursos %}<option value="{{ cu.id }}" data-periodo="{{ cu.periodo }}"{% if cu.id == filtros.curso %} selected{% endif %}>{{ cu.nombre }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="filtro">
+        <label class="filtro__etiqueta" for="f-eje">Eje temático</label>
+        <select id="f-eje" name="eje" class="form-select filtro__control" data-filtro="eje">
+          <option value="">Todos</option>
+          {% for e in catalogo.ejes %}<option value="{{ e.id }}"{% if e.id == filtros.eje %} selected{% endif %}>{{ e.nombre }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="filtro filtro--ancho">
+        <label class="filtro__etiqueta" for="f-estudiante">Estudiante</label>
+        <select id="f-estudiante" name="estudiante" class="form-select filtro__control" data-filtro="estudiante">
+          <option value="">Todos</option>
+          {% for est in catalogo.estudiantes %}<option value="{{ est.codigo }}"{% if est.codigo == filtros.estudiante %} selected{% endif %}>{{ est.nombre }} · {{ est.codigo }}</option>{% endfor %}
+        </select>
+      </div>
+    </div>
+
+    <div class="filtros-consulta__pie">
+      <div class="buscador filtros-consulta__buscar">
+        <label for="f-q" class="sr-only">Buscar estudiante por nombre o identificación</label>
+        <i data-lucide="search" aria-hidden="true" class="buscador__icono"></i>
+        <input type="search" id="f-q" name="q" value="{{ filtros.q }}" class="form-input" placeholder="Buscar estudiante por nombre o identificación" autocomplete="off">
+      </div>
+      <fieldset class="segmentado" aria-label="Tipo de simulacro">
+        <legend class="sr-only">Tipo de simulacro</legend>
+        <label class="segmentado__opcion"><input type="radio" name="visibilidad" value=""{% if not filtros.visibilidad %} checked{% endif %}><span>Todos</span></label>
+        <label class="segmentado__opcion"><input type="radio" name="visibilidad" value="institucional"{% if filtros.visibilidad == "institucional" %} checked{% endif %}><span>Institucionales</span></label>
+        <label class="segmentado__opcion"><input type="radio" name="visibilidad" value="privado"{% if filtros.visibilidad == "privado" %} checked{% endif %}><span>De curso</span></label>
+      </fieldset>
+      <div class="filtros-consulta__acciones">
+        {% if filtros.hay_filtros %}<a href="{% url 'reportes:consultas' %}?vista={{ filtros.vista }}" class="enlace-limpiar" data-accion="limpiar"><i data-lucide="x" aria-hidden="true"></i> Limpiar filtros</a>{% endif %}
+        <button type="submit" class="btn btn-primary btn-compacto"><i data-lucide="search" aria-hidden="true"></i> Consultar</button>
+      </div>
+    </div>
+  </form>
+
+  <!-- Consulta 1: consolidado general -->
+  <section aria-labelledby="titulo-indicadores">
+    <h2 class="sr-only" id="titulo-indicadores">Indicadores</h2>
+    <div class="metricas metricas--consulta">
+      {% componente "componentes/metrica.html" etiqueta="Estudiantes evaluados" valor=indicadores.estudiantes icono="users" ayuda="Estudiantes distintos con intentos terminados" %}{% fincomponente %}
+      {% componente "componentes/metrica.html" etiqueta="Intentos terminados" valor=indicadores.intentos icono="clipboard-check" ayuda="Un estudiante puede presentar varios" %}{% fincomponente %}
+      {% componente "componentes/metrica.html" etiqueta="Promedio" valor=textos.promedio contenido="/ 5,0" variante="info" icono="bar-chart-3" ayuda=textos.rango %}{% fincomponente %}
+      {% componente "componentes/metrica.html" etiqueta="Aprobación" valor=textos.aprobacion variante="exito" icono="award" ayuda=textos.aprobados %}{% fincomponente %}
+    </div>
+    <p class="regla-calculo texto-xs texto-suave">
+      <i data-lucide="info" aria-hidden="true"></i>
+      <span>Escala de 0,0 a 5,0. Se aprueba con la nota mínima de cada simulacro:
+      <strong>{% for u in indicadores.umbrales %}{{ u|nota }}{% if not forloop.last %}, {% endif %}{% empty %}—{% endfor %} / 5,0</strong>.
+      Promedios y aprobación solo con intentos terminados{% if indicadores.en_progreso %}; {{ indicadores.en_progreso }} intento{{ indicadores.en_progreso|pluralize }} en progreso no se cuenta{{ indicadores.en_progreso|pluralize:"n" }}{% endif %}.</span>
+    </p>
+  </section>
+
+  <!-- Consultas 2 a 7 -->
+  <div class="card barra-herramientas">
+    <div class="barra-herramientas__fila">
+      <nav class="tabs-header" aria-label="Consultas">
+        <a href="{% con_filtros filtros vista='calificaciones' %}" class="tab-btn{% if filtros.vista == 'calificaciones' %} active{% endif %}"{% if filtros.vista == 'calificaciones' %} aria-current="page"{% endif %}><i data-lucide="list" aria-hidden="true"></i> Calificaciones</a>
+        <a href="{% con_filtros filtros vista='periodos' %}" class="tab-btn{% if filtros.vista == 'periodos' %} active{% endif %}"{% if filtros.vista == 'periodos' %} aria-current="page"{% endif %}><i data-lucide="calendar" aria-hidden="true"></i> Por período</a>
+        <a href="{% con_filtros filtros vista='cursos' %}" class="tab-btn{% if filtros.vista == 'cursos' %} active{% endif %}"{% if filtros.vista == 'cursos' %} aria-current="page"{% endif %}><i data-lucide="users" aria-hidden="true"></i> Por curso</a>
+        <a href="{% con_filtros filtros vista='ejes' %}" class="tab-btn{% if filtros.vista == 'ejes' %} active{% endif %}"{% if filtros.vista == 'ejes' %} aria-current="page"{% endif %}><i data-lucide="target" aria-hidden="true"></i> Por eje temático</a>
+        <a href="{% con_filtros filtros vista='historial' %}" class="tab-btn{% if filtros.vista == 'historial' %} active{% endif %}"{% if filtros.vista == 'historial' %} aria-current="page"{% endif %}><i data-lucide="history" aria-hidden="true"></i> Historial individual</a>
+        <a href="{% con_filtros filtros vista='dificultad' %}" class="tab-btn{% if filtros.vista == 'dificultad' %} active{% endif %}"{% if filtros.vista == 'dificultad' %} aria-current="page"{% endif %}><i data-lucide="alert-triangle" aria-hidden="true"></i> Preguntas difíciles</a>
+      </nav>
+    </div>
+    <p class="vista-descripcion" id="descripcion-vista">
+      <i data-lucide="info" aria-hidden="true"></i>
+      {% if filtros.vista == "calificaciones" %}Una fila por intento, con la nota sobre 5,0. Desde aquí abres el historial de cada estudiante.
+      {% elif filtros.vista == "periodos" %}Compara cuántos simulacros se presentaron y el promedio en cada período académico.
+      {% elif filtros.vista == "cursos" %}Estudiantes evaluados, promedio, nota mínima y máxima de cada curso.
+      {% elif filtros.vista == "ejes" %}Aciertos y errores por competencia (Lectura Crítica, Inglés…): muestra en qué temas falla más el grupo.
+      {% elif filtros.vista == "historial" %}Todos los intentos de un estudiante en orden y cómo cambió su nota de uno a otro.
+      {% else %}Las preguntas que más se fallan, de menor a mayor porcentaje de acierto: sirven para reforzar temas o revisar el enunciado.{% endif %}
+    </p>
+  </div>
+
+  {% if filtros.vista == "calificaciones" %}
+  <!-- Consulta 5: calificaciones por estudiante -->
+  <div class="card tabla-contenedor" id="vista-calificaciones">
+    <div class="tabla-cabecera">
+      <h2 class="texto-sm peso-bold">Calificaciones por estudiante</h2>
+      <div class="tabla-cabecera__acciones">
+      <form method="GET" class="inline-flex items-center gap-2">
+        {% for clave, valor in filtros.params.items %}{% if clave != 'orden' %}<input type="hidden" name="{{ clave }}" value="{{ valor }}">{% endif %}{% endfor %}
+        <label for="f-orden" class="texto-xs texto-suave">Ordenar por</label>
+        <select id="f-orden" name="orden" class="form-select form-select--compacto" data-enviar-al-cambiar>
+          {% for clave, texto in ordenes %}<option value="{{ clave }}"{% if clave == filtros.orden %} selected{% endif %}>{{ texto }}</option>{% endfor %}
+        </select>
+        <noscript><button type="submit" class="btn btn-outline btn-accion">Ordenar</button></noscript>
+      </form>
+      {% include "reportes/_descargar.html" with reporte="consolidado" %}
+      </div>
+    </div>
+    <div class="tabla-desplazable">
+      <table class="tabla tabla--consulta">
+        <caption class="sr-only">Calificaciones por estudiante, {{ pagina.paginator.count }} intentos</caption>
+        <thead>
+          <tr>
+            <th scope="col">Estudiante</th><th scope="col">Curso</th><th scope="col">Simulacro</th>
+            <th scope="col">Fecha</th><th scope="col" class="texto-derecha">Nota / 5,0</th><th scope="col">Estado</th><th scope="col"><span class="sr-only">Acciones</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for i in pagina %}
+          <tr class="fila-consulta">
+            <td><span class="celda-linea peso-semibold" title="{{ i.participante_nombre }}">{{ i.participante_nombre }}</span><span class="celda-detalle">{{ i.participante_codigo }}</span></td>
+            <td>{% if i.curso %}<span class="celda-linea" title="{{ i.curso.asignatura }}">{{ i.curso.asignatura }}</span><span class="celda-detalle">G{{ i.curso.grupo }} · {{ i.periodo|default:"Sin período" }}</span>{% else %}<span class="celda-linea texto-suave">Sin curso</span><span class="celda-detalle">{{ i.periodo|default:"Sin período" }}</span>{% endif %}</td>
+            <td><span class="celda-linea" title="{{ i.cuestionario.nombre }}">{{ i.cuestionario.nombre }}</span><span class="celda-detalle">{% if i.cuestionario.es_institucional %}Institucional{% else %}De curso{% endif %}</span></td>
+            <td class="cifras"><span class="celda-linea">{{ i.fecha_inicio|date:"d/m/Y" }}</span><span class="celda-detalle">{{ i.fecha_inicio|date:"H:i" }}</span></td>
+            <td class="texto-derecha cifras peso-bold">{{ i.nota_5|nota }}</td>
+            <td>{% if i.estado_texto == "Aprobado" %}<span class="badge badge-success">Aprobado</span>{% elif i.estado_texto == "No aprobado" %}<span class="badge badge-danger">No aprobado</span>{% else %}<span class="badge badge-neutro">{{ i.estado_texto }}</span>{% endif %}</td>
+            <td class="texto-derecha"><a href="{% con_filtros filtros vista='historial' estudiante=i.participante_codigo %}" class="btn btn-outline btn-accion">Historial</a></td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="7" class="tabla__vacia" data-ref="sin-resultados"><strong>Sin resultados.</strong> Ningún intento coincide con los filtros aplicados.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% include "reportes/_paginacion.html" %}
+  </div>
+
+  {% elif filtros.vista == "periodos" %}
+  <!-- Consulta 2 -->
+  <div class="card tabla-contenedor" id="vista-periodos">
+    <div class="tabla-cabecera"><h2 class="texto-sm peso-bold">Resultados por año y período</h2>{% include "reportes/_descargar.html" with reporte="consolidado" %}</div>
+    <div class="tabla-desplazable">
+      <table class="tabla tabla--consulta">
+        <thead><tr><th scope="col">Período</th><th scope="col" class="texto-derecha">Intentos terminados</th><th scope="col" class="texto-derecha">Estudiantes</th><th scope="col" class="texto-derecha">Promedio / 5,0</th><th scope="col" class="texto-derecha">Aprobación</th></tr></thead>
+        <tbody>
+          {% for f in filas %}
+          <tr><th scope="row">{{ f.periodo }}</th><td class="texto-derecha cifras">{{ f.intentos }}</td><td class="texto-derecha cifras">{{ f.estudiantes }}</td><td class="texto-derecha cifras peso-bold">{{ f.promedio|nota }}</td><td class="texto-derecha cifras">{{ f.porcentaje_aprobacion|porcentaje }}</td></tr>
+          {% empty %}
+          <tr><td colspan="5" class="tabla__vacia"><strong>Sin resultados</strong> para los filtros aplicados.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  {% elif filtros.vista == "cursos" %}
+  <!-- Consulta 3 -->
+  <div class="card tabla-contenedor" id="vista-cursos">
+    <div class="tabla-cabecera"><h2 class="texto-sm peso-bold">Resultados por curso</h2>{% include "reportes/_descargar.html" with reporte="consolidado" %}</div>
+    <div class="tabla-desplazable">
+      <table class="tabla tabla--consulta">
+        <thead><tr><th scope="col">Curso</th><th scope="col">Período</th><th scope="col" class="texto-derecha">Estudiantes</th><th scope="col" class="texto-derecha">Intentos</th><th scope="col" class="texto-derecha">Promedio</th><th scope="col" class="texto-derecha">Mínima</th><th scope="col" class="texto-derecha">Máxima</th><th scope="col" class="texto-derecha">Aprobación</th></tr></thead>
+        <tbody>
+          {% for f in filas %}
+          <tr><th scope="row">{% if f.curso_id %}<a href="{% con_filtros filtros curso=f.curso_id vista='calificaciones' %}">{{ f.curso }}</a>{% else %}{{ f.curso }}{% endif %}</th><td>{{ f.periodo }}</td><td class="texto-derecha cifras">{{ f.estudiantes }}</td><td class="texto-derecha cifras">{{ f.intentos }}</td><td class="texto-derecha cifras peso-bold">{{ f.promedio|nota }}</td><td class="texto-derecha cifras">{{ f.minima|nota }}</td><td class="texto-derecha cifras">{{ f.maxima|nota }}</td><td class="texto-derecha cifras">{{ f.porcentaje_aprobacion|porcentaje }}</td></tr>
+          {% empty %}
+          <tr><td colspan="8" class="tabla__vacia"><strong>Sin resultados</strong> para los filtros aplicados.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  {% elif filtros.vista == "ejes" %}
+  <!-- Consulta 4 -->
+  <div class="card tabla-contenedor" id="vista-ejes">
+    <div class="tabla-cabecera">
+      <h2 class="texto-sm peso-bold">Desempeño por eje temático</h2>
+      {% include "reportes/_descargar.html" with reporte="ejes" %}
+      <p class="texto-xs texto-suave">Calculado con las respuestas contestadas. No se muestra nota por eje: el sistema no define cómo convertir aciertos de un eje en calificación.</p>
+    </div>
+    <div class="tabla-desplazable">
+      <table class="tabla tabla--consulta">
+        <thead><tr><th scope="col">Eje temático</th><th scope="col" class="texto-derecha">Contestadas</th><th scope="col" class="texto-derecha">Aciertos</th><th scope="col" class="texto-derecha">Errores</th><th scope="col" class="texto-derecha">Sin responder</th><th scope="col">% de aciertos</th></tr></thead>
+        <tbody>
+          {% for f in filas %}
+          <tr>
+            <th scope="row">{{ f.eje }}</th><td class="texto-derecha cifras">{{ f.respondidas }}</td><td class="texto-derecha cifras">{{ f.aciertos }}</td><td class="texto-derecha cifras">{{ f.errores }}</td><td class="texto-derecha cifras">{{ f.omitidas }}</td>
+            <td><span class="barra-porcentaje"><span class="barra-porcentaje__relleno" style="width: {{ f.porcentaje_aciertos|default:0|stringformat:'.1f' }}%"></span></span> <span class="cifras peso-bold">{{ f.porcentaje_aciertos|porcentaje }}</span></td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="6" class="tabla__vacia"><strong>Sin resultados</strong> para los filtros aplicados.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  {% elif filtros.vista == "historial" %}
+  <!-- Consulta 6 -->
+  <div class="card tabla-contenedor" id="vista-historial">
+    {% if not filtros.estudiante %}
+      {% componente "componentes/estado_vacio.html" icono="user-search" titulo="Elige un estudiante" mensaje="El historial individual muestra todos los intentos de un estudiante y la evolución de su nota. Selecciónalo en el filtro 5 o con «Historial» en la tabla de calificaciones." %}{% fincomponente %}
+    {% else %}
+    <div class="tabla-cabecera"><h2 class="texto-sm peso-bold">Historial de {{ filtros.etiquetas.estudiante }}</h2>{% include "reportes/_descargar.html" with reporte="historial" %}</div>
+    <div class="tabla-desplazable">
+      <table class="tabla tabla--consulta">
+        <thead><tr><th scope="col">Fecha</th><th scope="col">Simulacro</th><th scope="col">Curso</th><th scope="col">Aciertos</th><th scope="col" class="texto-derecha">Nota / 5,0</th><th scope="col" class="texto-derecha">Evolución</th><th scope="col">Estado</th></tr></thead>
+        <tbody>
+          {% for i in historial %}
+          <tr>
+            <td class="cifras"><span class="celda-linea">{{ i.fecha_inicio|date:"d/m/Y" }}</span><span class="celda-detalle">{{ i.fecha_inicio|date:"H:i" }}</span></td>
+            <td><span class="celda-linea" title="{{ i.cuestionario.nombre }}">{{ i.cuestionario.nombre }}</span></td>
+            <td>{% if i.curso %}<span class="celda-linea" title="{{ i.curso.asignatura }}">{{ i.curso.asignatura }}</span><span class="celda-detalle">G{{ i.curso.grupo }} · {{ i.periodo|default:"—" }}</span>{% else %}<span class="celda-linea texto-suave">Sin curso</span><span class="celda-detalle">{{ i.periodo|default:"—" }}</span>{% endif %}</td>
+            <td class="cifras"><span class="celda-linea">{{ i.aciertos }} de {{ i.respondidas }}</span><span class="celda-detalle">{{ i.errores }} error{{ i.errores|pluralize:"es" }}</span></td>
+            <td class="texto-derecha cifras peso-bold">{{ i.nota_5|nota }}</td>
+            <td class="texto-derecha cifras">{% if i.cambio is None %}<span class="texto-suave">—</span>{% elif i.cambio > 0 %}<span class="evolucion evolucion--sube"><i data-lucide="trending-up" aria-hidden="true"></i> +{{ i.cambio|nota }}</span>{% elif i.cambio < 0 %}<span class="evolucion evolucion--baja"><i data-lucide="trending-down" aria-hidden="true"></i> {{ i.cambio|nota }}</span>{% else %}<span class="texto-suave">= 0,00</span>{% endif %}</td>
+            <td>{% if i.estado_texto == "Aprobado" %}<span class="badge badge-success">Aprobado</span>{% elif i.estado_texto == "No aprobado" %}<span class="badge badge-danger">No aprobado</span>{% else %}<span class="badge badge-neutro">{{ i.estado_texto }}</span>{% endif %}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="7" class="tabla__vacia"><strong>Sin resultados.</strong> Este estudiante no tiene intentos con los filtros aplicados.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+  </div>
+
+  {% elif filtros.vista == "dificultad" %}
+  <!-- Consulta 7 -->
+  <div class="card tabla-contenedor" id="vista-dificultad">
+    <div class="tabla-cabecera">
+      <h2 class="texto-sm peso-bold">Preguntas de mayor dificultad</h2>
+      {% include "reportes/_descargar.html" with reporte="dificultad" %}
+      <p class="texto-xs texto-suave">Ordenadas de menor a mayor porcentaje de acierto, sobre las respuestas contestadas.</p>
+    </div>
+    <div class="tabla-desplazable">
+      <table class="tabla tabla--consulta">
+        <thead><tr><th scope="col">N.º</th><th scope="col">Pregunta</th><th scope="col">Eje</th><th scope="col" class="texto-derecha">Respuestas</th><th scope="col" class="texto-derecha">Errores</th><th scope="col" class="texto-derecha">% de acierto</th></tr></thead>
+        <tbody>
+          {% for f in pagina.filas %}
+          <tr><td class="cifras texto-suave">#{{ f.id }}</td><td>{{ f.enunciado|truncatechars:110 }}</td><td>{{ f.eje }}</td><td class="texto-derecha cifras">{{ f.respondidas }}</td><td class="texto-derecha cifras">{{ f.errores }}</td><td class="texto-derecha cifras peso-bold">{{ f.porcentaje_aciertos|porcentaje }}</td></tr>
+          {% empty %}
+          <tr><td colspan="6" class="tabla__vacia"><strong>Sin resultados</strong> para los filtros aplicados.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% include "reportes/_paginacion.html" %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_scripts %}<script src="{% static 'js/reportes/consultas.js' %}"></script>{% endblock %}

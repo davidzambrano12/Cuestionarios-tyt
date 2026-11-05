@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     # Apps del proyecto (las dependencias van de arriba hacia abajo)
     "apps.core",
     "apps.cuentas",
+    "apps.academico",
     "apps.banco_preguntas",
     "apps.cuestionarios",
     "apps.importaciones",

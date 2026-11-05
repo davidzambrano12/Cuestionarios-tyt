@@ -1,0 +1,33 @@
+{% extends 'layouts/app_base.html' %}
+{% load static componentes %}
+
+{% block title %}Elegir curso - {{ cuestionario.nombre }}{% endblock %}
+{% block nav_title %}Antes de empezar{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'css/evaluaciones.css' %}">{% endblock %}
+
+{% block app_content %}
+<div class="elegir-curso">
+  <a href="{% url 'evaluaciones:panel_estudiante' %}" class="enlace-volver mb-4"><i data-lucide="arrow-left" aria-hidden="true"></i> Volver a mis cuestionarios</a>
+  {% componente "componentes/encabezado.html" etiqueta="Antes de empezar" titulo=cuestionario.nombre subtitulo="Estás matriculado en varios cursos donde cuenta este simulacro. Elige para cuál lo presentas: tu resultado aparecerá en los reportes de ese curso." %}{% fincomponente %}
+
+  <form method="POST" action="{% url 'evaluaciones:iniciar' cuestionario.id %}" class="card elegir-curso__form">
+    {% csrf_token %}
+    <fieldset>
+      <legend class="texto-sm peso-bold mb-3">¿Para qué curso presentas este simulacro?</legend>
+      <div class="elegir-curso__opciones">
+        {% for curso in cursos %}
+        <label class="elegir-curso__opcion">
+          <input type="radio" name="curso" value="{{ curso.id }}" required{% if forloop.first %} autofocus{% endif %}>
+          <span>
+            <span class="peso-semibold">{{ curso.asignatura }}</span>
+            <span class="texto-xs texto-suave">Grupo {{ curso.grupo }} · {{ curso.periodo }}{% if curso.docente %} · {{ curso.docente.get_full_name|default:curso.docente.username }}{% endif %}</span>
+          </span>
+        </label>
+        {% endfor %}
+      </div>
+    </fieldset>
+    <p class="texto-xs texto-suave mb-4"><i data-lucide="info" aria-hidden="true"></i> El temporizador empieza cuando confirmes.</p>
+    <button type="submit" class="btn btn-primary btn-full"><i data-lucide="play" aria-hidden="true"></i> Empezar el simulacro</button>
+  </form>
+</div>
+{% endblock %}

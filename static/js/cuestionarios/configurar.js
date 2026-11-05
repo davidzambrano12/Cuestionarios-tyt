@@ -178,3 +178,16 @@
   actualizarResumen();
   recalcular();
 })();
+
+// Visibilidad: los cursos solo se eligen en un cuestionario «De curso»
+(function () {
+  'use strict';
+  const bloque = document.querySelector('[data-ref="cursos-asignados"]');
+  if (!bloque) return;
+  const aplicar = () => {
+    const elegido = document.querySelector('[data-visibilidad]:checked');
+    bloque.hidden = Boolean(elegido && elegido.value === 'institucional');
+  };
+  document.querySelectorAll('[data-visibilidad]').forEach((radio) => radio.addEventListener('change', aplicar));
+  aplicar();
+})();

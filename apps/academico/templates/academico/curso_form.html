@@ -1,0 +1,44 @@
+{% extends 'layouts/app_base.html' %}
+{% load static componentes %}
+
+{% block title %}{% if curso %}Editar curso{% else %}Nuevo curso{% endif %} - {{ config.nombre_sistema }}{% endblock %}
+{% block nav_title %}{% if curso %}Editar curso{% else %}Nuevo curso{% endif %}{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'css/academico.css' %}">{% endblock %}
+
+{% block app_content %}
+<div class="academico academico--angosto">
+  <a href="{% if curso %}{% url 'academico:detalle' curso.id %}{% else %}{% url 'academico:listado' %}{% endif %}" class="enlace-volver mb-4"><i data-lucide="arrow-left" aria-hidden="true"></i> Volver</a>
+  {% if curso %}
+    {% componente "componentes/encabezado.html" etiqueta=curso.periodo.nombre titulo="Editar curso" subtitulo=curso.nombre %}{% fincomponente %}
+  {% else %}
+    {% componente "componentes/encabezado.html" etiqueta="Estructura académica" titulo="Nuevo curso" subtitulo="Una asignatura dictada a un grupo en un período." %}{% fincomponente %}
+  {% endif %}
+
+  <form method="POST" class="card bloque-curso" novalidate>
+    {% csrf_token %}
+    {% for error in form.non_field_errors %}<div class="alerta alerta--error" role="alert">{{ error }}</div>{% endfor %}
+    {% include "componentes/campo.html" with campo=form.periodo %}
+    <div class="grid-asignatura">
+      {% include "componentes/campo.html" with campo=form.asignatura %}
+      {% include "componentes/campo.html" with campo=form.grupo %}
+    </div>
+    <div class="grid-2">
+      {% include "componentes/campo.html" with campo=form.programa %}
+      {% include "componentes/campo.html" with campo=form.semestre %}
+    </div>
+    {% if form.docente %}
+      {% include "componentes/campo.html" with campo=form.docente %}
+    {% else %}
+      <p class="texto-xs texto-suave mb-4"><i data-lucide="user-check" aria-hidden="true"></i> El curso quedará a tu cargo.</p>
+    {% endif %}
+    <div class="campo-casilla">
+      {{ form.activo }} <label for="{{ form.activo.id_for_label }}">{{ form.activo.label }}</label>
+      <p class="texto-xs texto-suave">{{ form.activo.help_text }}</p>
+    </div>
+    <div class="acciones-formulario">
+      <a href="{% if curso %}{% url 'academico:detalle' curso.id %}{% else %}{% url 'academico:listado' %}{% endif %}" class="btn btn-outline">Cancelar</a>
+      <button type="submit" class="btn btn-primary"><i data-lucide="save" aria-hidden="true"></i> {% if curso %}Guardar cambios{% else %}Crear curso{% endif %}</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

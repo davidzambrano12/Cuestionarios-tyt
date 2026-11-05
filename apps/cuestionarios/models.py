@@ -1,4 +1,5 @@
 """Módulo C: cuestionarios y su asignación ordenada de preguntas (N:M)."""
+from django.conf import settings
 from django.utils import timezone
 from django.db import models
 
@@ -25,8 +26,28 @@ class Cuestionario(models.Model):
     permitir_revision = models.BooleanField(default=True)
     estado = models.CharField(max_length=12, choices=ESTADO_CHOICES, default="borrador")
 
+    # Quién lo creó y quién puede presentarlo
+    INSTITUCIONAL = "institucional"
+    PRIVADO = "privado"
+    VISIBILIDAD_CHOICES = [
+        (INSTITUCIONAL, "Institucional: cualquier estudiante"),
+        (PRIVADO, "De curso: solo los cursos asignados"),
+    ]
+    creado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, db_column="creado_por_id",
+        related_name="cuestionarios_creados", blank=True, null=True,
+    )
+    visibilidad = models.CharField(max_length=13, choices=VISIBILIDAD_CHOICES, default=PRIVADO)
+    cursos = models.ManyToManyField(
+        "academico.Curso", related_name="cuestionarios", blank=True, db_table="cuestionario_cursos",
+    )
+
     class Meta:
         db_table = "cuestionarios"
+
+    @property
+    def es_institucional(self) -> bool:
+        return self.visibilidad == self.INSTITUCIONAL
 
     def __str__(self):
         return self.nombre

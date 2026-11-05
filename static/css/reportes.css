@@ -78,3 +78,74 @@
 .tarjeta-modulo__cabecera { display: flex; align-items: center; gap: var(--espacio-3); margin-bottom: var(--espacio-2); }
 .tarjeta-modulo__acciones { display: flex; gap: var(--espacio-3); margin-top: var(--espacio-5); }
 .tarjeta-modulo__acciones .btn { flex: 1; }
+
+/* ==========================================================================
+   CONSULTAS Y REPORTES — filtros jerárquicos, indicadores y tablas
+   ========================================================================== */
+.filtros-consulta { padding: var(--espacio-4) var(--espacio-5); margin-bottom: var(--espacio-5); }
+/* Cadena jerárquica en una sola fila: curso y estudiante tienen nombres largos */
+.filtros-consulta__cadena { display: grid; grid-template-columns: 0.8fr 0.8fr 1.6fr 1.1fr 1.5fr; gap: var(--espacio-3); }
+.filtro { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.filtro__etiqueta { font-size: var(--texto-xs); font-weight: var(--peso-semibold); color: var(--color-texto-suave); }
+.filtro__control { height: 36px; min-height: 36px; padding-top: 0; padding-bottom: 0; font-size: var(--texto-sm); text-overflow: ellipsis; }
+.filtros-consulta__pie { display: flex; align-items: center; flex-wrap: wrap; gap: var(--espacio-3); margin-top: var(--espacio-3); padding-top: var(--espacio-3); border-top: 1px solid var(--color-superficie-hundida); }
+.filtros-consulta__buscar { flex: 1 1 260px; max-width: 380px; }
+.filtros-consulta__buscar .form-input { height: 36px; }
+.filtros-consulta__acciones { display: flex; align-items: center; gap: var(--espacio-4); margin-left: auto; }
+.btn-compacto { min-height: 36px; padding: 6px 16px; font-size: var(--texto-sm); }
+.btn-compacto .lucide, .enlace-limpiar .lucide { width: 14px; height: 14px; }
+.enlace-limpiar { display: inline-flex; align-items: center; gap: 4px; font-size: var(--texto-sm); font-weight: var(--peso-semibold); color: var(--color-texto-suave); }
+.enlace-limpiar:hover { color: var(--color-peligro-texto); }
+
+/* Control segmentado (tres opciones excluyentes) */
+.segmentado { display: inline-flex; border: 1px solid var(--color-borde-campo); border-radius: var(--radio-md); padding: 2px; margin: 0; background: var(--color-superficie); }
+.segmentado__opcion { position: relative; }
+.segmentado__opcion input { position: absolute; opacity: 0; inset: 0; cursor: pointer; }
+.segmentado__opcion span { display: block; padding: 5px 12px; border-radius: var(--radio-sm); font-size: var(--texto-xs); font-weight: var(--peso-semibold); color: var(--color-texto-suave); white-space: nowrap; }
+.segmentado__opcion input:checked + span { background: var(--color-primario); color: var(--color-sobre-primario); }
+.segmentado__opcion input:focus-visible + span { outline: 2px solid var(--color-foco); outline-offset: 1px; }
+.segmentado__opcion:hover input:not(:checked) + span { color: var(--color-primario); }
+
+@media (max-width: 1180px) { .filtros-consulta__cadena { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 720px) {
+  .filtros-consulta__cadena { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .filtros-consulta__cadena .filtro:last-child { grid-column: 1 / -1; }
+  .filtros-consulta__buscar { max-width: none; flex-basis: 100%; }
+  .filtros-consulta__acciones { width: 100%; justify-content: space-between; margin-left: 0; }
+}
+
+.metricas--consulta { margin-bottom: var(--espacio-2); }
+.regla-calculo { display: flex; align-items: flex-start; gap: var(--espacio-2); margin-bottom: var(--espacio-5); }
+.regla-calculo .lucide { width: 14px; height: 14px; flex-shrink: 0; margin-top: 1px; }
+
+.paginacion .lucide, [data-ref="descargar-excel"] .lucide { width: 14px; height: 14px; }
+.barra-herramientas .tabs-header a.tab-btn { text-decoration: none; }
+
+.tabla-cabecera p { flex-basis: 100%; }
+.tabla--consulta { min-width: 760px; }
+.tabla--consulta th[scope="row"] { font-weight: var(--peso-semibold); text-align: left; }
+.form-select--compacto { width: auto; min-height: 34px; padding-top: 4px; padding-bottom: 4px; font-size: var(--texto-xs); }
+
+.paginacion { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--espacio-3); padding: var(--espacio-3) var(--espacio-5); border-top: 1px solid var(--color-borde); }
+.paginacion__botones { display: flex; align-items: center; gap: var(--espacio-3); }
+
+/* Porcentaje de aciertos: el ancho es un dato (única excepción a estilos en línea) */
+.barra-porcentaje { display: inline-block; vertical-align: middle; width: 90px; height: 8px; border-radius: var(--radio-pill); background: var(--color-superficie-hundida); overflow: hidden; margin-right: var(--espacio-2); }
+.barra-porcentaje__relleno { display: block; height: 100%; background: var(--color-primario); }
+
+.evolucion { display: inline-flex; align-items: center; gap: 4px; font-weight: var(--peso-bold); }
+.evolucion .lucide { width: 14px; height: 14px; }
+.evolucion--sube { color: var(--color-exito); }
+.evolucion--baja { color: var(--color-peligro); }
+.tabla--consulta .badge, .sin-salto { white-space: nowrap; }
+
+/* Celdas de una línea: el texto largo se recorta con «…» (el texto completo sigue
+   en el DOM para lectores de pantalla y en el title al pasar el mouse) */
+.tabla--consulta :where(td, th) { padding: 12px 14px; }
+.celda-linea { display: block; max-width: 190px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.celda-detalle { display: block; margin-top: 2px; font-size: var(--texto-xs); color: var(--color-texto-suave); white-space: nowrap; }
+
+/* Qué muestra la vista activa */
+.vista-descripcion { display: flex; align-items: flex-start; gap: var(--espacio-2); margin-top: var(--espacio-3); padding-top: var(--espacio-3); border-top: 1px solid var(--color-superficie-hundida); font-size: var(--texto-sm); color: var(--color-texto-suave); }
+.vista-descripcion .lucide { width: 15px; height: 15px; flex-shrink: 0; margin-top: 2px; color: var(--color-primario); }
+.tabla-cabecera__acciones { display: flex; align-items: center; flex-wrap: wrap; gap: var(--espacio-3); }
