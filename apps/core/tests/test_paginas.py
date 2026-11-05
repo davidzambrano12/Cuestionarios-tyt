@@ -61,7 +61,7 @@ class PaginasTests(TestCase):
         )
         self._ok(self.estudiante, [f"/evaluacion/{intento.id}/resultado/", "/dashboard/estudiante/"])
         panel = self.client.get("/dashboard/estudiante/").context
-        self.assertEqual(panel["promedio_global"], "5.00")
+        self.assertEqual(panel["promedio_global"], Decimal("5.00"))
         destacado = panel["cuestionario_destacado"]
         self.assertEqual(destacado.intentos_hechos, 1)
         self.assertEqual(destacado.intentos_restantes, 1)

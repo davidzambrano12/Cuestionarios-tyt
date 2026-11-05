@@ -348,5 +348,6 @@ def panel_estudiante(user, ahora=None) -> dict:
         "intentos_estudiante": historial,
         "disponibles_count": len(disponibles),
         "programados_count": len(programados),
-        "promedio_global": f"{promedio:.2f}" if promedio is not None else "0.00",
+        # Decimal para que la plantilla lo formatee según el idioma (5,00)
+        "promedio_global": Decimal(promedio).quantize(Decimal("0.01")) if promedio is not None else Decimal("0.00"),
     }

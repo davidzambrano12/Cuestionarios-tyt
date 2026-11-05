@@ -6,13 +6,13 @@
 
 {% block app_content %}
 <!-- Header Banner con datos del estudiante -->
-      <div class="dashboard-banner" style="background:linear-gradient(135deg, #e0f2fe 0%, #ecfdf5 100%);">
+      <div class="dashboard-banner" style="background:linear-gradient(135deg, var(--azul-50) 0%, var(--verde-50) 100%);">
         <div style="display:flex; align-items:center; gap:16px; margin-bottom:20px;">
-          <div style="width:54px; height:54px; border-radius:50%; background:#186382; color:white; display:flex; align-items:center; justify-content:center; font-size:24px;">
+          <div style="width:54px; height:54px; border-radius:50%; background:var(--color-primario); color:var(--color-texto-invertido); display:flex; align-items:center; justify-content:center; font-size:var(--texto-2xl);">
             <i data-lucide="graduation-cap" style="width:28px; height:28px;"></i>
           </div>
           <div>
-            <h1 class="banner-title" style="font-size:24px; margin:0;">{{ user.get_full_name|default:user.username }}</h1>
+            <h1 class="banner-title" style="font-size:var(--texto-2xl); margin:0;">{{ user.get_full_name|default:user.username }}</h1>
             <p class="banner-subtitle" style="margin-top:2px; display:inline-flex; align-items:center; gap:6px;">
               <i data-lucide="landmark" style="width:14px; height:14px;"></i> {{ user.perfil.semestre|default:"6° Semestre" }} · {{ user.perfil.programa_academico|default:"Ingeniería de Sistemas" }}
             </p>
@@ -20,17 +20,17 @@
         </div>
 
         <!-- 3 Stats cards -->
-        <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:16px; background:white; border-radius:16px; padding:20px 24px; box-shadow:0 1px 3px rgba(0,0,0,0.05); text-align:center;">
+        <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:16px; background:var(--color-superficie); border-radius:16px; padding:20px 24px; box-shadow:0 1px 3px rgba(0,0,0,0.05); text-align:center;">
           <div>
-            <div class="metric-number">{{ disponibles_count|default:"02" }}</div>
+            <div class="metric-number">{{ disponibles_count|default:"0" }}</div>
             <div class="metric-label">Disponibles</div>
           </div>
-          <div style="border-left:1px solid #e2e8f0; border-right:1px solid #e2e8f0;">
-            <div class="metric-number">{{ intentos_estudiante.count|default:"01" }}</div>
+          <div style="border-left:1px solid var(--color-borde); border-right:1px solid var(--color-borde);">
+            <div class="metric-number">{{ intentos_estudiante.count|default:"0" }}</div>
             <div class="metric-label">Presentados</div>
           </div>
           <div>
-            <div class="metric-number" style="color:var(--success-text);">{{ promedio_global|default:"4.00" }}<span class="text-sm text-subtle font-normal">/5.0</span></div>
+            <div class="metric-number" style="color:var(--success-text);">{{ promedio_global|default:"0.00" }}<span class="text-sm text-subtle font-normal">/5.0</span></div>
             <div class="metric-label">Promedio Global</div>
           </div>
         </div>
@@ -38,70 +38,70 @@
 
       <!-- Cuestionario Destacado Vigente (Solo si realmente está disponible ahora) -->
       {% if cuestionario_destacado %}
-      <div class="card" style="border-top:4px solid #186382; margin-bottom:28px;">
+      <div class="card" style="border-top:4px solid var(--color-primario); margin-bottom:28px;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
           <div style="display:flex; align-items:center; gap:8px;">
             {% if cuestionario_destacado.intento_activo %}
-            <span class="badge" style="background:#fef3c7; color:#92400e; font-weight:700;">● INTENTO EN CURSO</span>
+            <span class="badge" style="background:var(--naranja-50); color:var(--naranja-800); font-weight:700;">● INTENTO EN CURSO</span>
             {% elif cuestionario_destacado.intentos_agotados %}
-            <span class="badge" style="background:#f1f5f9; color:#64748b; font-weight:700;">● INTENTOS AGOTADOS</span>
+            <span class="badge" style="background:var(--color-superficie-hundida); color:var(--color-texto-suave); font-weight:700;">● INTENTOS AGOTADOS</span>
             {% else %}
             <span class="badge badge-success">● DISPONIBLE AHORA</span>
             {% endif %}
-            <span class="badge" style="background:#f1f5f9; color:#475569;">Saber TyT 2026</span>
+            <span class="badge" style="background:var(--color-superficie-hundida); color:var(--color-texto-suave);">Saber TyT 2026</span>
           </div>
-          <i data-lucide="zap" style="color:#f59e0b; width:22px; height:22px;"></i>
+          <i data-lucide="zap" style="color:var(--naranja-500); width:22px; height:22px;"></i>
         </div>
 
         <h2 class="card-title text-xl font-extrabold text-main" style="margin-bottom:6px;">
           {{ cuestionario_destacado.nombre }}
         </h2>
-        <div style="font-size:13px; color:#64748b; margin-bottom:16px; display:inline-flex; align-items:center; gap:6px;">
-          <i data-lucide="shield-check" style="width:15px; height:15px; color:#186382;"></i> Evaluación Oficial · <strong>Coordinación Saber TyT Uniputumayo</strong>
+        <div style="font-size:var(--texto-sm); color:var(--color-texto-suave); margin-bottom:16px; display:inline-flex; align-items:center; gap:6px;">
+          <i data-lucide="shield-check" style="width:15px; height:15px; color:var(--color-primario);"></i> Evaluación Oficial · <strong>Coordinación Saber TyT Uniputumayo</strong>
         </div>
 
-        <div style="background:#f8fafc; border-radius:12px; padding:16px; margin-bottom:20px;">
-          <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:12px; font-size:13px; color:#475569; margin-bottom:12px;">
+        <div style="background:var(--color-superficie-tenue); border-radius:12px; padding:16px; margin-bottom:20px;">
+          <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:12px; font-size:var(--texto-sm); color:var(--color-texto-suave); margin-bottom:12px;">
             <div style="display:inline-flex; align-items:center; gap:6px;"><i data-lucide="help-circle" style="width:14px; height:14px;"></i> {{ cuestionario_destacado.cuestionario_preguntas.count }} preguntas</div>
             <div style="display:inline-flex; align-items:center; gap:6px;"><i data-lucide="clock" style="width:14px; height:14px;"></i> {{ cuestionario_destacado.tiempo_limite_minutos }} minutos</div>
             <div style="display:inline-flex; align-items:center; gap:6px;"><i data-lucide="rotate-cw" style="width:14px; height:14px;"></i> Intentos: <strong>{{ cuestionario_destacado.intentos_hechos }} de {{ cuestionario_destacado.intentos_permitidos }}</strong> realizados</div>
             <div style="display:inline-flex; align-items:center; gap:6px;"><i data-lucide="target" style="width:14px; height:14px;"></i> Mínimo aprobación: {{ cuestionario_destacado.calificacion_aprobacion }} / {{ cuestionario_destacado.calificacion_maxima }}</div>
           </div>
-          <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid #e2e8f0; padding-top:10px; font-size:12px;">
-            <span style="color:#64748b; display:inline-flex; align-items:center; gap:6px;"><i data-lucide="calendar" style="width:14px; height:14px;"></i> Cierre: {{ cuestionario_destacado.fecha_cierre|date:"d M · H:i" }}</span>
+          <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--color-borde); padding-top:10px; font-size:var(--texto-xs);">
+            <span style="color:var(--color-texto-suave); display:inline-flex; align-items:center; gap:6px;"><i data-lucide="calendar" style="width:14px; height:14px;"></i> Cierre: {{ cuestionario_destacado.fecha_cierre|date:"d M · H:i" }}</span>
             <span class="badge {{ cuestionario_destacado.tiempo_restante_info.clase }}">{{ cuestionario_destacado.tiempo_restante_info.texto }}</span>
           </div>
         </div>
 
         {% if cuestionario_destacado.intento_activo %}
-        <a href="{% url 'evaluaciones:sala' cuestionario_destacado.intento_activo.id %}" class="btn btn-full" style="padding:14px; font-size:15px; border-radius:12px; background:#d97706; color:#ffffff; font-weight:700; display:flex; align-items:center; justify-content:center; gap:8px;">
+        <a href="{% url 'evaluaciones:sala' cuestionario_destacado.intento_activo.id %}" class="btn btn-full" style="padding:14px; font-size:var(--texto-md); border-radius:12px; background:var(--naranja-700); color:var(--color-texto-invertido); font-weight:700; display:flex; align-items:center; justify-content:center; gap:8px;">
           <i data-lucide="play-circle"></i> Continuar Intento en Curso
         </a>
         {% elif cuestionario_destacado.intentos_agotados %}
-        <button type="button" onclick="switchEstudianteTab('hist', document.querySelectorAll('.tab-btn')[2])" class="btn btn-outline btn-full" style="padding:14px; font-size:15px; border-radius:12px; color:#475569; border-color:#cbd5e1; display:flex; align-items:center; justify-content:center; gap:8px;">
+        <button type="button" onclick="switchEstudianteTab('hist', document.querySelectorAll('.tab-btn')[2])" class="btn btn-outline btn-full" style="padding:14px; font-size:var(--texto-md); border-radius:12px; color:var(--color-texto-suave); border-color:var(--color-borde-fuerte); display:flex; align-items:center; justify-content:center; gap:8px;">
           <i data-lucide="history"></i> Intentos Agotados ({{ cuestionario_destacado.intentos_hechos }}/{{ cuestionario_destacado.intentos_permitidos }}) · Ver Calificaciones
         </button>
         {% else %}
-        <a href="{% url 'evaluaciones:iniciar' cuestionario_destacado.id %}" class="btn btn-primary btn-full" style="padding:14px; font-size:15px; border-radius:12px; display:flex; align-items:center; justify-content:center; gap:8px;">
+        <a href="{% url 'evaluaciones:iniciar' cuestionario_destacado.id %}" class="btn btn-primary btn-full" style="padding:14px; font-size:var(--texto-md); border-radius:12px; display:flex; align-items:center; justify-content:center; gap:8px;">
           <i data-lucide="play"></i> Iniciar Intento {{ cuestionario_destacado.siguiente_intento_num }} de {{ cuestionario_destacado.intentos_permitidos }}
         </a>
         {% endif %}
       </div>
       {% else %}
       <!-- Estado Limpio cuando no hay cuestionarios disponibles en este momento -->
-      <div class="card" style="border-top:4px solid #64748b; margin-bottom:28px; padding:28px; text-align:center;">
-        <div style="width:48px; height:48px; border-radius:50%; background:#f1f5f9; color:#64748b; display:flex; align-items:center; justify-content:center; margin:0 auto 12px;">
-          <i data-lucide="check-circle" style="width:24px; height:24px; color:#16a34a;"></i>
+      <div class="card" style="border-top:4px solid var(--color-texto-suave); margin-bottom:28px; padding:28px; text-align:center;">
+        <div style="width:48px; height:48px; border-radius:50%; background:var(--color-superficie-hundida); color:var(--color-texto-suave); display:flex; align-items:center; justify-content:center; margin:0 auto 12px;">
+          <i data-lucide="check-circle" style="width:24px; height:24px; color:var(--verde-700);"></i>
         </div>
-        <h2 style="font-size:18px; font-weight:800; color:#0f172a; margin-bottom:6px;">No tienes cuestionarios activos con entrega pendiente</h2>
-        <p style="font-size:13px; color:#64748b; max-width:480px; margin:0 auto 16px;">
+        <h2 style="font-size:var(--texto-lg); font-weight:800; color:var(--color-texto); margin-bottom:6px;">No tienes cuestionarios activos con entrega pendiente</h2>
+        <p style="font-size:var(--texto-sm); color:var(--color-texto-suave); max-width:480px; margin:0 auto 16px;">
           Actualmente no hay evaluaciones abiertas en este momento. Puedes consultar tu historial de intentos o revisar los cuestionarios programados para próximas fechas.
         </p>
         <div style="display:flex; justify-content:center; gap:12px;">
-          <button type="button" onclick="switchEstudianteTab('prog', document.querySelectorAll('.tab-btn')[1])" class="btn btn-outline" style="font-size:13px; padding:8px 16px; gap:6px;">
+          <button type="button" onclick="switchEstudianteTab('prog', document.querySelectorAll('.tab-btn')[1])" class="btn btn-outline" style="font-size:var(--texto-sm); padding:8px 16px; gap:6px;">
             <i data-lucide="calendar" style="width:14px; height:14px;"></i> Ver Programados
           </button>
-          <button type="button" onclick="switchEstudianteTab('hist', document.querySelectorAll('.tab-btn')[2])" class="btn btn-secondary" style="font-size:13px; padding:8px 16px; gap:6px;">
+          <button type="button" onclick="switchEstudianteTab('hist', document.querySelectorAll('.tab-btn')[2])" class="btn btn-secondary" style="font-size:var(--texto-sm); padding:8px 16px; gap:6px;">
             <i data-lucide="history" style="width:14px; height:14px;"></i> Historial de Intentos
           </button>
         </div>
@@ -115,10 +115,10 @@
             Disponibles <span class="badge badge-info">{{ cuestionarios_disponibles|length }}</span>
           </button>
           <button type="button" class="tab-btn" onclick="switchEstudianteTab('prog', this)">
-            Programados <span class="badge" style="background:#cbd5e1; color:#334155;">{{ programados_count|default:"0" }}</span>
+            Programados <span class="badge" style="background:var(--color-borde-fuerte); color:var(--gris-700);">{{ programados_count|default:"0" }}</span>
           </button>
           <button type="button" class="tab-btn" onclick="switchEstudianteTab('hist', this)">
-            Historial de Intentos <span class="badge" style="background:#cbd5e1; color:#334155;">{{ intentos_estudiante.count }}</span>
+            Historial de Intentos <span class="badge" style="background:var(--color-borde-fuerte); color:var(--gris-700);">{{ intentos_estudiante.count }}</span>
           </button>
         </div>
 
@@ -130,40 +130,40 @@
               <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
                 <div>
                   {% if c.intento_activo %}
-                  <span class="badge" style="background:#fef3c7; color:#92400e; font-weight:700; margin-bottom:6px;">● INTENTO EN CURSO</span>
+                  <span class="badge" style="background:var(--naranja-50); color:var(--naranja-800); font-weight:700; margin-bottom:6px;">● INTENTO EN CURSO</span>
                   {% elif c.intentos_agotados %}
-                  <span class="badge" style="background:#f1f5f9; color:#64748b; font-weight:700; margin-bottom:6px;">● INTENTOS AGOTADOS</span>
+                  <span class="badge" style="background:var(--color-superficie-hundida); color:var(--color-texto-suave); font-weight:700; margin-bottom:6px;">● INTENTOS AGOTADOS</span>
                   {% else %}
                   <span class="badge badge-success" style="margin-bottom:6px;">● DISPONIBLE</span>
                   {% endif %}
-                  <h3 style="font-size:17px; font-weight:800; color:#0f172a;">{{ c.nombre }}</h3>
-                  <div style="font-size:12px; color:#64748b; display:inline-flex; align-items:center; gap:4px;"><i data-lucide="landmark" style="width:13px; height:13px;"></i> Uniputumayo · Pruebas Saber TyT</div>
+                  <h3 style="font-size:var(--texto-lg); font-weight:800; color:var(--color-texto);">{{ c.nombre }}</h3>
+                  <div style="font-size:var(--texto-xs); color:var(--color-texto-suave); display:inline-flex; align-items:center; gap:4px;"><i data-lucide="landmark" style="width:13px; height:13px;"></i> Uniputumayo · Pruebas Saber TyT</div>
                 </div>
-                <span class="badge {{ c.tiempo_restante_info.clase }}" style="font-size:11px;">
+                <span class="badge {{ c.tiempo_restante_info.clase }}" style="font-size:var(--texto-xs);">
                   <i data-lucide="clock" style="width:12px; height:12px;"></i> {{ c.tiempo_restante_info.texto }}
                 </span>
               </div>
-              <div style="display:flex; gap:16px; font-size:13px; color:#475569; margin:12px 0;">
+              <div style="display:flex; gap:16px; font-size:var(--texto-sm); color:var(--color-texto-suave); margin:12px 0;">
                 <span style="display:inline-flex; align-items:center; gap:4px;"><i data-lucide="help-circle" style="width:14px; height:14px;"></i> {{ c.cuestionario_preguntas.count }} ítems</span>
                 <span style="display:inline-flex; align-items:center; gap:4px;"><i data-lucide="clock" style="width:14px; height:14px;"></i> {{ c.tiempo_limite_minutos }} min</span>
                 <span style="display:inline-flex; align-items:center; gap:4px;"><i data-lucide="rotate-cw" style="width:14px; height:14px;"></i> {{ c.intentos_hechos }}/{{ c.intentos_permitidos }} intentos</span>
               </div>
               {% if c.intento_activo %}
-              <a href="{% url 'evaluaciones:sala' c.intento_activo.id %}" class="btn" style="padding:10px 18px; font-size:14px; background:#d97706; color:#ffffff; font-weight:700; display:inline-flex; align-items:center; gap:6px;">
+              <a href="{% url 'evaluaciones:sala' c.intento_activo.id %}" class="btn" style="padding:10px 18px; font-size:var(--texto-base); background:var(--naranja-700); color:var(--color-texto-invertido); font-weight:700; display:inline-flex; align-items:center; gap:6px;">
                 <i data-lucide="play-circle"></i> Continuar Intento
               </a>
               {% elif c.intentos_agotados %}
-              <button type="button" onclick="switchEstudianteTab('hist', document.querySelectorAll('.tab-btn')[2])" class="btn btn-outline" style="padding:10px 16px; font-size:13px; color:#475569; border-color:#cbd5e1; display:inline-flex; align-items:center; gap:6px;">
+              <button type="button" onclick="switchEstudianteTab('hist', document.querySelectorAll('.tab-btn')[2])" class="btn btn-outline" style="padding:10px 16px; font-size:var(--texto-sm); color:var(--color-texto-suave); border-color:var(--color-borde-fuerte); display:inline-flex; align-items:center; gap:6px;">
                 <i data-lucide="history"></i> Agotado ({{ c.intentos_hechos }}/{{ c.intentos_permitidos }}) · Ver Resultados
               </button>
               {% else %}
-              <a href="{% url 'evaluaciones:iniciar' c.id %}" class="btn btn-primary" style="padding:10px 18px; font-size:14px; display:inline-flex; align-items:center; gap:6px;">
+              <a href="{% url 'evaluaciones:iniciar' c.id %}" class="btn btn-primary" style="padding:10px 18px; font-size:var(--texto-base); display:inline-flex; align-items:center; gap:6px;">
                 <i data-lucide="play"></i> Iniciar Intento ({{ c.siguiente_intento_num }}/{{ c.intentos_permitidos }})
               </a>
               {% endif %}
             </div>
             {% empty %}
-            <div class="card" style="text-align:center; padding:30px; color:#64748b;">
+            <div class="card" style="text-align:center; padding:30px; color:var(--color-texto-suave);">
               No tienes más cuestionarios pendientes por resolver.
             </div>
             {% endfor %}
@@ -174,13 +174,13 @@
         <div id="tab-prog" class="tab-content-box" style="display:none;">
           <div style="display:flex; flex-direction:column; gap:16px;">
             {% for c in cuestionarios_programados %}
-            <div class="card" style="border-left:4px solid #0284c7; padding:20px; margin-bottom:0;">
+            <div class="card" style="border-left:4px solid var(--azul-600); padding:20px; margin-bottom:0;">
               <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                 <span class="badge badge-info"><i data-lucide="calendar" style="width:12px; height:12px;"></i> PROGRAMADO</span>
-                <span style="font-size:12px; color:#0284c7; font-weight:600;">{{ c.tiempo_restante_info.texto }}</span>
+                <span style="font-size:var(--texto-xs); color:var(--azul-600); font-weight:600;">{{ c.tiempo_restante_info.texto }}</span>
               </div>
-              <h3 style="font-size:17px; font-weight:800; color:#0f172a; margin-bottom:8px;">{{ c.nombre }}</h3>
-              <div style="background:#f0f9ff; border-radius:8px; padding:12px; font-size:13px; color:#0369a1; margin-bottom:16px;">
+              <h3 style="font-size:var(--texto-lg); font-weight:800; color:var(--color-texto); margin-bottom:8px;">{{ c.nombre }}</h3>
+              <div style="background:var(--azul-50); border-radius:8px; padding:12px; font-size:var(--texto-sm); color:var(--azul-700); margin-bottom:16px;">
                 <div style="display:flex; align-items:center; gap:6px;">
                   <i data-lucide="calendar" style="width:14px; height:14px;"></i> <strong>Apertura:</strong> {{ c.fecha_apertura|date:"d M Y · H:i" }}
                 </div>
@@ -193,7 +193,7 @@
               </button>
             </div>
             {% empty %}
-            <div class="card" style="text-align:center; padding:30px; color:#64748b;">
+            <div class="card" style="text-align:center; padding:30px; color:var(--color-texto-suave);">
               No hay cuestionarios programados para próximas fechas.
             </div>
             {% endfor %}
@@ -213,32 +213,32 @@
                       {% if intento.aprobado %}APROBADO{% else %}NO APROBADO{% endif %}
                     </span>
                   </div>
-                  <h3 style="font-size:17px; font-weight:800; color:#0f172a;">{{ intento.cuestionario.nombre }}</h3>
+                  <h3 style="font-size:var(--texto-lg); font-weight:800; color:var(--color-texto);">{{ intento.cuestionario.nombre }}</h3>
                 </div>
-                <span style="font-size:12px; color:#64748b;">{{ intento.fecha_inicio|date:"d M Y · H:i" }}</span>
+                <span style="font-size:var(--texto-xs); color:var(--color-texto-suave);">{{ intento.fecha_inicio|date:"d M Y · H:i" }}</span>
               </div>
 
-              <div style="display:flex; justify-content:space-between; align-items:center; background:#f8fafc; border-radius:10px; padding:12px 18px; margin-bottom:14px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; background:var(--color-superficie-tenue); border-radius:10px; padding:12px 18px; margin-bottom:14px;">
                 <div>
-                  <div style="font-size:11px; color:#64748b; text-transform:uppercase;">Calificación Obtenida</div>
-                  <div style="font-size:24px; font-weight:800; color:#0f172a;">
-                    {{ intento.calificacion|default:"0.00" }} <span style="font-size:14px; color:#94a3b8;">/ {{ intento.cuestionario.calificacion_maxima }}</span>
+                  <div style="font-size:var(--texto-xs); color:var(--color-texto-suave); text-transform:uppercase;">Calificación Obtenida</div>
+                  <div style="font-size:var(--texto-2xl); font-weight:800; color:var(--color-texto);">
+                    {{ intento.calificacion|default:"0.00" }} <span style="font-size:var(--texto-base); color:var(--color-texto-tenue);">/ {{ intento.cuestionario.calificacion_maxima }}</span>
                   </div>
                 </div>
                 <div>
-                  <div style="font-size:11px; color:#64748b; text-transform:uppercase;">Puntaje</div>
-                  <div style="font-size:18px; font-weight:700; color:#475569;">
+                  <div style="font-size:var(--texto-xs); color:var(--color-texto-suave); text-transform:uppercase;">Puntaje</div>
+                  <div style="font-size:var(--texto-lg); font-weight:700; color:var(--color-texto-suave);">
                     {{ intento.puntaje_obtenido|default:"0" }} / {{ intento.puntaje_total_posible|default:"0" }} pts
                   </div>
                 </div>
               </div>
 
-              <a href="{% url 'evaluaciones:resultado' intento.id %}" class="btn btn-outline btn-full" style="font-size:13px;">
+              <a href="{% url 'evaluaciones:resultado' intento.id %}" class="btn btn-outline btn-full" style="font-size:var(--texto-sm);">
                 <i data-lucide="file-text"></i> Ver Informe de Resultado
               </a>
             </div>
             {% empty %}
-            <div class="card" style="text-align:center; padding:30px; color:#64748b;">
+            <div class="card" style="text-align:center; padding:30px; color:var(--color-texto-suave);">
               Aún no has finalizado ningún cuestionario.
             </div>
             {% endfor %}
@@ -247,15 +247,15 @@
       </div>
 
       <!-- Normas para el desarrollo del intento -->
-      <div class="card" style="margin-top:28px; background:#f0f9ff; border:1px solid #bae6fd; padding:20px;">
+      <div class="card" style="margin-top:28px; background:var(--azul-50); border:1px solid var(--azul-200); padding:20px;">
         <div style="display:flex; gap:12px; align-items:flex-start;">
-          <i data-lucide="info" style="color:#0284c7; width:24px; height:24px; flex-shrink:0;"></i>
+          <i data-lucide="info" style="color:var(--azul-600); width:24px; height:24px; flex-shrink:0;"></i>
           <div>
-            <h4 style="font-size:14px; font-weight:800; color:#0369a1; margin-bottom:4px;">Normas para el Desarrollo del Intento</h4>
-            <p style="font-size:13px; color:#0c4a6e; line-height:1.5;">
+            <h4 style="font-size:var(--texto-base); font-weight:800; color:var(--azul-700); margin-bottom:4px;">Normas para el Desarrollo del Intento</h4>
+            <p style="font-size:var(--texto-sm); color:var(--azul-800); line-height:1.5;">
               Antes de iniciar un intento asegúrate de contar con una conexión a internet estable. Ten en cuenta que <strong>el temporizador no se detiene</strong> al cerrar la aplicación o cambiar de pestaña. Todas las respuestas guardadas se sincronizan automáticamente en el servidor Django.
             </p>
-            <div style="margin-top:8px; font-size:12px; color:#0284c7; display:inline-flex; align-items:center; gap:6px;">
+            <div style="margin-top:8px; font-size:var(--texto-xs); color:var(--azul-600); display:inline-flex; align-items:center; gap:6px;">
               <i data-lucide="headphones" style="width:14px; height:14px;"></i> Mesa de Ayuda IUP: <a href="mailto:soporte.sistemas@uniputumayo.edu.co" style="font-weight:600;">soporte.sistemas@uniputumayo.edu.co</a>
             </div>
           </div>
