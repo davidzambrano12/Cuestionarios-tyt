@@ -26,7 +26,7 @@
 <div class="metrics-grid">
   <div class="metric-card">
     <div class="metric-header">
-      <div class="metric-icon" style="background:#e0f2fe; color:#0284c7;"><i data-lucide="clipboard-list"></i></div>
+      <div class="metric-icon" style="background:var(--azul-50); color:var(--azul-600);"><i data-lucide="clipboard-list"></i></div>
       <span class="badge badge-info">Total</span>
     </div>
     <div class="metric-value">{{ total_count|default:"0" }}</div>
@@ -35,7 +35,7 @@
 
   <div class="metric-card">
     <div class="metric-header">
-      <div class="metric-icon" style="background:#dcfce7; color:#16a34a;"><i data-lucide="check-circle-2"></i></div>
+      <div class="metric-icon" style="background:var(--verde-100); color:var(--verde-800);"><i data-lucide="check-circle-2"></i></div>
       <span class="badge badge-success">Activos</span>
     </div>
     <div class="metric-value">{{ disponibles_count|default:"0" }}</div>
@@ -44,7 +44,7 @@
 
   <div class="metric-card">
     <div class="metric-header">
-      <div class="metric-icon" style="background:#fef3c7; color:#d97706;"><i data-lucide="clock"></i></div>
+      <div class="metric-icon" style="background:var(--naranja-50); color:var(--naranja-700);"><i data-lucide="clock"></i></div>
       <span class="badge badge-warning">En Espera</span>
     </div>
     <div class="metric-value">{{ borradores_count|default:"0" }}</div>
@@ -53,7 +53,7 @@
 
   <div class="metric-card">
     <div class="metric-header">
-      <div class="metric-icon" style="background:#fee2e2; color:#dc2626;"><i data-lucide="archive"></i></div>
+      <div class="metric-icon" style="background:var(--rojo-50); color:var(--rojo-600);"><i data-lucide="archive"></i></div>
       <span class="badge badge-danger">Finalizados</span>
     </div>
     <div class="metric-value">{{ cerrados_count|default:"0" }}</div>
@@ -67,7 +67,7 @@
     
     <!-- Input de Búsqueda -->
     <div style="flex:1; min-width:260px; position:relative;">
-      <i data-lucide="search" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:#94a3b8; width:16px; height:16px;"></i>
+      <i data-lucide="search" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--color-texto-tenue); width:16px; height:16px;"></i>
       <input type="text" id="filtro-cuestionario-texto" onkeyup="filtrarCuestionarios()" placeholder="Buscar por título o descripción..." class="form-input" style="padding-left:38px;">
     </div>
 
@@ -108,14 +108,14 @@
           {% else %}
             <span class="badge badge-warning">● Borrador</span>
           {% endif %}
-          <span class="badge {{ c.tiempo_restante_info.clase }}" style="font-size:11px;">
+          <span class="badge {{ c.tiempo_restante_info.clase }}" style="font-size:var(--texto-xs);">
             {{ c.tiempo_restante_info.texto }}
           </span>
         </div>
 
         {% if user.is_superuser or user.perfil.es_admin or user.perfil.es_docente %}
-        <a href="{% url 'cuestionarios:previsualizar' c.id %}" class="btn btn-outline" style="padding:4px 9px; font-size:11px; border-radius:8px; display:inline-flex; align-items:center; gap:4px; color:#475569; border-color:#e2e8f0; background:#f8fafc;" title="Previsualizar cuestionario como estudiante">
-          <i data-lucide="eye" style="width:13px; height:13px; color:#186382;"></i> Vista previa
+        <a href="{% url 'cuestionarios:previsualizar' c.id %}" class="btn btn-outline" style="padding:4px 9px; font-size:var(--texto-xs); border-radius:8px; display:inline-flex; align-items:center; gap:4px; color:var(--color-texto-suave); border-color:var(--color-borde); background:var(--color-superficie-tenue);" title="Previsualizar cuestionario como estudiante">
+          <i data-lucide="eye" style="width:13px; height:13px; color:var(--color-primario);"></i> Vista previa
         </a>
         {% endif %}
       </div>
@@ -129,35 +129,35 @@
       </p>
 
       <!-- Micro-métricas de Evaluación (Línea limpia y horizontal) -->
-      <div style="display:flex; align-items:center; gap:10px; font-size:12px; color:#64748b; flex-wrap:wrap; margin-bottom:14px;">
+      <div style="display:flex; align-items:center; gap:10px; font-size:var(--texto-xs); color:var(--color-texto-suave); flex-wrap:wrap; margin-bottom:14px;">
         <span style="display:inline-flex; align-items:center; gap:4px;">
-          <i data-lucide="help-circle" style="width:13px; height:13px; color:#186382;"></i>
+          <i data-lucide="help-circle" style="width:13px; height:13px; color:var(--color-primario);"></i>
           <strong>{{ c.cuestionario_preguntas.count }}</strong> preguntas
         </span>
-        <span style="color:#cbd5e1;">&middot;</span>
+        <span style="color:var(--color-borde-fuerte);">&middot;</span>
         <span style="display:inline-flex; align-items:center; gap:4px;">
-          <i data-lucide="clock" style="width:13px; height:13px; color:#186382;"></i>
+          <i data-lucide="clock" style="width:13px; height:13px; color:var(--color-primario);"></i>
           <strong>{{ c.tiempo_limite_minutos }}</strong> min
         </span>
-        <span style="color:#cbd5e1;">&middot;</span>
+        <span style="color:var(--color-borde-fuerte);">&middot;</span>
         <span style="display:inline-flex; align-items:center; gap:4px;">
-          <i data-lucide="award" style="width:13px; height:13px; color:#186382;"></i>
+          <i data-lucide="award" style="width:13px; height:13px; color:var(--color-primario);"></i>
           Mín: <strong>{{ c.calificacion_aprobacion }}</strong>/{{ c.calificacion_maxima }}
         </span>
-        <span style="color:#cbd5e1;">&middot;</span>
+        <span style="color:var(--color-borde-fuerte);">&middot;</span>
         <span style="display:inline-flex; align-items:center; gap:4px;">
-          <i data-lucide="shuffle" style="width:13px; height:13px; color:#186382;"></i>
+          <i data-lucide="shuffle" style="width:13px; height:13px; color:var(--color-primario);"></i>
           {% if c.mezclar_preguntas %}Aleatorio{% else %}Fijo{% endif %}
         </span>
       </div>
 
       <!-- Fecha en 1 sola línea sutil -->
-      <div style="font-size:12px; color:#475569; border-top:1px solid #f1f5f9; padding-top:10px; margin-bottom:16px; display:flex; justify-content:space-between; align-items:center;">
-        <span style="display:inline-flex; align-items:center; gap:6px; color:#64748b;">
-          <i data-lucide="calendar" style="width:13px; height:13px; color:#64748b;"></i>
-          Cierre: <strong style="color:{% if c.esta_vencido %}#dc2626{% else %}#0f172a{% endif %};">{{ c.fecha_cierre|date:"d M Y · H:i" }}</strong>
+      <div style="font-size:var(--texto-xs); color:var(--color-texto-suave); border-top:1px solid var(--color-superficie-hundida); padding-top:10px; margin-bottom:16px; display:flex; justify-content:space-between; align-items:center;">
+        <span style="display:inline-flex; align-items:center; gap:6px; color:var(--color-texto-suave);">
+          <i data-lucide="calendar" style="width:13px; height:13px; color:var(--color-texto-suave);"></i>
+          Cierre: <strong style="color:{% if c.esta_vencido %}var(--rojo-600){% else %}var(--color-texto){% endif %};">{{ c.fecha_cierre|date:"d M Y · H:i" }}</strong>
         </span>
-        <span style="font-size:11px; color:#94a3b8;">
+        <span style="font-size:var(--texto-xs); color:var(--color-texto-tenue);">
           Inicio: {{ c.fecha_apertura|date:"d M" }}
         </span>
       </div>
@@ -166,25 +166,25 @@
     <!-- Botones de Acción Segregados por Rol: 2 Botones Balanceados y Anchos -->
     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:auto;">
       {% if user.is_superuser or user.perfil.es_admin or user.perfil.es_docente %}
-      <a href="{% url 'reportes:intentos' c.id %}" class="btn btn-outline" style="font-size:13px; padding:10px 14px; display:inline-flex; align-items:center; justify-content:center; gap:6px; color:#186382; font-weight:700; border-color:#cbd5e1; border-radius:10px;" title="Ver calificaciones y estudiantes que presentaron">
-        <i data-lucide="users" style="width:15px; height:15px; color:#186382;"></i>
+      <a href="{% url 'reportes:intentos' c.id %}" class="btn btn-outline" style="font-size:var(--texto-sm); padding:10px 14px; display:inline-flex; align-items:center; justify-content:center; gap:6px; color:var(--color-primario); font-weight:700; border-color:var(--color-borde-fuerte); border-radius:10px;" title="Ver calificaciones y estudiantes que presentaron">
+        <i data-lucide="users" style="width:15px; height:15px; color:var(--color-primario);"></i>
         Intentos ({{ c.intentos.count }})
       </a>
-      <a href="{% url 'cuestionarios:editar' c.id %}" class="btn btn-primary" style="font-size:13px; padding:10px 14px; display:inline-flex; align-items:center; justify-content:center; gap:6px; font-weight:700; border-radius:10px;" title="Configurar parámetros y preguntas">
+      <a href="{% url 'cuestionarios:editar' c.id %}" class="btn btn-primary" style="font-size:var(--texto-sm); padding:10px 14px; display:inline-flex; align-items:center; justify-content:center; gap:6px; font-weight:700; border-radius:10px;" title="Configurar parámetros y preguntas">
         <i data-lucide="settings" style="width:15px; height:15px;"></i>
         Configurar
       </a>
       {% else %}
         {% if c.esta_vigente %}
-        <a href="{% url 'evaluaciones:iniciar' c.id %}" class="btn btn-primary" style="grid-column:1 / -1; font-size:13px; padding:10px; display:inline-flex; align-items:center; justify-content:center; gap:6px; border-radius:10px;">
+        <a href="{% url 'evaluaciones:iniciar' c.id %}" class="btn btn-primary" style="grid-column:1 / -1; font-size:var(--texto-sm); padding:10px; display:inline-flex; align-items:center; justify-content:center; gap:6px; border-radius:10px;">
           <i data-lucide="play" style="width:14px; height:14px;"></i> Iniciar Evaluación
         </a>
         {% elif c.esta_vencido %}
-        <button disabled class="btn btn-outline" style="grid-column:1 / -1; font-size:12px; padding:10px; opacity:0.6; cursor:not-allowed; display:inline-flex; align-items:center; justify-content:center; gap:6px; border-radius:10px;">
+        <button disabled class="btn btn-outline" style="grid-column:1 / -1; font-size:var(--texto-xs); padding:10px; opacity:0.6; cursor:not-allowed; display:inline-flex; align-items:center; justify-content:center; gap:6px; border-radius:10px;">
           <i data-lucide="lock" style="width:13px; height:13px;"></i> Plazo Vencido
         </button>
         {% else %}
-        <button disabled class="btn btn-outline" style="grid-column:1 / -1; font-size:12px; padding:10px; opacity:0.6; cursor:not-allowed; display:inline-flex; align-items:center; justify-content:center; gap:6px; border-radius:10px;">
+        <button disabled class="btn btn-outline" style="grid-column:1 / -1; font-size:var(--texto-xs); padding:10px; opacity:0.6; cursor:not-allowed; display:inline-flex; align-items:center; justify-content:center; gap:6px; border-radius:10px;">
           <i data-lucide="calendar" style="width:13px; height:13px;"></i> Programado ({{ c.fecha_apertura|date:"d M" }})
         </button>
         {% endif %}
@@ -193,12 +193,12 @@
 
   </div>
   {% empty %}
-  <div style="grid-column:1 / -1; text-align:center; padding:60px 20px; background:white; border-radius:16px; border:1px solid #e2e8f0;">
-    <div style="width:56px; height:56px; border-radius:50%; background:#f1f5f9; color:#94a3b8; display:flex; align-items:center; justify-content:center; margin:0 auto 16px;">
+  <div style="grid-column:1 / -1; text-align:center; padding:60px 20px; background:var(--color-superficie); border-radius:16px; border:1px solid var(--color-borde);">
+    <div style="width:56px; height:56px; border-radius:50%; background:var(--color-superficie-hundida); color:var(--color-texto-tenue); display:flex; align-items:center; justify-content:center; margin:0 auto 16px;">
       <i data-lucide="clipboard-x" style="width:28px; height:28px;"></i>
     </div>
-    <h3 style="font-size:18px; font-weight:800; color:#0f172a; margin-bottom:6px;">No hay cuestionarios registrados</h3>
-    <p style="font-size:14px; color:#64748b; max-width:440px; margin:0 auto 20px;">
+    <h3 style="font-size:var(--texto-lg); font-weight:800; color:var(--color-texto); margin-bottom:6px;">No hay cuestionarios registrados</h3>
+    <p style="font-size:var(--texto-base); color:var(--color-texto-suave); max-width:440px; margin:0 auto 20px;">
       Comienza creando una evaluación para programar las preguntas institucionales del banco.
     </p>
     {% if user.is_superuser or user.perfil.es_admin or user.perfil.es_docente %}
@@ -211,10 +211,10 @@
 </div>
 
 <!-- Mensaje cuando la búsqueda no produce resultados -->
-<div id="no-cuestionarios-busqueda" style="display:none; text-align:center; padding:50px 20px; background:white; border-radius:16px; border:1px solid #e2e8f0; margin-top:16px;">
-  <i data-lucide="search-x" style="width:36px; height:36px; color:#94a3b8; margin-bottom:12px;"></i>
-  <h4 style="font-size:16px; font-weight:700; color:#0f172a; margin-bottom:4px;">No se encontraron cuestionarios</h4>
-  <p style="font-size:13px; color:#64748b;">Prueba ajustando los términos de búsqueda o el filtro de estado.</p>
+<div id="no-cuestionarios-busqueda" style="display:none; text-align:center; padding:50px 20px; background:var(--color-superficie); border-radius:16px; border:1px solid var(--color-borde); margin-top:16px;">
+  <i data-lucide="search-x" style="width:36px; height:36px; color:var(--color-texto-tenue); margin-bottom:12px;"></i>
+  <h4 style="font-size:var(--texto-md); font-weight:700; color:var(--color-texto); margin-bottom:4px;">No se encontraron cuestionarios</h4>
+  <p style="font-size:var(--texto-sm); color:var(--color-texto-suave);">Prueba ajustando los términos de búsqueda o el filtro de estado.</p>
 </div>
 
 {% endblock %}
@@ -231,8 +231,8 @@
       b.style.color = '';
     });
     btn.classList.add('active');
-    btn.style.background = '#186382';
-    btn.style.color = '#ffffff';
+    btn.style.background = 'var(--color-primario)';
+    btn.style.color = 'var(--color-superficie)';
     filtrarCuestionarios();
   }
 
@@ -266,8 +266,8 @@
   document.addEventListener('DOMContentLoaded', () => {
     const btnTodos = document.querySelector('#filtro-estados-container .filtro-btn.active');
     if (btnTodos) {
-      btnTodos.style.background = '#186382';
-      btnTodos.style.color = '#ffffff';
+      btnTodos.style.background = 'var(--color-primario)';
+      btnTodos.style.color = 'var(--color-superficie)';
     }
   });
 </script>

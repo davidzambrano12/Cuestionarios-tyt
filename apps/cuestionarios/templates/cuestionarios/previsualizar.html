@@ -3,37 +3,37 @@
 {% block title %}Previsualización: {{ cuestionario.nombre }} - Simulador Saber TyT{% endblock %}
 
 {% block content %}
-<div style="background-color:#f8fafc; min-height:100vh; display:flex; flex-direction:column;">
+<div style="background-color:var(--color-superficie-tenue); min-height:100vh; display:flex; flex-direction:column;">
 
   <!-- Header Superior de Previsualización Docente -->
-  <header style="background:white; border-bottom:1px solid #e2e8f0; padding:12px 32px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
+  <header style="background:var(--color-superficie); border-bottom:1px solid var(--color-borde); padding:12px 32px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
     <div style="display:flex; align-items:center; gap:16px;">
-      <a href="{% url 'cuestionarios:listado' %}" style="display:inline-flex; align-items:center; justify-content:center; width:36px; height:36px; border-radius:50%; background:#f1f5f9; color:#0f172a; text-decoration:none;" title="Volver al listado de cuestionarios">
+      <a href="{% url 'cuestionarios:listado' %}" style="display:inline-flex; align-items:center; justify-content:center; width:36px; height:36px; border-radius:50%; background:var(--color-superficie-hundida); color:var(--color-texto); text-decoration:none;" title="Volver al listado de cuestionarios">
         <i data-lucide="arrow-left" style="width:18px; height:18px;"></i>
       </a>
       <div>
         <div style="display:flex; align-items:center; gap:8px;">
-          <span class="badge" style="background:#fef3c7; color:#92400e; border:1px solid #fde68a; font-size:11px; font-weight:700;">
+          <span class="badge" style="background:var(--naranja-50); color:var(--naranja-800); border:1px solid var(--naranja-200); font-size:var(--texto-xs); font-weight:700;">
             <i data-lucide="eye" style="width:12px; height:12px;"></i> MODO PREVISUALIZACIÓN DOCENTE
           </span>
-          <span style="font-size:12px; color:#64748b;">(Entorno Simulado)</span>
+          <span style="font-size:var(--texto-xs); color:var(--color-texto-suave);">(Entorno Simulado)</span>
         </div>
-        <div style="font-size:16px; font-weight:800; color:#0f172a; margin-top:2px;">{{ cuestionario.nombre }}</div>
+        <div style="font-size:var(--texto-md); font-weight:800; color:var(--color-texto); margin-top:2px;">{{ cuestionario.nombre }}</div>
       </div>
     </div>
 
     <!-- Controles Docentes Superiores -->
     <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
-      <button type="button" id="btn-toggle-clave" onclick="toggleClaveDocente()" class="btn btn-outline" style="border-color:#186382; color:#186382; font-size:13px; font-weight:600; padding:8px 14px; display:inline-flex; align-items:center; gap:6px;">
+      <button type="button" id="btn-toggle-clave" onclick="toggleClaveDocente()" class="btn btn-outline" style="border-color:var(--color-primario); color:var(--color-primario); font-size:var(--texto-sm); font-weight:600; padding:8px 14px; display:inline-flex; align-items:center; gap:6px;">
         <i data-lucide="key" style="width:15px; height:15px;"></i>
         <span id="label-toggle-clave">Revelar Claves y Retroalimentación</span>
       </button>
 
-      <a href="{% url 'cuestionarios:editar' cuestionario.id %}" class="btn btn-outline" style="font-size:13px; padding:8px 14px; display:inline-flex; align-items:center; gap:6px;">
+      <a href="{% url 'cuestionarios:editar' cuestionario.id %}" class="btn btn-outline" style="font-size:var(--texto-sm); padding:8px 14px; display:inline-flex; align-items:center; gap:6px;">
         <i data-lucide="settings" style="width:15px; height:15px;"></i> Configuración
       </a>
 
-      <a href="{% url 'cuestionarios:listado' %}" class="btn btn-primary" style="font-size:13px; padding:8px 16px; display:inline-flex; align-items:center; gap:6px;">
+      <a href="{% url 'cuestionarios:listado' %}" class="btn btn-primary" style="font-size:var(--texto-sm); padding:8px 16px; display:inline-flex; align-items:center; gap:6px;">
         <i data-lucide="check" style="width:15px; height:15px;"></i> Salir de Vista Previa
       </a>
     </div>
@@ -41,14 +41,14 @@
 
   <!-- Banner Informativo Institucional -->
   <div style="max-width:1400px; width:100%; margin:16px auto 0; padding:0 32px;">
-    <div style="background:#fef9e7; border:1px solid #fde68a; border-radius:12px; padding:12px 18px; display:flex; justify-content:space-between; align-items:center; gap:14px; flex-wrap:wrap;">
+    <div style="background:var(--naranja-50); border:1px solid var(--naranja-200); border-radius:12px; padding:12px 18px; display:flex; justify-content:space-between; align-items:center; gap:14px; flex-wrap:wrap;">
       <div style="display:flex; align-items:center; gap:10px;">
-        <i data-lucide="info" style="width:18px; height:18px; color:#b45309; flex-shrink:0;"></i>
-        <span style="font-size:13px; color:#78350f; font-weight:500;">
+        <i data-lucide="info" style="width:18px; height:18px; color:var(--naranja-700); flex-shrink:0;"></i>
+        <span style="font-size:var(--texto-sm); color:var(--naranja-800); font-weight:500;">
           <strong>Simulación de experiencia estudiantil:</strong> En este entorno puedes probar la navegación, verificar los enunciados y revelar las claves correctas sin generar registros en la tabla de intentos ni alterar las notas de los estudiantes.
         </span>
       </div>
-      <div style="font-size:12px; font-weight:700; color:#b45309; background:white; padding:4px 10px; border-radius:6px; border:1px solid #fde68a;">
+      <div style="font-size:var(--texto-xs); font-weight:700; color:var(--naranja-700); background:var(--color-superficie); padding:4px 10px; border-radius:6px; border:1px solid var(--naranja-200);">
         Límite configurado: {{ cuestionario.tiempo_limite_minutos }} min
       </div>
     </div>
@@ -56,9 +56,9 @@
 
   <!-- Barra de Progreso Simulada -->
   <div style="padding:16px 32px 10px; max-width:1400px; width:100%; margin:0 auto;">
-    <div style="display:flex; justify-content:space-between; align-items:center; font-size:13px; font-weight:700; margin-bottom:8px;">
-      <span style="color:#186382;">Pregunta <span id="idx-pregunta-label">1</span> de {{ total_preguntas }}</span>
-      <span id="porcentaje-progreso" style="color:#16a34a;">0% explorado</span>
+    <div style="display:flex; justify-content:space-between; align-items:center; font-size:var(--texto-sm); font-weight:700; margin-bottom:8px;">
+      <span style="color:var(--color-primario);">Pregunta <span id="idx-pregunta-label">1</span> de {{ total_preguntas }}</span>
+      <span id="porcentaje-progreso" style="color:var(--verde-700);">0% explorado</span>
     </div>
     <div class="progress-bar-container">
       <div id="barra-progreso" class="progress-bar-fill" style="width: 5%;"></div>
@@ -73,29 +73,29 @@
       <div>
         <!-- Badges de la pregunta actual -->
         <div style="display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap;">
-          <span id="badge-competencia" class="badge badge-info" style="font-size:12px; padding:6px 12px;">Competencia</span>
-          <span id="badge-puntaje" class="badge" style="background:#e2e8f0; color:#334155; font-size:12px; padding:6px 12px;">Valor: 1.00 pt</span>
+          <span id="badge-competencia" class="badge badge-info" style="font-size:var(--texto-xs); padding:6px 12px;">Competencia</span>
+          <span id="badge-puntaje" class="badge" style="background:var(--color-borde); color:var(--gris-700); font-size:var(--texto-xs); padding:6px 12px;">Valor: 1.00 pt</span>
         </div>
 
         <!-- Card Contexto Operativo -->
         <div class="card" style="padding:20px; border-radius:16px; margin-bottom:16px;">
-          <div style="display:flex; align-items:center; gap:8px; font-size:12px; font-weight:800; color:#186382; margin-bottom:12px; text-transform:uppercase;">
+          <div style="display:flex; align-items:center; gap:8px; font-size:var(--texto-xs); font-weight:800; color:var(--color-primario); margin-bottom:12px; text-transform:uppercase;">
             <i data-lucide="file-text" style="width:16px; height:16px;"></i> CONTEXTO OPERATIVO
           </div>
-          <div id="texto-contexto" class="text-reading text-sm text-main" style="line-height:var(--leading-relaxed); max-height:300px; overflow-y:auto;">
+          <div id="texto-contexto" class="text-reading text-main" style="line-height:var(--leading-relaxed); max-height:300px; overflow-y:auto;">
             Texto descriptivo de apoyo para la formulación del problema y resolución de la pregunta.
           </div>
         </div>
 
         <!-- Acción Docente Rápida: Editar en Banco -->
         <div class="card" style="padding:16px; border-radius:16px;">
-          <div style="font-size:12px; font-weight:700; color:#0f172a; margin-bottom:6px; display:flex; align-items:center; gap:6px;">
-            <i data-lucide="tool" style="width:14px; height:14px; color:#186382;"></i> Gestión de la Pregunta
+          <div style="font-size:var(--texto-xs); font-weight:700; color:var(--color-texto); margin-bottom:6px; display:flex; align-items:center; gap:6px;">
+            <i data-lucide="tool" style="width:14px; height:14px; color:var(--color-primario);"></i> Gestión de la Pregunta
           </div>
-          <p style="font-size:12px; color:#64748b; margin-bottom:12px;">
+          <p style="font-size:var(--texto-xs); color:var(--color-texto-suave); margin-bottom:12px;">
             ¿Detectaste un error tipográfico o deseas ajustar el enunciado?
           </p>
-          <a id="link-editar-pregunta" href="#" target="_blank" class="btn btn-outline btn-full" style="font-size:12px; padding:8px 10px; display:inline-flex; align-items:center; justify-content:center; gap:6px;">
+          <a id="link-editar-pregunta" href="#" target="_blank" class="btn btn-outline btn-full" style="font-size:var(--texto-xs); padding:8px 10px; display:inline-flex; align-items:center; justify-content:center; gap:6px;">
             <i data-lucide="edit-3" style="width:13px; height:13px;"></i> Editar en el Banco &rarr;
           </a>
         </div>
@@ -115,18 +115,18 @@
             </div>
 
             <!-- Panel Desplegable de Retroalimentación Pedagógica (Modo Docente) -->
-            <div id="panel-retroalimentacion" style="display:none; margin-top:24px; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:14px; padding:18px;">
-              <div style="display:flex; align-items:center; gap:8px; font-size:13px; font-weight:800; color:#166534; margin-bottom:8px;">
+            <div id="panel-retroalimentacion" style="display:none; margin-top:24px; background:var(--verde-50); border:1px solid var(--verde-200); border-radius:14px; padding:18px;">
+              <div style="display:flex; align-items:center; gap:8px; font-size:var(--texto-sm); font-weight:800; color:var(--verde-800); margin-bottom:8px;">
                 <i data-lucide="check-circle" style="width:16px; height:16px;"></i> RETROALIMENTACIÓN PEDAGÓGICA (CLAVE OFICIAL)
               </div>
-              <div id="texto-retroalimentacion" style="font-size:13px; color:#14532d; line-height:1.5;">
+              <div id="texto-retroalimentacion" style="font-size:var(--texto-sm); color:var(--verde-800); line-height:1.5;">
                 Sin retroalimentación registrada para esta pregunta.
               </div>
             </div>
           </div>
 
           <!-- Navegación Anterior / Siguiente -->
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:32px; border-top:1px solid #f1f5f9; padding-top:20px; gap:12px; flex-wrap:wrap;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:32px; border-top:1px solid var(--color-superficie-hundida); padding-top:20px; gap:12px; flex-wrap:wrap;">
             <button type="button" id="btn-anterior" onclick="cambiarPregunta(preguntaActualIdx - 1)" class="btn btn-outline" style="padding:10px 20px; display:inline-flex; align-items:center; gap:6px;">
               <i data-lucide="chevron-left" style="width:16px; height:16px;"></i> Anterior
             </button>
@@ -144,10 +144,10 @@
       <div>
         <div class="card" style="padding:24px; border-radius:20px;">
           <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
-            <i data-lucide="layout-grid" style="width:18px; height:18px; color:#186382;"></i>
-            <h3 style="font-size:15px; font-weight:800; color:#0f172a; margin:0;">Mapeo de Preguntas</h3>
+            <i data-lucide="layout-grid" style="width:18px; height:18px; color:var(--color-primario);"></i>
+            <h3 style="font-size:var(--texto-md); font-weight:800; color:var(--color-texto); margin:0;">Mapeo de Preguntas</h3>
           </div>
-          <div id="resumen-mapeo-label" style="font-size:12px; color:#64748b; margin-bottom:14px;">
+          <div id="resumen-mapeo-label" style="font-size:var(--texto-xs); color:var(--color-texto-suave); margin-bottom:14px;">
             Pregunta 1 de {{ total_preguntas }}
           </div>
 
@@ -157,22 +157,22 @@
           </div>
 
           <!-- Leyenda de colores -->
-          <div style="margin-top:20px; border-top:1px solid #f1f5f9; padding-top:14px; font-size:11px; color:#64748b; display:flex; flex-direction:column; gap:8px;">
+          <div style="margin-top:20px; border-top:1px solid var(--color-superficie-hundida); padding-top:14px; font-size:var(--texto-xs); color:var(--color-texto-suave); display:flex; flex-direction:column; gap:8px;">
             <div style="display:flex; align-items:center; gap:8px;">
-              <span style="width:12px; height:12px; background:#186382; border-radius:3px;"></span> Pregunta actual
+              <span style="width:12px; height:12px; background:var(--color-primario); border-radius:3px;"></span> Pregunta actual
             </div>
             <div style="display:flex; align-items:center; gap:8px;">
-              <span style="width:12px; height:12px; background:#bae6fd; border-radius:3px;"></span> Respuesta probada
+              <span style="width:12px; height:12px; background:var(--azul-200); border-radius:3px;"></span> Respuesta probada
             </div>
             <div style="display:flex; align-items:center; gap:8px;">
-              <span style="width:12px; height:12px; background:#f1f5f9; border-radius:3px; border:1px solid #cbd5e1;"></span> No probada
+              <span style="width:12px; height:12px; background:var(--color-superficie-hundida); border-radius:3px; border:1px solid var(--color-borde-fuerte);"></span> No probada
             </div>
           </div>
 
           <!-- Ficha de Parámetros del Examen -->
-          <div style="margin-top:20px; border-top:1px solid #f1f5f9; padding-top:14px;">
-            <div style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; margin-bottom:8px;">Parámetros del Cuestionario</div>
-            <div style="display:flex; flex-direction:column; gap:6px; font-size:12px; color:#475569;">
+          <div style="margin-top:20px; border-top:1px solid var(--color-superficie-hundida); padding-top:14px;">
+            <div style="font-size:var(--texto-xs); font-weight:700; color:var(--color-texto-suave); text-transform:uppercase; margin-bottom:8px;">Parámetros del Cuestionario</div>
+            <div style="display:flex; flex-direction:column; gap:6px; font-size:var(--texto-xs); color:var(--color-texto-suave);">
               <div style="display:flex; justify-content:space-between;">
                 <span>Total Preguntas:</span>
                 <strong>{{ total_preguntas }}</strong>
@@ -222,12 +222,12 @@
     const btn = document.getElementById('btn-toggle-clave');
     const label = document.getElementById('label-toggle-clave');
     if (mostrarClavesDocente) {
-      btn.style.background = '#186382';
-      btn.style.color = '#ffffff';
+      btn.style.background = 'var(--color-primario)';
+      btn.style.color = 'var(--color-superficie)';
       label.innerText = 'Ocultar Claves Pedagógicas';
     } else {
       btn.style.background = 'transparent';
-      btn.style.color = '#186382';
+      btn.style.color = 'var(--color-primario)';
       label.innerText = 'Revelar Claves y Retroalimentación';
     }
     mostrarPregunta(preguntaActualIdx);
@@ -295,8 +295,8 @@
       
       // Estilo de revelación de clave
       if (mostrarClavesDocente && esCorrecta) {
-        card.style.borderColor = '#16a34a';
-        card.style.background = '#f0fdf4';
+        card.style.borderColor = 'var(--verde-700)';
+        card.style.background = 'var(--verde-50)';
       }
 
       card.onclick = () => {
@@ -305,12 +305,12 @@
       };
 
       card.innerHTML = `
-        <div class="option-letter-badge" style="${mostrarClavesDocente && esCorrecta ? 'background:#16a34a; color:white;' : ''}">${letra}</div>
-        <div style="flex-grow:1; font-size:14px; color:#0f172a; font-weight:500;">
+        <div class="option-letter-badge" style="${mostrarClavesDocente && esCorrecta ? 'background:var(--verde-700); color:var(--color-texto-invertido);' : ''}">${letra}</div>
+        <div style="flex-grow:1; font-size:var(--texto-base); color:var(--color-texto); font-weight:500;">
           ${op.texto}
-          ${mostrarClavesDocente && esCorrecta ? '<span class="badge badge-success" style="margin-left:8px; font-size:11px; padding:2px 8px;"><i data-lucide="check" style="width:11px; height:11px;"></i> Clave Oficial Correcta</span>' : ''}
+          ${mostrarClavesDocente && esCorrecta ? '<span class="badge badge-success" style="margin-left:8px; font-size:var(--texto-xs); padding:2px 8px;"><i data-lucide="check" style="width:11px; height:11px;"></i> Clave Oficial Correcta</span>' : ''}
         </div>
-        <div style="width:20px; height:20px; border-radius:50%; border:2px solid ${estaSeleccionada ? '#186382' : '#cbd5e1'}; display:flex; align-items:center; justify-content:center; background:${estaSeleccionada ? '#186382' : 'transparent'}; color:white; font-size:12px;">
+        <div style="width:20px; height:20px; border-radius:50%; border:2px solid ${estaSeleccionada ? 'var(--color-primario)' : 'var(--color-borde-fuerte)'}; display:flex; align-items:center; justify-content:center; background:${estaSeleccionada ? 'var(--color-primario)' : 'transparent'}; color:var(--color-texto-invertido); font-size:var(--texto-xs);">
           ${estaSeleccionada ? '<i data-lucide="check" style="width:12px; height:12px;"></i>' : ''}
         </div>
       `;
