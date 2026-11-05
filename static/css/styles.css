@@ -1518,3 +1518,15 @@ a:hover {
 .alerta { padding: 10px 14px; border-radius: var(--radio-sm); font-size: var(--texto-sm); margin-bottom: var(--espacio-4); }
 .alerta--error { background: var(--color-peligro-suave); border: 1px solid var(--color-peligro-borde); color: var(--color-peligro-texto); }
 .alerta--info { background: var(--color-info-suave); border: 1px solid var(--color-info-borde); color: var(--color-info-texto); }
+
+/* ---------------------------------------------------------------- Transición login → panel
+   View Transitions entre documentos (Chrome/Edge 126+, Safari 18.2+; en otros
+   navegadores no hay animación). base.js la omite en cualquier otra navegación. */
+@view-transition { navigation: auto; }
+::view-transition-old(root) { animation: 200ms ease both transicion-salida; }
+::view-transition-new(root) { animation: 320ms ease both transicion-entrada; }
+@keyframes transicion-salida { to { opacity: 0; } }
+@keyframes transicion-entrada { from { opacity: 0; transform: translateY(10px); } }
+@media (prefers-reduced-motion: reduce) {
+  @view-transition { navigation: none; }
+}

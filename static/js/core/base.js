@@ -452,6 +452,19 @@
     }
   });
 
+  // Transición entre documentos solo al llegar desde el inicio de sesión
+  // (el resto de navegaciones son instantáneas, como siempre)
+  window.addEventListener('pagereveal', (evento) => {
+    const transicion = evento.viewTransition;
+    if (!transicion) return;
+    // Omitirla o salir antes de que termine rechaza sus promesas: es lo esperado, no un error
+    transicion.ready.catch(() => {});
+    transicion.finished.catch(() => {});
+    const desde = window.navigation && window.navigation.activation && window.navigation.activation.from;
+    const vieneDelLogin = desde && desde.url && new URL(desde.url).pathname.startsWith('/login');
+    if (!vieneDelLogin) transicion.skipTransition();
+  });
+
   document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('#toast-container .toast-item').forEach(programarCierre);
     sincronizarBarra();
