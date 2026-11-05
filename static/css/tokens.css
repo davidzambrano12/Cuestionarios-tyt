@@ -1,0 +1,204 @@
+/* ==========================================================================
+   TOKENS DE DISEÑO — IDENTIDAD VISUAL UNIPUTUMAYO
+   Fuente: Manual de Identidad Visual UNIPUTUMAYO, versión 01-2025
+   (colores primarios p. 21, secundarios p. 22, variantes p. 15,
+   tipografías p. 25-26). Documentación: docs/identidad-visual.md
+
+   Capas:
+     1. Primitivos  -> la paleta institucional y sus escalas (no usar
+                       directamente en componentes si existe un semántico).
+     2. Semánticos  -> el rol del color (texto, superficie, borde, estado).
+     3. Tipografía, espaciado, radios, sombras y movimiento.
+
+   Toda pareja texto/fondo permitida está verificada con WCAG 2.1 AA
+   (ver tabla de contraste en la documentación).
+   ========================================================================== */
+
+:root {
+  /* ------------------------------------------------------------------------
+     1. PRIMITIVOS
+     ------------------------------------------------------------------------ */
+
+  /* Azul institucional. Base de pantalla del manual: RGB 25,102,143 (#18668F).
+     El logo usa #0080AB (azul-500): solo para acentos e iconografía, porque
+     con texto blanco no alcanza AA (4.49:1). */
+  --azul-50:  #EEF5F9;
+  --azul-100: #D5E7F0;
+  --azul-200: #A9CDE0;
+  --azul-300: #6FA9C7;
+  --azul-500: #0080AB;
+  --azul-600: #18668F;   /* color principal */
+  --azul-700: #12557A;
+  --azul-800: #0E4462;
+  --azul-900: #0A3349;
+
+  /* Verde institucional. Manual: RGB 128,191,31 (#80BF1F; el hexadecimal
+     impreso "#bf1f50" es una errata). Nunca con texto blanco (2.24:1). */
+  --verde-50:  #F2F8E8;
+  --verde-100: #E2F0CB;
+  --verde-200: #C4E296;
+  --verde-500: #80BF1F;  /* color de marca: fondos con texto oscuro */
+  --verde-600: #6AA019;
+  --verde-700: #4D7612;  /* verde para texto sobre blanco (5.36:1) */
+  --verde-800: #3B5A0E;
+
+  /* Naranja institucional. Manual: #F5A51D. Nunca con texto blanco (2.04:1). */
+  --naranja-50:  #FEF6E8;
+  --naranja-100: #FDE9C5;
+  --naranja-200: #FBD38C;
+  --naranja-500: #F5A51D; /* color de marca: fondos con texto oscuro */
+  --naranja-600: #D68A0C;
+  --naranja-700: #9C6207; /* naranja para texto sobre blanco (5.04:1) */
+  --naranja-800: #7A4C06;
+
+  /* Grises. Primario #595957, secundario #B2B6B9 y negro de texto del
+     manual #231F20. Escala neutra cálida construida entre ellos. */
+  --gris-0:   #FFFFFF;
+  --gris-50:  #F5F5F4;
+  --gris-100: #ECECEA;
+  --gris-200: #DEDEDB;
+  --gris-300: #B2B6B9;   /* gris secundario del manual: bordes decorativos */
+  --gris-400: #8A8A87;   /* bordes de campos (3.46:1, cumple UI 3:1) */
+  --gris-500: #6B6B68;
+  --gris-600: #595957;   /* gris primario del manual */
+  --gris-700: #3F3F3D;
+  --gris-900: #231F20;   /* negro de texto del manual */
+
+  /* Rojo funcional (errores y acciones destructivas). El manual no define
+     un rojo; este se usa solo para estados, nunca como color de marca. */
+  --rojo-50:  #FDF0F0;
+  --rojo-100: #FADADA;
+  --rojo-200: #F3B0B0;
+  --rojo-600: #C62828;
+  --rojo-700: #A21F1F;
+  --rojo-800: #7F1818;
+
+  /* ------------------------------------------------------------------------
+     2. SEMÁNTICOS
+     ------------------------------------------------------------------------ */
+
+  /* Marca */
+  --color-primario:        var(--azul-600);
+  --color-primario-hover:  var(--azul-700);
+  --color-primario-activo: var(--azul-800);
+  --color-primario-suave:  var(--azul-50);
+  --color-primario-borde:  var(--azul-200);
+  --color-sobre-primario:  var(--gris-0);
+  --color-acento:          var(--naranja-500); /* destacar, nunca con texto blanco */
+  --color-acento-logo:     var(--azul-500);
+
+  /* Texto */
+  --color-texto:        var(--gris-900);
+  --color-texto-suave:  var(--gris-600);
+  --color-texto-tenue:  var(--gris-500);
+  --color-texto-invertido: var(--gris-0);
+  --color-enlace:       var(--azul-600);
+  --color-enlace-hover: var(--azul-800);
+
+  /* Superficies y bordes */
+  --color-fondo:            var(--gris-50);
+  --color-superficie:       var(--gris-0);
+  --color-superficie-tenue: var(--gris-50);
+  --color-superficie-hundida: var(--gris-100);
+  --color-borde:            var(--gris-200);
+  --color-borde-fuerte:     var(--gris-300);
+  --color-borde-campo:      var(--gris-400);
+  --color-foco:             var(--azul-600);
+
+  /* Estados: cada uno con superficie, borde, texto e icono/sólido */
+  --color-exito:        var(--verde-700);
+  --color-exito-suave:  var(--verde-50);
+  --color-exito-borde:  var(--verde-200);
+  --color-exito-texto:  var(--verde-800);
+  --color-exito-marca:  var(--verde-500);
+
+  --color-aviso:        var(--naranja-700);
+  --color-aviso-suave:  var(--naranja-50);
+  --color-aviso-borde:  var(--naranja-200);
+  --color-aviso-texto:  var(--naranja-800);
+  --color-aviso-marca:  var(--naranja-500);
+
+  --color-peligro:       var(--rojo-600);
+  --color-peligro-suave: var(--rojo-50);
+  --color-peligro-borde: var(--rojo-200);
+  --color-peligro-texto: var(--rojo-700);
+
+  --color-info:        var(--azul-600);
+  --color-info-suave:  var(--azul-50);
+  --color-info-borde:  var(--azul-200);
+  --color-info-texto:  var(--azul-700);
+
+  /* Degradado institucional para encabezados (texto blanco: 10.39:1) */
+  --degradado-marca: linear-gradient(135deg, var(--azul-800) 0%, var(--azul-600) 100%);
+
+  /* ------------------------------------------------------------------------
+     3. TIPOGRAFÍA (manual p. 25-26)
+     Heavitas es exclusiva del logotipo: no se usa como texto de interfaz.
+     - Títulos: Raleway (tipografía primaria).
+     - Interfaz y datos: Roboto (tipografía de apoyo).
+     - Lectura larga (textos base de Lectura Crítica): Fira Sans (apoyo).
+     ------------------------------------------------------------------------ */
+  --fuente-titulos: 'Raleway', 'Segoe UI', system-ui, sans-serif;
+  --fuente-texto:   'Roboto', 'Segoe UI', system-ui, sans-serif;
+  --fuente-lectura: 'Fira Sans', 'Roboto', 'Segoe UI', sans-serif;
+
+  /* Escala modular (base 14 px para interfaz densa, 16 px para lectura).
+     Ningún texto funcional baja de 12 px. */
+  --texto-xs:   0.75rem;   /* 12 px  badges, metadatos, ayudas */
+  --texto-sm:   0.8125rem; /* 13 px  textos secundarios, tablas */
+  --texto-base: 0.875rem;  /* 14 px  interfaz: botones, campos, navegación */
+  --texto-md:   1rem;      /* 16 px  párrafos, enunciados, lectura */
+  --texto-lg:   1.125rem;  /* 18 px  subtítulos, títulos de tarjeta */
+  --texto-xl:   1.25rem;   /* 20 px  títulos de sección */
+  --texto-2xl:  1.5rem;    /* 24 px  títulos de página secundarios */
+  --texto-3xl:  1.875rem;  /* 30 px  título de página */
+  --texto-4xl:  2.25rem;   /* 36 px  cifras destacadas */
+  --texto-display: 3rem;   /* 48 px  calificación final */
+
+  --interlineado-ajustado: 1.2;
+  --interlineado-titulo:   1.3;
+  --interlineado-normal:   1.5;
+  --interlineado-lectura:  1.7;
+
+  --peso-regular:  400;
+  --peso-medio:    500;
+  --peso-semibold: 600;
+  --peso-bold:     700;
+  --peso-extrabold: 800;
+
+  --tracking-titulo: -0.01em;
+  --tracking-mayus:  0.04em; /* etiquetas en mayúsculas */
+
+  /* ------------------------------------------------------------------------
+     4. ESPACIADO, FORMA, SOMBRA Y MOVIMIENTO
+     ------------------------------------------------------------------------ */
+  --espacio-1: 4px;
+  --espacio-2: 8px;
+  --espacio-3: 12px;
+  --espacio-4: 16px;
+  --espacio-5: 20px;
+  --espacio-6: 24px;
+  --espacio-8: 32px;
+  --espacio-10: 40px;
+
+  --radio-sm: 6px;
+  --radio-md: 10px;
+  --radio-lg: 14px;
+  --radio-xl: 20px;
+  --radio-pill: 9999px;
+
+  --sombra-sm: 0 1px 2px rgb(35 31 32 / 0.06);
+  --sombra-md: 0 4px 10px -2px rgb(35 31 32 / 0.08), 0 2px 4px -2px rgb(35 31 32 / 0.06);
+  --sombra-lg: 0 14px 28px -6px rgb(14 68 98 / 0.16), 0 6px 10px -6px rgb(14 68 98 / 0.10);
+  --sombra-foco: 0 0 0 3px rgb(24 102 143 / 0.25);
+
+  --transicion-rapida: 150ms ease;
+  --transicion-normal: 250ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --transicion-rapida: 0ms;
+    --transicion-normal: 0ms;
+  }
+}

@@ -6,15 +6,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}Simulador Saber TyT - Uniputumayo{% endblock %}</title>
   
-  <!-- Google Fonts: Inter (UI), Merriweather (Lectura Crítica) y JetBrains Mono (Datos Tabulares) -->
+  <!-- Tipografías del Manual de Identidad Visual UNIPUTUMAYO (p. 25-26):
+       Raleway (títulos), Roboto (interfaz) y Fira Sans (lectura larga) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300;1,400&display=swap" rel="stylesheet">
-  
-  <!-- Estilos globales del sistema de diseño -->
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Sans:ital,wght@0,400;0,600;1,400&family=Raleway:wght@600;700;800&family=Roboto:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+
+  <!-- Sistema de diseño: tokens institucionales y luego componentes -->
+  <link rel="stylesheet" href="{% static 'css/tokens.css' %}">
   <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 
-  <!-- Estilos para iconos vectoriales Lucide -->
+  <!-- Iconos vectoriales Lucide -->
   <style>
     .lucide {
       width: 1.15em;
@@ -33,7 +35,7 @@
       margin-right: 10px;
     }
   </style>
-  
+
   {% block extra_head %}{% endblock %}
 </head>
 <body>

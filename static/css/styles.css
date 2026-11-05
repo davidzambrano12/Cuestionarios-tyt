@@ -1,94 +1,88 @@
 /* ==========================================================================
-   SIMULADOR SABER TyT - SISTEMA DE DISEÑO UNIPUTUMAYO
-   Modern Academic Pro — Centralización Tipográfica y Sistema de Tokens
+   SIMULADOR SABER TyT - ESTILOS BASE Y COMPONENTES
+   Los valores (color, tipografía, espaciado) viven en tokens.css, derivados
+   del Manual de Identidad Visual UNIPUTUMAYO 2025. Este archivo no debe
+   declarar colores hexadecimales: usa siempre los tokens.
    ========================================================================== */
 
 :root {
-  /* ========================================================================
-     SISTEMA TIPOGRÁFICO UNIFICADO (DESIGN.md)
-     ======================================================================== */
-  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-serif: 'Merriweather', Georgia, serif;
-  --font-mono: 'JetBrains Mono', Consolas, Menlo, Monaco, monospace;
+  /* Alias de compatibilidad: nombres usados por los templates existentes,
+     apuntando a los tokens institucionales. */
+  --font-sans: var(--fuente-texto);
+  --font-heading: var(--fuente-titulos);
+  --font-serif: var(--fuente-lectura);
+  --font-mono: var(--fuente-texto);
 
-  /* Escala Tipográfica Modular Armónica */
-  --text-2xs: 0.6875rem; /* 11px - Overlines, badges micro, notas de pie */
-  --text-xs: 0.75rem;    /* 12px - Badges de estado, labels de métricas, breadcrumbs */
-  --text-sm: 0.8125rem;  /* 13px - Subtítulos, metadatos, descripciones secundarias */
-  --text-base: 0.875rem; /* 14px - Texto base UI, navegación, inputs, botones */
-  --text-body: 0.9375rem;/* 15px - Párrafos, opciones de respuesta, tarjetas */
-  --text-md: 1rem;       /* 16px - Enunciados normales, lectura base */
-  --text-lg: 1.125rem;   /* 18px - H4, títulos de modales, destacados */
-  --text-xl: 1.25rem;    /* 20px - H3, títulos de tarjetas principales */
-  --text-2xl: 1.5rem;    /* 24px - H2, títulos de secciones de página */
-  --text-3xl: 1.75rem;   /* 28px - H1, títulos de banners principales */
-  --text-display: 2rem;  /* 32px - Números de métricas, temporizador */
+  --text-2xs: var(--texto-xs);
+  --text-xs: var(--texto-xs);
+  --text-sm: var(--texto-sm);
+  --text-base: var(--texto-base);
+  --text-body: var(--texto-base);
+  --text-md: var(--texto-md);
+  --text-lg: var(--texto-lg);
+  --text-xl: var(--texto-xl);
+  --text-2xl: var(--texto-2xl);
+  --text-3xl: var(--texto-3xl);
+  --text-display: var(--texto-4xl);
 
-  /* Interlineados */
   --leading-none: 1;
-  --leading-tight: 1.2;
-  --leading-snug: 1.35;
-  --leading-normal: 1.5;
-  --leading-relaxed: 1.65;
+  --leading-tight: var(--interlineado-ajustado);
+  --leading-snug: var(--interlineado-titulo);
+  --leading-normal: var(--interlineado-normal);
+  --leading-relaxed: var(--interlineado-lectura);
 
-  /* Pesos */
-  --weight-regular: 400;
-  --weight-medium: 500;
-  --weight-semibold: 600;
-  --weight-bold: 700;
-  --weight-extrabold: 800;
+  --weight-regular: var(--peso-regular);
+  --weight-medium: var(--peso-medio);
+  --weight-semibold: var(--peso-semibold);
+  --weight-bold: var(--peso-bold);
+  --weight-extrabold: var(--peso-extrabold);
 
-  /* Tracking / Kerning */
-  --tracking-tight: -0.02em;
+  --tracking-tight: var(--tracking-titulo);
   --tracking-normal: 0em;
-  --tracking-wide: 0.025em;
+  --tracking-wide: var(--tracking-mayus);
 
-  /* ========================================================================
-     PALETA CROMÁTICA INSTITUCIONAL (DESIGN.md & RULE-03)
-     ======================================================================== */
-  --primary: #186382;          /* Azul Institucional Uniputumayo */
-  --primary-hover: #124d66;
-  --primary-light: #e0f2fe;
-  --primary-dark: #0f3d52;
-  
-  --secondary: #0ea5e9;
-  --secondary-hover: #0284c7;
+  --primary: var(--color-primario);
+  --primary-hover: var(--color-primario-hover);
+  --primary-light: var(--color-primario-suave);
+  --primary-dark: var(--color-primario-activo);
+  --secondary: var(--azul-500);
+  --secondary-hover: var(--azul-700);
 
-  --success: #7bb334;          /* Verde Institucional Uniputumayo */
-  --success-bg: #f0f8e8;
-  --success-text: #2d6b14;
-  --success-border: #7bb334;
+  --success: var(--color-exito);
+  --success-bg: var(--color-exito-suave);
+  --success-text: var(--color-exito-texto);
+  --success-border: var(--color-exito-borde);
 
-  --warning: #e8d47b;          /* Arena Institucional Uniputumayo */
-  --warning-bg: #fef9e7;
-  --warning-text: #5e4905;
-  --warning-border: #d4bc5a;
+  --warning: var(--color-aviso-marca);
+  --warning-bg: var(--color-aviso-suave);
+  --warning-text: var(--color-aviso-texto);
+  --warning-border: var(--color-aviso-borde);
 
-  --danger: #dc2626;           /* Carmesí Error / Rechazo */
-  --danger-bg: #fee2e2;
-  --danger-text: #991b1b;
-  --danger-border: #f87171;
+  --danger: var(--color-peligro);
+  --danger-bg: var(--color-peligro-suave);
+  --danger-text: var(--color-peligro-texto);
+  --danger-border: var(--color-peligro-borde);
 
-  --bg-page: #f8fafc;
-  --bg-surface: #ffffff;
-  --bg-muted: #f1f5f9;
-  --border-color: #e2e8f0;
-  --border-focus: #186382;
+  --bg-page: var(--color-fondo);
+  --bg-surface: var(--color-superficie);
+  --bg-muted: var(--color-superficie-hundida);
+  --border-color: var(--color-borde);
+  --border-focus: var(--color-foco);
 
-  --text-main: #0f172a;
-  --text-muted: #64748b;
-  --text-light: #94a3b8;
+  --text-main: var(--color-texto);
+  --text-muted: var(--color-texto-suave);
+  --text-light: var(--color-texto-tenue);
 
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 16px;
-  --radius-xl: 24px;
-  --radius-full: 9999px;
+  --radius-sm: var(--radio-sm);
+  --radius-md: var(--radio-md);
+  --radius-lg: var(--radio-lg);
+  --radius-xl: var(--radio-xl);
+  --radius-full: var(--radio-pill);
 
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.08);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.08);
-  --shadow-card: 0 2px 10px rgba(0, 0, 0, 0.04);
+  --shadow-sm: var(--sombra-sm);
+  --shadow-md: var(--sombra-md);
+  --shadow-lg: var(--sombra-lg);
+  --shadow-card: var(--sombra-sm);
 }
 
 *, *::before, *::after {
@@ -98,12 +92,33 @@
 }
 
 body {
-  font-family: var(--font-sans);
-  background-color: var(--bg-page);
-  color: var(--text-main);
-  line-height: var(--leading-normal);
-  font-size: var(--text-body);
+  font-family: var(--fuente-texto);
+  background-color: var(--color-fondo);
+  color: var(--color-texto);
+  line-height: var(--interlineado-normal);
+  font-size: var(--texto-base);
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Títulos: Raleway (tipografía primaria del manual). Raleway trae cifras
+   antiguas por defecto; se fuerzan cifras alineadas para notas y conteos. */
+h1, h2, h3, h4, h5, h6,
+.h1, .h2, .h3, .h4, .h5,
+.page-title, .section-title, .card-title, .banner-title, .sidebar-title,
+.metric-number, .metric-value {
+  font-family: var(--fuente-titulos);
+  font-variant-numeric: lining-nums;
+}
+
+/* Cifras de notas, tiempos y tablas: Roboto con ancho fijo */
+.metric-number, .metric-value, .num, .tabular-nums, .eval-timer-box, td {
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-foco);
+  outline-offset: 2px;
 }
 
 /* ==========================================================================
@@ -166,13 +181,13 @@ p {
 .banner-dark,
 .bg-dark,
 .dark-container {
-  color: #ffffff !important;
+  color: var(--color-superficie) !important;
 }
 
 .banner-dark h1, .banner-dark h2, .banner-dark h3, .banner-dark h4, .banner-dark h5, .banner-dark p,
 .bg-dark h1, .bg-dark h2, .bg-dark h3, .bg-dark h4, .bg-dark h5, .bg-dark p,
 .dark-container h1, .dark-container h2, .dark-container h3, .dark-container h4, .dark-container h5, .dark-container p {
-  color: #ffffff !important;
+  color: var(--color-superficie) !important;
 }
 
 /* Clases Semánticas y de Jerarquía Tipográfica */
@@ -233,9 +248,9 @@ p {
   color: var(--text-main);
 }
 
-.font-mono, .tabular-nums {
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
+.font-mono {
+  font-family: var(--fuente-texto);
+  font-variant-numeric: lining-nums tabular-nums;
 }
 
 .text-2xs { font-size: var(--text-2xs); line-height: var(--leading-tight); }
@@ -407,13 +422,14 @@ a:hover {
 
 /* Hero & Header Banners */
 .dashboard-banner {
-  background: linear-gradient(135deg, #e0f2fe 0%, #ecfdf5 100%);
+  background: linear-gradient(135deg, var(--azul-50) 0%, var(--verde-50) 100%);
+  border-left: 4px solid var(--color-primario);
   border-radius: var(--radius-lg);
   padding: 24px 32px;
   margin-bottom: 24px;
   position: relative;
   overflow: hidden;
-  border: 1px solid #bae6fd;
+  border: 1px solid var(--azul-200);
 }
 
 .banner-badge {
@@ -433,14 +449,15 @@ a:hover {
 .banner-title {
   font-size: var(--text-3xl);
   font-weight: var(--weight-extrabold);
-  color: #0c4a6e;
+  color: var(--azul-800);
   line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-titulo);
   margin-bottom: 4px;
 }
 
 .banner-subtitle {
   font-size: var(--text-sm);
-  color: #0369a1;
+  color: var(--azul-700);
   line-height: var(--leading-normal);
 }
 
@@ -482,7 +499,7 @@ a:hover {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 20px;
+  font-size: var(--texto-xl);
 }
 
 .metric-number, .metric-value {
@@ -523,7 +540,7 @@ a:hover {
 
 .action-card-btn:hover {
   border-color: var(--primary);
-  background: #f0f9ff;
+  background: var(--azul-50);
   transform: translateY(-2px);
 }
 
@@ -532,11 +549,11 @@ a:hover {
   height: 44px;
   border-radius: var(--radius-md);
   background: var(--primary);
-  color: white;
+  color: var(--color-texto-invertido);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 20px;
+  font-size: var(--texto-xl);
 }
 
 /* Buttons */
@@ -557,12 +574,12 @@ a:hover {
 
 .btn-primary {
   background-color: var(--primary);
-  color: #ffffff;
+  color: var(--color-superficie);
 }
 
 .btn-primary:hover {
   background-color: var(--primary-hover);
-  color: #ffffff;
+  color: var(--color-superficie);
 }
 
 .btn-secondary {
@@ -571,7 +588,7 @@ a:hover {
 }
 
 .btn-secondary:hover {
-  background-color: #bae6fd;
+  background-color: var(--azul-200);
 }
 
 .btn-outline {
@@ -583,26 +600,26 @@ a:hover {
 .btn-outline:hover {
   border-color: var(--primary);
   color: var(--primary);
-  background-color: #f0f9ff;
+  background-color: var(--azul-50);
 }
 
 .btn-danger {
-  background-color: #fee2e2;
+  background-color: var(--rojo-50);
   color: var(--danger-text);
-  border-color: #fca5a5;
+  border-color: var(--rojo-200);
 }
 
 .btn-danger:hover {
-  background-color: #fecaca;
+  background-color: var(--rojo-200);
 }
 
 .btn-success {
   background-color: var(--success);
-  color: white;
+  color: var(--color-texto-invertido);
 }
 
 .btn-success:hover {
-  background-color: #16a34a;
+  background-color: var(--verde-800);
 }
 
 .btn-full {
@@ -718,10 +735,10 @@ a:hover {
 }
 
 .eval-timer-box {
-  background: #0f172a;
-  color: #38bdf8;
-  font-family: monospace;
-  font-size: 18px;
+  background: var(--color-texto);
+  color: var(--azul-300);
+  font-family: var(--fuente-texto);
+  font-size: var(--texto-lg);
   font-weight: 700;
   padding: 8px 16px;
   border-radius: var(--radius-md);
@@ -757,7 +774,7 @@ a:hover {
   align-items: center;
   justify-content: center;
   font-weight: 700;
-  font-size: 13px;
+  font-size: var(--texto-sm);
   border-radius: var(--radius-sm);
   cursor: pointer;
   border: 1px solid var(--border-color);
@@ -767,14 +784,14 @@ a:hover {
 }
 
 .q-nav-item.answered {
-  background-color: #bae6fd;
-  color: #0369a1;
-  border-color: #7dd3fc;
+  background-color: var(--azul-200);
+  color: var(--azul-700);
+  border-color: var(--azul-200);
 }
 
 .q-nav-item.current {
   background-color: var(--primary);
-  color: #ffffff;
+  color: var(--color-superficie);
   border-color: var(--primary-dark);
 }
 
@@ -793,12 +810,12 @@ a:hover {
 
 .option-card:hover {
   border-color: var(--primary);
-  background: #f8fafc;
+  background: var(--color-superficie-tenue);
 }
 
 .option-card.selected {
   border-color: var(--primary);
-  background-color: #f0f9ff;
+  background-color: var(--azul-50);
   box-shadow: 0 0 0 1px var(--primary);
 }
 
@@ -806,7 +823,7 @@ a:hover {
   width: 32px;
   height: 32px;
   border-radius: var(--radius-sm);
-  background: #e2e8f0;
+  background: var(--color-borde);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -817,14 +834,14 @@ a:hover {
 
 .option-card.selected .option-letter-badge {
   background: var(--primary);
-  color: white;
+  color: var(--color-texto-invertido);
 }
 
 /* Modals */
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(15, 23, 42, 0.6);
+  background: rgb(10 51 73 / 0.55);
   backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
@@ -868,7 +885,7 @@ a:hover {
 .form-input, .form-select, .form-textarea {
   width: 100%;
   padding: 10px 14px;
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--color-borde-campo);
   border-radius: var(--radius-md);
   font-size: var(--text-base);
   font-family: inherit;
@@ -881,7 +898,7 @@ a:hover {
 .form-input:focus, .form-select:focus, .form-textarea:focus {
   outline: none;
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(24, 99, 130, 0.15);
+  box-shadow: 0 0 0 3px rgb(24 102 143 / 0.25);
 }
 
 .form-textarea {
@@ -893,7 +910,7 @@ a:hover {
 .progress-bar-container {
   width: 100%;
   height: 8px;
-  background-color: #e2e8f0;
+  background-color: var(--color-borde);
   border-radius: var(--radius-full);
   overflow: hidden;
 }
@@ -932,8 +949,8 @@ a:hover {
   background: rgba(255, 255, 255, 0.98);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  box-shadow: 0 20px 25px -5px rgba(15, 23, 42, 0.12), 0 8px 10px -6px rgba(15, 23, 42, 0.08);
-  border: 1px solid rgba(226, 232, 240, 0.9);
+  box-shadow: 0 20px 25px -5px rgb(35 31 32 / 0.12), 0 8px 10px -6px rgb(35 31 32 / 0.08);
+  border: 1px solid var(--color-borde);
   overflow: hidden;
   animation: toastSlideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
@@ -973,40 +990,40 @@ a:hover {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  font-size: 18px;
+  font-size: var(--texto-lg);
   font-weight: 700;
 }
 
 .toast-item.toast-success {
-  border-left: 4px solid #10b981;
+  border-left: 4px solid var(--verde-600);
 }
 .toast-item.toast-success .toast-icon-box {
-  background: #ecfdf5;
-  color: #059669;
+  background: var(--verde-50);
+  color: var(--verde-700);
 }
 
 .toast-item.toast-error {
-  border-left: 4px solid #ef4444;
+  border-left: 4px solid var(--rojo-600);
 }
 .toast-item.toast-error .toast-icon-box {
-  background: #fef2f2;
-  color: #dc2626;
+  background: var(--rojo-50);
+  color: var(--rojo-600);
 }
 
 .toast-item.toast-warning {
-  border-left: 4px solid #f59e0b;
+  border-left: 4px solid var(--naranja-500);
 }
 .toast-item.toast-warning .toast-icon-box {
-  background: #fffbeb;
-  color: #d97706;
+  background: var(--naranja-50);
+  color: var(--naranja-700);
 }
 
 .toast-item.toast-info {
-  border-left: 4px solid #186382;
+  border-left: 4px solid var(--color-primario);
 }
 .toast-item.toast-info .toast-icon-box {
-  background: #e0f2fe;
-  color: #186382;
+  background: var(--azul-50);
+  color: var(--color-primario);
 }
 
 .toast-content {
@@ -1017,30 +1034,30 @@ a:hover {
 .toast-title {
   font-size: var(--text-base);
   font-weight: var(--weight-bold);
-  color: #0f172a;
+  color: var(--color-texto);
   margin-bottom: 2px;
 }
 
 .toast-message {
   font-size: var(--text-sm);
-  color: #475569;
+  color: var(--color-texto-suave);
   line-height: var(--leading-normal);
 }
 
 .toast-close-btn {
   background: transparent;
   border: none;
-  color: #94a3b8;
+  color: var(--color-texto-tenue);
   cursor: pointer;
-  font-size: 18px;
+  font-size: var(--texto-lg);
   line-height: 1;
   padding: 4px;
   border-radius: 6px;
   transition: color 0.15s, background 0.15s;
 }
 .toast-close-btn:hover {
-  color: #0f172a;
-  background: #f1f5f9;
+  color: var(--color-texto);
+  background: var(--color-superficie-hundida);
 }
 
 .toast-progress {
@@ -1053,10 +1070,10 @@ a:hover {
   animation: toastTimer linear forwards;
 }
 
-.toast-success .toast-progress { background: #10b981; }
-.toast-error .toast-progress { background: #ef4444; }
-.toast-warning .toast-progress { background: #f59e0b; }
-.toast-info .toast-progress { background: #186382; }
+.toast-success .toast-progress { background: var(--verde-600); }
+.toast-error .toast-progress { background: var(--rojo-600); }
+.toast-warning .toast-progress { background: var(--naranja-500); }
+.toast-info .toast-progress { background: var(--color-primario); }
 
 @keyframes toastTimer {
   from { width: 100%; }
