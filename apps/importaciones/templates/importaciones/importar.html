@@ -1,137 +1,68 @@
 {% extends 'layouts/app_base.html' %}
 {% load static %}
 
-{% block title %}Importar Preguntas - Simulador Saber TyT{% endblock %}
-
-{% block nav_title %}Importar Preguntas Excel{% endblock %}
+{% block title %}Importar preguntas - Simulador Saber TyT{% endblock %}
+{% block nav_title %}Importar preguntas desde Excel{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'css/importaciones.css' %}">{% endblock %}
 
 {% block app_content %}
-<div style="max-width:760px; margin:0 auto;">
+<div class="importacion">
+  <a href="{% url 'banco_preguntas:banco' %}" class="enlace-volver mb-4"><i data-lucide="arrow-left" class="icono-16"></i> Volver al banco de preguntas</a>
 
-    <!-- Volver al Banco -->
-    <div class="mb-4">
-      <a href="{% url 'banco_preguntas:banco' %}" style="display:inline-flex; align-items:center; gap:6px; font-size:var(--texto-sm); font-weight:600; color:var(--color-primario); text-decoration:none;">
-        <i data-lucide="arrow-left" class="icono-16"></i> Volver al Banco de Preguntas
-      </a>
+  {% include "importaciones/_pasos.html" with paso=1 %}
+
+  {% if pendiente %}
+  <div class="aviso-pendiente">
+    <div>
+      <div class="texto-xs peso-extrabold inline-flex items-center gap-2"><i data-lucide="info" class="icono-16"></i> Tienes una importación sin terminar</div>
+      <div class="texto-sm mt-1">Archivo: <strong>{{ pendiente.nombre_archivo }}</strong></div>
     </div>
-
-    <!-- Stepper Asistente de Ingesta -->
-    <div class="card" style="padding:14px 20px; margin-bottom:20px; background:var(--azul-50); border-color:var(--azul-200);">
-      <div class="flex justify-between items-center mb-2">
-        <span style="font-size:var(--texto-xs); font-weight:800; color:var(--azul-700); text-transform:uppercase; letter-spacing:0.5px;">ASISTENTE DE INGESTA</span>
-        <span class="badge badge-info texto-xs">Paso 1 de 4</span>
-      </div>
-      <div style="display:flex; justify-content:space-between; font-size:var(--texto-xs); color:var(--azul-800); font-weight:600;">
-        <span><strong>1. Carga</strong></span>
-        <span style="opacity:0.6;">2. Validación</span>
-        <span style="opacity:0.6;">3. Previa</span>
-        <span style="opacity:0.6;">4. Final</span>
-      </div>
-    </div>
-
-    <!-- Banner si ya hay una importación pendiente -->
-    {% if pendiente %}
-    <div class="card" style="padding:14px 20px; margin-bottom:20px; background:var(--azul-50); border:1px solid var(--azul-200); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; border-radius:14px;">
-      <div>
-        <div style="font-size:var(--texto-xs); font-weight:800; color:var(--azul-700); display:flex; align-items:center; gap:6px;">
-          <i data-lucide="info" class="icono-16"></i> Tienes una importación activa en proceso
-        </div>
-        <div style="font-size:var(--texto-sm); color:var(--azul-900); margin-top:2px;">
-          Archivo: <strong>{{ pendiente.nombre_archivo }}</strong>
-        </div>
-      </div>
-      <div class="flex gap-2">
-        <a href="{% url 'importaciones:previsualizar' %}" class="btn btn-primary" style="font-size:var(--texto-xs); padding:8px 16px; background:var(--azul-600); font-weight:700;">
-          Ir a Auditoría y Corrección &rarr;
-        </a>
-        <form method="POST" action="{% url 'importaciones:cancelar' %}" class="m-0">
-          {% csrf_token %}
-          <button type="submit" class="btn btn-outline" style="font-size:var(--texto-xs); padding:8px 12px; color:var(--rojo-700); border-color:var(--rojo-200);">
-            Descartar
-          </button>
-        </form>
-      </div>
-    </div>
-    {% endif %}
-
-    <!-- Card Formulario Principal de Subida -->
-    <div class="card" style="padding:28px 24px; border-radius:20px; margin-bottom:20px;">
-      
-      <form method="POST" enctype="multipart/form-data">
+    <div class="flex gap-2">
+      <a href="{% url 'importaciones:previsualizar' %}" class="btn btn-primary btn-accion">Continuar revisión &rarr;</a>
+      <form method="POST" action="{% url 'importaciones:cancelar' %}" data-confirmar="¿Descartar la importación de {{ pendiente.nombre_archivo }}?">
         {% csrf_token %}
-
-        <!-- Cuestionario de Destino -->
-        <div class="form-group mb-5">
-          <label class="form-label" style="display:flex; align-items:center; gap:6px;">
-            <i data-lucide="clipboard-list" style="width:16px; height:16px; color:var(--azul-600);"></i> Cuestionario de Destino (Opcional)
-          </label>
-          {{ form.cuestionario }}
-          <div class="texto-xs texto-suave mt-1">
-            Si seleccionas un cuestionario, las preguntas válidas se vincularán automáticamente a él además de agregarse al banco general.
-          </div>
-        </div>
-
-        <!-- Dropzone / Input Archivo -->
-        <div class="form-group mb-6">
-          <label class="form-label" style="display:flex; align-items:center; gap:6px;">
-            <i data-lucide="upload" style="width:16px; height:16px; color:var(--azul-600);"></i> Archivo Excel con Formato Oficial (.xlsx)
-          </label>
-          <div style="border:2px dashed var(--color-borde-fuerte); border-radius:12px; padding:28px 20px; text-align:center; background:var(--color-superficie-tenue); cursor:pointer;" onclick="document.getElementById('id_archivo').click();">
-            <div class="mb-2 texto-primario flex justify-center">
-              <i data-lucide="file-spreadsheet" style="width:40px; height:40px;"></i>
-            </div>
-            <div class="peso-bold texto-principal texto-base mb-1">Haz clic para seleccionar el archivo Excel</div>
-            <div class="texto-xs texto-suave mb-3">Compatible con Microsoft Excel (.xlsx)</div>
-            <div style="display:none;">{{ form.archivo }}</div>
-            <div id="archivo-seleccionado-nombre" class="texto-sm peso-bold texto-primario">Ningún archivo seleccionado</div>
-          </div>
-        </div>
-
-        <!-- Esquema Reconocido Oficial (11/11 Campos) -->
-        <div style="background:var(--color-superficie-tenue); border:1px solid var(--color-borde); border-radius:12px; padding:16px; margin-bottom:24px;">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-            <span style="font-size:var(--texto-xs); font-weight:700; color:var(--gris-700);">Esquema Reconocido Oficial</span>
-            <span class="badge badge-success texto-xs">11/11 Campos OK</span>
-          </div>
-          <div style="display:flex; flex-wrap:wrap; gap:6px; font-size:var(--texto-xs);">
-            <span class="badge" style="background:var(--azul-50); color:var(--azul-700);">● categoria</span>
-            <span class="badge" style="background:var(--azul-50); color:var(--azul-700);">● tipo</span>
-            <span class="badge" style="background:var(--azul-50); color:var(--azul-700);">● texto_base</span>
-            <span class="badge" style="background:var(--azul-50); color:var(--azul-700);">● pregunta</span>
-            <span class="badge" style="background:var(--azul-50); color:var(--azul-700);">● opcion_a</span>
-            <span class="badge" style="background:var(--azul-50); color:var(--azul-700);">● opcion_b</span>
-            <span class="badge" style="background:var(--azul-50); color:var(--azul-700);">● opcion_c</span>
-            <span class="badge" style="background:var(--azul-50); color:var(--azul-700);">● opcion_d</span>
-            <span class="badge" style="background:var(--azul-50); color:var(--azul-700);">● respuesta_correcta</span>
-            <span class="badge" style="background:var(--azul-50); color:var(--azul-700);">● retroalimentacion</span>
-            <span class="badge" style="background:var(--azul-50); color:var(--azul-700);">● puntaje</span>
-          </div>
-        </div>
-
-        <!-- Botones de Acción -->
-        <button type="submit" class="btn btn-primary btn-full" style="padding:14px; font-size:var(--texto-md); border-radius:12px; margin-bottom:12px; background:var(--color-primario);">
-          Validar y Previsualizar Archivo &rarr;
-        </button>
-
-        <a href="{% static 'plantillas/plantilla_preguntas_simulador_tyt.xlsx' %}" download class="btn btn-outline btn-full" style="padding:10px; font-size:var(--texto-sm); color:var(--color-primario); border-color:var(--azul-200); display:inline-flex; align-items:center; justify-content:center; gap:6px;">
-          <i data-lucide="download" class="icono-15"></i> Descargar Plantilla Oficial Excel
-        </a>
+        <button type="submit" class="btn btn-accion btn-peligro">Descartar</button>
       </form>
-
     </div>
+  </div>
+  {% endif %}
 
+  <section class="card bloque-importacion">
+    <h1 class="texto-xl peso-extrabold mb-1">Importar preguntas</h1>
+    <p class="texto-sm texto-suave mb-5">Sube la plantilla diligenciada. Primero revisarás cada fila; nada se guarda hasta que lo confirmes.</p>
+
+    <form method="POST" enctype="multipart/form-data" id="form-importar" novalidate>
+      {% csrf_token %}
+      {% if form.non_field_errors %}<div class="alerta alerta--error" role="alert">{{ form.non_field_errors|join:" " }}</div>{% endif %}
+
+      <div class="form-group">
+        <label class="form-label" for="{{ form.archivo.id_for_label }}">Archivo Excel (.xlsx) *</label>
+        <label class="zona-archivo{% if form.archivo.errors %} zona-archivo--error{% endif %}" for="{{ form.archivo.id_for_label }}" data-ref="zona">
+          <i data-lucide="file-spreadsheet" class="zona-archivo__icono"></i>
+          <span class="peso-bold texto-base">Selecciona o arrastra aquí el archivo</span>
+          <span class="texto-xs texto-suave">Formato .xlsx · máximo 5 MB</span>
+          <span class="texto-sm peso-bold texto-primario" data-ref="nombre-archivo" aria-live="polite">Ningún archivo seleccionado</span>
+          {{ form.archivo }}
+        </label>
+        {% for error in form.archivo.errors %}<p class="error-campo" role="alert">{{ error }}</p>{% endfor %}
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="{{ form.cuestionario.id_for_label }}">Agregar también a un cuestionario (opcional)</label>
+        {{ form.cuestionario }}
+        <span class="texto-xs texto-suave">Las preguntas válidas siempre se guardan en el banco; si eliges un cuestionario, también quedan asignadas a él.</span>
+        {% for error in form.cuestionario.errors %}<p class="error-campo" role="alert">{{ error }}</p>{% endfor %}
+      </div>
+
+      {% include "importaciones/_columnas_plantilla.html" %}
+
+      <button type="submit" class="btn btn-primary btn-full btn-grande mt-6">Revisar archivo &rarr;</button>
+      <a href="{% static 'plantillas/plantilla_preguntas_simulador_tyt.xlsx' %}" download class="btn btn-outline btn-full mt-3" id="plantilla">
+        <i data-lucide="download" class="icono-15"></i> Descargar la plantilla oficial
+      </a>
+    </form>
+  </section>
 </div>
 {% endblock %}
 
-{% block extra_scripts %}
-<script>
-  const fileInput = document.getElementById('id_archivo');
-  if (fileInput) {
-    fileInput.addEventListener('change', () => {
-      if (fileInput.files.length > 0) {
-        document.getElementById('archivo-seleccionado-nombre').innerText = `${fileInput.files[0].name} (${(fileInput.files[0].size / 1024).toFixed(1)} KB)`;
-      }
-    });
-  }
-</script>
-{% endblock %}
+{% block extra_scripts %}<script src="{% static 'js/importaciones/importar.js' %}"></script>{% endblock %}

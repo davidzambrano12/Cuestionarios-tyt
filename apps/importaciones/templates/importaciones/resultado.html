@@ -1,48 +1,34 @@
-{% extends 'layouts/base.html' %}
+{% extends 'layouts/app_base.html' %}
+{% load static componentes %}
 
-{% block title %}Importación Finalizada - Simulador Saber TyT{% endblock %}
+{% block title %}Importación terminada - Simulador Saber TyT{% endblock %}
+{% block nav_title %}Importación terminada{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'css/importaciones.css' %}">{% endblock %}
 
-{% block content %}
-<div style="background:var(--color-superficie-tenue); min-height:100vh; padding:40px 20px;">
-  <div style="max-width:580px; margin:0 auto;">
+{% block app_content %}
+<div class="importacion">
+  {% include "importaciones/_pasos.html" with paso=3 %}
 
-    <div class="card" style="padding:40px 32px; border-radius:24px; text-align:center;">
-      <div style="width:64px; height:64px; border-radius:50%; background:var(--verde-100); color:var(--verde-800); display:flex; align-items:center; justify-content:center; margin:0 auto 18px;">
-        <i data-lucide="check-circle" style="width:36px; height:36px;"></i>
-      </div>
+  <section class="card resultado-importacion">
+    {% if resultado.validas %}
+      <span class="resultado-importacion__icono resultado-importacion__icono--exito"><i data-lucide="check-circle" class="icono-24"></i></span>
+      <h1 class="texto-xl peso-extrabold mb-1">Importación #{{ resultado.importacion_id }} guardada</h1>
+    {% else %}
+      <span class="resultado-importacion__icono resultado-importacion__icono--aviso"><i data-lucide="alert-triangle" class="icono-24"></i></span>
+      <h1 class="texto-xl peso-extrabold mb-1">No se guardó ninguna pregunta</h1>
+    {% endif %}
+    <p class="texto-sm texto-suave mb-5">Archivo: {{ resultado.nombre_archivo }}</p>
 
-      <span class="badge badge-success" style="font-size:var(--texto-sm); padding:6px 16px; margin-bottom:12px;">
-        ● Ingesta #{{ resultado.importacion_id }} Finalizada
-      </span>
-
-      <h1 style="font-size:var(--texto-xl); font-weight:800; color:var(--color-texto); margin-bottom:6px;">Importación Completada</h1>
-      <p class="texto-sm texto-suave mb-6">Archivo: {{ resultado.nombre_archivo }}</p>
-
-      <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:12px; margin-bottom:24px; text-align:center;">
-        <div style="background:var(--verde-50); border:1px solid var(--verde-200); border-radius:12px; padding:14px;">
-          <div class="texto-xl peso-extrabold texto-exito">{{ resultado.validas|length }}</div>
-          <div class="texto-xs texto-exito peso-semibold">Guardadas</div>
-        </div>
-        <div style="background:var(--azul-50); border:1px solid var(--azul-200); border-radius:12px; padding:14px;">
-          <div style="font-size:var(--texto-xl); font-weight:800; color:var(--azul-700);">{{ resultado.duplicadas|length }}</div>
-          <div style="font-size:var(--texto-xs); color:var(--azul-700); font-weight:600;">Duplicadas</div>
-        </div>
-        <div style="background:var(--rojo-50); border:1px solid var(--rojo-200); border-radius:12px; padding:14px;">
-          <div class="texto-xl peso-extrabold texto-peligro">{{ resultado.con_error|length }}</div>
-          <div class="texto-xs texto-peligro peso-semibold">Con Error</div>
-        </div>
-      </div>
-
-      <div class="flex gap-3">
-        <a href="{% url 'banco_preguntas:banco' %}" class="btn btn-primary" style="flex:1; padding:12px; font-size:var(--texto-base);">
-          Ver Banco de Preguntas &rarr;
-        </a>
-        <a href="{% url 'importaciones:importar' %}" class="btn btn-outline" style="flex:1; padding:12px; font-size:var(--texto-base);">
-          Importar Otro Archivo
-        </a>
-      </div>
+    <div class="metricas metricas--3">
+      {% componente "componentes/metrica.html" etiqueta="Guardadas" valor=resultado.validas|length variante="exito" %}{% fincomponente %}
+      {% componente "componentes/metrica.html" etiqueta="Duplicadas" valor=resultado.duplicadas|length variante="info" %}{% fincomponente %}
+      {% componente "componentes/metrica.html" etiqueta="Con error" valor=resultado.con_error|length variante="peligro" %}{% fincomponente %}
     </div>
 
-  </div>
+    <div class="grid-2">
+      <a href="{% url 'banco_preguntas:banco' %}" class="btn btn-primary">Ver banco de preguntas &rarr;</a>
+      <a href="{% url 'importaciones:importar' %}" class="btn btn-outline">Importar otro archivo</a>
+    </div>
+  </section>
 </div>
 {% endblock %}

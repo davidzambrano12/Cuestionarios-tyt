@@ -6,12 +6,16 @@ EXTENSIONES_VALIDAS = (".xlsx", ".xlsm")
 
 
 class ImportarPreguntasForm(forms.Form):
-    archivo = forms.FileField(label="Archivo Excel (.xlsx)")
+    archivo = forms.FileField(
+        label="Archivo Excel (.xlsx)",
+        widget=forms.ClearableFileInput(attrs={"accept": ".xlsx,.xlsm", "class": "zona-archivo__input"}),
+    )
     cuestionario = forms.ModelChoiceField(
         queryset=Cuestionario.objects.all(),
         required=False,
         label="Cuestionario de destino",
-        empty_label="(Opcional) Solo guardar en el banco de preguntas",
+        empty_label="Ninguno: solo agregar al banco de preguntas",
+        widget=forms.Select(attrs={"class": "form-select"}),
     )
 
     def clean_archivo(self):

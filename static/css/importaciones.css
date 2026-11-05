@@ -1,0 +1,132 @@
+/* ==========================================================================
+   IMPORTACIÓN DE PREGUNTAS DESDE EXCEL
+   ========================================================================== */
+
+.importacion { max-width: 820px; margin: 0 auto; }
+.importacion .enlace-volver { display: inline-flex; align-items: center; gap: 6px; font-size: var(--texto-sm); font-weight: var(--peso-semibold); }
+.bloque-importacion { padding: var(--espacio-6); }
+.btn-grande { padding: 14px 28px; font-size: var(--texto-md); }
+.metricas--3 { grid-template-columns: repeat(3, 1fr); }
+@media (max-width: 640px) { .metricas--3 { grid-template-columns: 1fr; } }
+
+/* Pasos del asistente */
+.pasos-importacion { list-style: none; display: flex; gap: var(--espacio-2); margin-bottom: var(--espacio-5); }
+.pasos-importacion li {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-2);
+  padding: 10px 14px;
+  border-radius: var(--radio-md);
+  background: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-semibold);
+  color: var(--color-texto-suave);
+}
+.pasos-importacion li span {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-borde);
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-extrabold);
+}
+.pasos-importacion li[aria-current="step"] { border-color: var(--color-primario); color: var(--color-primario); background: var(--color-primario-suave); }
+.pasos-importacion li[aria-current="step"] span { background: var(--color-primario); color: var(--color-texto-invertido); }
+.pasos-importacion li.hecho { color: var(--color-exito); }
+.pasos-importacion li.hecho span { background: var(--color-exito-suave); color: var(--color-exito); }
+@media (max-width: 640px) { .pasos-importacion { flex-direction: column; } }
+
+.aviso-pendiente {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--espacio-3);
+  padding: var(--espacio-4) var(--espacio-5);
+  margin-bottom: var(--espacio-5);
+  background: var(--color-info-suave);
+  border: 1px solid var(--color-info-borde);
+  border-radius: var(--radio-md);
+  color: var(--color-info-texto);
+}
+
+/* Zona para elegir o soltar el archivo (el input queda accesible por teclado) */
+.zona-archivo {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--espacio-1);
+  padding: var(--espacio-8) var(--espacio-5);
+  border: 2px dashed var(--color-borde-campo);
+  border-radius: var(--radio-lg);
+  background: var(--color-superficie-tenue);
+  text-align: center;
+  cursor: pointer;
+  transition: border-color var(--transicion-rapida), background var(--transicion-rapida);
+}
+.zona-archivo:hover, .zona-archivo--arrastrando { border-color: var(--color-primario); background: var(--color-primario-suave); }
+.zona-archivo:focus-within { outline: 2px solid var(--color-foco); outline-offset: 2px; }
+.zona-archivo--lista { border-color: var(--color-exito); border-style: solid; background: var(--color-exito-suave); }
+.zona-archivo--error { border-color: var(--color-peligro); background: var(--color-peligro-suave); }
+.zona-archivo__icono { width: 40px; height: 40px; color: var(--color-primario); margin-bottom: var(--espacio-2); }
+.zona-archivo__input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; }
+.error-campo { font-size: var(--texto-xs); color: var(--color-peligro-texto); margin-top: var(--espacio-1); font-weight: var(--peso-semibold); }
+
+.columnas-plantilla { background: var(--color-superficie-tenue); border: 1px solid var(--color-borde); border-radius: var(--radio-md); padding: var(--espacio-4); }
+.columnas-plantilla__lista { list-style: none; display: flex; flex-wrap: wrap; gap: 6px; counter-reset: columna; }
+.columnas-plantilla__lista li {
+  counter-increment: columna;
+  font-size: var(--texto-xs);
+  font-family: var(--fuente-texto);
+  background: var(--color-info-suave);
+  color: var(--color-info-texto);
+  padding: 3px 9px;
+  border-radius: var(--radio-pill);
+}
+.columnas-plantilla__lista li::before { content: counter(columna) ". "; font-weight: var(--peso-bold); }
+
+/* Revisión */
+.archivo-cargado { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--espacio-3); padding: var(--espacio-4) var(--espacio-5); }
+.filas-importacion { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.fila-importacion {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--espacio-3);
+  padding: var(--espacio-3) var(--espacio-4);
+  border-radius: var(--radio-md);
+  background: var(--color-superficie);
+  border: 1px solid var(--color-exito-borde);
+}
+.fila-importacion--error { background: var(--color-peligro-suave); border-color: var(--color-peligro-borde); border-left: 4px solid var(--color-peligro); }
+.fila-importacion--duplicada { background: var(--color-info-suave); border-color: var(--color-info-borde); border-left: 4px solid var(--azul-500); color: var(--color-info-texto); }
+.fila-importacion__errores { list-style: disc; padding-left: var(--espacio-5); font-size: var(--texto-xs); color: var(--color-peligro-texto); }
+.validas { background: var(--color-exito-suave); border-color: var(--color-exito-borde); }
+.validas__resumen { display: flex; align-items: center; gap: var(--espacio-2); font-size: var(--texto-sm); font-weight: var(--peso-extrabold); color: var(--color-exito-texto); cursor: pointer; }
+
+/* Modal de corrección */
+.grid-correccion { display: grid; grid-template-columns: 2fr 1.6fr 1fr; gap: var(--espacio-3); }
+@media (max-width: 640px) { .grid-correccion { grid-template-columns: 1fr; } }
+.opcion-campo--simple { display: grid; grid-template-columns: 32px 1fr; align-items: center; gap: var(--espacio-2); }
+.opcion-campo--simple .badge { justify-content: center; }
+.alerta ul { list-style: disc; padding-left: var(--espacio-5); }
+
+/* Resultado */
+.resultado-importacion { padding: var(--espacio-10) var(--espacio-8); text-align: center; }
+.resultado-importacion__icono {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--espacio-4);
+}
+.resultado-importacion__icono--exito { background: var(--color-exito-suave); color: var(--color-exito); }
+.resultado-importacion__icono--aviso { background: var(--color-aviso-suave); color: var(--color-aviso); }
