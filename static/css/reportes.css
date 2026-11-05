@@ -139,3 +139,9 @@
 .evolucion--sube { color: var(--color-exito); }
 .evolucion--baja { color: var(--color-peligro); }
 .tabla--consulta .badge, .sin-salto { white-space: nowrap; }
+
+/* Celdas de una línea: el texto largo se recorta con «…» (el texto completo sigue
+   en el DOM para lectores de pantalla y en el title al pasar el mouse) */
+.tabla--consulta :where(td, th) { padding: 12px 14px; }
+.celda-linea { display: block; max-width: 190px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.celda-detalle { display: block; margin-top: 2px; font-size: var(--texto-xs); color: var(--color-texto-suave); white-space: nowrap; }
