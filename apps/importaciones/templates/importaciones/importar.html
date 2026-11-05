@@ -9,17 +9,17 @@
 <div style="max-width:760px; margin:0 auto;">
 
     <!-- Volver al Banco -->
-    <div style="margin-bottom:16px;">
+    <div class="mb-4">
       <a href="{% url 'banco_preguntas:banco' %}" style="display:inline-flex; align-items:center; gap:6px; font-size:var(--texto-sm); font-weight:600; color:var(--color-primario); text-decoration:none;">
-        <i data-lucide="arrow-left" style="width:16px; height:16px;"></i> Volver al Banco de Preguntas
+        <i data-lucide="arrow-left" class="icono-16"></i> Volver al Banco de Preguntas
       </a>
     </div>
 
     <!-- Stepper Asistente de Ingesta -->
     <div class="card" style="padding:14px 20px; margin-bottom:20px; background:var(--azul-50); border-color:var(--azul-200);">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+      <div class="flex justify-between items-center mb-2">
         <span style="font-size:var(--texto-xs); font-weight:800; color:var(--azul-700); text-transform:uppercase; letter-spacing:0.5px;">ASISTENTE DE INGESTA</span>
-        <span class="badge badge-info" style="font-size:var(--texto-xs);">Paso 1 de 4</span>
+        <span class="badge badge-info texto-xs">Paso 1 de 4</span>
       </div>
       <div style="display:flex; justify-content:space-between; font-size:var(--texto-xs); color:var(--azul-800); font-weight:600;">
         <span><strong>1. Carga</strong></span>
@@ -34,17 +34,17 @@
     <div class="card" style="padding:14px 20px; margin-bottom:20px; background:var(--azul-50); border:1px solid var(--azul-200); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; border-radius:14px;">
       <div>
         <div style="font-size:var(--texto-xs); font-weight:800; color:var(--azul-700); display:flex; align-items:center; gap:6px;">
-          <i data-lucide="info" style="width:16px; height:16px;"></i> Tienes una importación activa en proceso
+          <i data-lucide="info" class="icono-16"></i> Tienes una importación activa en proceso
         </div>
         <div style="font-size:var(--texto-sm); color:var(--azul-900); margin-top:2px;">
           Archivo: <strong>{{ pendiente.nombre_archivo }}</strong>
         </div>
       </div>
-      <div style="display:flex; gap:8px;">
+      <div class="flex gap-2">
         <a href="{% url 'importaciones:previsualizar' %}" class="btn btn-primary" style="font-size:var(--texto-xs); padding:8px 16px; background:var(--azul-600); font-weight:700;">
           Ir a Auditoría y Corrección &rarr;
         </a>
-        <form method="POST" action="{% url 'importaciones:cancelar' %}" style="margin:0;">
+        <form method="POST" action="{% url 'importaciones:cancelar' %}" class="m-0">
           {% csrf_token %}
           <button type="submit" class="btn btn-outline" style="font-size:var(--texto-xs); padding:8px 12px; color:var(--rojo-700); border-color:var(--rojo-200);">
             Descartar
@@ -61,29 +61,29 @@
         {% csrf_token %}
 
         <!-- Cuestionario de Destino -->
-        <div class="form-group" style="margin-bottom:20px;">
+        <div class="form-group mb-5">
           <label class="form-label" style="display:flex; align-items:center; gap:6px;">
             <i data-lucide="clipboard-list" style="width:16px; height:16px; color:var(--azul-600);"></i> Cuestionario de Destino (Opcional)
           </label>
           {{ form.cuestionario }}
-          <div style="font-size:var(--texto-xs); color:var(--color-texto-suave); margin-top:4px;">
+          <div class="texto-xs texto-suave mt-1">
             Si seleccionas un cuestionario, las preguntas válidas se vincularán automáticamente a él además de agregarse al banco general.
           </div>
         </div>
 
         <!-- Dropzone / Input Archivo -->
-        <div class="form-group" style="margin-bottom:24px;">
+        <div class="form-group mb-6">
           <label class="form-label" style="display:flex; align-items:center; gap:6px;">
             <i data-lucide="upload" style="width:16px; height:16px; color:var(--azul-600);"></i> Archivo Excel con Formato Oficial (.xlsx)
           </label>
           <div style="border:2px dashed var(--color-borde-fuerte); border-radius:12px; padding:28px 20px; text-align:center; background:var(--color-superficie-tenue); cursor:pointer;" onclick="document.getElementById('id_archivo').click();">
-            <div style="margin-bottom:8px; color:var(--color-primario); display:flex; justify-content:center;">
+            <div class="mb-2 texto-primario flex justify-center">
               <i data-lucide="file-spreadsheet" style="width:40px; height:40px;"></i>
             </div>
-            <div style="font-weight:700; color:var(--color-texto); font-size:var(--texto-base); margin-bottom:4px;">Haz clic para seleccionar el archivo Excel</div>
-            <div style="font-size:var(--texto-xs); color:var(--color-texto-suave); margin-bottom:12px;">Compatible con Microsoft Excel (.xlsx)</div>
+            <div class="peso-bold texto-principal texto-base mb-1">Haz clic para seleccionar el archivo Excel</div>
+            <div class="texto-xs texto-suave mb-3">Compatible con Microsoft Excel (.xlsx)</div>
             <div style="display:none;">{{ form.archivo }}</div>
-            <div id="archivo-seleccionado-nombre" style="font-size:var(--texto-sm); font-weight:700; color:var(--color-primario);">Ningún archivo seleccionado</div>
+            <div id="archivo-seleccionado-nombre" class="texto-sm peso-bold texto-primario">Ningún archivo seleccionado</div>
           </div>
         </div>
 
@@ -91,7 +91,7 @@
         <div style="background:var(--color-superficie-tenue); border:1px solid var(--color-borde); border-radius:12px; padding:16px; margin-bottom:24px;">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
             <span style="font-size:var(--texto-xs); font-weight:700; color:var(--gris-700);">Esquema Reconocido Oficial</span>
-            <span class="badge badge-success" style="font-size:var(--texto-xs);">11/11 Campos OK</span>
+            <span class="badge badge-success texto-xs">11/11 Campos OK</span>
           </div>
           <div style="display:flex; flex-wrap:wrap; gap:6px; font-size:var(--texto-xs);">
             <span class="badge" style="background:var(--azul-50); color:var(--azul-700);">● categoria</span>
@@ -114,7 +114,7 @@
         </button>
 
         <a href="{% static 'plantillas/plantilla_preguntas_simulador_tyt.xlsx' %}" download class="btn btn-outline btn-full" style="padding:10px; font-size:var(--texto-sm); color:var(--color-primario); border-color:var(--azul-200); display:inline-flex; align-items:center; justify-content:center; gap:6px;">
-          <i data-lucide="download" style="width:15px; height:15px;"></i> Descargar Plantilla Oficial Excel
+          <i data-lucide="download" class="icono-15"></i> Descargar Plantilla Oficial Excel
         </a>
       </form>
 

@@ -16,24 +16,24 @@
       </span>
 
       <h1 style="font-size:var(--texto-xl); font-weight:800; color:var(--color-texto); margin-bottom:6px;">Importación Completada</h1>
-      <p style="font-size:var(--texto-sm); color:var(--color-texto-suave); margin-bottom:24px;">Archivo: {{ resultado.nombre_archivo }}</p>
+      <p class="texto-sm texto-suave mb-6">Archivo: {{ resultado.nombre_archivo }}</p>
 
       <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:12px; margin-bottom:24px; text-align:center;">
         <div style="background:var(--verde-50); border:1px solid var(--verde-200); border-radius:12px; padding:14px;">
-          <div style="font-size:var(--texto-xl); font-weight:800; color:var(--verde-700);">{{ resultado.validas|length }}</div>
-          <div style="font-size:var(--texto-xs); color:var(--verde-700); font-weight:600;">Guardadas</div>
+          <div class="texto-xl peso-extrabold texto-exito">{{ resultado.validas|length }}</div>
+          <div class="texto-xs texto-exito peso-semibold">Guardadas</div>
         </div>
         <div style="background:var(--azul-50); border:1px solid var(--azul-200); border-radius:12px; padding:14px;">
           <div style="font-size:var(--texto-xl); font-weight:800; color:var(--azul-700);">{{ resultado.duplicadas|length }}</div>
           <div style="font-size:var(--texto-xs); color:var(--azul-700); font-weight:600;">Duplicadas</div>
         </div>
         <div style="background:var(--rojo-50); border:1px solid var(--rojo-200); border-radius:12px; padding:14px;">
-          <div style="font-size:var(--texto-xl); font-weight:800; color:var(--rojo-700);">{{ resultado.con_error|length }}</div>
-          <div style="font-size:var(--texto-xs); color:var(--rojo-700); font-weight:600;">Con Error</div>
+          <div class="texto-xl peso-extrabold texto-peligro">{{ resultado.con_error|length }}</div>
+          <div class="texto-xs texto-peligro peso-semibold">Con Error</div>
         </div>
       </div>
 
-      <div style="display:flex; gap:12px;">
+      <div class="flex gap-3">
         <a href="{% url 'banco_preguntas:banco' %}" class="btn btn-primary" style="flex:1; padding:12px; font-size:var(--texto-base);">
           Ver Banco de Preguntas &rarr;
         </a>
