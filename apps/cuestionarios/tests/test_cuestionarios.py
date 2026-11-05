@@ -74,7 +74,7 @@ class ConfigurarCuestionarioTests(TestCase):
         self.client.post("/cuestionarios/crear/", self._datos([self.p1]))
         cuestionario = Cuestionario.objects.get()
         r = self.client.get(f"/cuestionarios/{cuestionario.id}/previsualizar/")
-        self.assertIn('"es_correcta"', r.context["preguntas_json"])
+        self.assertIn("es_correcta", r.context["preguntas"][0]["opciones"][0])
 
         estudiante = crear_usuario("alumno", "estudiante")
         self.client.force_login(estudiante)

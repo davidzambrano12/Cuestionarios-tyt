@@ -1,6 +1,4 @@
 """Módulo C: configuración y previsualización de cuestionarios."""
-import json
-
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
@@ -64,7 +62,7 @@ def previsualizar_cuestionario(request, cuestionario_id):
     return render(request, "cuestionarios/previsualizar.html", {
         "cuestionario": cuestionario,
         "total_preguntas": len(preguntas),
-        "preguntas_json": json.dumps(preguntas),
+        "preguntas": preguntas,
     })
 
 
