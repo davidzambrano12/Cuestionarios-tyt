@@ -36,6 +36,7 @@
 .mt-2 { margin-top: var(--espacio-2); }
 .mt-3 { margin-top: var(--espacio-3); }
 .mt-4 { margin-top: var(--espacio-4); }
+.mt-5 { margin-top: var(--espacio-5); }
 .mt-6 { margin-top: var(--espacio-6); }
 .mb-0 { margin-bottom: 0; }
 .mb-1 { margin-bottom: var(--espacio-1); }
