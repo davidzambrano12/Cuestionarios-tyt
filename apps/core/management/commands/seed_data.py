@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import User
-from core.models import PermisoSistema, Rol, PerfilUsuario
+from apps.core.models import PermisoSistema, Rol, PerfilUsuario
 
 class Command(BaseCommand):
     help = 'Inicializa permisos, roles por defecto y usuarios de prueba'
@@ -161,8 +161,9 @@ class Command(BaseCommand):
         # ----------------------------------------------------------------------
         # Categorías / Competencias oficiales Saber TyT
         # ----------------------------------------------------------------------
-        from preguntas.models import Categoria, Pregunta, OpcionRespuesta, Cuestionario, CuestionarioPregunta
-        from preguntas.services.importador_excel import calcular_huella
+        from apps.banco_preguntas.models import Categoria, OpcionRespuesta, Pregunta
+        from apps.cuestionarios.models import Cuestionario, CuestionarioPregunta
+        from apps.banco_preguntas.services import calcular_huella
         from django.utils import timezone
         from datetime import timedelta
         from decimal import Decimal

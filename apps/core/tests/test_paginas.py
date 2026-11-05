@@ -7,8 +7,8 @@ from decimal import Decimal
 
 from django.test import TestCase
 
-from preguntas.models import Intento
-from preguntas.tests.factories import (
+from apps.evaluaciones.models import Intento
+from apps.core.tests.factories import (
     CLAVE,
     crear_cuestionario,
     crear_usuario,

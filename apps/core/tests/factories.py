@@ -9,15 +9,10 @@ from django.contrib.auth.models import User
 from django.core.management import call_command
 from django.utils import timezone
 
-from core.models import PerfilUsuario, Rol
-from preguntas.models import (
-    Categoria,
-    Cuestionario,
-    CuestionarioPregunta,
-    Intento,
-    OpcionRespuesta,
-    Pregunta,
-)
+from apps.core.models import PerfilUsuario, Rol
+from apps.banco_preguntas.models import Categoria, OpcionRespuesta, Pregunta
+from apps.cuestionarios.models import Cuestionario, CuestionarioPregunta
+from apps.evaluaciones.models import Intento
 
 CLAVE = "Clave-Segura-2026"
 

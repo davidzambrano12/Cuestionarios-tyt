@@ -4,9 +4,6 @@ Reglas de identidad y acceso compartidas por todos los módulos.
 Centraliza preguntas que antes se repetían en cada vista: ¿qué código
 identifica al participante?, ¿es personal docente?, ¿puede auditar notas?
 """
-from django.urls import reverse
-
-
 def perfil_de(user):
     return getattr(user, "perfil", None)
 
@@ -46,13 +43,3 @@ def puede_auditar_resultados(user) -> bool:
 
 def es_dueno_del_intento(user, intento) -> bool:
     return intento.participante_codigo == codigo_participante(user)
-
-
-def url_panel(user) -> str:
-    """Panel de inicio que corresponde al rol del usuario."""
-    perfil = perfil_de(user)
-    if user.is_superuser or (perfil and perfil.es_admin):
-        return reverse("core:admin_dashboard")
-    if perfil and perfil.es_docente:
-        return reverse("core:docente_dashboard")
-    return reverse("core:estudiante_dashboard")
