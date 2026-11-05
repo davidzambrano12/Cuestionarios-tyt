@@ -25,7 +25,7 @@ urlpatterns = [
     path("cuestionarios/<int:cuestionario_id>/intentos/", views.cuestionario_intentos, name="cuestionario_intentos"),
     path("cuestionarios/intentos/<int:intento_id>/reiniciar/", views.reiniciar_intento, name="reiniciar_intento"),
     path("cuestionarios/<int:cuestionario_id>/intentos/reiniciar-estudiante/<str:codigo_estudiante>/", views.reiniciar_estudiante_cuestionario, name="reiniciar_estudiante_cuestionario"),
-    path("cuestionarios/<int:cuestionario_id>/intentos/exportar/", views.exportar_intentos_csv, name="exportar_intentos_csv"),
+    path("cuestionarios/<int:cuestionario_id>/intentos/exportar/", views.exportar_intentos_excel, name="exportar_intentos_excel"),
 
 
     # Evaluación en Vivo y Calificación
