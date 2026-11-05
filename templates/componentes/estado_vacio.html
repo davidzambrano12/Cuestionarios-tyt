@@ -1,0 +1,11 @@
+{% comment %}
+  Estado vacío (no hay datos o un filtro no encontró resultados).
+  Parámetros: titulo, mensaje (opcional), icono (opcional, por defecto "inbox").
+  contenido: acción sugerida (botón o enlace).
+{% endcomment %}
+<div class="estado-vacio">
+  <span class="estado-vacio__icono"><i data-lucide="{{ icono|default:'inbox' }}" class="icono-24"></i></span>
+  <h3 class="estado-vacio__titulo">{{ titulo }}</h3>
+  {% if mensaje %}<p class="estado-vacio__mensaje">{{ mensaje }}</p>{% endif %}
+  {% if contenido %}<div class="estado-vacio__acciones">{{ contenido }}</div>{% endif %}
+</div>

@@ -1,0 +1,14 @@
+{% comment %}
+  Tarjeta de métrica.
+  Parámetros: etiqueta, valor, ayuda (opcional), icono (opcional, nombre Lucide),
+  variante: neutra (por defecto) | exito | peligro | info | aviso.
+  contenido: texto adicional junto al valor (p. ej. "/ 5,00").
+{% endcomment %}
+<div class="metrica metrica--{{ variante|default:'neutra' }}">
+  <div class="metrica__cabecera">
+    <span class="metrica__etiqueta">{{ etiqueta }}</span>
+    {% if icono %}<span class="metrica__icono"><i data-lucide="{{ icono }}" class="icono-18"></i></span>{% endif %}
+  </div>
+  <div class="metrica__valor">{{ valor }}{% if contenido %} <span class="metrica__sufijo">{{ contenido }}</span>{% endif %}</div>
+  {% if ayuda %}<div class="metrica__ayuda">{{ ayuda }}</div>{% endif %}
+</div>

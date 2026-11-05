@@ -1,0 +1,13 @@
+{% comment %}
+  Encabezado de página.
+  Parámetros: etiqueta (opcional), titulo, subtitulo (opcional).
+  contenido: acciones a la derecha (botones o enlaces).
+{% endcomment %}
+<header class="dashboard-banner encabezado-pagina">
+  <div class="encabezado-pagina__texto">
+    {% if etiqueta %}<span class="banner-badge">{{ etiqueta }}</span>{% endif %}
+    <h1 class="banner-title">{{ titulo }}</h1>
+    {% if subtitulo %}<p class="banner-subtitle">{{ subtitulo }}</p>{% endif %}
+  </div>
+  {% if contenido %}<div class="encabezado-pagina__acciones">{{ contenido }}</div>{% endif %}
+</header>
