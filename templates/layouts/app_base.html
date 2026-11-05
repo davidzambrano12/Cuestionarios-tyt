@@ -65,7 +65,7 @@
 
     <!-- Footer del Sidebar con Identidad del Usuario -->
     <div style="padding-top:16px; border-top:1px solid var(--color-borde); margin-top:auto;" class="text-xs text-muted">
-      <div style="display:flex; align-items:center; justify-content:space-between;">
+      <div class="flex items-center justify-between">
         <div style="overflow:hidden; padding-right:8px;">
           <div style="text-overflow:ellipsis; overflow:hidden; white-space:nowrap;" class="text-sm font-bold text-main">
             {{ user.get_full_name|default:user.username }}
@@ -81,7 +81,7 @@
           </div>
         </div>
         <a href="{% url 'cuentas:perfil' %}" title="Ver mi perfil" style="display:inline-flex; align-items:center; justify-content:center; width:30px; height:30px; border-radius:8px; background:var(--color-superficie-hundida); color:var(--color-texto-suave); text-decoration:none; flex-shrink:0;">
-          <i data-lucide="user" style="width:15px; height:15px;"></i>
+          <i data-lucide="user" class="icono-15"></i>
         </a>
       </div>
     </div>
