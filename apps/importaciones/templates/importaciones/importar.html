@@ -19,7 +19,7 @@
     </div>
     <div class="flex gap-2">
       <a href="{% url 'importaciones:previsualizar' %}" class="btn btn-primary btn-accion">Continuar revisión &rarr;</a>
-      <form method="POST" action="{% url 'importaciones:cancelar' %}" data-confirmar="¿Descartar la importación de {{ pendiente.nombre_archivo }}?">
+      <form method="POST" action="{% url 'importaciones:cancelar' %}" data-confirmar-titulo="¿Descartar la importación pendiente?" data-confirmar="Se eliminará el archivo «{{ pendiente.nombre_archivo }}» junto con las correcciones que hiciste. No se guardará ninguna pregunta." data-confirmar-boton="Descartar importación" data-confirmar-tipo="peligro">
         {% csrf_token %}
         <button type="submit" class="btn btn-accion btn-peligro">Descartar</button>
       </form>

@@ -147,7 +147,7 @@
     {% include "importaciones/_columnas_plantilla.html" %}
     <div class="grid-2 mt-5">
       <a href="{% static 'plantillas/plantilla_preguntas_simulador_tyt.xlsx' %}" download class="btn btn-outline"><i data-lucide="download" class="icono-14"></i> Descargar plantilla</a>
-      <form method="POST" action="{% url 'importaciones:cancelar' %}" data-confirmar="¿Cancelar la importación? Se descartará el archivo subido.">
+      <form method="POST" action="{% url 'importaciones:cancelar' %}" data-confirmar-titulo="¿Cancelar la importación?" data-confirmar="Se descartará el archivo subido junto con las correcciones de esta revisión. No se guardará ninguna pregunta." data-confirmar-boton="Cancelar importación" data-confirmar-cancelar="Seguir revisando" data-confirmar-tipo="peligro">
         {% csrf_token %}
         <button type="submit" class="btn btn-peligro btn-full"><i data-lucide="x" class="icono-14"></i> Cancelar importación</button>
       </form>
@@ -165,7 +165,7 @@
     </p>
     {% if resultado.validas %}
     <form method="POST" action="{% url 'importaciones:confirmar' %}"
-          {% if resultado.con_error %}data-confirmar="Hay {{ resultado.con_error|length }} fila(s) con errores que NO se guardarán. ¿Guardar solo las {{ resultado.validas|length }} listas?"{% endif %}>
+          {% if resultado.con_error %}data-confirmar-titulo="¿Guardar solo {{ resultado.validas|length }} pregunta{{ resultado.validas|length|pluralize }}?" data-confirmar="{{ resultado.con_error|length }} fila{{ resultado.con_error|length|pluralize }} con errores no se guardará{{ resultado.con_error|length|pluralize:'n' }}.&#10;Puedes volver y editarla{{ resultado.con_error|length|pluralize }} antes de guardar." data-confirmar-boton="Guardar {{ resultado.validas|length }}" data-confirmar-cancelar="Revisar errores" data-confirmar-tipo="aviso"{% endif %}>
       {% csrf_token %}
       <button type="submit" class="btn btn-primary"><i data-lucide="check-circle-2" class="icono-18"></i> Guardar {{ resultado.validas|length }} en el banco</button>
     </form>
