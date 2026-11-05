@@ -1208,7 +1208,7 @@ a:hover {
 
 /* Tablas de datos */
 .tabla-contenedor { padding: 0; overflow: hidden; }
-.tabla-desplazable { overflow-x: auto; }
+.tabla-desplazable { overflow-x: auto; position: relative; } /* recorta también los elementos absolutos (caption .sr-only) */
 .tabla { width: 100%; border-collapse: collapse; }
 .tabla thead { background: var(--color-superficie-tenue); border-bottom: 1px solid var(--color-borde); }
 /* :where() deja la especificidad en 0 para que las utilidades de alineación ganen */
@@ -1511,3 +1511,8 @@ a:hover {
   .confirmacion__acciones { flex-direction: column-reverse; }
   .confirmacion__acciones .btn { width: 100%; justify-content: center; }
 }
+
+/* Alertas en línea (compartidas por varias apps) */
+.alerta { padding: 10px 14px; border-radius: var(--radio-sm); font-size: var(--texto-sm); margin-bottom: var(--espacio-4); }
+.alerta--error { background: var(--color-peligro-suave); border: 1px solid var(--color-peligro-borde); color: var(--color-peligro-texto); }
+.alerta--info { background: var(--color-info-suave); border: 1px solid var(--color-info-borde); color: var(--color-info-texto); }
