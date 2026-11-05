@@ -41,10 +41,11 @@ def asignar_cursos_pendientes() -> int:
         usuarios[codigo_participante(user)] = user
 
     actualizados = 0
-    for intento in pendientes.filter(participante_codigo__in=usuarios.keys()):
+    for intento in pendientes.filter(participante_codigo__in=usuarios.keys()).select_related("cuestionario"):
         curso = curso_vigente(usuarios[intento.participante_codigo], intento.fecha_inicio)
-        if curso:
-            Intento.objects.filter(id=intento.id).update(curso=curso)
+        # Un cuestionario de curso solo cuenta en los cursos a los que se asignó
+        if curso and (intento.cuestionario.es_institucional or intento.cuestionario.cursos.filter(id=curso.id).exists()):
+            Intento.objects.filter(id=intento.id).update(curso=curso, periodo=curso.periodo)
             actualizados += 1
     return actualizados
 
@@ -81,11 +82,16 @@ def estudiantes_elegibles():
     )
 
 
-def _intentos_sin_curso(user, periodo):
+def _intentos_sin_curso(user, periodo, curso=None):
+    from django.db.models import Q
+
     from apps.core.services.acceso import codigo_participante
     from apps.evaluaciones.models import Intento
 
-    return Intento.objects.filter(
+    intentos = Intento.objects.filter(
+        Q(cuestionario__visibilidad="institucional") | Q(cuestionario__cursos=curso)
+    ) if curso else Intento.objects.all()
+    return intentos.filter(
         curso__isnull=True,
         participante_codigo=codigo_participante(user),
         fecha_inicio__range=rango_del_periodo(periodo),
@@ -107,6 +113,8 @@ def matricular(curso: Curso, estudiantes) -> dict:
     Matricula a los estudiantes indicados en el curso. Los intentos que ya
     habían presentado en ese período sin curso quedan asociados a él.
     """
+    from apps.evaluaciones.models import Intento
+
     nuevos, ya_estaban, en_otro_curso, asignados = [], [], [], 0
     for est in estudiantes:
         _, creada = Matricula.objects.get_or_create(curso=curso, estudiante=est)
@@ -116,7 +124,8 @@ def matricular(curso: Curso, estudiantes) -> dict:
         nuevos.append(est)
         if Matricula.objects.filter(estudiante=est, curso__periodo=curso.periodo).exclude(curso=curso).exists():
             en_otro_curso.append(est)
-        asignados += _intentos_sin_curso(est, curso.periodo).update(curso=curso)
+        ids = list(_intentos_sin_curso(est, curso.periodo, curso).values_list("id", flat=True))
+        asignados += Intento.objects.filter(id__in=ids).update(curso=curso, periodo=curso.periodo)
     return {"nuevos": nuevos, "ya_estaban": ya_estaban, "en_otro_curso": en_otro_curso,
             "intentos_asignados": asignados}
 

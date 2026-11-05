@@ -80,7 +80,11 @@ class Command(BaseCommand):
         docente = User.objects.filter(perfil__rol__codigo="docente", is_active=True).order_by("id").first()
 
         preguntas = self._preguntas()
-        simulacros = [self._simulacro(f"{PREFIJO_SIMULACRO}Simulacro general {n}", preguntas) for n in (1, 2)]
+        # Uno institucional (cualquier estudiante) y uno de curso, creado por el docente
+        simulacros = [
+            self._simulacro(f"{PREFIJO_SIMULACRO}Simulacro institucional", preguntas, "institucional", None),
+            self._simulacro(f"{PREFIJO_SIMULACRO}Parcial de curso", preguntas, "privado", docente),
+        ]
 
         estudiantes = []
         for i, (nombre, apellido) in enumerate(NOMBRES, start=1):
@@ -106,6 +110,7 @@ class Command(BaseCommand):
                 })[0]
                 for j, grupo in enumerate(grupos)
             ]
+            simulacros[1].cursos.add(*cursos)
             for k, (user, habilidad, mejora) in enumerate(estudiantes):
                 curso = cursos[k % len(cursos)]
                 Matricula.objects.get_or_create(curso=curso, estudiante=user)
@@ -132,14 +137,14 @@ class Command(BaseCommand):
             raise CommandError("El banco necesita al menos 4 preguntas activas (ejecuta `seed_data` o importa preguntas).")
         return preguntas
 
-    def _simulacro(self, nombre, preguntas):
+    def _simulacro(self, nombre, preguntas, visibilidad, creador):
         simulacro = Cuestionario.objects.create(
             nombre=nombre, descripcion="Generado por datos_demo_consultas.",
             fecha_apertura=timezone.make_aware(datetime(2025, 7, 1)),
             fecha_cierre=timezone.make_aware(datetime(2026, 12, 15)),
             tiempo_limite_minutos=60, intentos_permitidos=3,
             calificacion_maxima=Decimal("5.00"), calificacion_aprobacion=Decimal("3.00"),
-            estado="cerrado",
+            estado="cerrado", visibilidad=visibilidad, creado_por=creador,
         )
         for orden, pregunta in enumerate(preguntas, start=1):
             CuestionarioPregunta.objects.create(cuestionario=simulacro, pregunta=pregunta, orden=orden,
@@ -155,7 +160,7 @@ class Command(BaseCommand):
     @staticmethod
     def _presentar(user, simulacro, curso, prob, cuando, azar):
         intento = Intento.objects.create(
-            cuestionario=simulacro, curso=curso, estado="en_progreso",
+            cuestionario=simulacro, curso=curso, periodo=curso.periodo, estado="en_progreso",
             participante_nombre=user.get_full_name(), participante_codigo=user.perfil.codigo_institucional,
         )
         Intento.objects.filter(id=intento.id).update(fecha_inicio=cuando)
