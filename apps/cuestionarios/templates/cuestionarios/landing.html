@@ -13,12 +13,12 @@
     <div class="flex items-center gap-3">
       <div class="portada-marca__logo">U</div>
       <div>
-        <div class="portada-marca__nombre">Simulador Saber TyT</div>
-        <div class="texto-xs texto-suave">Institución Universitaria del Putumayo</div>
+        <div class="portada-marca__nombre">{{ config.nombre_sistema }}</div>
+        <div class="texto-xs texto-suave">{{ config.institucion }}</div>
       </div>
     </div>
     <div class="flex items-center gap-4">
-      <a href="mailto:soporte.sistemas@uniputumayo.edu.co" class="btn btn-outline">
+      <a href="mailto:{{ config.correo_soporte }}" class="btn btn-outline">
         <i data-lucide="headphones" class="icono-15"></i> Mesa de Ayuda
       </a>
       {% if user.is_authenticated %}
@@ -36,10 +36,10 @@
   <!-- Hero Section -->
   <section class="portada-heroe">
     <h1 class="portada-heroe__titulo">
-      Entrena y Valida tus <span class="texto-primario">Competencias</span>
+      Entrena y valida tus <span class="texto-primario">competencias</span>
     </h1>
     <p class="portada-heroe__texto">
-      Plataforma oficial de simulación con preguntas diseñada para la comunidad Uniputumayo.
+      Simulacros de las pruebas Saber TyT para practicar con tiempo límite y conocer tu resultado al terminar.
     </p>
     <div class="flex justify-center gap-4 flex-wrap">
       <a href="#simulacros" class="btn btn-primary btn-grande">
@@ -66,24 +66,24 @@
         <div class="caracteristica__icono caracteristica__icono--verde">
           <i data-lucide="clock" class="icono-22"></i>
         </div>
-        <h3 class="texto-md peso-bold mb-2">Temporizador Sincronizado</h3>
-        <p class="texto-sm texto-suave">Control estricto de tiempo estilo ICFES y plataforma de evaluación continua.</p>
+        <h3 class="texto-md peso-bold mb-2">Tiempo controlado</h3>
+        <p class="texto-sm texto-suave">El tiempo lo controla el servidor: no se detiene si cierras la página o cambias de pestaña.</p>
       </div>
 
       <div class="card mb-0 p-6">
         <div class="caracteristica__icono caracteristica__icono--naranja">
           <i data-lucide="bar-chart-2" class="icono-22"></i>
         </div>
-        <h3 class="texto-md peso-bold mb-2">Calificación Determinista</h3>
-        <p class="texto-sm texto-suave">Escala 0.00 a 5.00 con cálculo automático de puntajes e informe instantáneo.</p>
+        <h3 class="texto-md peso-bold mb-2">Calificación inmediata</h3>
+        <p class="texto-sm texto-suave">La nota se calcula al entregar, en la escala que define el docente para cada cuestionario.</p>
       </div>
 
       <div class="card mb-0 p-6">
         <div class="caracteristica__icono">
           <i data-lucide="shield-check" class="icono-22"></i>
         </div>
-        <h3 class="texto-md peso-bold mb-2">Banco Actualizado 2026</h3>
-        <p class="texto-sm texto-suave">Preguntas oficiales con huella SHA-256 única para prevenir duplicados.</p>
+        <h3 class="texto-md peso-bold mb-2">Banco de preguntas institucional</h3>
+        <p class="texto-sm texto-suave">Preguntas preparadas por los docentes, con control automático de duplicados.</p>
       </div>
     </div>
   </section>
@@ -100,7 +100,7 @@
       <!-- Tarjeta Estudiante -->
       <div class="card portal portal--destacado">
         <div class="portal__etiqueta">
-          <span class="badge badge-success">ACCESO DIRECTO SIN CLAVE</span>
+          <span class="badge badge-success">Estudiantes</span>
         </div>
         <div class="portal__cuerpo">
           <div class="flex items-center gap-3 mb-3">
@@ -108,20 +108,20 @@
               <i data-lucide="graduation-cap" class="icono-24"></i>
             </div>
             <div>
-              <h3 class="texto-lg peso-extrabold texto-principal">Portal Estudiantes - Acceso Rápido</h3>
+              <h3 class="texto-lg peso-extrabold texto-principal">Portal de estudiantes</h3>
               <span class="texto-xs texto-primario peso-semibold">Estudiantes activos Uniputumayo</span>
             </div>
           </div>
           <p class="texto-sm texto-suave mb-4">
-            Ingreso ágil: ingresa directamente con tu Nombre Completo y Código Estudiantil activo para iniciar tu simulacro inmediatamente.
+            Inicia sesión con el usuario y la contraseña que te asignó la institución para presentar los simulacros abiertos y consultar tus resultados.
           </p>
           <div class="portal__ventajas">
-            <div class="inline-flex items-center gap-2"><i data-lucide="credit-card" class="icono-14"></i> Identificación inmediata con código institucional</div>
-            <div class="inline-flex items-center gap-2"><i data-lucide="zap" class="icono-14 texto-aviso"></i> Sin demoras de restablecimiento de contraseña</div>
+            <div class="inline-flex items-center gap-2"><i data-lucide="credit-card" class="icono-14"></i> Tus intentos quedan registrados con tu código institucional</div>
+            <div class="inline-flex items-center gap-2"><i data-lucide="file-text" class="icono-14"></i> Revisión de respuestas al terminar, si el docente la habilita</div>
           </div>
         </div>
         <a href="{% url 'login' %}" class="btn btn-primary btn-full portal__boton">
-          Ingresar como Estudiante &rarr;
+          Ingresar como estudiante &rarr;
         </a>
       </div>
 
@@ -141,11 +141,11 @@
             </div>
           </div>
           <p class="texto-sm texto-suave mb-4">
-            Gestión de preguntas, parametrización de cuestionarios, seguimiento de cohortes y reportes pedagógicos con credenciales @uniputumayo.edu.co.
+            Banco de preguntas, importación desde Excel, configuración de cuestionarios y reporte de calificaciones por cuestionario.
           </p>
           <div class="portal__ventajas">
-            <div class="inline-flex items-center gap-2"><i data-lucide="bar-chart-2" class="icono-14"></i> Métricas por cohorte, programa y competencia</div>
-            <div class="inline-flex items-center gap-2"><i data-lucide="download" class="icono-14"></i> Exportación de informes consolidados y auditoría</div>
+            <div class="inline-flex items-center gap-2"><i data-lucide="bar-chart-2" class="icono-14"></i> Notas definitivas, aprobación y promedio por cuestionario</div>
+            <div class="inline-flex items-center gap-2"><i data-lucide="download" class="icono-14"></i> Exportación del reporte de calificaciones a Excel</div>
           </div>
         </div>
         <a href="{% url 'login' %}" class="btn btn-outline btn-full portal__boton">
@@ -162,7 +162,7 @@
         <i data-lucide="landmark" class="icono-14"></i> ENTORNO DE EVALUACIÓN ABIERTO
       </span>
       <h2 class="texto-2xl peso-extrabold texto-principal mt-1">Cuestionarios Oficiales Saber TyT Uniputumayo</h2>
-      <p class="texto-base texto-suave">Acceso ágil: los estudiantes ingresan directamente con su Nombre y Código Estudiantil para comenzar la prueba de inmediato.</p>
+      <p class="texto-base texto-suave">Cuestionarios abiertos en este momento. Para presentarlos, inicia sesión con tu usuario institucional.</p>
     </div>
 
     <div class="rejilla-cuestionarios">
@@ -209,28 +209,24 @@
         <p class="portada-cta__texto">Comunícate con la Coordinación TyT de Uniputumayo o acércate a la Dirección Académica en la Sede Principal Mocoa o extensiones Sibundoy y Puerto Asís.</p>
       </div>
       <div class="flex gap-3 flex-wrap">
-        <a href="mailto:soporte.sistemas@uniputumayo.edu.co" class="btn portada-cta__principal">
+        <a href="mailto:{{ config.correo_soporte }}" class="btn portada-cta__principal">
           <i data-lucide="mail" class="icono-16"></i> Contactar Coordinación TyT
         </a>
         <a href="{% static 'plantillas/plantilla_preguntas_simulador_tyt.xlsx' %}" download class="btn portada-cta__secundario">
-          <i data-lucide="download" class="icono-16"></i> Guía y Plantilla 2026
+          <i data-lucide="download" class="icono-16"></i> Plantilla de preguntas para docentes
         </a>
       </div>
     </div>
   </section>
 
-  <!-- Footer Oficial -->
   <footer class="portada-pie">
     <div>
-      <div class="peso-bold texto-principal">© 2026 Institución Universitaria del Putumayo (Uniputumayo).</div>
-      <div>Vigilada Mineducación. Todos los derechos reservados. Mocoa, Putumayo - Colombia • NIT: 800.125.845-1</div>
+      <div class="peso-bold texto-principal">{{ config.nombre_sistema }} · {{ config.institucion }}{% if config.sigla %} ({{ config.sigla }}){% endif %}</div>
+      <div>{% if config.ubicacion %}{{ config.ubicacion }}{% endif %}{% if config.ubicacion and config.telefono_soporte %} · {% endif %}{{ config.telefono_soporte }}</div>
     </div>
-    <div class="flex gap-5">
-      <a href="#">Reglamento Académico</a>
-      <a href="#">Políticas de Privacidad</a>
-      <a href="#">Soporte Técnico Campus</a>
-      <a href="#">Acreditación Institucional ICFES</a>
-      <a href="mailto:soporte.sistemas@uniputumayo.edu.co" class="peso-semibold texto-primario">Mesa de Ayuda</a>
+    <div class="flex gap-5 flex-wrap">
+      <a href="{% url 'login' %}">Iniciar sesión</a>
+      <a href="mailto:{{ config.correo_soporte }}" class="peso-semibold">Mesa de ayuda: {{ config.correo_soporte }}</a>
     </div>
   </footer>
 
