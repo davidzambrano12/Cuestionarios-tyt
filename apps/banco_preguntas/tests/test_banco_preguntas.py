@@ -3,8 +3,8 @@ from decimal import Decimal
 
 from django.test import TestCase
 
-from preguntas.models import Categoria, Pregunta
-from .factories import crear_usuario, sembrar_roles
+from apps.banco_preguntas.models import Categoria, Pregunta
+from apps.core.tests.factories import crear_usuario, sembrar_roles
 
 
 class BancoPreguntasTests(TestCase):

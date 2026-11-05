@@ -2,15 +2,28 @@
 Módulo A: reglas del banco de preguntas (alta, edición, deduplicación por
 huella SHA-256 y borrado lógico). Las vistas solo traducen el formulario.
 """
+import hashlib
+import re
 from dataclasses import dataclass, field
 from decimal import Decimal, InvalidOperation
 
 from django.db import transaction
 
-from preguntas.models import Categoria, OpcionRespuesta, Pregunta
-from .importador_excel import calcular_huella
+from apps.banco_preguntas.models import Categoria, OpcionRespuesta, Pregunta
 
 LETRAS_MULTIPLE = ("A", "B", "C", "D")
+
+
+def _normalizar(texto: str) -> str:
+    """Minúsculas y espacios colapsados, para que la huella no cambie por
+    mayúsculas o espacios de más."""
+    return re.sub(r"\s+", " ", texto.strip().lower())
+
+
+def calcular_huella(enunciado: str, opciones_texto: list[str]) -> str:
+    base = _normalizar(enunciado) + "|" + "|".join(_normalizar(o) for o in opciones_texto)
+    return hashlib.sha256(base.encode("utf-8")).hexdigest()
+
 
 
 class PreguntaDuplicada(Exception):

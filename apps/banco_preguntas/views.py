@@ -5,9 +5,9 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
-from core.decorators import requiere_permiso
-from preguntas.models import Categoria, Pregunta
-from preguntas.services import banco
+from apps.core.decorators import requiere_permiso
+from apps.banco_preguntas.models import Categoria, Pregunta
+from apps.banco_preguntas import services as banco
 
 
 @login_required
@@ -17,7 +17,7 @@ def banco_preguntas(request):
     preguntas = (
         Pregunta.objects.select_related("categoria").prefetch_related("opciones").order_by("-id")
     )
-    return render(request, "banco_preguntas.html", {
+    return render(request, "banco_preguntas/banco.html", {
         "preguntas": preguntas,
         "categorias": Categoria.objects.all(),
     })
@@ -32,7 +32,7 @@ def crear_pregunta(request):
             messages.success(request, f"Pregunta #{pregunta.id} registrada exitosamente.")
         except banco.PreguntaDuplicada:
             messages.error(request, "Error de duplicidad: Ya existe una pregunta idéntica en el banco.")
-    return redirect("preguntas:banco")
+    return redirect("banco_preguntas:banco")
 
 
 @login_required
@@ -49,7 +49,7 @@ def editar_pregunta(request, pregunta_id):
         messages.success(request, f"Pregunta #{pregunta.id} actualizada exitosamente.")
     except banco.PreguntaDuplicada:
         messages.error(request, "Error de duplicidad: Ya existe otra pregunta con el mismo contenido.")
-    return redirect("preguntas:banco")
+    return redirect("banco_preguntas:banco")
 
 
 @login_required
@@ -59,4 +59,4 @@ def toggle_pregunta_estado(request, pregunta_id):
     pregunta = banco.alternar_estado(get_object_or_404(Pregunta, id=pregunta_id))
     estado = "activada" if pregunta.activa else "desactivada"
     messages.success(request, f"Pregunta #{pregunta.id} {estado}.")
-    return redirect("preguntas:banco")
+    return redirect("banco_preguntas:banco")
