@@ -11,7 +11,7 @@
     <div class="card" style="padding:28px 24px; border-radius:20px; margin-bottom:20px;">
       
       <!-- Avatar y Nombres -->
-      <div style="text-align:center; margin-bottom:24px;">
+      <div class="texto-centro mb-6">
         <div class="user-avatar-circle" style="width:72px; height:72px; font-size:var(--texto-2xl); margin:0 auto 12px; background:var(--color-primario); color:var(--color-texto-invertido);">
           {{ user.first_name|default:user.username|slice:":2"|upper }}
         </div>
@@ -20,14 +20,14 @@
           <span class="badge badge-success">● Cuenta Activa y Verificada</span>
         </div>
         <h1 class="page-title text-2xl font-extrabold text-main" style="margin-bottom:2px;">{{ user.get_full_name|default:user.username }}</h1>
-        <div style="font-size:var(--texto-xs); color:var(--color-texto-suave);">Institución Universitaria del Putumayo · Mocoa</div>
+        <div class="texto-xs texto-suave">Institución Universitaria del Putumayo · Mocoa</div>
       </div>
 
       <!-- Datos Personales y Programa -->
       <div style="border-top:1px solid var(--color-superficie-hundida); padding-top:20px; margin-bottom:24px;">
         <div style="display:flex; align-items:center; gap:8px; margin-bottom:14px;">
-          <i data-lucide="graduation-cap" style="width:16px; height:16px; color:var(--color-primario);"></i>
-          <h3 class="card-title text-base font-bold text-main" style="margin:0;">Datos Personales y Programa</h3>
+          <i data-lucide="graduation-cap" class="icono-16 texto-primario"></i>
+          <h3 class="card-title text-base font-bold text-main m-0">Datos Personales y Programa</h3>
         </div>
 
         <form method="POST" action="{% url 'cuentas:actualizar_perfil' %}">
@@ -61,8 +61,8 @@
       <!-- Seguridad y Credenciales -->
       <div style="border-top:1px solid var(--color-superficie-hundida); padding-top:20px; margin-bottom:20px;">
         <div style="display:flex; align-items:center; gap:8px; margin-bottom:14px;">
-          <i data-lucide="lock" style="width:16px; height:16px; color:var(--color-primario);"></i>
-          <h3 style="font-size:var(--texto-base); font-weight:800; color:var(--color-texto); margin:0;">Seguridad y Credenciales</h3>
+          <i data-lucide="lock" class="icono-16 texto-primario"></i>
+          <h3 class="texto-base peso-extrabold texto-principal m-0">Seguridad y Credenciales</h3>
         </div>
 
         <form method="POST" action="{% url 'cuentas:cambiar_password' %}">
@@ -77,19 +77,19 @@
           </div>
 
           <button type="submit" class="btn btn-outline btn-full" style="padding:10px; font-size:var(--texto-sm); color:var(--color-primario); border-color:var(--azul-200); display:inline-flex; align-items:center; justify-content:center; gap:6px;">
-            <i data-lucide="save" style="width:14px; height:14px;"></i> Guardar Nueva Contraseña
+            <i data-lucide="save" class="icono-14"></i> Guardar Nueva Contraseña
           </button>
         </form>
       </div>
 
       <!-- Sesión Activa Segura y Logout -->
       <div style="background:var(--color-superficie-tenue); border-radius:12px; padding:16px; border:1px solid var(--color-borde);">
-        <div style="display:flex; justify-content:space-between; align-items:center; font-size:var(--texto-xs); color:var(--color-texto-suave); margin-bottom:12px;">
-          <span style="display:inline-flex; align-items:center; gap:4px;"><i data-lucide="globe" style="width:13px; height:13px;"></i> Red IUP Campus Mocoa</span>
-          <span style="color:var(--verde-700); font-weight:700;">● Sesión Activa Segura</span>
+        <div class="flex justify-between items-center texto-xs texto-suave mb-3">
+          <span class="inline-flex items-center gap-1"><i data-lucide="globe" class="icono-13"></i> Red IUP Campus Mocoa</span>
+          <span class="texto-exito peso-bold">● Sesión Activa Segura</span>
         </div>
         <a href="{% url 'logout' %}" onclick="cerrarSesion(); return false;" class="btn btn-danger btn-full" style="padding:10px; font-size:var(--texto-sm); text-decoration:none; display:inline-flex; align-items:center; justify-content:center; gap:8px;">
-          <i data-lucide="log-out" style="width:15px; height:15px;"></i> Cerrar Sesión Segura (Revocar JWT)
+          <i data-lucide="log-out" class="icono-15"></i> Cerrar Sesión Segura (Revocar JWT)
         </a>
       </div>
 

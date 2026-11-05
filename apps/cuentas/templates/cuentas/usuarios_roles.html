@@ -8,7 +8,7 @@
 <div>
   <!-- Header Banner -->
   <div class="dashboard-banner">
-    <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:16px;">
+    <div class="flex justify-between items-start flex-wrap gap-4">
       <div>
         <div class="banner-badge">● Administración Institucional Uniputumayo</div>
         <h1 class="banner-title">Gestión de Usuarios y Roles</h1>
@@ -30,30 +30,30 @@
       <div class="user-avatar-circle" style="width:48px; height:48px; font-size:var(--texto-lg); background:var(--color-primario); color:var(--color-texto-invertido);">
         {{ user.first_name|default:user.username|slice:":1"|upper }}
       </div>
-      <div style="flex-grow:1;">
-        <div style="display:flex; align-items:center; gap:8px;">
-          <h3 style="font-size:var(--texto-md); font-weight:800; color:var(--color-texto); margin:0;">{{ user.get_full_name|default:user.username }}</h3>
-          <span class="badge badge-info" style="font-size:var(--texto-xs); display:inline-flex; align-items:center; gap:4px;">
-            <i data-lucide="shield" style="width:12px; height:12px;"></i> Super Admin
+      <div class="flex-grow">
+        <div class="flex items-center gap-2">
+          <h3 class="texto-md peso-extrabold texto-principal m-0">{{ user.get_full_name|default:user.username }}</h3>
+          <span class="badge badge-info texto-xs inline-flex items-center gap-1">
+            <i data-lucide="shield" class="icono-12"></i> Super Admin
           </span>
         </div>
-        <div style="font-size:var(--texto-xs); color:var(--color-texto-suave);">Administrador del Sistema · Uniputumayo</div>
+        <div class="texto-xs texto-suave">Administrador del Sistema · Uniputumayo</div>
       </div>
     </div>
 
     <!-- Título y descripción -->
-    <div style="margin-bottom:20px;">
-      <h1 style="font-size:var(--texto-xl); font-weight:800; color:var(--color-texto); margin-bottom:4px;">Gestión de Usuarios y Roles</h1>
-      <p style="font-size:var(--texto-sm); color:var(--color-texto-suave);">Control de acceso, perfiles institucionales y asignación de permisos del sistema.</p>
+    <div class="mb-5">
+      <h1 class="texto-xl peso-extrabold texto-principal mb-1">Gestión de Usuarios y Roles</h1>
+      <p class="texto-sm texto-suave">Control de acceso, perfiles institucionales y asignación de permisos del sistema.</p>
     </div>
 
     <!-- Tab Selector -->
     <div style="background:var(--color-borde); border-radius:14px; padding:4px; display:flex; gap:4px; margin-bottom:20px;">
       <button type="button" id="tab-btn-usuarios" onclick="switchTab('usuarios')" style="flex:1; border:none; padding:10px; border-radius:10px; font-weight:700; font-size:var(--texto-sm); cursor:pointer; background:var(--color-superficie); color:var(--color-texto); display:flex; align-items:center; justify-content:center; gap:8px; box-shadow:0 1px 3px rgba(0,0,0,0.1);">
-        <i data-lucide="users" style="width:16px; height:16px;"></i> Usuarios <span class="badge badge-info" style="font-size:var(--texto-xs);">{{ usuarios.count }}</span>
+        <i data-lucide="users" class="icono-16"></i> Usuarios <span class="badge badge-info texto-xs">{{ usuarios.count }}</span>
       </button>
       <button type="button" id="tab-btn-roles" onclick="switchTab('roles')" style="flex:1; border:none; padding:10px; border-radius:10px; font-weight:700; font-size:var(--texto-sm); cursor:pointer; background:transparent; color:var(--color-texto-suave); display:flex; align-items:center; justify-content:center; gap:8px;">
-        <i data-lucide="shield" style="width:16px; height:16px;"></i> Roles y Permisos <span class="badge" style="background:var(--color-borde-fuerte); color:var(--gris-700); font-size:var(--texto-xs);">{{ roles.count }}</span>
+        <i data-lucide="shield" class="icono-16"></i> Roles y Permisos <span class="badge" style="background:var(--color-borde-fuerte); color:var(--gris-700); font-size:var(--texto-xs);">{{ roles.count }}</span>
       </button>
     </div>
 
@@ -67,20 +67,20 @@
 
       <!-- Botón Nuevo Usuario -->
       <button type="button" onclick="openModal('modal-nuevo-usuario')" class="btn btn-primary btn-full" style="height:46px; border-radius:12px; margin-bottom:18px; font-size:var(--texto-base); display:inline-flex; align-items:center; justify-content:center; gap:8px;">
-        <i data-lucide="user-plus" style="width:18px; height:18px;"></i> Nuevo Usuario
+        <i data-lucide="user-plus" class="icono-18"></i> Nuevo Usuario
       </button>
 
       <!-- Filtros de Rol y Estado -->
       <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:20px; font-size:var(--texto-xs);">
-        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-          <span style="color:var(--color-texto-suave); font-weight:600;">Rol:</span>
+        <div class="flex items-center gap-2 flex-wrap">
+          <span class="texto-suave peso-semibold">Rol:</span>
           <button type="button" class="btn btn-primary" onclick="filtrarRol('')" style="padding:4px 12px; font-size:var(--texto-xs); border-radius:9999px;">Todos</button>
           <button type="button" class="btn btn-outline" onclick="filtrarRol('admin')" style="padding:4px 12px; font-size:var(--texto-xs); border-radius:9999px;">Admin</button>
           <button type="button" class="btn btn-outline" onclick="filtrarRol('docente')" style="padding:4px 12px; font-size:var(--texto-xs); border-radius:9999px;">Docente</button>
           <button type="button" class="btn btn-outline" onclick="filtrarRol('estudiante')" style="padding:4px 12px; font-size:var(--texto-xs); border-radius:9999px;">Estudiante</button>
         </div>
-        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-          <span style="color:var(--color-texto-suave); font-weight:600;">Estado:</span>
+        <div class="flex items-center gap-2 flex-wrap">
+          <span class="texto-suave peso-semibold">Estado:</span>
           <button type="button" class="btn btn-outline" onclick="filtrarEstado('activos')" style="padding:4px 12px; font-size:var(--texto-xs); border-radius:9999px; background:var(--verde-100); color:var(--verde-800); border-color:var(--verde-200);">Activos</button>
           <button type="button" class="btn btn-outline" onclick="filtrarEstado('inactivos')" style="padding:4px 12px; font-size:var(--texto-xs); border-radius:9999px; background:var(--rojo-50); color:var(--rojo-700); border-color:var(--rojo-200);">Inactivos / Bloqueados</button>
           <button type="button" class="btn btn-outline" onclick="filtrarEstado('')" style="padding:4px 12px; font-size:var(--texto-xs); border-radius:9999px;">Todos</button>
@@ -91,14 +91,14 @@
       <div id="lista-usuarios" style="display:flex; flex-direction:column; gap:14px;">
         {% for u in usuarios %}
         <div class="card usuario-item" data-nombre="{{ u.get_full_name }} {{ u.username }} {{ u.email }}" data-rol="{{ u.perfil.rol.codigo|default:'' }}" data-activo="{% if u.is_active %}activos{% else %}inactivos{% endif %}" style="margin-bottom:0; padding:18px 20px;">
-          <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
+          <div class="flex justify-between items-start mb-2">
             <div style="display:flex; gap:14px; align-items:center;">
               <div class="user-avatar-circle" style="width:44px; height:44px; font-size:var(--texto-md);">
                 {{ u.first_name|default:u.username|slice:":2"|upper }}
               </div>
               <div>
-                <h3 style="font-size:var(--texto-md); font-weight:800; color:var(--color-texto); margin:0;">{{ u.get_full_name|default:u.username }}</h3>
-                <div style="font-size:var(--texto-xs); color:var(--color-texto-suave);">{{ u.email|default:"Sin correo" }}</div>
+                <h3 class="texto-md peso-extrabold texto-principal m-0">{{ u.get_full_name|default:u.username }}</h3>
+                <div class="texto-xs texto-suave">{{ u.email|default:"Sin correo" }}</div>
                 <div style="font-size:var(--texto-xs); color:var(--color-texto-tenue); margin-top:2px;">
                   Cód: {{ u.perfil.codigo_institucional|default:u.username }} · {{ u.perfil.rol.nombre|default:"Sin Rol" }}
                 </div>
@@ -108,8 +108,8 @@
               {% if u.is_active %}
                 <span class="badge badge-success">● Activo</span>
               {% else %}
-                <span class="badge badge-danger" style="display:inline-flex; align-items:center; gap:4px;">
-                  <i data-lucide="lock" style="width:12px; height:12px;"></i> Inactivo
+                <span class="badge badge-danger inline-flex items-center gap-1">
+                  <i data-lucide="lock" class="icono-12"></i> Inactivo
                 </span>
               {% endif %}
             </div>
@@ -122,21 +122,21 @@
           {% endif %}
 
           <div style="display:flex; gap:10px; border-top:1px solid var(--color-superficie-hundida); padding-top:12px;">
-            <form method="POST" action="{% url 'cuentas:toggle_usuario_estado' u.id %}" style="flex:1;">
+            <form method="POST" action="{% url 'cuentas:toggle_usuario_estado' u.id %}" class="flex-1">
               {% csrf_token %}
               {% if u.is_active %}
                 <button type="submit" class="btn btn-outline btn-full" style="padding:6px 12px; font-size:var(--texto-xs); color:var(--rojo-700); border-color:var(--rojo-200); display:inline-flex; align-items:center; justify-content:center; gap:4px;">
-                  <i data-lucide="user-x" style="width:14px; height:14px;"></i> Suspender
+                  <i data-lucide="user-x" class="icono-14"></i> Suspender
                 </button>
               {% else %}
                 <button type="submit" class="btn btn-outline btn-full" style="padding:6px 12px; font-size:var(--texto-xs); color:var(--verde-800); border-color:var(--verde-200); background:var(--verde-100); display:inline-flex; align-items:center; justify-content:center; gap:4px;">
-                  <i data-lucide="user-check" style="width:14px; height:14px;"></i> Reactivar Acceso
+                  <i data-lucide="user-check" class="icono-14"></i> Reactivar Acceso
                 </button>
               {% endif %}
             </form>
 
             <button type="button" onclick="editarUsuario('{{ u.id }}', '{{ u.first_name }}', '{{ u.last_name }}', '{{ u.email }}', '{{ u.perfil.rol.id|default:'' }}', '{{ u.perfil.codigo_institucional|default:'' }}')" class="btn btn-primary" style="flex:1; padding:6px 12px; font-size:var(--texto-xs); display:inline-flex; align-items:center; justify-content:center; gap:4px;">
-              <i data-lucide="edit-3" style="width:14px; height:14px;"></i> Editar
+              <i data-lucide="edit-3" class="icono-14"></i> Editar
             </button>
           </div>
         </div>
@@ -158,21 +158,21 @@
 
       <!-- Botón Nuevo Rol -->
       <button type="button" onclick="openModal('modal-nuevo-rol')" class="btn btn-primary btn-full" style="height:46px; border-radius:12px; margin-bottom:20px; font-size:var(--texto-base); display:inline-flex; align-items:center; justify-content:center; gap:6px;">
-        <i data-lucide="shield-plus" style="width:18px; height:18px;"></i> Nuevo Rol
+        <i data-lucide="shield-plus" class="icono-18"></i> Nuevo Rol
       </button>
 
       <!-- Lista de Roles -->
-      <div style="display:flex; flex-direction:column; gap:16px;">
+      <div class="flex flex-col gap-4">
         {% for r in roles %}
-        <div class="card" style="margin-bottom:0; padding:20px;">
-          <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
+        <div class="card mb-0 p-5">
+          <div class="flex justify-between items-start mb-2">
             <div style="display:flex; gap:14px; align-items:center;">
               <div class="user-avatar-circle" style="width:44px; height:44px; font-size:var(--texto-md); background:var(--azul-50); color:var(--azul-600);">
                 {{ r.nombre|slice:":2"|upper }}
               </div>
               <div>
-                <h3 style="font-size:var(--texto-md); font-weight:800; color:var(--color-texto); margin:0;">{{ r.nombre }}</h3>
-                <div style="font-size:var(--texto-xs); color:var(--color-texto-suave);">{{ r.descripcion|default:"Configuración institucional y permisos del sistema" }}</div>
+                <h3 class="texto-md peso-extrabold texto-principal m-0">{{ r.nombre }}</h3>
+                <div class="texto-xs texto-suave">{{ r.descripcion|default:"Configuración institucional y permisos del sistema" }}</div>
               </div>
             </div>
             <div>
@@ -186,15 +186,15 @@
 
           <div style="background:var(--color-superficie-hundida); border-radius:8px; padding:8px 14px; font-size:var(--texto-xs); color:var(--color-texto-suave); margin:12px 0; display:flex; justify-content:space-between; align-items:center;">
             <span><strong>{{ r.permisos.count }}</strong> permisos habilitados</span>
-            <span style="font-size:var(--texto-xs); color:var(--color-texto-suave);">Cód: {{ r.codigo }}</span>
+            <span class="texto-xs texto-suave">Cód: {{ r.codigo }}</span>
           </div>
 
           <div style="display:flex; gap:10px;">
             <button type="button" onclick="abrirModalPermisos('{{ r.id }}', '{{ r.nombre }}')" class="btn btn-outline btn-full" style="background:var(--azul-50); color:var(--color-primario); border-color:var(--azul-100); font-size:var(--texto-sm); padding:8px; display:inline-flex; align-items:center; justify-content:center; gap:6px;">
-              <i data-lucide="shield" style="width:15px; height:15px;"></i> Editar Permisos
+              <i data-lucide="shield" class="icono-15"></i> Editar Permisos
             </button>
             {% if not r.es_sistema %}
-            <form method="POST" action="{% url 'cuentas:toggle_rol_estado' r.id %}" style="flex-shrink:0;">
+            <form method="POST" action="{% url 'cuentas:toggle_rol_estado' r.id %}" class="shrink-0">
               {% csrf_token %}
               <button type="submit" class="btn btn-outline" style="font-size:var(--texto-xs); padding:8px 12px;">
                 {% if r.activo %}Desactivar{% else %}Activar{% endif %}
@@ -212,7 +212,7 @@
 <div id="modal-nuevo-usuario" class="modal-backdrop">
   <div class="modal-box">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
-      <h3 style="font-size:var(--texto-lg); font-weight:800; color:var(--color-texto);">Registrar Nuevo Usuario</h3>
+      <h3 class="texto-lg peso-extrabold texto-principal">Registrar Nuevo Usuario</h3>
       <button onclick="closeModal('modal-nuevo-usuario')" style="background:none; border:none; font-size:var(--texto-xl); cursor:pointer;">&times;</button>
     </div>
 
@@ -266,7 +266,7 @@
   <div class="modal-box">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
       <div>
-        <h3 style="font-size:var(--texto-lg); font-weight:800; color:var(--color-texto);">Editar Usuario Institucional</h3>
+        <h3 class="texto-lg peso-extrabold texto-principal">Editar Usuario Institucional</h3>
         <div id="editar-usuario-subtitulo" style="font-size:var(--texto-xs); color:var(--azul-600); font-weight:600;"></div>
       </div>
       <button onclick="closeModal('modal-editar-usuario')" style="background:none; border:none; font-size:var(--texto-xl); cursor:pointer;">&times;</button>
@@ -317,7 +317,7 @@
 <div id="modal-nuevo-rol" class="modal-backdrop">
   <div class="modal-box">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
-      <h3 style="font-size:var(--texto-lg); font-weight:800; color:var(--color-texto);">Crear Rol Personalizado</h3>
+      <h3 class="texto-lg peso-extrabold texto-principal">Crear Rol Personalizado</h3>
       <button onclick="closeModal('modal-nuevo-rol')" style="background:none; border:none; font-size:var(--texto-xl); cursor:pointer;">&times;</button>
     </div>
 
@@ -341,7 +341,7 @@
         <div style="max-height:220px; overflow-y:auto; border:1px solid var(--color-borde); border-radius:10px; padding:12px; display:flex; flex-direction:column; gap:8px;">
           {% for p in todos_permisos %}
           <label style="display:flex; align-items:center; gap:8px; font-size:var(--texto-sm); cursor:pointer;">
-            <input type="checkbox" name="permisos" value="{{ p.id }}" style="accent-color:var(--color-primario); width:16px; height:16px;">
+            <input type="checkbox" name="permisos" value="{{ p.id }}" class="icono-16">
             <span><strong>{{ p.modulo }}:</strong> {{ p.nombre }}</span>
           </label>
           {% endfor %}
@@ -361,7 +361,7 @@
   <div class="modal-box">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
       <div>
-        <h3 style="font-size:var(--texto-lg); font-weight:800; color:var(--color-texto);">Configurar Permisos de Rol</h3>
+        <h3 class="texto-lg peso-extrabold texto-principal">Configurar Permisos de Rol</h3>
         <div id="nombre-rol-permisos" style="font-size:var(--texto-sm); color:var(--azul-600); font-weight:600;"></div>
       </div>
       <button onclick="closeModal('modal-editar-permisos')" style="background:none; border:none; font-size:var(--texto-xl); cursor:pointer;">&times;</button>
@@ -374,10 +374,10 @@
         <div style="max-height:280px; overflow-y:auto; border:1px solid var(--color-borde); border-radius:10px; padding:14px; display:flex; flex-direction:column; gap:10px;">
           {% for p in todos_permisos %}
           <label style="display:flex; align-items:center; gap:10px; font-size:var(--texto-sm); cursor:pointer; padding:4px 0;">
-            <input type="checkbox" name="permisos" value="{{ p.id }}" id="permiso-chk-{{ p.id }}" style="accent-color:var(--color-primario); width:16px; height:16px;">
+            <input type="checkbox" name="permisos" value="{{ p.id }}" id="permiso-chk-{{ p.id }}" class="icono-16">
             <div>
-              <div style="font-weight:600; color:var(--color-texto);">{{ p.modulo }}: {{ p.nombre }}</div>
-              <div style="font-size:var(--texto-xs); color:var(--color-texto-suave);">{{ p.descripcion }}</div>
+              <div class="peso-semibold texto-principal">{{ p.modulo }}: {{ p.nombre }}</div>
+              <div class="texto-xs texto-suave">{{ p.descripcion }}</div>
             </div>
           </label>
           {% endfor %}

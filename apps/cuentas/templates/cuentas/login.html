@@ -8,12 +8,12 @@
   <!-- Header con botón volver -->
   <div style="padding:20px 32px;">
     <a href="{% url 'landing' %}" style="display:inline-flex; align-items:center; justify-content:center; width:40px; height:40px; border-radius:50%; background:var(--color-superficie); border:1px solid var(--color-borde); color:var(--color-texto); text-decoration:none; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
-      <i data-lucide="arrow-left" style="width:18px; height:18px;"></i>
+      <i data-lucide="arrow-left" class="icono-18"></i>
     </a>
   </div>
 
   <!-- Contenedor central -->
-  <div style="flex-grow:1; display:flex; align-items:center; justify-content:center; padding:20px;">
+  <div class="flex-grow flex items-center justify-center p-5">
     <div style="width:100%; max-width:440px;">
       
       <!-- Card Login -->
@@ -22,10 +22,10 @@
         <!-- Badge y Título -->
         <div style="text-align:center; margin-bottom:28px;">
           <div style="display:inline-flex; align-items:center; gap:6px; background:var(--azul-50); color:var(--azul-600); padding:6px 14px; border-radius:9999px; font-size:var(--texto-xs); font-weight:700; margin-bottom:14px;">
-            <i data-lucide="graduation-cap" style="width:15px; height:15px;"></i> Portal de Evaluación Institucional
+            <i data-lucide="graduation-cap" class="icono-15"></i> Portal de Evaluación Institucional
           </div>
           <h1 style="font-size:var(--texto-2xl); font-weight:800; color:var(--color-texto); margin-bottom:6px;">Simulador Saber TyT</h1>
-          <p style="font-size:var(--texto-sm); color:var(--color-texto-suave);">Acceso unificado para Estudiantes, Docentes y Administradores</p>
+          <p class="texto-sm texto-suave">Acceso unificado para Estudiantes, Docentes y Administradores</p>
         </div>
 
         <!-- Alerta de Error -->
@@ -46,18 +46,18 @@
           <div class="form-group" style="margin-bottom:14px;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
               <label class="form-label" style="margin-bottom:0; font-size:var(--texto-sm); font-weight:600; color:var(--gris-700);">Contraseña</label>
-              <a href="#" onclick="mostrarNotificacion('Por favor contacte a la Dirección de Sistemas: soporte.sistemas@uniputumayo.edu.co', 'info', 'Recuperación de Clave'); return false;" style="font-size:var(--texto-xs); color:var(--color-primario); font-weight:600;">¿Olvidó su clave?</a>
+              <a href="#" onclick="mostrarNotificacion('Por favor contacte a la Dirección de Sistemas: soporte.sistemas@uniputumayo.edu.co', 'info', 'Recuperación de Clave'); return false;" class="texto-xs texto-primario peso-semibold">¿Olvidó su clave?</a>
             </div>
             <div style="position:relative;">
               <i data-lucide="lock" style="position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--color-texto-tenue); width:16px; height:16px;"></i>
               <input type="password" id="password" name="password" required class="form-input" placeholder="••••••••••••" style="padding-left:40px; padding-right:40px; height:46px; border-radius:10px;">
               <button type="button" onclick="togglePassword()" style="position:absolute; right:14px; top:50%; transform:translateY(-50%); background:none; border:none; color:var(--color-texto-tenue); cursor:pointer; display:flex; align-items:center;">
-                <i data-lucide="eye" style="width:16px; height:16px;"></i>
+                <i data-lucide="eye" class="icono-16"></i>
               </button>
             </div>
           </div>
 
-          <div style="display:flex; align-items:center; gap:8px; margin-bottom:24px;">
+          <div class="flex items-center gap-2 mb-6">
             <input type="checkbox" id="remember" style="width:16px; height:16px; accent-color:var(--color-primario); cursor:pointer;">
             <label for="remember" style="font-size:var(--texto-sm); color:var(--color-texto-suave); cursor:pointer;">Recordar en este equipo</label>
           </div>
@@ -70,15 +70,15 @@
         <!-- Accesos directos de prueba para sustentación -->
         <div style="margin-top:24px; padding-top:18px; border-top:1px dashed var(--color-borde); text-align:center;">
           <span style="font-size:var(--texto-xs); font-weight:700; color:var(--color-texto-tenue); text-transform:uppercase; letter-spacing:0.5px;">Acceso Rápido para Sustentación</span>
-          <div style="display:flex; gap:8px; justify-content:center; margin-top:8px; flex-wrap:wrap;">
+          <div class="flex gap-2 justify-center mt-2 flex-wrap">
             <button type="button" onclick="quickFill('david', '1234')" class="btn btn-outline" style="font-size:var(--texto-xs); padding:6px 12px; cursor:pointer; font-weight:700; display:inline-flex; align-items:center; gap:4px;">
-              <i data-lucide="shield" style="width:13px; height:13px;"></i> Admin (david / 1234)
+              <i data-lucide="shield" class="icono-13"></i> Admin (david / 1234)
             </button>
             <button type="button" onclick="quickFill('docente', '123456')" class="btn btn-outline" style="font-size:var(--texto-xs); padding:6px 12px; cursor:pointer; font-weight:700; display:inline-flex; align-items:center; gap:4px;">
-              <i data-lucide="briefcase" style="width:13px; height:13px;"></i> Docente (docente / 123456)
+              <i data-lucide="briefcase" class="icono-13"></i> Docente (docente / 123456)
             </button>
             <button type="button" onclick="quickFill('estudiante', '123456')" class="btn btn-outline" style="font-size:var(--texto-xs); padding:6px 12px; cursor:pointer; font-weight:700; display:inline-flex; align-items:center; gap:4px;">
-              <i data-lucide="graduation-cap" style="width:13px; height:13px;"></i> Estudiante (estudiante / 123456)
+              <i data-lucide="graduation-cap" class="icono-13"></i> Estudiante (estudiante / 123456)
             </button>
           </div>
         </div>
@@ -86,11 +86,11 @@
       </div>
 
       <!-- Footer soporte técnico -->
-      <div style="text-align:center; margin-top:24px; font-size:var(--texto-sm); color:var(--color-texto-suave);">
+      <div class="texto-centro mt-6 texto-sm texto-suave">
         <div style="font-weight:600; color:var(--gris-700); margin-bottom:2px; display:inline-flex; align-items:center; gap:6px;">
-          <i data-lucide="headphones" style="width:14px; height:14px;"></i> Soporte Técnico: Dirección de Sistemas IUP
+          <i data-lucide="headphones" class="icono-14"></i> Soporte Técnico: Dirección de Sistemas IUP
         </div>
-        <div>Mesa de ayuda: <a href="mailto:soporte.sistemas@uniputumayo.edu.co" style="color:var(--color-primario); font-weight:500;">soporte.sistemas@uniputumayo.edu.co</a></div>
+        <div>Mesa de ayuda: <a href="mailto:soporte.sistemas@uniputumayo.edu.co" class="texto-primario peso-medio">soporte.sistemas@uniputumayo.edu.co</a></div>
       </div>
 
     </div>
