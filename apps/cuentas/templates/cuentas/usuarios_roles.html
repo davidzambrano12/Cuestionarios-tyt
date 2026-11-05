@@ -18,7 +18,7 @@
         <button type="button" onclick="openModal('modal-nuevo-usuario')" class="btn btn-primary" style="padding:10px 18px; border-radius:10px; font-weight:700; display:inline-flex; align-items:center; gap:6px;">
           <i data-lucide="user-plus"></i> Nuevo Usuario
         </button>
-        <button type="button" onclick="openModal('modal-nuevo-rol')" class="btn btn-outline" style="padding:10px 16px; border-radius:10px; background:white; font-weight:600; display:inline-flex; align-items:center; gap:6px;">
+        <button type="button" onclick="openModal('modal-nuevo-rol')" class="btn btn-outline" style="padding:10px 16px; border-radius:10px; background:var(--color-superficie); font-weight:600; display:inline-flex; align-items:center; gap:6px;">
           <i data-lucide="shield"></i> Nuevo Rol
         </button>
       </div>
@@ -27,33 +27,33 @@
 
     <!-- Admin profile card en cabecera -->
     <div class="card" style="padding:16px 20px; display:flex; align-items:center; gap:16px; margin-bottom:24px;">
-      <div class="user-avatar-circle" style="width:48px; height:48px; font-size:18px; background:#186382; color:white;">
+      <div class="user-avatar-circle" style="width:48px; height:48px; font-size:var(--texto-lg); background:var(--color-primario); color:var(--color-texto-invertido);">
         {{ user.first_name|default:user.username|slice:":1"|upper }}
       </div>
       <div style="flex-grow:1;">
         <div style="display:flex; align-items:center; gap:8px;">
-          <h3 style="font-size:15px; font-weight:800; color:#0f172a; margin:0;">{{ user.get_full_name|default:user.username }}</h3>
-          <span class="badge badge-info" style="font-size:11px; display:inline-flex; align-items:center; gap:4px;">
+          <h3 style="font-size:var(--texto-md); font-weight:800; color:var(--color-texto); margin:0;">{{ user.get_full_name|default:user.username }}</h3>
+          <span class="badge badge-info" style="font-size:var(--texto-xs); display:inline-flex; align-items:center; gap:4px;">
             <i data-lucide="shield" style="width:12px; height:12px;"></i> Super Admin
           </span>
         </div>
-        <div style="font-size:12px; color:#64748b;">Administrador del Sistema · Uniputumayo</div>
+        <div style="font-size:var(--texto-xs); color:var(--color-texto-suave);">Administrador del Sistema · Uniputumayo</div>
       </div>
     </div>
 
     <!-- Título y descripción -->
     <div style="margin-bottom:20px;">
-      <h1 style="font-size:22px; font-weight:800; color:#0f172a; margin-bottom:4px;">Gestión de Usuarios y Roles</h1>
-      <p style="font-size:13px; color:#64748b;">Control de acceso, perfiles institucionales y asignación de permisos del sistema.</p>
+      <h1 style="font-size:var(--texto-xl); font-weight:800; color:var(--color-texto); margin-bottom:4px;">Gestión de Usuarios y Roles</h1>
+      <p style="font-size:var(--texto-sm); color:var(--color-texto-suave);">Control de acceso, perfiles institucionales y asignación de permisos del sistema.</p>
     </div>
 
     <!-- Tab Selector -->
-    <div style="background:#e2e8f0; border-radius:14px; padding:4px; display:flex; gap:4px; margin-bottom:20px;">
-      <button type="button" id="tab-btn-usuarios" onclick="switchTab('usuarios')" style="flex:1; border:none; padding:10px; border-radius:10px; font-weight:700; font-size:13px; cursor:pointer; background:white; color:#0f172a; display:flex; align-items:center; justify-content:center; gap:8px; box-shadow:0 1px 3px rgba(0,0,0,0.1);">
-        <i data-lucide="users" style="width:16px; height:16px;"></i> Usuarios <span class="badge badge-info" style="font-size:11px;">{{ usuarios.count }}</span>
+    <div style="background:var(--color-borde); border-radius:14px; padding:4px; display:flex; gap:4px; margin-bottom:20px;">
+      <button type="button" id="tab-btn-usuarios" onclick="switchTab('usuarios')" style="flex:1; border:none; padding:10px; border-radius:10px; font-weight:700; font-size:var(--texto-sm); cursor:pointer; background:var(--color-superficie); color:var(--color-texto); display:flex; align-items:center; justify-content:center; gap:8px; box-shadow:0 1px 3px rgba(0,0,0,0.1);">
+        <i data-lucide="users" style="width:16px; height:16px;"></i> Usuarios <span class="badge badge-info" style="font-size:var(--texto-xs);">{{ usuarios.count }}</span>
       </button>
-      <button type="button" id="tab-btn-roles" onclick="switchTab('roles')" style="flex:1; border:none; padding:10px; border-radius:10px; font-weight:700; font-size:13px; cursor:pointer; background:transparent; color:#64748b; display:flex; align-items:center; justify-content:center; gap:8px;">
-        <i data-lucide="shield" style="width:16px; height:16px;"></i> Roles y Permisos <span class="badge" style="background:#cbd5e1; color:#334155; font-size:11px;">{{ roles.count }}</span>
+      <button type="button" id="tab-btn-roles" onclick="switchTab('roles')" style="flex:1; border:none; padding:10px; border-radius:10px; font-weight:700; font-size:var(--texto-sm); cursor:pointer; background:transparent; color:var(--color-texto-suave); display:flex; align-items:center; justify-content:center; gap:8px;">
+        <i data-lucide="shield" style="width:16px; height:16px;"></i> Roles y Permisos <span class="badge" style="background:var(--color-borde-fuerte); color:var(--gris-700); font-size:var(--texto-xs);">{{ roles.count }}</span>
       </button>
     </div>
 
@@ -61,29 +61,29 @@
     <div id="tab-usuarios">
       <!-- Buscador -->
       <div style="position:relative; margin-bottom:14px;">
-        <i data-lucide="search" style="position:absolute; left:14px; top:50%; transform:translateY(-50%); color:#94a3b8; width:16px; height:16px;"></i>
+        <i data-lucide="search" style="position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--color-texto-tenue); width:16px; height:16px;"></i>
         <input type="text" id="filtro-texto-usuarios" onkeyup="filtrarUsuarios()" placeholder="Buscar por nombre, código o correo institucional" class="form-input" style="padding-left:40px; height:44px; border-radius:12px;">
       </div>
 
       <!-- Botón Nuevo Usuario -->
-      <button type="button" onclick="openModal('modal-nuevo-usuario')" class="btn btn-primary btn-full" style="height:46px; border-radius:12px; margin-bottom:18px; font-size:14px; display:inline-flex; align-items:center; justify-content:center; gap:8px;">
+      <button type="button" onclick="openModal('modal-nuevo-usuario')" class="btn btn-primary btn-full" style="height:46px; border-radius:12px; margin-bottom:18px; font-size:var(--texto-base); display:inline-flex; align-items:center; justify-content:center; gap:8px;">
         <i data-lucide="user-plus" style="width:18px; height:18px;"></i> Nuevo Usuario
       </button>
 
       <!-- Filtros de Rol y Estado -->
-      <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:20px; font-size:12px;">
+      <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:20px; font-size:var(--texto-xs);">
         <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-          <span style="color:#64748b; font-weight:600;">Rol:</span>
-          <button type="button" class="btn btn-primary" onclick="filtrarRol('')" style="padding:4px 12px; font-size:12px; border-radius:9999px;">Todos</button>
-          <button type="button" class="btn btn-outline" onclick="filtrarRol('admin')" style="padding:4px 12px; font-size:12px; border-radius:9999px;">Admin</button>
-          <button type="button" class="btn btn-outline" onclick="filtrarRol('docente')" style="padding:4px 12px; font-size:12px; border-radius:9999px;">Docente</button>
-          <button type="button" class="btn btn-outline" onclick="filtrarRol('estudiante')" style="padding:4px 12px; font-size:12px; border-radius:9999px;">Estudiante</button>
+          <span style="color:var(--color-texto-suave); font-weight:600;">Rol:</span>
+          <button type="button" class="btn btn-primary" onclick="filtrarRol('')" style="padding:4px 12px; font-size:var(--texto-xs); border-radius:9999px;">Todos</button>
+          <button type="button" class="btn btn-outline" onclick="filtrarRol('admin')" style="padding:4px 12px; font-size:var(--texto-xs); border-radius:9999px;">Admin</button>
+          <button type="button" class="btn btn-outline" onclick="filtrarRol('docente')" style="padding:4px 12px; font-size:var(--texto-xs); border-radius:9999px;">Docente</button>
+          <button type="button" class="btn btn-outline" onclick="filtrarRol('estudiante')" style="padding:4px 12px; font-size:var(--texto-xs); border-radius:9999px;">Estudiante</button>
         </div>
         <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-          <span style="color:#64748b; font-weight:600;">Estado:</span>
-          <button type="button" class="btn btn-outline" onclick="filtrarEstado('activos')" style="padding:4px 12px; font-size:12px; border-radius:9999px; background:#dcfce7; color:#15803d; border-color:#86efac;">Activos</button>
-          <button type="button" class="btn btn-outline" onclick="filtrarEstado('inactivos')" style="padding:4px 12px; font-size:12px; border-radius:9999px; background:#fee2e2; color:#b91c1c; border-color:#fca5a5;">Inactivos / Bloqueados</button>
-          <button type="button" class="btn btn-outline" onclick="filtrarEstado('')" style="padding:4px 12px; font-size:12px; border-radius:9999px;">Todos</button>
+          <span style="color:var(--color-texto-suave); font-weight:600;">Estado:</span>
+          <button type="button" class="btn btn-outline" onclick="filtrarEstado('activos')" style="padding:4px 12px; font-size:var(--texto-xs); border-radius:9999px; background:var(--verde-100); color:var(--verde-800); border-color:var(--verde-200);">Activos</button>
+          <button type="button" class="btn btn-outline" onclick="filtrarEstado('inactivos')" style="padding:4px 12px; font-size:var(--texto-xs); border-radius:9999px; background:var(--rojo-50); color:var(--rojo-700); border-color:var(--rojo-200);">Inactivos / Bloqueados</button>
+          <button type="button" class="btn btn-outline" onclick="filtrarEstado('')" style="padding:4px 12px; font-size:var(--texto-xs); border-radius:9999px;">Todos</button>
         </div>
       </div>
 
@@ -93,13 +93,13 @@
         <div class="card usuario-item" data-nombre="{{ u.get_full_name }} {{ u.username }} {{ u.email }}" data-rol="{{ u.perfil.rol.codigo|default:'' }}" data-activo="{% if u.is_active %}activos{% else %}inactivos{% endif %}" style="margin-bottom:0; padding:18px 20px;">
           <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
             <div style="display:flex; gap:14px; align-items:center;">
-              <div class="user-avatar-circle" style="width:44px; height:44px; font-size:16px;">
+              <div class="user-avatar-circle" style="width:44px; height:44px; font-size:var(--texto-md);">
                 {{ u.first_name|default:u.username|slice:":2"|upper }}
               </div>
               <div>
-                <h3 style="font-size:15px; font-weight:800; color:#0f172a; margin:0;">{{ u.get_full_name|default:u.username }}</h3>
-                <div style="font-size:12px; color:#64748b;">{{ u.email|default:"Sin correo" }}</div>
-                <div style="font-size:11px; color:#94a3b8; margin-top:2px;">
+                <h3 style="font-size:var(--texto-md); font-weight:800; color:var(--color-texto); margin:0;">{{ u.get_full_name|default:u.username }}</h3>
+                <div style="font-size:var(--texto-xs); color:var(--color-texto-suave);">{{ u.email|default:"Sin correo" }}</div>
+                <div style="font-size:var(--texto-xs); color:var(--color-texto-tenue); margin-top:2px;">
                   Cód: {{ u.perfil.codigo_institucional|default:u.username }} · {{ u.perfil.rol.nombre|default:"Sin Rol" }}
                 </div>
               </div>
@@ -116,32 +116,32 @@
           </div>
 
           {% if u.perfil.modulo_asignado %}
-          <div style="background:#f0f9ff; border-radius:8px; padding:8px 12px; font-size:12px; color:#0369a1; margin-bottom:12px;">
+          <div style="background:var(--azul-50); border-radius:8px; padding:8px 12px; font-size:var(--texto-xs); color:var(--azul-700); margin-bottom:12px;">
             <strong>Módulo asignado:</strong> {{ u.perfil.modulo_asignado }}
           </div>
           {% endif %}
 
-          <div style="display:flex; gap:10px; border-top:1px solid #f1f5f9; padding-top:12px;">
+          <div style="display:flex; gap:10px; border-top:1px solid var(--color-superficie-hundida); padding-top:12px;">
             <form method="POST" action="{% url 'cuentas:toggle_usuario_estado' u.id %}" style="flex:1;">
               {% csrf_token %}
               {% if u.is_active %}
-                <button type="submit" class="btn btn-outline btn-full" style="padding:6px 12px; font-size:12px; color:#b91c1c; border-color:#fca5a5; display:inline-flex; align-items:center; justify-content:center; gap:4px;">
+                <button type="submit" class="btn btn-outline btn-full" style="padding:6px 12px; font-size:var(--texto-xs); color:var(--rojo-700); border-color:var(--rojo-200); display:inline-flex; align-items:center; justify-content:center; gap:4px;">
                   <i data-lucide="user-x" style="width:14px; height:14px;"></i> Suspender
                 </button>
               {% else %}
-                <button type="submit" class="btn btn-outline btn-full" style="padding:6px 12px; font-size:12px; color:#15803d; border-color:#86efac; background:#dcfce7; display:inline-flex; align-items:center; justify-content:center; gap:4px;">
+                <button type="submit" class="btn btn-outline btn-full" style="padding:6px 12px; font-size:var(--texto-xs); color:var(--verde-800); border-color:var(--verde-200); background:var(--verde-100); display:inline-flex; align-items:center; justify-content:center; gap:4px;">
                   <i data-lucide="user-check" style="width:14px; height:14px;"></i> Reactivar Acceso
                 </button>
               {% endif %}
             </form>
 
-            <button type="button" onclick="editarUsuario('{{ u.id }}', '{{ u.first_name }}', '{{ u.last_name }}', '{{ u.email }}', '{{ u.perfil.rol.id|default:'' }}', '{{ u.perfil.codigo_institucional|default:'' }}')" class="btn btn-primary" style="flex:1; padding:6px 12px; font-size:12px; display:inline-flex; align-items:center; justify-content:center; gap:4px;">
+            <button type="button" onclick="editarUsuario('{{ u.id }}', '{{ u.first_name }}', '{{ u.last_name }}', '{{ u.email }}', '{{ u.perfil.rol.id|default:'' }}', '{{ u.perfil.codigo_institucional|default:'' }}')" class="btn btn-primary" style="flex:1; padding:6px 12px; font-size:var(--texto-xs); display:inline-flex; align-items:center; justify-content:center; gap:4px;">
               <i data-lucide="edit-3" style="width:14px; height:14px;"></i> Editar
             </button>
           </div>
         </div>
         {% empty %}
-        <div class="card" style="text-align:center; padding:30px; color:#64748b;">
+        <div class="card" style="text-align:center; padding:30px; color:var(--color-texto-suave);">
           No se encontraron usuarios registrados.
         </div>
         {% endfor %}
@@ -152,12 +152,12 @@
     <div id="tab-roles" style="display:none;">
       <!-- Buscador -->
       <div style="position:relative; margin-bottom:14px;">
-        <i data-lucide="search" style="position:absolute; left:14px; top:50%; transform:translateY(-50%); color:#94a3b8; width:16px; height:16px;"></i>
+        <i data-lucide="search" style="position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--color-texto-tenue); width:16px; height:16px;"></i>
         <input type="text" id="filtro-texto-roles" placeholder="Buscar por rol..." class="form-input" style="padding-left:40px; height:44px; border-radius:12px;">
       </div>
 
       <!-- Botón Nuevo Rol -->
-      <button type="button" onclick="openModal('modal-nuevo-rol')" class="btn btn-primary btn-full" style="height:46px; border-radius:12px; margin-bottom:20px; font-size:14px; display:inline-flex; align-items:center; justify-content:center; gap:6px;">
+      <button type="button" onclick="openModal('modal-nuevo-rol')" class="btn btn-primary btn-full" style="height:46px; border-radius:12px; margin-bottom:20px; font-size:var(--texto-base); display:inline-flex; align-items:center; justify-content:center; gap:6px;">
         <i data-lucide="shield-plus" style="width:18px; height:18px;"></i> Nuevo Rol
       </button>
 
@@ -167,12 +167,12 @@
         <div class="card" style="margin-bottom:0; padding:20px;">
           <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
             <div style="display:flex; gap:14px; align-items:center;">
-              <div class="user-avatar-circle" style="width:44px; height:44px; font-size:16px; background:#e0f2fe; color:#0284c7;">
+              <div class="user-avatar-circle" style="width:44px; height:44px; font-size:var(--texto-md); background:var(--azul-50); color:var(--azul-600);">
                 {{ r.nombre|slice:":2"|upper }}
               </div>
               <div>
-                <h3 style="font-size:16px; font-weight:800; color:#0f172a; margin:0;">{{ r.nombre }}</h3>
-                <div style="font-size:12px; color:#64748b;">{{ r.descripcion|default:"Configuración institucional y permisos del sistema" }}</div>
+                <h3 style="font-size:var(--texto-md); font-weight:800; color:var(--color-texto); margin:0;">{{ r.nombre }}</h3>
+                <div style="font-size:var(--texto-xs); color:var(--color-texto-suave);">{{ r.descripcion|default:"Configuración institucional y permisos del sistema" }}</div>
               </div>
             </div>
             <div>
@@ -184,19 +184,19 @@
             </div>
           </div>
 
-          <div style="background:#f1f5f9; border-radius:8px; padding:8px 14px; font-size:12px; color:#475569; margin:12px 0; display:flex; justify-content:space-between; align-items:center;">
+          <div style="background:var(--color-superficie-hundida); border-radius:8px; padding:8px 14px; font-size:var(--texto-xs); color:var(--color-texto-suave); margin:12px 0; display:flex; justify-content:space-between; align-items:center;">
             <span><strong>{{ r.permisos.count }}</strong> permisos habilitados</span>
-            <span style="font-size:11px; color:#64748b;">Cód: {{ r.codigo }}</span>
+            <span style="font-size:var(--texto-xs); color:var(--color-texto-suave);">Cód: {{ r.codigo }}</span>
           </div>
 
           <div style="display:flex; gap:10px;">
-            <button type="button" onclick="abrirModalPermisos('{{ r.id }}', '{{ r.nombre }}')" class="btn btn-outline btn-full" style="background:#eff6ff; color:#186382; border-color:#bfdbfe; font-size:13px; padding:8px; display:inline-flex; align-items:center; justify-content:center; gap:6px;">
+            <button type="button" onclick="abrirModalPermisos('{{ r.id }}', '{{ r.nombre }}')" class="btn btn-outline btn-full" style="background:var(--azul-50); color:var(--color-primario); border-color:var(--azul-100); font-size:var(--texto-sm); padding:8px; display:inline-flex; align-items:center; justify-content:center; gap:6px;">
               <i data-lucide="shield" style="width:15px; height:15px;"></i> Editar Permisos
             </button>
             {% if not r.es_sistema %}
             <form method="POST" action="{% url 'cuentas:toggle_rol_estado' r.id %}" style="flex-shrink:0;">
               {% csrf_token %}
-              <button type="submit" class="btn btn-outline" style="font-size:12px; padding:8px 12px;">
+              <button type="submit" class="btn btn-outline" style="font-size:var(--texto-xs); padding:8px 12px;">
                 {% if r.activo %}Desactivar{% else %}Activar{% endif %}
               </button>
             </form>
@@ -212,8 +212,8 @@
 <div id="modal-nuevo-usuario" class="modal-backdrop">
   <div class="modal-box">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
-      <h3 style="font-size:18px; font-weight:800; color:#0f172a;">Registrar Nuevo Usuario</h3>
-      <button onclick="closeModal('modal-nuevo-usuario')" style="background:none; border:none; font-size:20px; cursor:pointer;">&times;</button>
+      <h3 style="font-size:var(--texto-lg); font-weight:800; color:var(--color-texto);">Registrar Nuevo Usuario</h3>
+      <button onclick="closeModal('modal-nuevo-usuario')" style="background:none; border:none; font-size:var(--texto-xl); cursor:pointer;">&times;</button>
     </div>
 
     <form method="POST" action="{% url 'cuentas:crear_usuario' %}">
@@ -266,10 +266,10 @@
   <div class="modal-box">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
       <div>
-        <h3 style="font-size:18px; font-weight:800; color:#0f172a;">Editar Usuario Institucional</h3>
-        <div id="editar-usuario-subtitulo" style="font-size:12px; color:#0284c7; font-weight:600;"></div>
+        <h3 style="font-size:var(--texto-lg); font-weight:800; color:var(--color-texto);">Editar Usuario Institucional</h3>
+        <div id="editar-usuario-subtitulo" style="font-size:var(--texto-xs); color:var(--azul-600); font-weight:600;"></div>
       </div>
-      <button onclick="closeModal('modal-editar-usuario')" style="background:none; border:none; font-size:20px; cursor:pointer;">&times;</button>
+      <button onclick="closeModal('modal-editar-usuario')" style="background:none; border:none; font-size:var(--texto-xl); cursor:pointer;">&times;</button>
     </div>
 
     <form id="form-editar-usuario" method="POST" action="">
@@ -317,8 +317,8 @@
 <div id="modal-nuevo-rol" class="modal-backdrop">
   <div class="modal-box">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
-      <h3 style="font-size:18px; font-weight:800; color:#0f172a;">Crear Rol Personalizado</h3>
-      <button onclick="closeModal('modal-nuevo-rol')" style="background:none; border:none; font-size:20px; cursor:pointer;">&times;</button>
+      <h3 style="font-size:var(--texto-lg); font-weight:800; color:var(--color-texto);">Crear Rol Personalizado</h3>
+      <button onclick="closeModal('modal-nuevo-rol')" style="background:none; border:none; font-size:var(--texto-xl); cursor:pointer;">&times;</button>
     </div>
 
     <form method="POST" action="{% url 'cuentas:crear_rol' %}">
@@ -338,10 +338,10 @@
 
       <div class="form-group">
         <label class="form-label" style="margin-bottom:10px;">Permisos Habilitados Individuales:</label>
-        <div style="max-height:220px; overflow-y:auto; border:1px solid #e2e8f0; border-radius:10px; padding:12px; display:flex; flex-direction:column; gap:8px;">
+        <div style="max-height:220px; overflow-y:auto; border:1px solid var(--color-borde); border-radius:10px; padding:12px; display:flex; flex-direction:column; gap:8px;">
           {% for p in todos_permisos %}
-          <label style="display:flex; align-items:center; gap:8px; font-size:13px; cursor:pointer;">
-            <input type="checkbox" name="permisos" value="{{ p.id }}" style="accent-color:#186382; width:16px; height:16px;">
+          <label style="display:flex; align-items:center; gap:8px; font-size:var(--texto-sm); cursor:pointer;">
+            <input type="checkbox" name="permisos" value="{{ p.id }}" style="accent-color:var(--color-primario); width:16px; height:16px;">
             <span><strong>{{ p.modulo }}:</strong> {{ p.nombre }}</span>
           </label>
           {% endfor %}
@@ -361,23 +361,23 @@
   <div class="modal-box">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
       <div>
-        <h3 style="font-size:18px; font-weight:800; color:#0f172a;">Configurar Permisos de Rol</h3>
-        <div id="nombre-rol-permisos" style="font-size:13px; color:#0284c7; font-weight:600;"></div>
+        <h3 style="font-size:var(--texto-lg); font-weight:800; color:var(--color-texto);">Configurar Permisos de Rol</h3>
+        <div id="nombre-rol-permisos" style="font-size:var(--texto-sm); color:var(--azul-600); font-weight:600;"></div>
       </div>
-      <button onclick="closeModal('modal-editar-permisos')" style="background:none; border:none; font-size:20px; cursor:pointer;">&times;</button>
+      <button onclick="closeModal('modal-editar-permisos')" style="background:none; border:none; font-size:var(--texto-xl); cursor:pointer;">&times;</button>
     </div>
 
     <form id="form-editar-permisos" method="POST" action="">
       {% csrf_token %}
       <div class="form-group">
         <label class="form-label" style="margin-bottom:10px;">Seleccione las funcionalidades autorizadas para este rol:</label>
-        <div style="max-height:280px; overflow-y:auto; border:1px solid #e2e8f0; border-radius:10px; padding:14px; display:flex; flex-direction:column; gap:10px;">
+        <div style="max-height:280px; overflow-y:auto; border:1px solid var(--color-borde); border-radius:10px; padding:14px; display:flex; flex-direction:column; gap:10px;">
           {% for p in todos_permisos %}
-          <label style="display:flex; align-items:center; gap:10px; font-size:13px; cursor:pointer; padding:4px 0;">
-            <input type="checkbox" name="permisos" value="{{ p.id }}" id="permiso-chk-{{ p.id }}" style="accent-color:#186382; width:16px; height:16px;">
+          <label style="display:flex; align-items:center; gap:10px; font-size:var(--texto-sm); cursor:pointer; padding:4px 0;">
+            <input type="checkbox" name="permisos" value="{{ p.id }}" id="permiso-chk-{{ p.id }}" style="accent-color:var(--color-primario); width:16px; height:16px;">
             <div>
-              <div style="font-weight:600; color:#0f172a;">{{ p.modulo }}: {{ p.nombre }}</div>
-              <div style="font-size:11px; color:#64748b;">{{ p.descripcion }}</div>
+              <div style="font-weight:600; color:var(--color-texto);">{{ p.modulo }}: {{ p.nombre }}</div>
+              <div style="font-size:var(--texto-xs); color:var(--color-texto-suave);">{{ p.descripcion }}</div>
             </div>
           </label>
           {% endfor %}
@@ -405,16 +405,16 @@
       tabU.style.display = 'block';
       tabR.style.display = 'none';
       btnU.style.background = 'white';
-      btnU.style.color = '#0f172a';
+      btnU.style.color = 'var(--color-texto)';
       btnR.style.background = 'transparent';
-      btnR.style.color = '#64748b';
+      btnR.style.color = 'var(--color-texto-suave)';
     } else {
       tabU.style.display = 'none';
       tabR.style.display = 'block';
       btnR.style.background = 'white';
-      btnR.style.color = '#0f172a';
+      btnR.style.color = 'var(--color-texto)';
       btnU.style.background = 'transparent';
-      btnU.style.color = '#64748b';
+      btnU.style.color = 'var(--color-texto-suave)';
     }
   }
 

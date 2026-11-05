@@ -11,18 +11,18 @@
     <div class="card" style="padding:28px 24px; border-radius:20px;">
       
       <div style="margin-bottom:20px;">
-        <span class="badge badge-success" style="font-size:11px; margin-bottom:6px;">● Versión activa en producción · Todos los servicios en línea</span>
+        <span class="badge badge-success" style="font-size:var(--texto-xs); margin-bottom:6px;">● Versión activa en producción · Todos los servicios en línea</span>
         <h1 class="page-title text-2xl font-extrabold text-main" style="margin-bottom:4px;">Configuración General del Sistema</h1>
-        <p style="font-size:12px; color:#64748b;">Ajuste de parámetros institucionales, identidad visual, zona horaria y canales oficiales de soporte.</p>
+        <p style="font-size:var(--texto-xs); color:var(--color-texto-suave);">Ajuste de parámetros institucionales, identidad visual, zona horaria y canales oficiales de soporte.</p>
       </div>
 
       <form method="POST" action="{% url 'cuentas:guardar_ajustes' %}">
         {% csrf_token %}
 
         <!-- Identidad Institucional -->
-        <div style="border-top:1px solid #f1f5f9; padding-top:18px; margin-bottom:20px;">
+        <div style="border-top:1px solid var(--color-superficie-hundida); padding-top:18px; margin-bottom:20px;">
           <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
-            <i data-lucide="landmark" style="width:16px; height:16px; color:#186382;"></i>
+            <i data-lucide="landmark" style="width:16px; height:16px; color:var(--color-primario);"></i>
             <h3 class="card-title text-base font-bold text-main" style="margin:0;">Identidad Institucional</h3>
           </div>
 
@@ -41,10 +41,10 @@
         </div>
 
         <!-- Configuración Regional y Servidor -->
-        <div style="border-top:1px solid #f1f5f9; padding-top:18px; margin-bottom:20px;">
+        <div style="border-top:1px solid var(--color-superficie-hundida); padding-top:18px; margin-bottom:20px;">
           <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
-            <i data-lucide="globe" style="width:16px; height:16px; color:#186382;"></i>
-            <h3 style="font-size:14px; font-weight:800; color:#0f172a; margin:0;">Configuración Regional y Servidor</h3>
+            <i data-lucide="globe" style="width:16px; height:16px; color:var(--color-primario);"></i>
+            <h3 style="font-size:var(--texto-base); font-weight:800; color:var(--color-texto); margin:0;">Configuración Regional y Servidor</h3>
           </div>
 
           <div class="form-group">
@@ -52,20 +52,20 @@
             <select name="zona_horaria" class="form-select">
               <option value="America/Bogota" selected>America/Bogota (GMT -05:00)</option>
             </select>
-            <span style="font-size:11px; color:#64748b;">Utilizada para los cronómetros y ventanas de apertura/cierre.</span>
+            <span style="font-size:var(--texto-xs); color:var(--color-texto-suave);">Utilizada para los cronómetros y ventanas de apertura/cierre.</span>
           </div>
 
           <div class="form-group">
             <label class="form-label">Formato de Fecha y Hora</label>
-            <input type="text" value="DD/MM/AAAA - HH:mm (24 horas)" readonly class="form-input" style="background:#f8fafc; color:#64748b;">
+            <input type="text" value="DD/MM/AAAA - HH:mm (24 horas)" readonly class="form-input" style="background:var(--color-superficie-tenue); color:var(--color-texto-suave);">
           </div>
         </div>
 
         <!-- Mesa de Ayuda y Soporte -->
-        <div style="border-top:1px solid #f1f5f9; padding-top:18px; margin-bottom:24px;">
+        <div style="border-top:1px solid var(--color-superficie-hundida); padding-top:18px; margin-bottom:24px;">
           <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
-            <i data-lucide="headphones" style="width:16px; height:16px; color:#186382;"></i>
-            <h3 style="font-size:14px; font-weight:800; color:#0f172a; margin:0;">Mesa de Ayuda y Soporte</h3>
+            <i data-lucide="headphones" style="width:16px; height:16px; color:var(--color-primario);"></i>
+            <h3 style="font-size:var(--texto-base); font-weight:800; color:var(--color-texto); margin:0;">Mesa de Ayuda y Soporte</h3>
           </div>
 
           <div class="form-group">
@@ -82,10 +82,10 @@
           </div>
         </div>
 
-        <button type="submit" class="btn btn-primary btn-full" style="padding:12px; font-size:14px; margin-bottom:10px; display:inline-flex; align-items:center; justify-content:center; gap:6px;">
+        <button type="submit" class="btn btn-primary btn-full" style="padding:12px; font-size:var(--texto-base); margin-bottom:10px; display:inline-flex; align-items:center; justify-content:center; gap:6px;">
           <i data-lucide="save" style="width:16px; height:16px;"></i> Guardar y Aplicar Cambios
         </button>
-        <button type="button" onclick="mostrarNotificacion('Configuración predeterminada institucional restaurada.', 'success', 'Ajustes del Sistema');" class="btn btn-outline btn-full" style="padding:10px; font-size:13px; display:inline-flex; align-items:center; justify-content:center; gap:6px;">
+        <button type="button" onclick="mostrarNotificacion('Configuración predeterminada institucional restaurada.', 'success', 'Ajustes del Sistema');" class="btn btn-outline btn-full" style="padding:10px; font-size:var(--texto-sm); display:inline-flex; align-items:center; justify-content:center; gap:6px;">
           <i data-lucide="rotate-ccw" style="width:15px; height:15px;"></i> Restaurar Predeterminados
         </button>
       </form>
