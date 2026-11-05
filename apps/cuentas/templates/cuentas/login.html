@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'layouts/base.html' %}
 
 {% block title %}Iniciar Sesión - Simulador Saber TyT{% endblock %}
 
@@ -129,7 +129,7 @@
     btn.innerText = 'Validando credenciales JWT...';
 
     try {
-      const response = await fetch('{% url 'core:token_obtain_pair' %}', {
+      const response = await fetch('{% url 'cuentas:token_obtain_pair' %}', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

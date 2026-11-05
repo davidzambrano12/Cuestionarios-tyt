@@ -4,14 +4,9 @@ from rest_framework_simplejwt.views import TokenRefreshView
 from . import views
 from .jwt_auth import CustomTokenObtainPairView, LogoutView, UserProfileMeView
 
-app_name = "core"
+app_name = "cuentas"
 
 urlpatterns = [
-    # Dashboards por rol
-    path("dashboard/admin/", views.admin_dashboard_view, name="admin_dashboard"),
-    path("dashboard/docente/", views.docente_dashboard_view, name="docente_dashboard"),
-    path("dashboard/estudiante/", views.estudiante_dashboard_view, name="estudiante_dashboard"),
-
     # Gestión de Usuarios
     path("usuarios/", views.usuarios_roles_view, name="usuarios_roles"),
     path("usuarios/crear/", views.crear_usuario_view, name="crear_usuario"),

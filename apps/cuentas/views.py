@@ -1,28 +1,15 @@
+"""Cuentas: autenticación, perfil, ajustes y gestión de usuarios y roles."""
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
-from django.utils import timezone
 
-from core.decorators import requiere_permiso, solo_roles
-from core.models import PerfilUsuario, PermisoSistema, Rol
-from core.services import tokens
-from core.services.acceso import url_panel
-from preguntas.models import Categoria, Cuestionario, Intento, Pregunta
-from preguntas.services.evaluacion import panel_estudiante
-
-
-def landing_view(request):
-    """Página de inicio pública del Simulador Saber TyT Uniputumayo."""
-    ahora = timezone.now()
-    cuestionarios = Cuestionario.objects.filter(
-        estado="disponible",
-        fecha_apertura__lte=ahora,
-        fecha_cierre__gte=ahora,
-    ).order_by("-id")
-    return render(request, "landing.html", {"cuestionarios": cuestionarios})
+from apps.core.decorators import requiere_permiso, solo_roles
+from apps.core.models import PerfilUsuario, PermisoSistema, Rol
+from . import tokens
+from .services import url_panel
 
 
 def login_view(request):
@@ -49,7 +36,7 @@ def login_view(request):
             access, refresh = tokens.emitir_tokens(user)
             return tokens.guardar_en_cookies(redirect(url_panel(user)), access, refresh)
 
-    return render(request, "login.html")
+    return render(request, "cuentas/login.html")
 
 
 def logout_view(request):
@@ -60,48 +47,6 @@ def logout_view(request):
 
 
 @login_required
-@solo_roles("admin")
-def admin_dashboard_view(request):
-    """Dashboard para el Administrador del Sistema."""
-    preguntas_activas = Pregunta.objects.filter(activa=True).count()
-    categorias = Categoria.objects.all()
-    cuestionarios_count = Cuestionario.objects.count()
-    intentos_count = Intento.objects.count()
-    cuestionarios_recientes = Cuestionario.objects.all().order_by("-id")[:5]
-
-    return render(request, "admin_dashboard.html", {
-        "preguntas_activas": preguntas_activas,
-        "categorias_count": categorias.count(),
-        "categorias_list": categorias,
-        "cuestionarios_count": cuestionarios_count,
-        "intentos_count": intentos_count,
-        "cuestionarios_recientes": cuestionarios_recientes,
-    })
-
-
-@login_required
-@requiere_permiso("preguntas.gestionar")
-def docente_dashboard_view(request):
-    """Dashboard para Docentes y Evaluadores."""
-    cuestionarios = Cuestionario.objects.all().order_by("-id")
-    preguntas_count = Pregunta.objects.filter(activa=True).count()
-    publicados_count = Cuestionario.objects.filter(estado="disponible").count()
-
-    return render(request, "docente_dashboard.html", {
-        "cuestionarios": cuestionarios,
-        "preguntas_count": preguntas_count,
-        "publicados_count": publicados_count,
-        "cuestionarios_recientes": cuestionarios[:4],
-    })
-
-
-@login_required
-def estudiante_dashboard_view(request):
-    """Panel del estudiante: cuestionarios vigentes, programados e historial propio."""
-    return render(request, "estudiante_dashboard.html", panel_estudiante(request.user))
-
-
-@login_required
 @requiere_permiso("roles.gestionar")
 def usuarios_roles_view(request):
     """Gestión de usuarios institucionales y roles/permisos configurables."""
@@ -109,7 +54,7 @@ def usuarios_roles_view(request):
     roles = Rol.objects.all().prefetch_related("permisos").order_by("id")
     todos_permisos = PermisoSistema.objects.all().order_by("modulo", "nombre")
 
-    return render(request, "usuarios_roles.html", {
+    return render(request, "cuentas/usuarios_roles.html", {
         "usuarios": usuarios,
         "roles": roles,
         "todos_permisos": todos_permisos,
@@ -131,7 +76,7 @@ def crear_usuario_view(request):
 
         if User.objects.filter(username=username).exists():
             messages.error(request, f"El nombre de usuario '{username}' ya está en uso.")
-            return redirect("core:usuarios_roles")
+            return redirect("cuentas:usuarios_roles")
 
         user = User.objects.create_user(
             username=username,
@@ -151,7 +96,7 @@ def crear_usuario_view(request):
         )
 
         messages.success(request, f"Usuario '{user.username}' registrado exitosamente.")
-    return redirect("core:usuarios_roles")
+    return redirect("cuentas:usuarios_roles")
 
 
 @login_required
@@ -181,7 +126,7 @@ def editar_usuario_view(request, user_id):
         perfil.save()
 
         messages.success(request, f"Datos del usuario '{user_obj.get_full_name() or user_obj.username}' actualizados exitosamente.")
-    return redirect("core:usuarios_roles")
+    return redirect("cuentas:usuarios_roles")
 
 
 @login_required
@@ -192,13 +137,13 @@ def toggle_usuario_estado_view(request, user_id):
         user_obj = get_object_or_404(User, id=user_id)
         if user_obj == request.user:
             messages.error(request, "No puede suspender su propia cuenta de administrador.")
-            return redirect("core:usuarios_roles")
+            return redirect("cuentas:usuarios_roles")
 
         user_obj.is_active = not user_obj.is_active
         user_obj.save()
         estado = "reactivada" if user_obj.is_active else "suspendida"
         messages.success(request, f"Cuenta de '{user_obj.username}' {estado} correctamente.")
-    return redirect("core:usuarios_roles")
+    return redirect("cuentas:usuarios_roles")
 
 
 @login_required
@@ -213,7 +158,7 @@ def crear_rol_view(request):
 
         if Rol.objects.filter(codigo=codigo).exists():
             messages.error(request, f"Ya existe un rol con el código '{codigo}'.")
-            return redirect("core:usuarios_roles")
+            return redirect("cuentas:usuarios_roles")
 
         rol = Rol.objects.create(
             nombre=nombre,
@@ -226,7 +171,7 @@ def crear_rol_view(request):
             rol.permisos.set(permisos_ids)
 
         messages.success(request, f"Rol personalizado '{rol.nombre}' creado exitosamente.")
-    return redirect("core:usuarios_roles")
+    return redirect("cuentas:usuarios_roles")
 
 
 @login_required
@@ -237,13 +182,13 @@ def toggle_rol_estado_view(request, rol_id):
         rol = get_object_or_404(Rol, id=rol_id)
         if rol.es_sistema:
             messages.error(request, "Los roles del sistema predeterminados no se pueden desactivar.")
-            return redirect("core:usuarios_roles")
+            return redirect("cuentas:usuarios_roles")
 
         rol.activo = not rol.activo
         rol.save()
         estado = "activado" if rol.activo else "desactivado"
         messages.success(request, f"Rol '{rol.nombre}' {estado}.")
-    return redirect("core:usuarios_roles")
+    return redirect("cuentas:usuarios_roles")
 
 
 @login_required
@@ -255,7 +200,7 @@ def editar_rol_permisos_view(request, rol_id):
         permisos_ids = request.POST.getlist("permisos")
         rol.permisos.set(permisos_ids)
         messages.success(request, f"Permisos actualizados para el rol '{rol.nombre}'.")
-    return redirect("core:usuarios_roles")
+    return redirect("cuentas:usuarios_roles")
 
 
 @login_required
@@ -269,7 +214,7 @@ def api_rol_permisos(request, rol_id):
 @login_required
 def perfil_view(request):
     """Vista de perfil institucional del usuario actual."""
-    return render(request, "perfil.html", {"user": request.user})
+    return render(request, "cuentas/perfil.html", {"user": request.user})
 
 
 @login_required
@@ -285,7 +230,7 @@ def actualizar_perfil_view(request):
             perfil.semestre = partes[1].strip()
         perfil.save()
         messages.success(request, "Datos de perfil actualizados exitosamente.")
-    return redirect("core:perfil")
+    return redirect("cuentas:perfil")
 
 
 @login_required
@@ -297,22 +242,22 @@ def cambiar_password_view(request):
 
         if len(nueva) < 6:
             messages.error(request, "La nueva contraseña debe tener al menos 6 caracteres.")
-            return redirect("core:perfil")
+            return redirect("cuentas:perfil")
         if nueva != confirmar:
             messages.error(request, "Las contraseñas no coinciden.")
-            return redirect("core:perfil")
+            return redirect("cuentas:perfil")
 
         request.user.set_password(nueva)
         request.user.save()
         update_session_auth_hash(request, request.user)  # no cerrar la sesión actual
         messages.success(request, "Contraseña actualizada exitosamente.")
-    return redirect("core:perfil")
+    return redirect("cuentas:perfil")
 
 
 @login_required
 def ajustes_view(request):
     """Vista de configuración general del sistema."""
-    return render(request, "ajustes.html")
+    return render(request, "cuentas/ajustes.html")
 
 
 @login_required
@@ -321,4 +266,4 @@ def guardar_ajustes_view(request):
     """Guarda parámetros institucionales."""
     if request.method == "POST":
         messages.success(request, "Ajustes del sistema guardados exitosamente.")
-    return redirect("core:ajustes")
+    return redirect("cuentas:ajustes")

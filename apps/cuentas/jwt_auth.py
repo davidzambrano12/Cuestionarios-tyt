@@ -7,7 +7,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
-from core.models import PerfilUsuario
+from apps.core.models import PerfilUsuario
 
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):

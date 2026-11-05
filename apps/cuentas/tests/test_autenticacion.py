@@ -1,7 +1,7 @@
 """Login, redirección por rol y control de acceso por permisos."""
 from django.test import TestCase
 
-from preguntas.tests.factories import CLAVE, crear_usuario, sembrar_roles
+from apps.core.tests.factories import CLAVE, crear_usuario, sembrar_roles
 
 
 class AutenticacionTests(TestCase):

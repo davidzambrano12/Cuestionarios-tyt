@@ -1,4 +1,4 @@
-{% extends 'app_base.html' %}
+{% extends 'layouts/app_base.html' %}
 
 {% block title %}Perfil Institucional - Simulador Saber TyT{% endblock %}
 
@@ -30,7 +30,7 @@
           <h3 class="card-title text-base font-bold text-main" style="margin:0;">Datos Personales y Programa</h3>
         </div>
 
-        <form method="POST" action="{% url 'core:actualizar_perfil' %}">
+        <form method="POST" action="{% url 'cuentas:actualizar_perfil' %}">
           {% csrf_token %}
           <div class="form-group">
             <label class="form-label">Código Institucional</label>
@@ -65,7 +65,7 @@
           <h3 style="font-size:14px; font-weight:800; color:#0f172a; margin:0;">Seguridad y Credenciales</h3>
         </div>
 
-        <form method="POST" action="{% url 'core:cambiar_password' %}">
+        <form method="POST" action="{% url 'cuentas:cambiar_password' %}">
           {% csrf_token %}
           <div class="form-group">
             <label class="form-label">Nueva Contraseña</label>
