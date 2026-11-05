@@ -1067,7 +1067,7 @@ a:hover {
   height: 3px;
   width: 100%;
   opacity: 0.85;
-  animation: toastTimer linear forwards;
+  animation: toastTimer 4.5s linear forwards;
 }
 
 .toast-success .toast-progress { background: var(--verde-600); }

@@ -51,10 +51,10 @@
           <i data-lucide="settings"></i> Ajustes
         </a>
       {% else %}
-        <a href="{% url 'evaluaciones:panel_estudiante' %}" onclick="if (window.location.pathname.startsWith('/dashboard/estudiante')) { event.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); if (history.pushState) history.pushState(null, null, '/dashboard/estudiante/'); }" class="nav-item {% if '/dashboard/' in request.path or active_tab == 'inicio' %}active{% endif %}">
+        <a href="{% url 'evaluaciones:panel_estudiante' %}" class="nav-item {% if '/dashboard/' in request.path or active_tab == 'inicio' %}active{% endif %}">
           <i data-lucide="home"></i> Inicio
         </a>
-        <a href="{% url 'evaluaciones:panel_estudiante' %}#cuestionarios" onclick="if (window.location.pathname.startsWith('/dashboard/estudiante')) { event.preventDefault(); irACuestionariosEstudiante(); }" class="nav-item {% if '/cuestionarios/' in request.path or active_tab == 'cuestionarios' %}active{% endif %}">
+        <a href="{% url 'evaluaciones:panel_estudiante' %}#cuestionarios" data-ancla-local="cuestionarios" class="nav-item {% if '/cuestionarios/' in request.path or active_tab == 'cuestionarios' %}active{% endif %}">
           <i data-lucide="clipboard-list"></i> Cuestionarios
         </a>
         <a href="{% url 'cuentas:perfil' %}" class="nav-item {% if '/perfil/' in request.path or active_tab == 'perfil' %}active{% endif %}">
@@ -102,7 +102,7 @@
           </div>
           <span class="text-base font-semibold text-main">{{ user.get_full_name|default:user.username }}</span>
         </a>
-        <a href="{% url 'logout' %}" onclick="cerrarSesion(); return false;" title="Cerrar Sesión" class="btn btn-outline btn-sm" style="color:var(--danger-text); text-decoration:none;">
+        <a href="{% url 'logout' %}" data-cerrar-sesion title="Cerrar sesión" class="btn btn-outline btn-sm texto-peligro">
           <i data-lucide="log-out"></i> Salir
         </a>
       </div>
@@ -117,22 +117,4 @@
 
 </div>
 
-<script>
-  function irACuestionariosEstudiante() {
-    const el = document.getElementById('cuestionarios');
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      if (history.pushState) {
-        history.pushState(null, null, '#cuestionarios');
-      } else {
-        location.hash = '#cuestionarios';
-      }
-    } else {
-      window.location.href = '{% url 'evaluaciones:panel_estudiante' %}#cuestionarios';
-    }
-  }
-</script>
 {% endblock %}
-
-
-{% block extra_scripts %}{% endblock %}
