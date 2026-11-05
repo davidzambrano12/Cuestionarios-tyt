@@ -18,7 +18,7 @@
   {% if sin_curso and sin_curso.intentos %}
   <div class="alerta alerta--info mb-5" role="status" data-ref="aviso-sin-curso">
     <strong>{{ sin_curso.intentos }} intento{{ sin_curso.intentos|pluralize }} terminado{{ sin_curso.intentos|pluralize }} sin curso</strong>
-    ({{ sin_curso.estudiantes }} estudiante{{ sin_curso.estudiantes|pluralize }} sin matrícula en ese período). Se incluyen con «Todos», pero no al filtrar por año, período o curso.
+    ({{ sin_curso.estudiantes }} estudiante{{ sin_curso.estudiantes|pluralize }} sin matrícula en ese período). Cuentan por año y período, pero no por curso.
     <a href="{% url 'academico:listado' %}">Matricularlos en su curso</a>.
   </div>
   {% endif %}
@@ -63,6 +63,14 @@
         <select id="f-estudiante" name="estudiante" class="form-select" data-filtro="estudiante">
           <option value="">Todos</option>
           {% for est in catalogo.estudiantes %}<option value="{{ est.codigo }}"{% if est.codigo == filtros.estudiante %} selected{% endif %}>{{ est.nombre }} · {{ est.codigo }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="form-group mb-0">
+        <label class="form-label" for="f-visibilidad">Tipo de simulacro</label>
+        <select id="f-visibilidad" name="visibilidad" class="form-select">
+          <option value="">Todos</option>
+          <option value="institucional"{% if filtros.visibilidad == "institucional" %} selected{% endif %}>Institucionales</option>
+          <option value="privado"{% if filtros.visibilidad == "privado" %} selected{% endif %}>De curso</option>
         </select>
       </div>
       <div class="form-group mb-0">
@@ -141,8 +149,8 @@
           {% for i in pagina %}
           <tr class="fila-consulta">
             <td><div class="peso-semibold">{{ i.participante_nombre }}</div><div class="texto-xs texto-suave">{{ i.participante_codigo }}</div></td>
-            <td>{% if i.curso %}{{ i.curso.nombre }}<div class="texto-xs texto-suave">{{ i.curso.periodo }}</div>{% else %}<span class="texto-suave">Sin curso</span>{% endif %}</td>
-            <td>{{ i.cuestionario.nombre }}</td>
+            <td>{% if i.curso %}{{ i.curso.nombre }}{% else %}<span class="texto-suave">Sin curso</span>{% endif %}<div class="texto-xs texto-suave">{{ i.periodo|default:"Sin período" }}</div></td>
+            <td>{{ i.cuestionario.nombre }}{% if i.cuestionario.es_institucional %}<div class="texto-xs texto-suave">Institucional</div>{% endif %}</td>
             <td class="cifras">{{ i.fecha_inicio|date:"d/m/Y H:i" }}</td>
             <td class="texto-derecha cifras peso-bold">{{ i.nota_5|nota }}</td>
             <td>{% if i.estado_texto == "Aprobado" %}<span class="badge badge-success">Aprobado</span>{% elif i.estado_texto == "No aprobado" %}<span class="badge badge-danger">No aprobado</span>{% else %}<span class="badge badge-neutro">{{ i.estado_texto }}</span>{% endif %}</td>
@@ -231,7 +239,7 @@
           {% for i in historial %}
           <tr>
             <td class="cifras">{{ i.fecha_inicio|date:"d/m/Y H:i" }}</td><td>{{ i.cuestionario.nombre }}</td>
-            <td>{% if i.curso %}{{ i.curso.nombre }} · {{ i.curso.periodo }}{% else %}<span class="texto-suave">Sin curso</span>{% endif %}</td>
+            <td>{% if i.curso %}{{ i.curso.nombre }}{% else %}<span class="texto-suave">Sin curso</span>{% endif %} · {{ i.periodo|default:"—" }}</td>
             <td class="texto-derecha cifras">{{ i.respondidas }}</td><td class="texto-derecha cifras">{{ i.aciertos }}</td><td class="texto-derecha cifras">{{ i.errores }}</td>
             <td class="texto-derecha cifras peso-bold">{{ i.nota_5|nota }}</td>
             <td class="texto-derecha cifras">{% if i.cambio is None %}<span class="texto-suave">—</span>{% elif i.cambio > 0 %}<span class="evolucion evolucion--sube"><i data-lucide="trending-up" aria-hidden="true"></i> +{{ i.cambio|nota }}</span>{% elif i.cambio < 0 %}<span class="evolucion evolucion--baja"><i data-lucide="trending-down" aria-hidden="true"></i> {{ i.cambio|nota }}</span>{% else %}<span class="texto-suave">= 0,00</span>{% endif %}</td>

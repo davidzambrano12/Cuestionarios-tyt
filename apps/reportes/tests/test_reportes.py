@@ -15,7 +15,7 @@ class ReportesTests(TestCase):
         sembrar_roles()
         cls.docente = crear_usuario("prof", "docente")
         cls.estudiante = crear_usuario("alumno", "estudiante", codigo="EST-001")
-        cls.cuestionario = crear_cuestionario(num_preguntas=2)
+        cls.cuestionario = crear_cuestionario(num_preguntas=2, visibilidad="privado", creado_por=cls.docente)
 
         def intento(codigo, nombre, estado, calificacion=None):
             return Intento.objects.create(

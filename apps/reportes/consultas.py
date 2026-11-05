@@ -46,6 +46,7 @@ ORDENES = {
     "nota": (F("nota").desc(nulls_last=True), "-fecha_inicio"),
 }
 DECIMAL = DecimalField(max_digits=7, decimal_places=4)
+VISIBILIDADES = {"institucional": "Institucionales", "privado": "De curso"}
 
 
 # ---------------------------------------------------------------------------
@@ -93,6 +94,7 @@ class Filtros:
     curso: int | None = None
     eje: int | None = None
     estudiante: str = ""
+    visibilidad: str = ""  # "" | institucional | privado
     q: str = ""
     orden: str = "fecha"
     vista: str = "calificaciones"
@@ -103,7 +105,8 @@ class Filtros:
     def params(self, **cambios) -> dict:
         datos = {
             "anio": self.anio, "periodo": self.periodo, "curso": self.curso, "eje": self.eje,
-            "estudiante": self.estudiante, "q": self.q, "orden": self.orden, "vista": self.vista,
+            "estudiante": self.estudiante, "visibilidad": self.visibilidad,
+            "q": self.q, "orden": self.orden, "vista": self.vista,
         }
         datos.update(cambios)
         return {k: v for k, v in datos.items() if v not in (None, "")}
@@ -121,12 +124,13 @@ class Filtros:
             ("Curso", e.get("curso", "Todos")),
             ("Eje temático", e.get("eje", "Todos")),
             ("Estudiante", e.get("estudiante", "Todos")),
+            ("Tipo de simulacro", VISIBILIDADES.get(self.visibilidad, "Todos")),
             ("Búsqueda", self.q or "—"),
         ]
 
     @property
     def hay_filtros(self) -> bool:
-        return any([self.anio, self.periodo, self.curso, self.eje, self.estudiante, self.q])
+        return any([self.anio, self.periodo, self.curso, self.eje, self.estudiante, self.visibilidad, self.q])
 
 
 def catalogo(alcance: Alcance) -> dict:
@@ -178,6 +182,7 @@ def leer_filtros(datos, alcance: Alcance, cat: dict | None = None) -> Filtros:
         curso=_entero(datos.get("curso")),
         eje=_entero(datos.get("eje")),
         estudiante=(datos.get("estudiante") or "").strip()[:50],
+        visibilidad=datos.get("visibilidad") if datos.get("visibilidad") in VISIBILIDADES else "",
         q=(datos.get("q") or "").strip()[:100],
         orden=datos.get("orden") if datos.get("orden") in ORDENES else "fecha",
         vista=datos.get("vista") if datos.get("vista") in VISTAS else "calificaciones",
@@ -258,11 +263,13 @@ def _nota_sobre_5():
 
 def intentos_filtrados(filtros: Filtros, alcance: Alcance):
     """Intentos que cumplen los filtros (todos los estados), con la nota sobre 5,0."""
-    qs = alcance.intentos().select_related("cuestionario", "curso__periodo")
+    qs = alcance.intentos().select_related("cuestionario", "curso__periodo", "periodo")
     if filtros.anio:
-        qs = qs.filter(curso__periodo__anio=filtros.anio)
+        qs = qs.filter(periodo__anio=filtros.anio)
     if filtros.periodo:
-        qs = qs.filter(curso__periodo_id=filtros.periodo)
+        qs = qs.filter(periodo_id=filtros.periodo)
+    if filtros.visibilidad:
+        qs = qs.filter(cuestionario__visibilidad=filtros.visibilidad)
     if filtros.curso:
         qs = qs.filter(curso_id=filtros.curso)
     if filtros.eje:
@@ -325,16 +332,16 @@ def por_periodo(qs) -> list[dict]:
     """Consulta 2: evaluaciones y promedio por año y período."""
     filas = (
         terminados(qs)
-        .values("curso__periodo__anio", "curso__periodo__numero")
+        .values("periodo__anio", "periodo__numero")
         .annotate(
             intentos=Count("id"), estudiantes=Count("participante_codigo", distinct=True),
             promedio=Avg("nota"), aprobados=Count("id", filter=Q(aprobado=True)),
         )
-        .order_by("-curso__periodo__anio", "-curso__periodo__numero")
+        .order_by("-periodo__anio", "-periodo__numero")
     )
     return [{
-        "anio": f["curso__periodo__anio"],
-        "periodo": f"{f['curso__periodo__anio']}-{f['curso__periodo__numero']}" if f["curso__periodo__anio"] else "Sin curso asignado",
+        "anio": f["periodo__anio"],
+        "periodo": f"{f['periodo__anio']}-{f['periodo__numero']}" if f["periodo__anio"] else "Fuera de los períodos registrados",
         "intentos": f["intentos"], "estudiantes": f["estudiantes"],
         "promedio": _redondear(f["promedio"]),
         "porcentaje_aprobacion": _porcentaje(f["aprobados"], f["intentos"]),
@@ -394,7 +401,7 @@ def por_eje(qs, filtros: Filtros, *, detallar_curso: bool = False) -> list[dict]
     """Consulta 4 (y Reporte B si `detallar_curso`): aciertos por eje temático."""
     campos = ["pregunta__categoria__nombre"]
     if detallar_curso:
-        campos = ["intento__curso__periodo__anio", "intento__curso__periodo__numero",
+        campos = ["intento__periodo__anio", "intento__periodo__numero",
                   "intento__curso__asignatura", "intento__curso__grupo", *campos]
     filas = _respuestas(qs, filtros).values(*campos).annotate(**_CONTEO_RESPUESTAS).order_by(*[
         f"-{c}" if "periodo" in c else c for c in campos
@@ -406,10 +413,10 @@ def por_eje(qs, filtros: Filtros, *, detallar_curso: bool = False) -> list[dict]
             "registradas": f["registradas"], "respondidas": f["respondidas"], "aciertos": f["aciertos"],
         })
         if detallar_curso:
-            anio = f["intento__curso__periodo__anio"]
+            anio = f["intento__periodo__anio"]
             fila.update(
                 anio=anio or "—",
-                periodo=f"{anio}-{f['intento__curso__periodo__numero']}" if anio else "—",
+                periodo=f"{anio}-{f['intento__periodo__numero']}" if anio else "—",
                 curso=_nombre_curso(f["intento__curso__asignatura"], f["intento__curso__grupo"]),
             )
         resultado.append(fila)

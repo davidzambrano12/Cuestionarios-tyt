@@ -11,7 +11,7 @@ class ReporteIntentosTests(PruebaNavegador):
     def setUp(self):
         sembrar_roles()
         self.docente = crear_usuario("prof", "docente")
-        self.cuestionario = crear_cuestionario(num_preguntas=2)
+        self.cuestionario = crear_cuestionario(num_preguntas=2, visibilidad="privado", creado_por=self.docente)
         for codigo, nombre, nota in (("E1", "Ana Gómez", "4.00"), ("E1", "Ana Gómez", "2.00"), ("E2", "Beto Ruiz", "1.50")):
             Intento.objects.create(
                 cuestionario=self.cuestionario, participante_codigo=codigo, participante_nombre=nombre,

@@ -100,9 +100,11 @@ VACIO = "Sin registros para los filtros aplicados."
 
 
 def _periodo(intento) -> tuple:
-    if intento.curso_id:
-        return intento.curso.periodo.anio, intento.curso.periodo.nombre, intento.curso.nombre
-    return "—", "—", "Sin curso asignado"
+    """(año, período, curso) del intento; el período no depende de que tenga curso."""
+    curso = intento.curso.nombre if intento.curso_id else "Sin curso asignado"
+    if intento.periodo_id:
+        return intento.periodo.anio, intento.periodo.nombre, curso
+    return "—", "—", curso
 
 
 def libro_consolidado(filtros: c.Filtros, alcance: c.Alcance) -> Workbook:

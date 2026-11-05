@@ -96,7 +96,25 @@ python manage.py datos_demo_consultas --limpiar  # borra solo esos datos
 
 - El grupo 01 de cada asignatura queda a cargo del primer docente activo.
 
-## 7. Cómo se matricula un estudiante
+## 7. Cuestionarios institucionales y de curso
+
+| Visibilidad | Quién lo presenta | Quién lo crea y edita |
+|---|---|---|
+| **Institucional** | Cualquier estudiante activo | Administrador o quien tenga el permiso `cuestionarios.publicar` |
+| **De curso** | Solo los matriculados en los cursos asignados, en el período vigente | Su creador (en sus cursos) o un administrador |
+
+- **Cada cuestionario guarda su creador.** El docente edita y ve el reporte por cuestionario solo de los suyos.
+  - Los institucionales los puede previsualizar, y los resultados de sus estudiantes en ellos los ve en Consultas.
+- **El servidor rechaza** que un estudiante inicie por URL un cuestionario de un curso ajeno.
+- **La portada pública** solo anuncia los institucionales.
+- **Atribución del intento:**
+  - De curso: cuenta en el curso del estudiante entre los asignados.
+  - Institucional: si el estudiante tiene un solo curso vigente, cuenta en ese. Si tiene varios, elige para cuál lo presenta antes de empezar. Si no tiene ninguno, queda sin curso.
+- **Período:** cada intento guarda el período según su fecha, así cuenta en los reportes por año y período aunque no tenga curso.
+- **En Consultas,** el filtro "Tipo de simulacro" separa los institucionales de los de curso.
+- **Datos anteriores:** los cuestionarios que existían antes quedaron institucionales, que es como funcionaban.
+
+## 8. Cómo se matricula un estudiante
 
 La matrícula la hace la institución, no el estudiante (RULE-04). Se hace en el menú **Cursos**:
 

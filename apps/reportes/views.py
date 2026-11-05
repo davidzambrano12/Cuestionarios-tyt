@@ -13,10 +13,22 @@ from apps.reportes import services as reportes
 TIPO_XLSX = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
 
+def _gestionable(request, cuestionario_id) -> Cuestionario:
+    """El reporte por cuestionario es de quien lo gestiona (su creador o la institución)."""
+    from django.core.exceptions import PermissionDenied
+
+    from apps.cuestionarios.acceso import puede_editar
+
+    cuestionario = get_object_or_404(Cuestionario, id=cuestionario_id)
+    if not puede_editar(request.user, cuestionario):
+        raise PermissionDenied("Este cuestionario lo gestiona otro docente o la institución.")
+    return cuestionario
+
+
 @login_required
 @requiere_permiso("cuestionarios.gestionar")
 def cuestionario_intentos(request, cuestionario_id):
-    cuestionario = get_object_or_404(Cuestionario, id=cuestionario_id)
+    cuestionario = _gestionable(request, cuestionario_id)
     return render(request, "reportes/intentos.html", {
         "cuestionario": cuestionario,
         "active_tab": "cuestionarios",
@@ -28,7 +40,7 @@ def cuestionario_intentos(request, cuestionario_id):
 @requiere_permiso("cuestionarios.gestionar")
 def exportar_intentos_excel(request, cuestionario_id):
     """Descarga el reporte en .xlsx; `?q=` exporta solo la búsqueda del docente."""
-    cuestionario = get_object_or_404(Cuestionario, id=cuestionario_id)
+    cuestionario = _gestionable(request, cuestionario_id)
     libro, nombre_archivo = reportes.libro_excel_intentos(cuestionario, request.GET.get("q", ""))
     response = HttpResponse(content_type=TIPO_XLSX)
     response["Content-Disposition"] = f'attachment; filename="{nombre_archivo}"'
@@ -40,8 +52,8 @@ def exportar_intentos_excel(request, cuestionario_id):
 @requiere_permiso("cuestionarios.gestionar")
 def reiniciar_estudiante_cuestionario(request, cuestionario_id, codigo_estudiante):
     """Elimina todos los intentos de un estudiante y le restaura el cupo completo."""
+    cuestionario = _gestionable(request, cuestionario_id)
     if request.method == "POST":
-        cuestionario = get_object_or_404(Cuestionario, id=cuestionario_id)
         with transaction.atomic():
             eliminados, _ = Intento.objects.filter(
                 cuestionario=cuestionario, participante_codigo=codigo_estudiante,
@@ -60,7 +72,7 @@ def reiniciar_intento(request, intento_id):
     if request.method != "POST":
         return redirect("cuestionarios:listado")
     intento = get_object_or_404(Intento, id=intento_id)
-    cuestionario_id = intento.cuestionario_id
+    cuestionario_id = _gestionable(request, intento.cuestionario_id).id
     with transaction.atomic():
         intento.delete()  # sus respuestas_intento se eliminan en cascada
     messages.success(
@@ -85,7 +97,7 @@ def panel_admin(request):
 @requiere_permiso("preguntas.gestionar")
 def panel_docente(request):
     """Panel del docente con su resumen de cuestionarios y banco."""
-    return render(request, "reportes/panel_docente.html", reportes.panel_docente())
+    return render(request, "reportes/panel_docente.html", reportes.panel_docente(request.user))
 
 
 # ---------------------------------------------------------------------------

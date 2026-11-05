@@ -22,7 +22,7 @@ def presentar(estudiante, cuestionario, curso, correctas: int, cuando=None):
     """Intento terminado del estudiante con `correctas` respuestas acertadas (en orden)."""
     cuando = cuando or timezone.now()
     intento = Intento.objects.create(
-        cuestionario=cuestionario, curso=curso, estado="en_progreso",
+        cuestionario=cuestionario, curso=curso, periodo=curso.periodo if curso else None, estado="en_progreso",
         participante_nombre=estudiante.get_full_name(), participante_codigo=estudiante.perfil.codigo_institucional,
     )
     Intento.objects.filter(id=intento.id).update(fecha_inicio=cuando)
@@ -69,7 +69,7 @@ class BaseConsultas(TestCase):
         presentar(cls.beto, cls.simulacro, cls.sexto_a, 3, ahora)                      # 3,75
         presentar(cls.caro, cls.simulacro, cls.sexto_b, 1, ahora)                      # 1,25
         presentar(cls.ana, cls.simulacro, cls.quinto, 0, ahora - timedelta(days=300))  # 0,00
-        Intento.objects.create(cuestionario=cls.simulacro, curso=cls.sexto_a, participante_codigo="E2",
+        Intento.objects.create(cuestionario=cls.simulacro, curso=cls.sexto_a, periodo=cls.p2026, participante_codigo="E2",
                                participante_nombre="Beto Ruiz", estado="en_progreso")
 
     def consultar(self, usuario=None, **params):
@@ -163,6 +163,20 @@ class FiltrosTests(BaseConsultas):
         self.assertTrue(all(i.participante_codigo == "E1" for i in historial))
         self.assertEqual((historial[1].respondidas, historial[1].aciertos), (4, 4))
 
+    def test_intento_sin_curso_cuenta_en_su_periodo_y_filtro_de_tipo(self):
+        privado = crear_cuestionario(num_preguntas=1, nombre="Parcial", visibilidad="privado")
+        Intento.objects.create(cuestionario=self.simulacro, periodo=self.p2026, participante_codigo="E9",
+                               participante_nombre="Sin Matrícula", estado="finalizado", calificacion=Decimal("4.00"), aprobado=True)
+        Intento.objects.create(cuestionario=privado, curso=self.sexto_a, periodo=self.p2026, participante_codigo="E2",
+                               participante_nombre="Beto Ruiz", estado="finalizado", calificacion=Decimal("1.00"), aprobado=False)
+        admin = self.consultar(periodo=self.p2026.id).context["indicadores"]
+        self.assertEqual((admin["estudiantes"], admin["intentos"]), (4, 6))  # incluye al que no tiene curso
+        self.assertEqual(self.consultar(periodo=self.p2026.id, visibilidad="privado").context["indicadores"]["intentos"], 1)
+        self.assertEqual(self.consultar(periodo=self.p2026.id, visibilidad="institucional").context["indicadores"]["intentos"], 5)
+        # El docente no ve intentos sin curso ni de cursos ajenos
+        docente = self.consultar(self.docente, periodo=self.p2026.id).context["indicadores"]
+        self.assertEqual(docente["intentos"], 4)
+
     def test_preguntas_mas_dificiles_primero(self):
         filas = self.consultar(vista="dificultad").context["pagina"].filas
         tasas = [f["porcentaje_aciertos"] for f in filas]
@@ -246,8 +260,13 @@ class AsignacionCursoTests(BaseConsultas):
         actual = PeriodoAcademico.objects.create(anio=2099, numero=1, fecha_inicio=hoy - timedelta(days=1), fecha_fin=hoy + timedelta(days=1))
         curso = Curso.objects.create(periodo=actual, asignatura="Vigente")
         Matricula.objects.create(estudiante=self.caro, curso=curso)
-        resultado = iniciar_intento(self.caro, crear_cuestionario(num_preguntas=1, nombre="Hoy"))
-        self.assertEqual(resultado.intento.curso, curso)
+        simulacro = crear_cuestionario(num_preguntas=1, nombre="Hoy")
+        # Caro también está en Frameworks · G02 (2026-2, vigente): elige para qué curso lo presenta
+        resultado = iniciar_intento(self.caro, simulacro)
+        self.assertEqual(resultado.tipo, "elegir_curso")
+        self.assertEqual({c.id for c in resultado.cursos}, {curso.id, self.sexto_b.id})
+        resultado = iniciar_intento(self.caro, simulacro, curso_id=curso.id)
+        self.assertEqual((resultado.intento.curso, resultado.intento.periodo), (curso, actual))
 
     def test_asignar_cursos_a_intentos_anteriores(self):
         intento = Intento.objects.create(cuestionario=self.simulacro, participante_codigo="E3",
