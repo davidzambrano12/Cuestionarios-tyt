@@ -1,0 +1,49 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="csrf-token" content="{{ csrf_token }}">
+  <title>{% block title %}Simulador Saber TyT - Uniputumayo{% endblock %}</title>
+  
+  <!-- Tipografías del Manual de Identidad Visual UNIPUTUMAYO (p. 25-26):
+       Raleway (títulos), Roboto (interfaz) y Fira Sans (lectura larga) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Sans:ital,wght@0,400;0,600;1,400&family=Raleway:wght@600;700;800&family=Roboto:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+
+  <!-- Sistema de diseño: tokens institucionales y luego componentes -->
+  <link rel="stylesheet" href="{% static 'css/tokens.css' %}">
+  <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+  <link rel="stylesheet" href="{% static 'css/utilidades.css' %}">
+
+
+  {% block extra_head %}{% endblock %}
+</head>
+<body data-url-logout="{% url 'logout' %}" data-url-jwt-logout="{% url 'cuentas:jwt_logout' %}">
+
+  <!-- Notificaciones (mensajes de Django y las que crea base.js) -->
+  <div id="toast-container" aria-live="polite">
+    {% for message in messages %}
+    <div class="toast-item {% if message.tags == 'error' %}toast-error{% elif message.tags == 'success' %}toast-success{% elif message.tags == 'warning' %}toast-warning{% else %}toast-info{% endif %}" role="{% if message.tags == 'error' %}alert{% else %}status{% endif %}">
+      <div class="toast-icon-box">
+        <i data-lucide="{% if message.tags == 'error' %}alert-circle{% elif message.tags == 'success' %}check-circle-2{% elif message.tags == 'warning' %}alert-triangle{% else %}info{% endif %}"></i>
+      </div>
+      <div class="toast-content">
+        <div class="toast-title">{% if message.tags == 'error' %}Atención{% elif message.tags == 'success' %}Operación exitosa{% elif message.tags == 'warning' %}Advertencia{% else %}Aviso{% endif %}</div>
+        <div class="toast-message">{{ message }}</div>
+      </div>
+      <button type="button" class="toast-close-btn" data-cerrar-toast aria-label="Cerrar notificación">&times;</button>
+      <div class="toast-progress"></div>
+    </div>
+    {% endfor %}
+  </div>
+
+  {% block content %}{% endblock %}
+
+  <script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js"></script>
+  <script src="{% static 'js/core/base.js' %}"></script>
+  {% block extra_scripts %}{% endblock %}
+</body>
+</html>

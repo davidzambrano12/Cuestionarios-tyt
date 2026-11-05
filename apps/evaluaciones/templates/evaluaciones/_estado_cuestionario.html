@@ -1,0 +1,4 @@
+{% comment %}Estado de un cuestionario para el estudiante. Espera `c` anotado por panel_estudiante().{% endcomment %}
+{% if c.intento_activo %}<span class="badge badge-warning">Intento en curso</span>
+{% elif c.intentos_agotados %}<span class="badge badge-neutro">Intentos agotados</span>
+{% else %}<span class="badge badge-success">Disponible</span>{% endif %}

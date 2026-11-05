@@ -1,0 +1,6 @@
+{% comment %}Indicador del asistente de importación. Recibe `paso` (1 a 3).{% endcomment %}
+<ol class="pasos-importacion" aria-label="Pasos de la importación">
+  <li {% if paso == 1 %}aria-current="step"{% endif %} class="{% if paso > 1 %}hecho{% endif %}"><span>1</span> Subir archivo</li>
+  <li {% if paso == 2 %}aria-current="step"{% endif %} class="{% if paso > 2 %}hecho{% endif %}"><span>2</span> Revisar y corregir</li>
+  <li {% if paso == 3 %}aria-current="step"{% endif %}><span>3</span> Guardar</li>
+</ol>

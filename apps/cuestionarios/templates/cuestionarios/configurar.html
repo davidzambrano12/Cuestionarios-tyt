@@ -1,0 +1,184 @@
+{% extends 'layouts/app_base.html' %}
+{% load static componentes %}
+
+{% block title %}{% if cuestionario.pk %}Editar: {{ cuestionario.nombre }}{% else %}Crear cuestionario{% endif %} - Simulador Saber TyT{% endblock %}
+{% block nav_title %}{% if cuestionario.pk %}Configurar cuestionario{% else %}Crear cuestionario{% endif %}{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'css/cuestionarios.css' %}">{% endblock %}
+
+{% block app_content %}
+<div class="configurar" id="configurar-cuestionario">
+
+  <div class="flex justify-between items-center mb-4">
+    <a href="{% url 'cuestionarios:listado' %}" class="enlace-volver"><i data-lucide="arrow-left" class="icono-16"></i> Volver a cuestionarios</a>
+    {% if cuestionario.pk %}
+    <a href="{% url 'cuestionarios:previsualizar' cuestionario.pk %}" class="btn btn-outline btn-accion"><i data-lucide="eye" class="icono-14"></i> Previsualizar examen</a>
+    {% endif %}
+  </div>
+
+  {% if cuestionario.pk %}
+    {% componente "componentes/encabezado.html" etiqueta=cuestionario.get_estado_display titulo="Editar: "|add:cuestionario.nombre subtitulo="Configura el contenido, la programación y las preguntas de la evaluación." %}{% fincomponente %}
+  {% else %}
+    {% componente "componentes/encabezado.html" etiqueta="Nuevo cuestionario" titulo="Diseño y configuración de la evaluación" subtitulo="Configura el contenido, la programación y las preguntas de la evaluación." %}{% fincomponente %}
+  {% endif %}
+
+  <!-- Pasos -->
+  <nav class="pasos" aria-label="Pasos de la configuración">
+    <button type="button" class="pasos__boton" data-ir-paso="1" aria-current="step"><span class="pasos__numero">1</span> Información y fechas</button>
+    <button type="button" class="pasos__boton" data-ir-paso="2"><span class="pasos__numero">2</span> Políticas y calificación</button>
+    <button type="button" class="pasos__boton" data-ir-paso="3"><span class="pasos__numero">3</span> Preguntas del banco <span class="badge badge-info" data-ref="conteo-pestana">{{ reactivos_asignados|length }}</span></button>
+  </nav>
+
+  <form method="POST" id="form-cuestionario" novalidate>
+    {% csrf_token %}
+    <div class="configurar__grid">
+
+      <div>
+        <!-- Paso 1 -->
+        <section data-paso="1">
+          <div class="card bloque-formulario">
+            <h2 class="bloque-formulario__titulo"><i data-lucide="clipboard-list" class="icono-20"></i> Información general</h2>
+            <div class="form-group">
+              <label class="form-label" for="campo-nombre">Nombre del cuestionario *</label>
+              <input type="text" id="campo-nombre" name="nombre" value="{{ cuestionario.nombre|default:'' }}" required class="form-input" placeholder="Ej.: Simulacro diagnóstico Saber TyT · Razonamiento cuantitativo">
+              <span class="texto-xs texto-suave">Claro y representativo de la competencia que evalúa.</span>
+            </div>
+            <div class="form-group mb-0">
+              <label class="form-label" for="campo-descripcion">Instrucciones para el estudiante *</label>
+              <textarea id="campo-descripcion" name="descripcion" required class="form-textarea form-textarea--alto" placeholder="Lee atentamente cada pregunta y elige la mejor opción…">{{ cuestionario.descripcion|default:'' }}</textarea>
+              <span class="texto-xs texto-suave inline-flex items-center gap-1"><i data-lucide="eye" class="icono-13"></i> Se muestran antes de empezar el examen.</span>
+            </div>
+          </div>
+
+          <div class="card bloque-formulario">
+            <h2 class="bloque-formulario__titulo"><i data-lucide="calendar" class="icono-20"></i> Ventana de acceso y duración</h2>
+            <div class="grid-2">
+              <div class="form-group">
+                <label class="form-label" for="campo-apertura">Apertura *</label>
+                <input type="datetime-local" id="campo-apertura" name="fecha_apertura" value="{{ cuestionario.fecha_apertura|date:'Y-m-d\TH:i' }}" required class="form-input">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="campo-cierre">Cierre *</label>
+                <input type="datetime-local" id="campo-cierre" name="fecha_cierre" value="{{ cuestionario.fecha_cierre|date:'Y-m-d\TH:i' }}" required class="form-input">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="campo-tiempo">Tiempo límite (minutos) *</label>
+              <div class="flex items-center gap-3">
+                <input type="number" min="5" max="360" id="campo-tiempo" name="tiempo_limite_minutos" value="{{ cuestionario.tiempo_limite_minutos|default:120 }}" required class="form-input campo-corto">
+                <span class="texto-sm texto-suave" data-ref="tiempo-horas"></span>
+              </div>
+              <span class="texto-xs texto-suave">Entre 5 y 360 minutos.</span>
+            </div>
+            <p class="nota nota--exito"><i data-lucide="shield-check" class="icono-16 shrink-0"></i> El servidor controla el tiempo real de cada intento, aunque el estudiante cambie la hora de su equipo.</p>
+          </div>
+
+          <div class="flex justify-end">
+            <button type="button" class="btn btn-primary" data-ir-paso="2">Continuar a políticas <i data-lucide="arrow-right" class="icono-16"></i></button>
+          </div>
+        </section>
+
+        <!-- Paso 2 -->
+        <section data-paso="2" hidden>
+          <div class="card bloque-formulario">
+            <h2 class="bloque-formulario__titulo"><i data-lucide="award" class="icono-20"></i> Escala y calificación</h2>
+            <div class="grid-3">
+              <div class="form-group">
+                <label class="form-label" for="campo-intentos">Intentos permitidos *</label>
+                <input type="number" min="1" max="10" id="campo-intentos" name="intentos_permitidos" value="{{ cuestionario.intentos_permitidos|default:5 }}" required class="form-input">
+                <span class="texto-xs texto-suave">Cuenta la nota más alta.</span>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="campo-maxima">Calificación máxima *</label>
+                <input type="number" step="0.1" min="0.1" id="campo-maxima" name="calificacion_maxima" value="{{ cuestionario.calificacion_maxima|default:'5.00'|stringformat:'s' }}" required class="form-input">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="campo-aprobacion">Nota para aprobar *</label>
+                <input type="number" step="0.1" min="0" id="campo-aprobacion" name="calificacion_aprobacion" value="{{ cuestionario.calificacion_aprobacion|default:'3.00'|stringformat:'s' }}" required class="form-input">
+              </div>
+            </div>
+            <p class="nota nota--exito"><i data-lucide="check" class="icono-16 shrink-0"></i> Nota = (puntos obtenidos / puntos posibles) × calificación máxima</p>
+          </div>
+
+          <div class="card bloque-formulario">
+            <h2 class="bloque-formulario__titulo"><i data-lucide="shuffle" class="icono-20"></i> Entrega y revisión</h2>
+            <div class="flex flex-col gap-3">
+              <label class="interruptor">
+                <span><span class="block texto-sm peso-bold">Mezclar el orden de las preguntas</span><span class="texto-xs texto-suave">Cada estudiante ve una secuencia distinta.</span></span>
+                <input type="checkbox" name="mezclar_preguntas" {% if cuestionario.mezclar_preguntas %}checked{% endif %}>
+              </label>
+              <label class="interruptor">
+                <span><span class="block texto-sm peso-bold">Mezclar las opciones de respuesta</span><span class="texto-xs texto-suave">Las alternativas A, B, C y D cambian de lugar en cada intento.</span></span>
+                <input type="checkbox" name="mezclar_respuestas" {% if cuestionario.mezclar_respuestas %}checked{% endif %}>
+              </label>
+              <label class="interruptor">
+                <span><span class="block texto-sm peso-bold">Permitir revisión pedagógica</span><span class="texto-xs texto-suave">Al terminar, el estudiante ve las respuestas correctas y la retroalimentación.</span></span>
+                <input type="checkbox" name="permitir_revision" {% if cuestionario.permitir_revision or not cuestionario.pk %}checked{% endif %}>
+              </label>
+            </div>
+          </div>
+
+          <div class="flex justify-between">
+            <button type="button" class="btn btn-outline" data-ir-paso="1"><i data-lucide="arrow-left" class="icono-16"></i> Paso anterior</button>
+            <button type="button" class="btn btn-primary" data-ir-paso="3">Continuar a preguntas <i data-lucide="arrow-right" class="icono-16"></i></button>
+          </div>
+        </section>
+
+        <!-- Paso 3 -->
+        <section data-paso="3" hidden>
+          <div class="card bloque-formulario">
+            <div class="flex justify-between items-center gap-3 flex-wrap bloque-formulario__titulo">
+              <h2 class="flex items-center gap-2 m-0"><i data-lucide="book-open" class="icono-20"></i> Preguntas asignadas</h2>
+              <button type="button" class="btn btn-primary btn-accion" data-abrir-modal="modal-selector-preguntas"><i data-lucide="plus" class="icono-14"></i> Añadir preguntas del banco</button>
+            </div>
+
+            <div class="resumen-preguntas">
+              <div><span class="metrica__etiqueta">Preguntas</span><strong class="texto-xl" data-ref="conteo">{{ reactivos_asignados|length }}</strong></div>
+              <div><span class="metrica__etiqueta">Puntaje total</span><strong class="texto-xl texto-primario" data-ref="puntaje">{{ puntaje_total }}</strong></div>
+            </div>
+
+            <ol class="lista-asignadas" data-ref="lista">
+              {% for cp in reactivos_asignados %}
+                {% include "cuestionarios/_pregunta_asignada.html" with pregunta=cp.pregunta %}
+              {% endfor %}
+            </ol>
+            <div class="vacio-asignadas" data-ref="vacio" {% if reactivos_asignados %}hidden{% endif %}>
+              {% componente "componentes/estado_vacio.html" icono="file-question" titulo="Aún no hay preguntas en este examen" mensaje="Explora el banco y elige las preguntas que presentarán los estudiantes." %}
+                <button type="button" class="btn btn-outline" data-abrir-modal="modal-selector-preguntas"><i data-lucide="plus"></i> Seleccionar preguntas</button>
+              {% fincomponente %}
+            </div>
+          </div>
+
+          <div class="flex justify-between">
+            <button type="button" class="btn btn-outline" data-ir-paso="2"><i data-lucide="arrow-left" class="icono-16"></i> Paso anterior</button>
+          </div>
+        </section>
+      </div>
+
+      <!-- Ficha resumen -->
+      <aside class="ficha-resumen card">
+        <h3 class="bloque-formulario__titulo"><i data-lucide="file-text" class="icono-18"></i> Ficha resumen</h3>
+        <dl class="ficha-resumen__datos">
+          <div class="ficha-resumen__nombre"><dt>Nombre</dt><dd data-ref="r-nombre">{{ cuestionario.nombre|default:"Sin nombre" }}</dd></div>
+          <div><dt>Duración</dt><dd data-ref="r-tiempo">{{ cuestionario.tiempo_limite_minutos|default:120 }} min</dd></div>
+          <div><dt>Preguntas</dt><dd data-ref="r-preguntas">{{ reactivos_asignados|length }}</dd></div>
+          <div><dt>Puntaje</dt><dd data-ref="r-puntaje">{{ puntaje_total }}</dd></div>
+          <div><dt>Escala máxima</dt><dd data-ref="r-escala">{{ cuestionario.calificacion_maxima|default:"5,00" }}</dd></div>
+          <div class="ficha-resumen__nombre"><dt>Disponibilidad</dt><dd data-ref="r-fechas">{% if cuestionario.fecha_apertura and cuestionario.fecha_cierre %}{{ cuestionario.fecha_apertura|date:"d M Y H:i" }} → {{ cuestionario.fecha_cierre|date:"d M Y H:i" }}{% else %}Define las fechas en el paso 1{% endif %}</dd></div>
+        </dl>
+        <div class="ficha-resumen__acciones">
+          <button type="submit" name="accion" value="borrador" class="btn btn-outline btn-full"><i data-lucide="save" class="icono-16"></i> Guardar como borrador</button>
+          <button type="submit" name="accion" value="publicar" class="btn btn-primary btn-full"><i data-lucide="send" class="icono-16"></i> Publicar y habilitar</button>
+        </div>
+      </aside>
+    </div>
+  </form>
+</div>
+
+{% include "cuestionarios/_modal_selector.html" %}
+
+<template id="plantilla-pregunta-asignada">
+  {% include "cuestionarios/_pregunta_asignada.html" with pregunta=None %}
+</template>
+{% endblock %}
+
+{% block extra_scripts %}<script src="{% static 'js/cuestionarios/configurar.js' %}"></script>{% endblock %}

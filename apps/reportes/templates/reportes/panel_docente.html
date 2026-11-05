@@ -1,0 +1,66 @@
+{% extends 'layouts/app_base.html' %}
+{% load static componentes %}
+
+{% block title %}Panel docente - Simulador Saber TyT{% endblock %}
+{% block nav_title %}Panel docente{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'css/reportes.css' %}">{% endblock %}
+
+{% block app_content %}
+{% with nombre=user.first_name|default:user.username %}
+{% componente "componentes/encabezado.html" etiqueta="Periodo "|add:periodo titulo="Hola, "|add:nombre subtitulo="Prepara y gestiona tus evaluaciones Saber TyT." %}{% fincomponente %}
+{% endwith %}
+
+<div class="metricas">
+  {% componente "componentes/metrica.html" etiqueta="Cuestionarios" valor=cuestionarios_count icono="clipboard-list" ayuda=borradores_count|stringformat:"s"|add:" en borrador" %}{% fincomponente %}
+  {% componente "componentes/metrica.html" etiqueta="Publicados" valor=publicados_count icono="send" variante="exito" %}{% fincomponente %}
+  {% componente "componentes/metrica.html" etiqueta="Preguntas activas" valor=preguntas_count icono="library" variante="info" ayuda=categorias_count|stringformat:"s"|add:" competencias" %}{% fincomponente %}
+</div>
+
+<section aria-labelledby="titulo-trabajo">
+  <div class="section-header">
+    <h2 class="section-title" id="titulo-trabajo">Tu espacio de trabajo</h2>
+  </div>
+  <div class="panel-tarjetas">
+    <article class="card tarjeta-modulo">
+      <div class="tarjeta-modulo__cabecera">
+        <span class="metrica__icono"><i data-lucide="clipboard-list" class="icono-18"></i></span>
+        <h3 class="card-title m-0">Cuestionarios</h3>
+      </div>
+      <p class="card-subtitle">{{ cuestionarios_count }} cuestionario{{ cuestionarios_count|pluralize }} · {{ publicados_count }} publicado{{ publicados_count|pluralize }} · {{ borradores_count }} en borrador</p>
+      <div class="tarjeta-modulo__acciones">
+        <a href="{% url 'cuestionarios:crear' %}" class="btn btn-primary"><i data-lucide="plus"></i> Crear cuestionario</a>
+        <a href="{% url 'cuestionarios:listado' %}" class="btn btn-secondary"><i data-lucide="settings"></i> Administrar</a>
+      </div>
+    </article>
+    <article class="card tarjeta-modulo">
+      <div class="tarjeta-modulo__cabecera">
+        <span class="metrica__icono"><i data-lucide="library" class="icono-18"></i></span>
+        <h3 class="card-title m-0">Banco de preguntas</h3>
+      </div>
+      <p class="card-subtitle">{{ preguntas_count }} pregunta{{ preguntas_count|pluralize }} activa{{ preguntas_count|pluralize }}{% if preguntas_inactivas %} · {{ preguntas_inactivas }} desactivada{{ preguntas_inactivas|pluralize }}{% endif %}</p>
+      <div class="tarjeta-modulo__acciones">
+        <a href="{% url 'banco_preguntas:banco' %}#nueva" class="btn btn-primary"><i data-lucide="plus"></i> Nueva pregunta</a>
+        <a href="{% url 'banco_preguntas:banco' %}" class="btn btn-secondary"><i data-lucide="settings"></i> Administrar</a>
+      </div>
+    </article>
+  </div>
+</section>
+
+<section aria-labelledby="titulo-recientes">
+  <div class="section-header">
+    <h2 class="section-title" id="titulo-recientes">Cuestionarios recientes</h2>
+    <a href="{% url 'cuestionarios:listado' %}" class="texto-sm peso-semibold">Ver todos &rarr;</a>
+  </div>
+  <div class="panel-tarjetas">
+    {% for c in cuestionarios_recientes %}
+      {% include "reportes/_tarjeta_cuestionario.html" %}
+    {% empty %}
+      <div class="card">
+        {% componente "componentes/estado_vacio.html" icono="clipboard-list" titulo="Todavía no hay cuestionarios" mensaje="Crea tu primer cuestionario para empezar a evaluar." %}
+          <a href="{% url 'cuestionarios:crear' %}" class="btn btn-primary"><i data-lucide="plus"></i> Crear cuestionario</a>
+        {% fincomponente %}
+      </div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

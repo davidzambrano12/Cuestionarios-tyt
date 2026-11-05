@@ -1,0 +1,127 @@
+{% extends 'layouts/app_base.html' %}
+{% load static componentes %}
+
+{% block title %}Usuarios y roles - Simulador Saber TyT{% endblock %}
+{% block nav_title %}Usuarios y roles{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'css/cuentas.css' %}">{% endblock %}
+
+{% block app_content %}
+<div id="usuarios-roles" data-url-editar-usuario="{% url 'cuentas:editar_usuario' 0 %}" data-url-editar-permisos="{% url 'cuentas:editar_rol_permisos' 0 %}" data-url-permisos-rol="{% url 'cuentas:api_rol_permisos' 0 %}">
+
+  {% componente "componentes/encabezado.html" etiqueta="Administración institucional" titulo="Usuarios y roles" subtitulo="Control de acceso, perfiles institucionales y permisos del sistema." %}
+    <button type="button" class="btn btn-primary" data-abrir-modal="modal-nuevo-usuario"><i data-lucide="user-plus"></i> Nuevo usuario</button>
+    <button type="button" class="btn btn-outline" data-abrir-modal="modal-nuevo-rol"><i data-lucide="shield"></i> Nuevo rol</button>
+  {% fincomponente %}
+
+  <div class="card barra-herramientas">
+    <div class="barra-herramientas__fila">
+      <div class="tabs-header" role="tablist" aria-label="Secciones">
+        <button type="button" class="tab-btn active" id="tab-usuarios" role="tab" aria-selected="true" aria-controls="panel-usuarios" data-pestana="usuarios">
+          <i data-lucide="users" class="icono-16"></i> Usuarios <span class="badge badge-info">{{ usuarios|length }}</span>
+        </button>
+        <button type="button" class="tab-btn" id="tab-roles" role="tab" aria-selected="false" aria-controls="panel-roles" tabindex="-1" data-pestana="roles">
+          <i data-lucide="shield" class="icono-16"></i> Roles y permisos <span class="badge badge-neutro">{{ roles|length }}</span>
+        </button>
+      </div>
+      <div class="buscador">
+        <label for="filtro-texto" class="sr-only">Buscar</label>
+        <i data-lucide="search" class="buscador__icono"></i>
+        <input type="search" id="filtro-texto" placeholder="Buscar por nombre, código o correo…" class="form-input" autocomplete="off">
+      </div>
+    </div>
+    <div class="barra-herramientas__fila" data-solo-pestana="usuarios">
+      <div class="flex items-center gap-2 flex-wrap" role="group" aria-label="Filtrar por rol">
+        <span class="texto-xs texto-suave peso-semibold">Rol:</span>
+        <button type="button" class="btn btn-outline chip-filtro active" data-filtro-rol="" aria-pressed="true">Todos</button>
+        {% for r in roles %}<button type="button" class="btn btn-outline chip-filtro" data-filtro-rol="{{ r.codigo }}" aria-pressed="false">{{ r.nombre }}</button>{% endfor %}
+      </div>
+      <div class="flex items-center gap-2 flex-wrap" role="group" aria-label="Filtrar por estado">
+        <span class="texto-xs texto-suave peso-semibold">Estado:</span>
+        <button type="button" class="btn btn-outline chip-filtro active" data-filtro-estado="" aria-pressed="true">Todos</button>
+        <button type="button" class="btn btn-outline chip-filtro" data-filtro-estado="activo" aria-pressed="false">Activos</button>
+        <button type="button" class="btn btn-outline chip-filtro" data-filtro-estado="inactivo" aria-pressed="false">Suspendidos</button>
+      </div>
+    </div>
+  </div>
+  <p class="texto-xs texto-suave mb-3" id="contador" aria-live="polite"></p>
+
+  <!-- Usuarios -->
+  <section id="panel-usuarios" role="tabpanel" aria-labelledby="tab-usuarios" class="rejilla-cuentas">
+    {% for u in usuarios %}
+    <article class="card tarjeta-cuenta" data-texto="{{ u.get_full_name|lower }} {{ u.username|lower }} {{ u.email|lower }} {{ u.perfil.codigo_institucional|default:''|lower }}" data-rol="{{ u.perfil.rol.codigo|default:'' }}" data-estado="{% if u.is_active %}activo{% else %}inactivo{% endif %}">
+      <div class="tarjeta-cuenta__cabecera">
+        <span class="user-avatar-circle">{{ u.first_name|default:u.username|slice:":2"|upper }}</span>
+        <div class="flex-1">
+          <h3 class="texto-md peso-extrabold">{{ u.get_full_name|default:u.username }}</h3>
+          <div class="texto-xs texto-suave">{{ u.email|default:"Sin correo" }}</div>
+          <div class="texto-xs texto-tenue">Cód: {{ u.perfil.codigo_institucional|default:u.username }} · {{ u.perfil.rol.nombre|default:"Sin rol" }}</div>
+        </div>
+        {% if u.is_active %}<span class="badge badge-success">Activo</span>{% else %}<span class="badge badge-danger"><i data-lucide="lock" class="icono-12"></i> Suspendido</span>{% endif %}
+      </div>
+      {% if u.perfil.modulo_asignado %}
+      <div class="tarjeta-cuenta__nota"><strong>Módulo asignado:</strong> {{ u.perfil.modulo_asignado }}</div>
+      {% endif %}
+      <div class="tarjeta-cuenta__acciones">
+        {% if u != user %}
+        <form method="POST" action="{% url 'cuentas:toggle_usuario_estado' u.id %}" class="flex-1"
+              {% if u.is_active %}data-confirmar-titulo="¿Suspender a {{ u.get_full_name|default:u.username }}?" data-confirmar="No podrá iniciar sesión hasta que lo reactives.&#10;Sus preguntas y cuestionarios se conservan." data-confirmar-boton="Suspender acceso" data-confirmar-tipo="peligro"{% endif %}>
+          {% csrf_token %}
+          {% if u.is_active %}
+            <button type="submit" class="btn btn-accion btn-peligro btn-full"><i data-lucide="user-x" class="icono-14"></i> Suspender</button>
+          {% else %}
+            <button type="submit" class="btn btn-outline btn-accion btn-full texto-exito"><i data-lucide="user-check" class="icono-14"></i> Reactivar acceso</button>
+          {% endif %}
+        </form>
+        {% endif %}
+        <button type="button" class="btn btn-primary btn-accion flex-1" data-editar-usuario="{{ u.id }}"
+                data-nombre="{{ u.first_name }}" data-apellido="{{ u.last_name }}" data-email="{{ u.email }}"
+                data-rol="{{ u.perfil.rol.id|default:'' }}" data-codigo="{{ u.perfil.codigo_institucional|default:'' }}">
+          <i data-lucide="edit-3" class="icono-14"></i> Editar
+        </button>
+      </div>
+    </article>
+    {% empty %}
+    <div class="card rejilla-cuentas__completa">{% componente "componentes/estado_vacio.html" icono="users" titulo="No hay usuarios registrados" %}{% fincomponente %}</div>
+    {% endfor %}
+  </section>
+
+  <!-- Roles -->
+  <section id="panel-roles" role="tabpanel" aria-labelledby="tab-roles" class="rejilla-cuentas" hidden>
+    {% for r in roles %}
+    <article class="card tarjeta-cuenta" data-texto="{{ r.nombre|lower }} {{ r.codigo|lower }} {{ r.descripcion|lower }}">
+      <div class="tarjeta-cuenta__cabecera">
+        <span class="user-avatar-circle">{{ r.nombre|slice:":2"|upper }}</span>
+        <div class="flex-1">
+          <h3 class="texto-md peso-extrabold">{{ r.nombre }}</h3>
+          <div class="texto-xs texto-suave">{{ r.descripcion|default:"Sin descripción." }}</div>
+        </div>
+        {% if r.activo %}<span class="badge badge-success">Activo</span>{% else %}<span class="badge badge-danger">Inactivo</span>{% endif %}
+      </div>
+      <div class="tarjeta-cuenta__nota tarjeta-cuenta__nota--neutra">
+        <span><strong>{{ r.permisos.all|length }}</strong> permiso{{ r.permisos.all|length|pluralize }} habilitado{{ r.permisos.all|length|pluralize }}</span>
+        <span>Cód: {{ r.codigo }}{% if r.es_sistema %} · del sistema{% endif %}</span>
+      </div>
+      <div class="tarjeta-cuenta__acciones">
+        <button type="button" class="btn btn-secondary btn-accion flex-1" data-editar-permisos="{{ r.id }}" data-nombre="{{ r.nombre }}"><i data-lucide="shield" class="icono-15"></i> Editar permisos</button>
+        {% if not r.es_sistema %}
+        <form method="POST" action="{% url 'cuentas:toggle_rol_estado' r.id %}" {% if r.activo %}data-confirmar-titulo="¿Desactivar el rol {{ r.nombre }}?" data-confirmar="Sus usuarios perderán esos permisos mientras el rol esté inactivo.&#10;Puedes volver a activarlo cuando quieras." data-confirmar-boton="Desactivar rol" data-confirmar-tipo="peligro"{% endif %}>
+          {% csrf_token %}
+          <button type="submit" class="btn btn-outline btn-accion">{% if r.activo %}Desactivar{% else %}Activar{% endif %}</button>
+        </form>
+        {% endif %}
+      </div>
+    </article>
+    {% endfor %}
+  </section>
+
+  <div class="card" id="sin-resultados" hidden>
+    {% componente "componentes/estado_vacio.html" icono="search-x" titulo="Nada coincide con la búsqueda o los filtros" %}
+      <button type="button" class="btn btn-outline" data-accion="limpiar-filtros">Limpiar filtros</button>
+    {% fincomponente %}
+  </div>
+</div>
+
+{% include "cuentas/_modales_usuarios.html" %}
+{% endblock %}
+
+{% block extra_scripts %}<script src="{% static 'js/cuentas/usuarios_roles.js' %}"></script>{% endblock %}

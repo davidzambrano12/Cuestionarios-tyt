@@ -1,0 +1,120 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %}Simulador Saber TyT - Uniputumayo{% endblock %}
+
+{% block content %}
+<div class="app-container" data-barra="{% if request.COOKIES.barra_lateral == 'contraida' %}contraida{% elif request.COOKIES.barra_lateral == 'expandida' %}expandida{% else %}auto{% endif %}">
+
+  <!-- Sidebar Persistente Dinámico según Rol -->
+  <aside class="sidebar" id="barra-lateral" aria-label="Navegación principal">
+    <div class="sidebar-header">
+      <span class="sidebar-marca" aria-hidden="true"><i data-lucide="graduation-cap"></i></span>
+      <div class="sidebar-header__texto">
+        <div class="sidebar-title">{{ config.nombre_sistema }}</div>
+        <div class="sidebar-subtitle">
+          {% if user.is_superuser or user.perfil.es_admin %}
+            Dashboard de Administración
+          {% elif user.perfil.es_docente %}
+            Dashboard de Docente
+          {% else %}
+            Dashboard de Estudiante
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      {% if user.is_superuser or user.perfil.es_admin %}
+        <a href="{% url 'reportes:panel_admin' %}" class="nav-item {% if '/dashboard/' in request.path or active_tab == 'inicio' %}active{% endif %}"{% if '/dashboard/' in request.path or active_tab == 'inicio' %} aria-current="page"{% endif %}>
+          <i data-lucide="home" aria-hidden="true"></i><span class="nav-item__texto">Inicio</span>
+        </a>
+        <a href="{% url 'banco_preguntas:banco' %}" class="nav-item {% if '/preguntas/' in request.path or active_tab == 'preguntas' %}active{% endif %}"{% if '/preguntas/' in request.path or active_tab == 'preguntas' %} aria-current="page"{% endif %}>
+          <i data-lucide="library" aria-hidden="true"></i><span class="nav-item__texto">Preguntas</span>
+        </a>
+        <a href="{% url 'cuentas:usuarios_roles' %}" class="nav-item {% if '/usuarios/' in request.path or '/roles/' in request.path or active_tab == 'usuarios' %}active{% endif %}"{% if '/usuarios/' in request.path or '/roles/' in request.path or active_tab == 'usuarios' %} aria-current="page"{% endif %}>
+          <i data-lucide="users" aria-hidden="true"></i><span class="nav-item__texto">Usuarios</span>
+        </a>
+        <a href="{% url 'cuestionarios:listado' %}" class="nav-item {% if '/cuestionarios/' in request.path or active_tab == 'cuestionarios' %}active{% endif %}"{% if '/cuestionarios/' in request.path or active_tab == 'cuestionarios' %} aria-current="page"{% endif %}>
+          <i data-lucide="clipboard-list" aria-hidden="true"></i><span class="nav-item__texto">Cuestionarios</span>
+        </a>
+        <a href="{% url 'cuentas:ajustes' %}" class="nav-item {% if '/ajustes/' in request.path or active_tab == 'ajustes' %}active{% endif %}"{% if '/ajustes/' in request.path or active_tab == 'ajustes' %} aria-current="page"{% endif %}>
+          <i data-lucide="settings" aria-hidden="true"></i><span class="nav-item__texto">Ajustes</span>
+        </a>
+      {% elif user.perfil.es_docente %}
+        <a href="{% url 'reportes:panel_docente' %}" class="nav-item {% if '/dashboard/' in request.path or active_tab == 'inicio' %}active{% endif %}"{% if '/dashboard/' in request.path or active_tab == 'inicio' %} aria-current="page"{% endif %}>
+          <i data-lucide="home" aria-hidden="true"></i><span class="nav-item__texto">Inicio</span>
+        </a>
+        <a href="{% url 'banco_preguntas:banco' %}" class="nav-item {% if '/preguntas/' in request.path or active_tab == 'preguntas' %}active{% endif %}"{% if '/preguntas/' in request.path or active_tab == 'preguntas' %} aria-current="page"{% endif %}>
+          <i data-lucide="library" aria-hidden="true"></i><span class="nav-item__texto">Preguntas</span>
+        </a>
+        <a href="{% url 'cuestionarios:listado' %}" class="nav-item {% if '/cuestionarios/' in request.path or active_tab == 'cuestionarios' %}active{% endif %}"{% if '/cuestionarios/' in request.path or active_tab == 'cuestionarios' %} aria-current="page"{% endif %}>
+          <i data-lucide="clipboard-list" aria-hidden="true"></i><span class="nav-item__texto">Cuestionarios</span>
+        </a>
+        <a href="{% url 'cuentas:ajustes' %}" class="nav-item {% if '/ajustes/' in request.path or active_tab == 'ajustes' %}active{% endif %}"{% if '/ajustes/' in request.path or active_tab == 'ajustes' %} aria-current="page"{% endif %}>
+          <i data-lucide="settings" aria-hidden="true"></i><span class="nav-item__texto">Ajustes</span>
+        </a>
+      {% else %}
+        <a href="{% url 'evaluaciones:panel_estudiante' %}" class="nav-item {% if '/dashboard/' in request.path or active_tab == 'inicio' %}active{% endif %}"{% if '/dashboard/' in request.path or active_tab == 'inicio' %} aria-current="page"{% endif %}>
+          <i data-lucide="home" aria-hidden="true"></i><span class="nav-item__texto">Inicio</span>
+        </a>
+        <a href="{% url 'evaluaciones:panel_estudiante' %}#cuestionarios" data-ancla-local="cuestionarios" class="nav-item {% if '/cuestionarios/' in request.path or active_tab == 'cuestionarios' %}active{% endif %}"{% if '/cuestionarios/' in request.path or active_tab == 'cuestionarios' %} aria-current="page"{% endif %}>
+          <i data-lucide="clipboard-list" aria-hidden="true"></i><span class="nav-item__texto">Cuestionarios</span>
+        </a>
+      {% endif %}
+    </nav>
+
+    <button type="button" class="barra-alternar" data-alternar-barra aria-controls="barra-lateral" aria-expanded="true">
+      <i data-lucide="chevrons-left" aria-hidden="true"></i><span class="nav-item__texto">Contraer menú</span>
+    </button>
+  </aside>
+  <div class="barra-fondo" data-cerrar-barra hidden></div>
+
+  <!-- Contenido Principal -->
+  <main class="main-content">
+    
+    <!-- Topbar Persistente Compartido -->
+    <header class="top-navbar">
+      <button type="button" class="btn-menu-movil" data-abrir-barra aria-controls="barra-lateral" aria-expanded="false" aria-label="Abrir menú">
+        <i data-lucide="menu" aria-hidden="true"></i>
+      </button>
+      <div class="navbar-brand-title">
+        {{ config.nombre_sistema }} / <span class="text-muted font-normal">{% block nav_title %}Plataforma Institucional{% endblock %}</span>
+      </div>
+      <div class="menu-cuenta" data-menu-desplegable>
+        <button type="button" class="menu-cuenta__boton" aria-haspopup="menu" aria-expanded="false" aria-controls="menu-cuenta-lista">
+          <span class="user-avatar-circle user-avatar-circle--solido" aria-hidden="true">{{ user.first_name|default:user.username|slice:":1"|upper }}</span>
+          <span class="menu-cuenta__texto">
+            <span class="menu-cuenta__nombre">{{ user.get_full_name|default:user.username }}</span>
+            <span class="menu-cuenta__rol">
+              {% if user.is_superuser or user.perfil.es_admin %}
+                Administrador
+              {% elif user.perfil.es_docente %}
+                {{ user.perfil.rol.nombre|default:"Docente" }}
+              {% else %}
+                Cód. {{ user.perfil.codigo_institucional|default:user.username }}
+              {% endif %}
+            </span>
+          </span>
+          <i data-lucide="chevron-down" class="menu-cuenta__flecha" aria-hidden="true"></i>
+        </button>
+        <div class="menu-cuenta__lista" id="menu-cuenta-lista" role="menu" hidden>
+          <a href="{% url 'cuentas:perfil' %}" role="menuitem" class="menu-cuenta__item{% if '/perfil/' in request.path %} menu-cuenta__item--activo{% endif %}">
+            <i data-lucide="user" aria-hidden="true"></i> Mi perfil
+          </a>
+          <a href="{% url 'logout' %}" role="menuitem" data-cerrar-sesion class="menu-cuenta__item menu-cuenta__item--peligro">
+            <i data-lucide="log-out" aria-hidden="true"></i> Cerrar sesión
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <!-- Cuerpo de Página -->
+    <div class="page-body">
+      {% block app_content %}{% endblock %}
+    </div>
+
+  </main>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,108 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+{% comment %}
+  Estructura común de la sala de examen (estudiante) y de la previsualización
+  (docente). Las pantallas hijas solo rellenan los bloques; el comportamiento
+  lo pone static/js/examen/motor.js según data-modo.
+
+  Bloques: volver_url, volver_confirmar, etiqueta_superior, acciones_encabezado,
+  aviso, progreso_texto, contexto_extra, debajo_opciones, mapa_extra,
+  boton_final, formulario_inicio, formulario_fin, datos.
+{% endcomment %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/examen.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="sala" id="sala-examen" data-modo="{% block modo %}examen{% endblock %}" {% block atributos_sala %}{% endblock %}>
+
+  <header class="sala-encabezado">
+    <div class="sala-encabezado__titulo">
+      <a href="{% block volver_url %}{% endblock %}" class="sala-volver" title="Volver" {% block volver_confirmar %}{% endblock %}>
+        <i data-lucide="arrow-left" class="icono-18"></i>
+      </a>
+      <div>
+        <div class="sala-etiqueta">{% block etiqueta_superior %}{% endblock %}</div>
+        <div class="sala-nombre">{{ cuestionario.nombre }}</div>
+      </div>
+    </div>
+    <div class="sala-encabezado__acciones">{% block acciones_encabezado %}{% endblock %}</div>
+  </header>
+
+  {% block aviso %}{% endblock %}
+
+  <div class="sala-progreso">
+    <div class="sala-progreso__fila">
+      <span class="texto-primario">Pregunta <span data-ref="indice">1</span> de {{ total_preguntas }}</span>
+      <span class="texto-exito" data-ref="porcentaje">{% block progreso_texto %}0% completado{% endblock %}</span>
+    </div>
+    <div class="progress-bar-container">
+      <div class="progress-bar-fill" data-ref="barra"></div>
+    </div>
+  </div>
+
+  {% block formulario_inicio %}{% endblock %}
+  <div class="sala-cuerpo">
+    <div class="sala-grid">
+
+      <!-- Columna 1: contexto de la pregunta -->
+      <aside>
+        <div class="sala-etiquetas">
+          <span class="badge badge-info sala-chip" data-ref="competencia">Competencia</span>
+          <span class="badge badge-neutro sala-chip" data-ref="puntaje">Valor: 1.00 pt</span>
+        </div>
+        <section class="card sala-tarjeta">
+          <div class="sala-subtitulo"><i data-lucide="file-text" class="icono-16"></i> Contexto de la pregunta</div>
+          <div class="text-reading" data-ref="contexto"></div>
+        </section>
+        {% block contexto_extra %}{% endblock %}
+      </aside>
+
+      <!-- Columna 2: enunciado y opciones -->
+      <section class="card sala-pregunta" aria-live="polite">
+        <div>
+          <h2 class="sala-enunciado" data-ref="enunciado">Cargando pregunta…</h2>
+          <div class="sala-opciones" data-ref="opciones" role="radiogroup" aria-label="Opciones de respuesta"></div>
+          {% block debajo_opciones %}{% endblock %}
+        </div>
+        <div class="sala-navegacion">
+          <button type="button" class="btn btn-outline" data-accion="anterior">
+            <i data-lucide="chevron-left" class="icono-16"></i> Anterior
+          </button>
+          <button type="button" class="btn btn-primary" data-accion="siguiente">
+            <span>Siguiente</span> <i data-lucide="chevron-right" class="icono-16"></i>
+          </button>
+        </div>
+      </section>
+
+      <!-- Columna 3: mapa de preguntas -->
+      <aside class="card sala-tarjeta">
+        <div class="flex items-center gap-2">
+          <i data-lucide="layout-grid" class="icono-18 texto-primario"></i>
+          <h3 class="sala-mapa__titulo">Mapa de preguntas</h3>
+        </div>
+        <div class="texto-xs texto-suave mb-3" data-ref="resumen"></div>
+        <div class="question-nav-grid" data-ref="grilla"></div>
+        <ul class="sala-leyenda">
+          <li><span class="sala-leyenda__muestra sala-leyenda__muestra--actual"></span> Actual</li>
+          <li><span class="sala-leyenda__muestra sala-leyenda__muestra--respondida"></span> {% block leyenda_respondida %}Respondida{% endblock %}</li>
+          <li><span class="sala-leyenda__muestra"></span> {% block leyenda_pendiente %}Pendiente{% endblock %}</li>
+        </ul>
+        {% block mapa_extra %}{% endblock %}
+        {% block boton_final %}{% endblock %}
+      </aside>
+
+    </div>
+  </div>
+  {% block formulario_fin %}{% endblock %}
+</div>
+
+{{ preguntas|json_script:"datos-preguntas" }}
+{% block datos %}{% endblock %}
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{% static 'js/examen/motor.js' %}"></script>
+{% block script_pagina %}{% endblock %}
+{% endblock %}

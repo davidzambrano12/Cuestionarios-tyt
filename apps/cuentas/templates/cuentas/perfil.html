@@ -1,0 +1,69 @@
+{% extends 'layouts/app_base.html' %}
+{% load static %}
+
+{% block title %}Mi perfil - Simulador Saber TyT{% endblock %}
+{% block nav_title %}Mi perfil{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'css/cuentas.css' %}">{% endblock %}
+
+{% block app_content %}
+<div class="columna-angosta">
+  <section class="card perfil">
+    <div class="perfil__cabecera">
+      <span class="user-avatar-circle perfil__avatar">{{ user.first_name|default:user.username|slice:":2"|upper }}</span>
+      <div class="flex justify-center gap-2 mb-2">
+        <span class="badge badge-info">{{ user.perfil.rol.nombre|default:"Usuario" }}</span>
+        <span class="badge badge-success">Cuenta activa</span>
+      </div>
+      <h1 class="texto-2xl peso-extrabold">{{ user.get_full_name|default:user.username }}</h1>
+      <div class="texto-xs texto-suave">Institución Universitaria del Putumayo</div>
+    </div>
+
+    <div class="perfil__seccion">
+      <h2 class="bloque-formulario__titulo"><i data-lucide="graduation-cap" class="icono-16"></i> Datos personales y programa</h2>
+      <form method="POST" action="{% url 'cuentas:actualizar_perfil' %}">
+        {% csrf_token %}
+        <div class="grid-2">
+          <div class="form-group">
+            <label class="form-label" for="perfil-codigo">Código institucional</label>
+            <input type="text" id="perfil-codigo" value="{{ user.perfil.codigo_institucional|default:user.username }}" readonly class="form-input form-input--lectura">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="perfil-correo">Correo institucional</label>
+            <input type="email" id="perfil-correo" value="{{ user.email }}" readonly class="form-input form-input--lectura">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="perfil-programa">Programa académico y semestre</label>
+          <input type="text" id="perfil-programa" name="programa" value="{{ user.perfil.programa_academico }} - {{ user.perfil.semestre }}" class="form-input">
+          <span class="texto-xs texto-suave">Formato: programa - semestre (ej.: Ingeniería de Sistemas - 6° Semestre)</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="perfil-telefono">Teléfono de contacto</label>
+          <input type="tel" id="perfil-telefono" name="telefono" value="{{ user.perfil.telefono|default:'' }}" class="form-input" placeholder="+57 300 000 0000" autocomplete="tel">
+        </div>
+        <button type="submit" class="btn btn-primary btn-full">Guardar datos</button>
+      </form>
+    </div>
+
+    <div class="perfil__seccion">
+      <h2 class="bloque-formulario__titulo"><i data-lucide="lock" class="icono-16"></i> Contraseña</h2>
+      <form method="POST" action="{% url 'cuentas:cambiar_password' %}">
+        {% csrf_token %}
+        <div class="form-group">
+          <label class="form-label" for="perfil-clave">Nueva contraseña</label>
+          <input type="password" id="perfil-clave" name="nueva_password" required minlength="8" autocomplete="new-password" class="form-input" placeholder="Mínimo 8 caracteres">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="perfil-clave-2">Confirmar nueva contraseña</label>
+          <input type="password" id="perfil-clave-2" name="confirmar_password" required minlength="8" autocomplete="new-password" class="form-input">
+        </div>
+        <button type="submit" class="btn btn-secondary btn-full"><i data-lucide="save" class="icono-14"></i> Cambiar contraseña</button>
+      </form>
+    </div>
+
+    <div class="perfil__seccion">
+      <a href="{% url 'logout' %}" data-cerrar-sesion class="btn btn-danger btn-full"><i data-lucide="log-out" class="icono-15"></i> Cerrar sesión</a>
+    </div>
+  </section>
+</div>
+{% endblock %}

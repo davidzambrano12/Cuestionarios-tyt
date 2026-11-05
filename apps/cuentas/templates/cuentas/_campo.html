@@ -1,0 +1,7 @@
+{% comment %}Campo de formulario con etiqueta, ayuda y errores. Recibe `campo` (BoundField).{% endcomment %}
+<div class="form-group">
+  <label class="form-label" for="{{ campo.id_for_label }}">{{ campo.label|capfirst }}{% if campo.field.required %} *{% endif %}</label>
+  {{ campo }}
+  {% if campo.help_text %}<span class="texto-xs texto-suave">{{ campo.help_text }}</span>{% endif %}
+  {% for error in campo.errors %}<p class="error-campo" role="alert">{{ error }}</p>{% endfor %}
+</div>

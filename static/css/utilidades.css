@@ -1,0 +1,111 @@
+/* ==========================================================================
+   UTILIDADES
+   Clases de una sola responsabilidad para maquetar sin estilos en línea.
+   Solo usan tokens (tokens.css). Para piezas con identidad propia
+   (tarjeta, badge, encabezado…) usar componentes, no combinaciones largas.
+   ========================================================================== */
+
+/* Visualización y flex */
+.block { display: block; }
+.inline-flex { display: inline-flex; }
+.flex { display: flex; }
+.grid { display: grid; }
+.hidden { display: none !important; }
+.flex-col { flex-direction: column; }
+.flex-wrap { flex-wrap: wrap; }
+.flex-1 { flex: 1; }
+.flex-grow { flex-grow: 1; }
+.shrink-0 { flex-shrink: 0; }
+.items-start { align-items: flex-start; }
+.items-center { align-items: center; }
+.items-end { align-items: flex-end; }
+.justify-center { justify-content: center; }
+.justify-between { justify-content: space-between; }
+.justify-end { justify-content: flex-end; }
+
+.gap-1 { gap: var(--espacio-1); }
+.gap-2 { gap: var(--espacio-2); }
+.gap-3 { gap: var(--espacio-3); }
+.gap-4 { gap: var(--espacio-4); }
+.gap-5 { gap: var(--espacio-5); }
+.gap-6 { gap: var(--espacio-6); }
+
+/* Espaciado */
+.m-0 { margin: 0; }
+.mt-1 { margin-top: var(--espacio-1); }
+.mt-2 { margin-top: var(--espacio-2); }
+.mt-3 { margin-top: var(--espacio-3); }
+.mt-4 { margin-top: var(--espacio-4); }
+.mt-5 { margin-top: var(--espacio-5); }
+.mt-6 { margin-top: var(--espacio-6); }
+.mb-0 { margin-bottom: 0; }
+.mb-1 { margin-bottom: var(--espacio-1); }
+.mb-2 { margin-bottom: var(--espacio-2); }
+.mb-3 { margin-bottom: var(--espacio-3); }
+.mb-4 { margin-bottom: var(--espacio-4); }
+.mb-5 { margin-bottom: var(--espacio-5); }
+.mb-6 { margin-bottom: var(--espacio-6); }
+.ml-2 { margin-left: var(--espacio-2); }
+.p-0 { padding: 0; }
+.p-4 { padding: var(--espacio-4); }
+.p-5 { padding: var(--espacio-5); }
+.p-6 { padding: var(--espacio-6); }
+
+/* Tipografía */
+.texto-xs { font-size: var(--texto-xs); }
+.texto-sm { font-size: var(--texto-sm); }
+.texto-base { font-size: var(--texto-base); }
+.texto-md { font-size: var(--texto-md); }
+.texto-lg { font-size: var(--texto-lg); }
+.texto-xl { font-size: var(--texto-xl); }
+.texto-2xl { font-size: var(--texto-2xl); }
+.texto-3xl { font-size: var(--texto-3xl); }
+.peso-medio { font-weight: var(--peso-medio); }
+.peso-semibold { font-weight: var(--peso-semibold); }
+.peso-bold { font-weight: var(--peso-bold); }
+.peso-extrabold { font-weight: var(--peso-extrabold); }
+.mayusculas { text-transform: uppercase; letter-spacing: var(--tracking-mayus); }
+.texto-centro { text-align: center; }
+.texto-izquierda { text-align: left; }
+.texto-derecha { text-align: right; }
+.nowrap { white-space: nowrap; }
+.cifras { font-variant-numeric: lining-nums tabular-nums; }
+
+/* Color de texto */
+.texto-principal { color: var(--color-texto); }
+.texto-suave { color: var(--color-texto-suave); }
+.texto-tenue { color: var(--color-texto-tenue); }
+.texto-primario { color: var(--color-primario); }
+.texto-exito { color: var(--color-exito); }
+.texto-aviso { color: var(--color-aviso); }
+.texto-peligro { color: var(--color-peligro-texto); }
+.texto-invertido { color: var(--color-texto-invertido); }
+
+/* Iconos Lucide: tamaño fijo */
+.icono-12 { width: 12px; height: 12px; }
+.icono-13 { width: 13px; height: 13px; }
+.icono-14 { width: 14px; height: 14px; }
+.icono-15 { width: 15px; height: 15px; }
+.icono-16 { width: 16px; height: 16px; }
+.icono-18 { width: 18px; height: 18px; }
+.icono-20 { width: 20px; height: 20px; }
+.icono-24 { width: 24px; height: 24px; }
+
+/* Accesibilidad: oculto en pantalla, visible para lectores */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Casillas y radios con el color institucional */
+input[type="checkbox"], input[type="radio"] { accent-color: var(--color-primario); }
+
+/* El atributo hidden siempre oculta, aunque una clase defina display */
+[hidden] { display: none !important; }

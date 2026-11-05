@@ -1,0 +1,111 @@
+{% extends 'layouts/app_base.html' %}
+{% load static componentes %}
+
+{% block title %}Banco de preguntas - Simulador Saber TyT{% endblock %}
+{% block nav_title %}Banco de preguntas{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'css/banco_preguntas.css' %}">{% endblock %}
+
+{% block app_content %}
+<div id="banco" data-url-crear="{% url 'banco_preguntas:crear' %}" data-url-editar="{% url 'banco_preguntas:editar' 0 %}">
+
+  {% componente "componentes/encabezado.html" etiqueta="Preguntas institucionales Saber TyT" titulo="Banco de preguntas" subtitulo="Gestión, edición y clasificación de preguntas por competencia evaluada." %}
+    <a href="{% url 'importaciones:importar' %}" class="btn btn-outline"><i data-lucide="upload" class="icono-16"></i> Importar Excel</a>
+    <button type="button" class="btn btn-primary" data-accion="nueva"><i data-lucide="plus" class="icono-16"></i> Nueva pregunta</button>
+  {% fincomponente %}
+
+  <!-- Búsqueda y filtros -->
+  <div class="card barra-herramientas">
+    <div class="filtros-banco">
+      <div class="buscador filtros-banco__texto">
+        <label for="filtro-pregunta" class="sr-only">Buscar por enunciado</label>
+        <i data-lucide="search" class="buscador__icono"></i>
+        <input type="search" id="filtro-pregunta" placeholder="Buscar por enunciado o palabra clave…" class="form-input" autocomplete="off">
+      </div>
+      <label class="sr-only" for="filtro-categoria">Competencia</label>
+      <select id="filtro-categoria" class="form-select">
+        <option value="">Competencia: todas</option>
+        {% for cat in categorias %}<option value="{{ cat.id }}">{{ cat.nombre }}</option>{% endfor %}
+      </select>
+      <label class="sr-only" for="filtro-tipo">Tipo de pregunta</label>
+      <select id="filtro-tipo" class="form-select">
+        <option value="">Tipo: todos</option>
+        <option value="MULTIPLE">Selección múltiple</option>
+        <option value="V_F">Verdadero / Falso</option>
+      </select>
+    </div>
+    <div class="texto-xs texto-suave mt-2" id="contador-preguntas" aria-live="polite"></div>
+  </div>
+
+  <!-- Lista de preguntas -->
+  <div id="contenedor-preguntas" class="flex flex-col gap-4">
+    {% for p in preguntas %}
+    <article class="card pregunta-card" data-enunciado="{{ p.enunciado|lower }}" data-cat="{{ p.categoria_id }}" data-tipo="{{ p.tipo }}">
+      <div class="flex justify-between items-center gap-2 flex-wrap mb-3">
+        <div class="flex items-center gap-2">
+          <span class="badge badge-info">{{ p.categoria.nombre }}</span>
+          <span class="texto-xs texto-suave peso-semibold">{{ p.get_tipo_display }}</span>
+        </div>
+        <div class="flex items-center gap-2">
+          {% if p.activa %}<span class="badge badge-success">Activa</span>{% else %}<span class="badge badge-danger">Inactiva</span>{% endif %}
+          <span class="badge badge-neutro cifras">{{ p.puntaje }} pto</span>
+        </div>
+      </div>
+
+      <div class="texto-xs texto-tenue peso-bold mb-1">Cód. P-{{ p.id }}</div>
+      <h3 class="pregunta-card__enunciado">{{ p.enunciado }}</h3>
+
+      {% if p.texto_base %}
+      <blockquote class="pregunta-card__contexto text-reading"><strong>Texto de apoyo:</strong> {{ p.texto_base|truncatewords:30 }}</blockquote>
+      {% endif %}
+
+      <div class="texto-xs peso-bold mb-2">Opciones de respuesta</div>
+      <ul class="pregunta-card__opciones">
+        {% for op in p.opciones.all %}
+        <li class="pregunta-card__opcion{% if op.es_correcta %} pregunta-card__opcion--correcta{% endif %}">
+          {% if op.es_correcta %}<i data-lucide="check" class="icono-14"></i><span class="sr-only">Correcta:</span>{% else %}<i data-lucide="circle" class="icono-12"></i>{% endif %}
+          <span>{{ op.texto }}</span>
+        </li>
+        {% endfor %}
+      </ul>
+
+      {% if p.retroalimentacion %}
+      <div class="pregunta-card__retro">
+        <i data-lucide="lightbulb" class="icono-14 shrink-0"></i>
+        <div><strong>Retroalimentación:</strong> {{ p.retroalimentacion }}</div>
+      </div>
+      {% endif %}
+
+      <div class="pregunta-card__pie">
+        <span class="texto-xs texto-tenue">Huella SHA-256 validada</span>
+        <div class="flex gap-2">
+          <button type="button" class="btn btn-secondary btn-accion" data-editar="{{ p.id }}"><i data-lucide="edit-3" class="icono-13"></i> Editar</button>
+          <form method="POST" action="{% url 'banco_preguntas:toggle_estado' p.id %}" class="inline-flex">
+            {% csrf_token %}
+            {% if p.activa %}
+              <button type="submit" class="btn btn-accion btn-peligro"><i data-lucide="eye-off" class="icono-13"></i> Desactivar</button>
+            {% else %}
+              <button type="submit" class="btn btn-outline btn-accion texto-exito"><i data-lucide="eye" class="icono-13"></i> Activar</button>
+            {% endif %}
+          </form>
+        </div>
+      </div>
+    </article>
+    {% empty %}
+    <div class="card">
+      {% componente "componentes/estado_vacio.html" icono="library" titulo="El banco aún no tiene preguntas" mensaje="Crea una pregunta o importa varias desde la plantilla de Excel." %}
+        <button type="button" class="btn btn-primary" data-accion="nueva"><i data-lucide="plus"></i> Nueva pregunta</button>
+      {% fincomponente %}
+    </div>
+    {% endfor %}
+    <div class="card" id="sin-resultados" hidden>
+      {% componente "componentes/estado_vacio.html" icono="search-x" titulo="Ninguna pregunta coincide con los filtros" %}
+        <button type="button" class="btn btn-outline" data-accion="limpiar-filtros">Limpiar filtros</button>
+      {% fincomponente %}
+    </div>
+  </div>
+</div>
+
+{% include "banco_preguntas/_modal_pregunta.html" %}
+{% endblock %}
+
+{% block extra_scripts %}<script src="{% static 'js/banco_preguntas/banco.js' %}"></script>{% endblock %}

@@ -1,0 +1,133 @@
+{% extends 'layouts/base.html' %}
+{% load static formato_tiempo componentes %}
+
+{% block title %}Resultado: {{ cuestionario.nombre }} - Simulador Saber TyT{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'css/evaluaciones.css' %}">{% endblock %}
+
+{% block content %}
+<div class="resultado" id="resultado-intento">
+  <div class="resultado__contenedor">
+
+    <div class="flex justify-between items-center gap-3 flex-wrap mb-6 no-imprimir">
+      {% if es_auditor %}
+      <a href="{% url 'reportes:intentos' cuestionario.id %}" class="btn btn-outline"><i data-lucide="arrow-left" class="icono-15"></i> Volver al reporte de intentos</a>
+      {% else %}
+      <a href="{% url 'evaluaciones:panel_estudiante' %}" class="btn btn-outline"><i data-lucide="arrow-left" class="icono-15"></i> Volver a mi panel</a>
+      {% endif %}
+      {% if intento.fecha_fin %}<span class="texto-xs texto-suave peso-semibold">Entregado el {{ intento.fecha_fin|date:"d/m/Y H:i" }}</span>{% endif %}
+    </div>
+
+    <!-- Resumen de la calificación -->
+    <section class="card resumen-resultado resumen-resultado--{% if dictamen == 'Aprobado' %}aprobado{% elif dictamen == 'Reprobado' %}reprobado{% else %}sin-nota{% endif %}">
+      <span class="resumen-resultado__icono">
+        <i data-lucide="{% if dictamen == 'Aprobado' %}award{% elif dictamen == 'Reprobado' %}file-text{% else %}clock{% endif %}" class="icono-24"></i>
+      </span>
+      <div class="mb-2">
+        {% if dictamen == 'Aprobado' %}<span class="badge badge-success resumen-resultado__dictamen">Aprobado</span>
+        {% elif dictamen == 'Reprobado' %}<span class="badge badge-danger resumen-resultado__dictamen">No aprobado</span>
+        {% else %}<span class="badge badge-neutro resumen-resultado__dictamen">{{ dictamen }}</span>{% endif %}
+      </div>
+      <h1 class="texto-2xl peso-extrabold mb-1">{% if dictamen == 'Aprobado' or dictamen == 'Reprobado' %}Evaluación finalizada{% else %}El intento no tiene nota{% endif %}</h1>
+      <p class="texto-md texto-suave mb-6">{{ cuestionario.nombre }}</p>
+
+      {% if dictamen == 'Aprobado' or dictamen == 'Reprobado' %}
+      <div class="nota-final">
+        <div class="metrica__etiqueta">Calificación obtenida</div>
+        <div class="nota-final__valor">{{ intento.calificacion }} <span>/ {{ cuestionario.calificacion_maxima }}</span></div>
+        <div class="texto-sm texto-suave">Puntaje: <strong>{{ intento.puntaje_obtenido }}</strong> de {{ intento.puntaje_total_posible }} puntos · {{ porcentaje_acierto }} % de acierto</div>
+      </div>
+      {% else %}
+      <p class="texto-sm texto-suave mb-6">El tiempo terminó antes de que se entregara el examen, por eso no se calculó una calificación.</p>
+      {% endif %}
+
+      <div class="metricas">
+        {% componente "componentes/metrica.html" etiqueta="Correctas" valor=total_correctas variante="exito" icono="check-circle" %}{% fincomponente %}
+        {% componente "componentes/metrica.html" etiqueta="Incorrectas" valor=total_incorrectas variante="peligro" icono="x-circle" %}{% fincomponente %}
+        {% componente "componentes/metrica.html" etiqueta="Sin responder" valor=total_sin_responder icono="alert-circle" %}{% fincomponente %}
+        {% componente "componentes/metrica.html" etiqueta="Tiempo empleado" valor=intento.duracion_segundos|duracion icono="clock" %}{% fincomponente %}
+      </div>
+
+      <div class="resumen-resultado__pie">
+        <span>Estudiante: <strong>{{ intento.participante_nombre }}</strong> ({{ intento.participante_codigo }})</span>
+        <span>Nota mínima para aprobar: <strong>{{ cuestionario.calificacion_aprobacion }}</strong></span>
+      </div>
+    </section>
+
+    {% if permitir_revision %}
+    <section aria-labelledby="titulo-revision">
+      <div class="flex justify-between items-center flex-wrap gap-3 mb-4">
+        <div>
+          <h2 class="texto-lg peso-extrabold" id="titulo-revision">Revisión de preguntas</h2>
+          <p class="texto-sm texto-suave">{% if es_auditor %}Respuestas del estudiante{% else %}Tus respuestas{% endif %}, la respuesta correcta y la explicación de cada pregunta.</p>
+        </div>
+        <div role="group" aria-label="Filtrar preguntas" class="flex gap-2 flex-wrap no-imprimir">
+          <button type="button" class="btn btn-outline chip-filtro active" data-filtro="todas" aria-pressed="true">Todas ({{ total_preguntas }})</button>
+          <button type="button" class="btn btn-outline chip-filtro" data-filtro="correcta" aria-pressed="false"><i data-lucide="check" class="icono-13"></i> Correctas ({{ total_correctas }})</button>
+          <button type="button" class="btn btn-outline chip-filtro" data-filtro="incorrecta" aria-pressed="false"><i data-lucide="x" class="icono-13"></i> Incorrectas ({{ total_incorrectas }})</button>
+          {% if total_sin_responder %}<button type="button" class="btn btn-outline chip-filtro" data-filtro="sin_responder" aria-pressed="false"><i data-lucide="alert-circle" class="icono-13"></i> Sin responder ({{ total_sin_responder }})</button>{% endif %}
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-5">
+        {% for item in detalles_respuestas %}
+        <article class="card revision revision--{{ item.estado }}" data-estado="{{ item.estado }}">
+          <div class="flex justify-between items-start gap-3 flex-wrap mb-3">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="texto-md peso-extrabold">Pregunta {{ item.numero }}</span>
+              <span class="badge badge-info">{{ item.pregunta.categoria.nombre|default:"General" }}</span>
+            </div>
+            {% if item.estado == 'correcta' %}<span class="badge badge-success"><i data-lucide="check" class="icono-13"></i> Correcta · +{{ item.puntaje_obtenido }} pts</span>
+            {% elif item.estado == 'incorrecta' %}<span class="badge badge-danger"><i data-lucide="x" class="icono-13"></i> Incorrecta · 0 de {{ item.peso_total }} pts</span>
+            {% else %}<span class="badge badge-neutro"><i data-lucide="alert-circle" class="icono-13"></i> Sin responder · 0 pts</span>{% endif %}
+          </div>
+
+          {% if item.pregunta.texto_base %}
+          <div class="revision__contexto">
+            <div class="revision__subtitulo"><i data-lucide="file-text" class="icono-14"></i> Texto de apoyo</div>
+            <div class="text-reading">{{ item.pregunta.texto_base }}</div>
+          </div>
+          {% endif %}
+
+          <p class="revision__enunciado">{{ item.pregunta.enunciado }}</p>
+
+          <ul class="revision__opciones">
+            {% for op in item.opciones %}
+            <li class="revision__opcion{% if op.es_correcta %} revision__opcion--correcta{% endif %}{% if op.es_seleccionada %} revision__opcion--elegida{% endif %}">
+              <span class="revision__letra">{{ op.letra }}</span>
+              <span class="flex-grow">{{ op.texto }}</span>
+              {% if op.es_correcta and op.es_seleccionada %}<span class="badge badge-success"><i data-lucide="check" class="icono-12"></i> {% if es_auditor %}Elegida (correcta){% else %}Tu respuesta (correcta){% endif %}</span>
+              {% elif op.es_correcta %}<span class="badge badge-success"><i data-lucide="check" class="icono-12"></i> Respuesta correcta</span>
+              {% elif op.es_seleccionada %}<span class="badge badge-danger"><i data-lucide="x" class="icono-12"></i> {% if es_auditor %}Elegida (incorrecta){% else %}Tu respuesta (incorrecta){% endif %}</span>{% endif %}
+            </li>
+            {% endfor %}
+          </ul>
+
+          {% if item.retroalimentacion %}
+          <div class="revision__retro">
+            <div class="flex items-center gap-2 texto-xs peso-extrabold mayusculas mb-1"><i data-lucide="lightbulb" class="icono-16"></i> Retroalimentación</div>
+            <p class="texto-sm">{{ item.retroalimentacion }}</p>
+          </div>
+          {% endif %}
+        </article>
+        {% endfor %}
+      </div>
+    </section>
+    {% else %}
+    <section class="card">
+      {% componente "componentes/estado_vacio.html" icono="lock" titulo="La revisión de preguntas no está habilitada" mensaje="El docente decidió no mostrar las respuestas correctas de esta evaluación. Tu calificación quedó registrada." %}{% fincomponente %}
+    </section>
+    {% endif %}
+
+    <div class="flex justify-center gap-4 flex-wrap mt-6 no-imprimir">
+      {% if es_auditor %}
+      <a href="{% url 'reportes:intentos' cuestionario.id %}" class="btn btn-primary"><i data-lucide="arrow-left" class="icono-16"></i> Volver al reporte de intentos</a>
+      {% else %}
+      <a href="{% url 'evaluaciones:panel_estudiante' %}" class="btn btn-primary"><i data-lucide="arrow-left" class="icono-16"></i> Volver a mi panel</a>
+      {% endif %}
+      <button type="button" class="btn btn-outline" data-accion="imprimir"><i data-lucide="printer" class="icono-16"></i> Imprimir o guardar en PDF</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}<script src="{% static 'js/evaluaciones/resultado.js' %}"></script>{% endblock %}

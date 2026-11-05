@@ -1,0 +1,142 @@
+{% extends 'layouts/app_base.html' %}
+{% load static componentes %}
+
+{% block title %}Mi panel - Simulador Saber TyT{% endblock %}
+{% block nav_title %}Mi panel{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'css/evaluaciones.css' %}">{% endblock %}
+
+{% block app_content %}
+<div id="panel-estudiante">
+
+  <header class="dashboard-banner bienvenida">
+    <div class="flex items-center gap-4">
+      <span class="bienvenida__avatar"><i data-lucide="graduation-cap" class="icono-24"></i></span>
+      <div>
+        <h1 class="banner-title texto-2xl m-0">{{ user.get_full_name|default:user.username }}</h1>
+        <p class="banner-subtitle inline-flex items-center gap-2"><i data-lucide="landmark" class="icono-14"></i> {{ user.perfil.semestre }} · {{ user.perfil.programa_academico }}</p>
+      </div>
+    </div>
+    <dl class="bienvenida__cifras">
+      <div><dt>Disponibles</dt><dd>{{ disponibles_count }}</dd></div>
+      <div><dt>Presentados</dt><dd>{{ presentados_count }}</dd></div>
+      <div><dt>Promedio de tus notas</dt><dd class="texto-exito">{{ promedio_global }}</dd></div>
+    </dl>
+  </header>
+
+  {% if cuestionario_destacado %}
+    {% with c=cuestionario_destacado %}
+    <section class="card destacado" aria-labelledby="titulo-destacado">
+      <div class="flex justify-between items-center gap-2 mb-3">
+        {% include "evaluaciones/_estado_cuestionario.html" %}
+        <span class="badge {{ c.tiempo_restante_info.clase }}"><i data-lucide="clock" class="icono-12"></i> {{ c.tiempo_restante_info.texto }}</span>
+      </div>
+      <h2 class="texto-xl peso-extrabold mb-3" id="titulo-destacado">{{ c.nombre }}</h2>
+      <ul class="destacado__datos">
+        <li><i data-lucide="library" class="icono-14"></i> {{ c.cuestionario_preguntas.all|length }} preguntas</li>
+        <li><i data-lucide="clock" class="icono-14"></i> {{ c.tiempo_limite_minutos }} minutos</li>
+        <li><i data-lucide="rotate-cw" class="icono-14"></i> Intentos: <strong>{{ c.intentos_hechos }} de {{ c.intentos_permitidos }}</strong></li>
+        <li><i data-lucide="target" class="icono-14"></i> Apruebas con {{ c.calificacion_aprobacion }} / {{ c.calificacion_maxima }}</li>
+        <li><i data-lucide="calendar" class="icono-14"></i> Cierra el {{ c.fecha_cierre|date:"d M · H:i" }}</li>
+      </ul>
+      {% include "evaluaciones/_accion_cuestionario.html" with grande=True %}
+    </section>
+    {% endwith %}
+  {% else %}
+    <section class="card destacado destacado--vacio">
+      {% componente "componentes/estado_vacio.html" icono="check-circle" titulo="No tienes cuestionarios abiertos ahora" mensaje="Revisa los cuestionarios programados para próximas fechas o consulta tus resultados." %}
+        <button type="button" class="btn btn-outline" data-ir-pestana="programados"><i data-lucide="calendar" class="icono-14"></i> Ver programados</button>
+        <button type="button" class="btn btn-secondary" data-ir-pestana="historial"><i data-lucide="history" class="icono-14"></i> Ver mis intentos</button>
+      {% fincomponente %}
+    </section>
+  {% endif %}
+
+  <section id="cuestionarios" class="seccion-pestanas">
+    <div class="tabs-header" role="tablist" aria-label="Mis cuestionarios">
+      <button type="button" class="tab-btn active" role="tab" aria-selected="true" aria-controls="pestana-disponibles" id="tab-disponibles" data-pestana="disponibles">Disponibles <span class="badge badge-info">{{ disponibles_count }}</span></button>
+      <button type="button" class="tab-btn" role="tab" aria-selected="false" aria-controls="pestana-programados" id="tab-programados" data-pestana="programados" tabindex="-1">Programados <span class="badge badge-neutro">{{ programados_count }}</span></button>
+      <button type="button" class="tab-btn" role="tab" aria-selected="false" aria-controls="pestana-historial" id="tab-historial" data-pestana="historial" tabindex="-1">Mis intentos <span class="badge badge-neutro">{{ intentos_estudiante|length }}</span></button>
+    </div>
+
+    <div id="pestana-disponibles" role="tabpanel" aria-labelledby="tab-disponibles" class="flex flex-col gap-4">
+      {% for c in cuestionarios_disponibles %}
+      <article class="card tarjeta-evaluacion">
+        <div class="flex justify-between items-start gap-2 mb-2">
+          <div>
+            {% include "evaluaciones/_estado_cuestionario.html" %}
+            <h3 class="texto-lg peso-extrabold mt-2">{{ c.nombre }}</h3>
+          </div>
+          <span class="badge {{ c.tiempo_restante_info.clase }}"><i data-lucide="clock" class="icono-12"></i> {{ c.tiempo_restante_info.texto }}</span>
+        </div>
+        <ul class="destacado__datos">
+          <li><i data-lucide="library" class="icono-14"></i> {{ c.cuestionario_preguntas.all|length }} preguntas</li>
+          <li><i data-lucide="clock" class="icono-14"></i> {{ c.tiempo_limite_minutos }} min</li>
+          <li><i data-lucide="rotate-cw" class="icono-14"></i> {{ c.intentos_hechos }}/{{ c.intentos_permitidos }} intentos</li>
+        </ul>
+        {% include "evaluaciones/_accion_cuestionario.html" %}
+      </article>
+      {% empty %}
+      <div class="card">{% componente "componentes/estado_vacio.html" icono="inbox" titulo="No hay cuestionarios abiertos" %}{% fincomponente %}</div>
+      {% endfor %}
+    </div>
+
+    <div id="pestana-programados" role="tabpanel" aria-labelledby="tab-programados" class="flex flex-col gap-4" hidden>
+      {% for c in cuestionarios_programados %}
+      <article class="card tarjeta-evaluacion tarjeta-evaluacion--programada">
+        <div class="flex justify-between items-center mb-2">
+          <span class="badge badge-info"><i data-lucide="calendar" class="icono-12"></i> Programado</span>
+          <span class="texto-xs texto-primario peso-semibold">{{ c.tiempo_restante_info.texto }}</span>
+        </div>
+        <h3 class="texto-lg peso-extrabold mb-2">{{ c.nombre }}</h3>
+        <p class="nota-programada">
+          <span class="inline-flex items-center gap-2"><i data-lucide="calendar" class="icono-14"></i> Abre el <strong>{{ c.fecha_apertura|date:"d M Y · H:i" }}</strong></span>
+          <span class="inline-flex items-center gap-2"><i data-lucide="clock" class="icono-14"></i> {{ c.tiempo_limite_minutos }} minutos · {{ c.cuestionario_preguntas.all|length }} preguntas</span>
+        </p>
+      </article>
+      {% empty %}
+      <div class="card">{% componente "componentes/estado_vacio.html" icono="calendar" titulo="No hay cuestionarios programados" %}{% fincomponente %}</div>
+      {% endfor %}
+    </div>
+
+    <div id="pestana-historial" role="tabpanel" aria-labelledby="tab-historial" class="flex flex-col gap-4" hidden>
+      {% for intento in intentos_estudiante %}
+      <article class="card tarjeta-evaluacion">
+        <div class="flex justify-between items-start gap-2 mb-3">
+          <div>
+            {% if intento.dictamen == 'Aprobado' %}<span class="badge badge-success">Aprobado</span>
+            {% elif intento.dictamen == 'Reprobado' %}<span class="badge badge-danger">No aprobado</span>
+            {% elif intento.dictamen == 'En curso' %}<span class="badge badge-warning">En curso</span>
+            {% else %}<span class="badge badge-neutro">Vencido sin entregar</span>{% endif %}
+            <h3 class="texto-lg peso-extrabold mt-2">{{ intento.cuestionario.nombre }}</h3>
+          </div>
+          <span class="texto-xs texto-suave cifras">{{ intento.fecha_inicio|date:"d M Y · H:i" }}</span>
+        </div>
+        {% if intento.dictamen == 'Aprobado' or intento.dictamen == 'Reprobado' %}
+        <div class="resumen-nota">
+          <div><span class="metrica__etiqueta">Calificación</span><strong class="texto-2xl cifras">{{ intento.calificacion }} <span class="texto-base texto-tenue">/ {{ intento.cuestionario.calificacion_maxima }}</span></strong></div>
+          <div><span class="metrica__etiqueta">Puntaje</span><strong class="texto-lg cifras texto-suave">{{ intento.puntaje_obtenido }} / {{ intento.puntaje_total_posible }} pts</strong></div>
+        </div>
+        <a href="{% url 'evaluaciones:resultado' intento.id %}" class="btn btn-outline btn-full"><i data-lucide="file-text"></i> Ver resultado</a>
+        {% elif intento.dictamen == 'En curso' %}
+        <a href="{% url 'evaluaciones:sala' intento.id %}" class="btn btn-aviso btn-full"><i data-lucide="play-circle"></i> Continuar intento</a>
+        {% else %}
+        <p class="texto-sm texto-suave">El tiempo terminó antes de entregar; este intento no tiene nota.</p>
+        {% endif %}
+      </article>
+      {% empty %}
+      <div class="card">{% componente "componentes/estado_vacio.html" icono="history" titulo="Aún no has presentado ningún cuestionario" %}{% fincomponente %}</div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <aside class="card normas">
+    <i data-lucide="info" class="icono-24 shrink-0"></i>
+    <div>
+      <h2 class="texto-base peso-extrabold mb-1">Antes de iniciar un intento</h2>
+      <p class="texto-sm">Asegúrate de tener una conexión estable. <strong>El temporizador no se detiene</strong> si cierras la página o cambias de pestaña. Tus respuestas se guardan automáticamente en el servidor.</p>
+      <div class="texto-xs mt-2 inline-flex items-center gap-2"><i data-lucide="headphones" class="icono-14"></i> Mesa de ayuda: <a href="mailto:{{ config.correo_soporte }}" class="peso-semibold">{{ config.correo_soporte }}</a></div>
+    </div>
+  </aside>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}<script src="{% static 'js/evaluaciones/panel_estudiante.js' %}"></script>{% endblock %}

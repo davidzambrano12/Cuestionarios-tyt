@@ -1,0 +1,118 @@
+{% comment %}Modales de usuarios y roles. usuarios_roles.js rellena los de edición.{% endcomment %}
+
+<div id="modal-nuevo-usuario" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="titulo-nuevo-usuario">
+  <div class="modal-box">
+    <div class="modal-cabecera">
+      <h2 class="texto-lg peso-extrabold" id="titulo-nuevo-usuario">Registrar usuario</h2>
+      <button type="button" class="modal-cerrar" data-cerrar-modal aria-label="Cerrar">&times;</button>
+    </div>
+    <form method="POST" action="{% url 'cuentas:crear_usuario' %}">
+      {% csrf_token %}
+      <div class="form-group">
+        <label class="form-label" for="nu-username">Nombre de usuario</label>
+        <input type="text" id="nu-username" name="username" required class="form-input" placeholder="Ej.: c.villota" autocomplete="off">
+      </div>
+      <div class="grid-2">
+        <div class="form-group"><label class="form-label" for="nu-nombre">Nombres</label><input type="text" id="nu-nombre" name="first_name" required class="form-input"></div>
+        <div class="form-group"><label class="form-label" for="nu-apellido">Apellidos</label><input type="text" id="nu-apellido" name="last_name" required class="form-input"></div>
+      </div>
+      <div class="form-group"><label class="form-label" for="nu-email">Correo institucional</label><input type="email" id="nu-email" name="email" required class="form-input" placeholder="usuario@uniputumayo.edu.co"></div>
+      <div class="form-group"><label class="form-label" for="nu-clave">Contraseña</label><input type="password" id="nu-clave" name="password" required minlength="8" class="form-input" autocomplete="new-password"></div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label class="form-label" for="nu-rol">Rol</label>
+          <select id="nu-rol" name="rol_id" required class="form-select">{% for r in roles %}<option value="{{ r.id }}">{{ r.nombre }}</option>{% endfor %}</select>
+        </div>
+        <div class="form-group"><label class="form-label" for="nu-codigo">Código institucional</label><input type="text" id="nu-codigo" name="codigo_institucional" class="form-input" placeholder="Ej.: EST-20242-8819"></div>
+      </div>
+      <div class="modal-acciones">
+        <button type="button" class="btn btn-outline" data-cerrar-modal>Cancelar</button>
+        <button type="submit" class="btn btn-primary">Guardar usuario</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="modal-editar-usuario" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="titulo-editar-usuario">
+  <div class="modal-box">
+    <div class="modal-cabecera">
+      <div>
+        <h2 class="texto-lg peso-extrabold" id="titulo-editar-usuario">Editar usuario</h2>
+        <div class="texto-xs texto-primario peso-semibold" data-ref="subtitulo-usuario"></div>
+      </div>
+      <button type="button" class="modal-cerrar" data-cerrar-modal aria-label="Cerrar">&times;</button>
+    </div>
+    <form id="form-editar-usuario" method="POST" action="">
+      {% csrf_token %}
+      <div class="grid-2">
+        <div class="form-group"><label class="form-label" for="eu-nombre">Nombres</label><input type="text" id="eu-nombre" name="first_name" required class="form-input"></div>
+        <div class="form-group"><label class="form-label" for="eu-apellido">Apellidos</label><input type="text" id="eu-apellido" name="last_name" required class="form-input"></div>
+      </div>
+      <div class="form-group"><label class="form-label" for="eu-email">Correo institucional</label><input type="email" id="eu-email" name="email" required class="form-input"></div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label class="form-label" for="eu-rol">Rol</label>
+          <select id="eu-rol" name="rol_id" required class="form-select">{% for r in roles %}<option value="{{ r.id }}">{{ r.nombre }}</option>{% endfor %}</select>
+        </div>
+        <div class="form-group"><label class="form-label" for="eu-codigo">Código institucional</label><input type="text" id="eu-codigo" name="codigo_institucional" class="form-input"></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="eu-clave">Nueva contraseña</label>
+        <input type="password" id="eu-clave" name="password" minlength="8" class="form-input" autocomplete="new-password">
+        <span class="texto-xs texto-suave">Déjala en blanco para conservar la actual.</span>
+      </div>
+      <div class="modal-acciones">
+        <button type="button" class="btn btn-outline" data-cerrar-modal>Cancelar</button>
+        <button type="submit" class="btn btn-primary">Guardar cambios</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="modal-nuevo-rol" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="titulo-nuevo-rol">
+  <div class="modal-box">
+    <div class="modal-cabecera">
+      <h2 class="texto-lg peso-extrabold" id="titulo-nuevo-rol">Crear rol personalizado</h2>
+      <button type="button" class="modal-cerrar" data-cerrar-modal aria-label="Cerrar">&times;</button>
+    </div>
+    <form method="POST" action="{% url 'cuentas:crear_rol' %}">
+      {% csrf_token %}
+      <div class="grid-2">
+        <div class="form-group"><label class="form-label" for="nr-nombre">Nombre del rol</label><input type="text" id="nr-nombre" name="nombre" required class="form-input" placeholder="Ej.: Coordinador TyT"></div>
+        <div class="form-group"><label class="form-label" for="nr-codigo">Código único</label><input type="text" id="nr-codigo" name="codigo" required pattern="[a-z0-9_]+" title="Minúsculas, números y guion bajo" class="form-input" placeholder="coordinador_tyt"></div>
+      </div>
+      <div class="form-group"><label class="form-label" for="nr-descripcion">Descripción</label><textarea id="nr-descripcion" name="descripcion" class="form-textarea"></textarea></div>
+      <fieldset class="form-group">
+        <legend class="form-label">Permisos</legend>
+        {% include "cuentas/_lista_permisos.html" with prefijo="nuevo" %}
+      </fieldset>
+      <div class="modal-acciones">
+        <button type="button" class="btn btn-outline" data-cerrar-modal>Cancelar</button>
+        <button type="submit" class="btn btn-primary">Guardar rol</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="modal-editar-permisos" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="titulo-permisos">
+  <div class="modal-box">
+    <div class="modal-cabecera">
+      <div>
+        <h2 class="texto-lg peso-extrabold" id="titulo-permisos">Permisos del rol</h2>
+        <div class="texto-sm texto-primario peso-semibold" data-ref="nombre-rol"></div>
+      </div>
+      <button type="button" class="modal-cerrar" data-cerrar-modal aria-label="Cerrar">&times;</button>
+    </div>
+    <form id="form-editar-permisos" method="POST" action="">
+      {% csrf_token %}
+      <fieldset class="form-group">
+        <legend class="form-label">Funcionalidades autorizadas</legend>
+        {% include "cuentas/_lista_permisos.html" with prefijo="editar" %}
+      </fieldset>
+      <div class="modal-acciones">
+        <button type="button" class="btn btn-outline" data-cerrar-modal>Cancelar</button>
+        <button type="submit" class="btn btn-primary">Guardar permisos</button>
+      </div>
+    </form>
+  </div>
+</div>

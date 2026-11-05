@@ -1,0 +1,42 @@
+{% extends 'examen/base_sala.html' %}
+{% load static %}
+
+{% block title %}{{ cuestionario.nombre }} - Simulador Saber TyT{% endblock %}
+
+{% block modo %}examen{% endblock %}
+{% block atributos_sala %}data-url-guardar="{% url 'evaluaciones:guardar_respuesta' intento.id %}" data-segundos-restantes="{{ segundos_restantes }}" data-segundos-limite="{% widthratio cuestionario.tiempo_limite_minutos 1 60 %}"{% endblock %}
+
+{% block volver_url %}{% url 'evaluaciones:panel_estudiante' %}{% endblock %}
+{% block volver_confirmar %}data-confirmar-salida{% endblock %}
+{% block etiqueta_superior %}Saber TyT · Sesión de examen{% endblock %}
+
+{% block acciones_encabezado %}
+<span class="sala-guardado" data-ref="guardado" aria-live="polite"></span>
+<div class="eval-timer-box" role="timer" aria-label="Tiempo restante">
+  <i data-lucide="clock" class="icono-16"></i>
+  <span data-ref="reloj" class="cifras">--:--:--</span>
+</div>
+<button type="button" class="sala-boton-icono" data-accion="sincronizacion" title="¿El tiempo se detiene?">
+  <i data-lucide="info" class="icono-16"></i>
+  <span class="sr-only">Información del temporizador</span>
+</button>
+{% endblock %}
+
+{% block progreso_texto %}0% completado{% endblock %}
+
+{% block formulario_inicio %}
+<form id="form-evaluacion" method="POST" action="{% url 'evaluaciones:finalizar' intento.id %}" class="flex-grow flex flex-col">
+  {% csrf_token %}
+  <input type="hidden" id="datos-respuestas-json" name="respuestas_json" value="{}">
+{% endblock %}
+{% block formulario_fin %}</form>{% endblock %}
+
+{% block boton_final %}
+<button type="button" class="btn btn-success btn-full sala-entregar" data-accion="entregar">
+  <i data-lucide="check-circle-2" class="icono-16"></i> Finalizar y entregar intento
+</button>
+{% endblock %}
+
+{% block datos %}{{ respuestas_previas|json_script:"datos-respuestas" }}{% endblock %}
+
+{% block script_pagina %}<script src="{% static 'js/evaluaciones/sala.js' %}"></script>{% endblock %}

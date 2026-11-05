@@ -1,0 +1,287 @@
+{% extends 'layouts/app_base.html' %}
+{% load static formato_tiempo componentes %}
+
+{% block title %}Intentos y calificaciones: {{ cuestionario.nombre }} - Simulador Saber TyT{% endblock %}
+
+{% block nav_title %}Intentos y Calificaciones{% endblock %}
+
+{% block app_content %}
+<div id="reporte-intentos" data-url-exportar="{% url 'reportes:exportar_excel' cuestionario.id %}">
+
+  {% componente "componentes/encabezado.html" etiqueta="Reporte de calificaciones" titulo=cuestionario.nombre subtitulo="Notas definitivas por estudiante, historial de intentos y control de reintentos." %}
+    <a href="{% url 'reportes:exportar_excel' cuestionario.id %}" class="btn btn-outline" data-ref="exportar" title="Descarga un libro .xlsx con resumen, notas definitivas e historial">
+      <i data-lucide="file-spreadsheet" aria-hidden="true" class="icono-15"></i> <span data-ref="exportar-texto">Exportar a Excel</span>
+    </a>
+    <a href="{% url 'cuestionarios:previsualizar' cuestionario.id %}" class="btn btn-outline">
+      <i data-lucide="eye" aria-hidden="true" class="icono-15"></i> Probar examen
+    </a>
+    <a href="{% url 'cuestionarios:listado' %}" class="btn btn-primary">
+      <i data-lucide="arrow-left" aria-hidden="true" class="icono-15"></i> Volver
+    </a>
+  {% fincomponente %}
+
+  <ul class="datos-clave">
+    <li><i data-lucide="clock" aria-hidden="true" class="icono-13"></i> Límite: <strong>{{ cuestionario.tiempo_limite_minutos }} min</strong></li>
+    <li><i data-lucide="rotate-cw" aria-hidden="true" class="icono-13"></i> Intentos permitidos: <strong>{{ cuestionario.intentos_permitidos }}</strong></li>
+    <li><i data-lucide="award" aria-hidden="true" class="icono-13"></i> Aprueba con: <strong>{{ cuestionario.calificacion_aprobacion }} / {{ cuestionario.calificacion_maxima }}</strong></li>
+    <li><i data-lucide="library" aria-hidden="true" class="icono-13"></i> Preguntas: <strong>{{ total_preguntas }}</strong></li>
+  </ul>
+
+  <div class="metricas">
+    {% componente "componentes/metrica.html" etiqueta="Estudiantes evaluados" valor=total_estudiantes icono="users" %}{% fincomponente %}
+    {% componente "componentes/metrica.html" etiqueta="Aprobados" valor=estudiantes_aprobados_count variante="exito" icono="circle-check" ayuda=resumen_aprobacion %}{% fincomponente %}
+    {% componente "componentes/metrica.html" etiqueta="Reprobados" valor=estudiantes_reprobados_count variante="peligro" icono="circle-x" ayuda="Nota definitiva menor a la mínima" %}{% fincomponente %}
+    {% if estudiantes_calificados_count %}
+      {% componente "componentes/metrica.html" etiqueta="Promedio del grupo" valor=promedio_calif variante="info" icono="bar-chart-3" ayuda="Promedio de las notas definitivas" %}/ {{ cuestionario.calificacion_maxima }}{% fincomponente %}
+    {% else %}
+      {% componente "componentes/metrica.html" etiqueta="Promedio del grupo" valor="—" variante="info" icono="bar-chart-3" ayuda="Promedio de las notas definitivas" %}{% fincomponente %}
+    {% endif %}
+  </div>
+  <p class="texto-xs texto-suave mb-5">
+    {{ total_intentos_registrados }} intento{{ total_intentos_registrados|pluralize }} registrado{{ total_intentos_registrados|pluralize }}{% if estudiantes_sin_nota_count %} · {{ estudiantes_sin_nota_count }} estudiante{{ estudiantes_sin_nota_count|pluralize }} sin nota{% endif %}
+  </p>
+
+  <!-- Vistas y filtros -->
+  <div class="card barra-herramientas">
+    <div class="barra-herramientas__fila">
+      <div class="tabs-header" role="tablist" aria-label="Vistas del reporte">
+        <button type="button" class="tab-btn active" id="btn-tab-estudiantes" role="tab" aria-selected="true" aria-controls="vista-estudiantes" data-vista="estudiantes">
+          <i data-lucide="users" aria-hidden="true" class="icono-14"></i>
+          Por estudiante <span class="badge badge-info cifras">{{ total_estudiantes }}</span>
+        </button>
+        <button type="button" class="tab-btn" id="btn-tab-historial" role="tab" aria-selected="false" aria-controls="vista-historial" tabindex="-1" data-vista="historial">
+          <i data-lucide="history" aria-hidden="true" class="icono-14"></i>
+          Historial de intentos <span class="badge badge-neutro cifras">{{ total_intentos_registrados }}</span>
+        </button>
+      </div>
+      <div class="buscador">
+        <label for="filtro-busqueda" class="sr-only">Buscar estudiante por nombre o código</label>
+        <i data-lucide="search" aria-hidden="true" class="buscador__icono"></i>
+        <input type="search" id="filtro-busqueda" placeholder="Buscar por nombre o código…" autocomplete="off" class="form-input">
+      </div>
+    </div>
+    <div class="barra-herramientas__fila">
+      <div role="group" aria-label="Filtrar por resultado" class="flex gap-2 flex-wrap">
+        <button type="button" class="btn btn-outline chip-filtro active" data-filtro="todos" aria-pressed="true">Todos</button>
+        <button type="button" class="btn btn-outline chip-filtro" data-filtro="aprobado" aria-pressed="false">Aprobados <span class="chip-filtro__cuenta">{{ estudiantes_aprobados_count }}</span></button>
+        <button type="button" class="btn btn-outline chip-filtro" data-filtro="reprobado" aria-pressed="false">Reprobados <span class="chip-filtro__cuenta">{{ estudiantes_reprobados_count }}</span></button>
+        <button type="button" class="btn btn-outline chip-filtro" data-filtro="pendiente" aria-pressed="false">Sin nota <span class="chip-filtro__cuenta">{{ estudiantes_sin_nota_count }}</span></button>
+      </div>
+      <div id="contador-resultados" aria-live="polite" class="texto-xs texto-suave"></div>
+    </div>
+  </div>
+
+  <!-- Vista 1: por estudiante -->
+  <div id="vista-estudiantes" role="tabpanel" aria-labelledby="btn-tab-estudiantes" class="card tabla-contenedor">
+    <div class="tabla-desplazable">
+      <table class="tabla tabla--estudiantes">
+        <caption class="sr-only">Nota definitiva de cada estudiante</caption>
+        <colgroup><col class="col-26"><col class="col-11"><col class="col-16"><col class="col-18"><col class="col-29"></colgroup>
+        <thead>
+          <tr>
+            <th scope="col">Estudiante</th>
+            <th scope="col" class="texto-centro">Intentos</th>
+            <th scope="col" class="texto-centro" title="La nota más alta entre sus intentos calificados">Nota definitiva</th>
+            <th scope="col">Última actividad</th>
+            <th scope="col" class="texto-derecha">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for est in estudiantes_agrupados %}
+          <tr class="fila-estudiante" data-detalle="detalles-est-{{ forloop.counter }}" data-texto="{{ est.nombre|lower }} {{ est.codigo|lower }}" data-estado="{% if est.estado_final == 'aprobado' or est.estado_final == 'reprobado' %}{{ est.estado_final }}{% else %}pendiente{% endif %}">
+            <td>
+              <div class="peso-bold texto-base texto-principal">{{ est.nombre }}</div>
+              <div class="texto-xs texto-suave mt-1">Código: <strong class="cifras texto-primario">{{ est.codigo }}</strong></div>
+            </td>
+            <td class="texto-centro">
+              <span class="badge badge-info cifras nowrap" title="Intentos usados de los permitidos">{{ est.total_intentos }} de {{ cuestionario.intentos_permitidos }}</span>
+            </td>
+            <td class="texto-centro">
+              {% if est.mejor_calificacion is not None %}
+                <div class="cifras texto-md peso-extrabold texto-principal nowrap">
+                  {{ est.mejor_calificacion }} <span class="texto-xs texto-suave peso-medio">/ {{ cuestionario.calificacion_maxima }}</span>
+                </div>
+                <div class="mt-1">
+                  {% if est.aprobado %}
+                    <span class="badge badge-success nowrap"><i data-lucide="circle-check" aria-hidden="true" class="icono-12"></i> Aprobado</span>
+                  {% else %}
+                    <span class="badge badge-danger nowrap"><i data-lucide="circle-x" aria-hidden="true" class="icono-12"></i> Reprobado</span>
+                  {% endif %}
+                </div>
+              {% elif est.estado_final == 'en_curso' %}
+                <span class="badge badge-warning nowrap"><i data-lucide="loader" aria-hidden="true" class="icono-12"></i> En curso</span>
+              {% else %}
+                <span class="badge badge-neutro nowrap" title="Sus intentos vencieron sin ser entregados">Sin nota</span>
+              {% endif %}
+            </td>
+            <td class="texto-xs">
+              {% with ult=est.ultimo_intento %}
+                {% if est.tiene_activo %}
+                  <div class="texto-principal peso-semibold">Presentando ahora</div>
+                  <div class="texto-suave">Inició {{ ult.fecha_inicio|date:"d M · H:i" }}</div>
+                {% elif ult.fecha_fin %}
+                  <div class="texto-principal peso-semibold nowrap">{{ ult.fecha_fin|date:"d M Y · H:i" }}</div>
+                  <div class="texto-suave">Duración: {{ ult.duracion_segundos|duracion }}</div>
+                {% else %}
+                  <div class="texto-suave nowrap">Inició {{ ult.fecha_inicio|date:"d M · H:i" }}</div>
+                {% endif %}
+              {% endwith %}
+            </td>
+            <td class="texto-derecha nowrap">
+              <div class="inline-flex items-center gap-2">
+                <button type="button" class="btn btn-outline btn-accion" data-acordeon="detalles-est-{{ forloop.counter }}" aria-expanded="false" aria-controls="detalles-est-{{ forloop.counter }}">
+                  <span>Ver {{ est.total_intentos }} intento{{ est.total_intentos|pluralize }}</span>
+                  <i data-lucide="chevron-down" aria-hidden="true" class="icono-13 icono-giratorio"></i>
+                </button>
+                <form method="POST" action="{% url 'reportes:reiniciar_estudiante' cuestionario.id est.codigo %}" class="inline-flex"
+                      data-confirmar-titulo="¿Restablecer el cupo de {{ est.nombre }}?" data-confirmar="Se eliminará{{ est.total_intentos|pluralize:'n' }} {{ est.total_intentos }} intento{{ est.total_intentos|pluralize }} y su{{ est.total_intentos|pluralize }} nota{{ est.total_intentos|pluralize }} en este cuestionario (código {{ est.codigo }}).&#10;Esta acción no se puede deshacer." data-confirmar-boton="Restablecer cupo" data-confirmar-tipo="peligro">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-accion btn-peligro" title="Elimina todos sus intentos y le devuelve el cupo completo">
+                    <i data-lucide="rotate-ccw" aria-hidden="true" class="icono-13"></i> Restablecer cupo
+                  </button>
+                </form>
+              </div>
+            </td>
+          </tr>
+
+          <tr id="detalles-est-{{ forloop.counter }}" class="fila-detalle" hidden>
+            <td colspan="5">
+              <div class="detalle-intentos">
+                <div class="detalle-intentos__titulo"><i data-lucide="layers" aria-hidden="true" class="icono-14"></i> Intentos de {{ est.nombre }}</div>
+                <ul class="detalle-intentos__lista">
+                  {% for it in est.intentos %}
+                  <li class="detalle-intentos__item">
+                    <div class="flex items-center gap-3 flex-wrap">
+                      <span class="badge badge-oscuro">Intento {{ forloop.revcounter }}</span>
+                      <span class="cifras inline-flex items-center gap-1"><i data-lucide="calendar" aria-hidden="true" class="icono-12 texto-suave"></i> {{ it.fecha_inicio|date:"d M Y · H:i" }}</span>
+                      {% if it.duracion_segundos %}
+                        <span class="cifras texto-suave inline-flex items-center gap-1"><i data-lucide="timer" aria-hidden="true" class="icono-12"></i> {{ it.duracion_segundos|duracion }}</span>
+                      {% endif %}
+                    </div>
+                    <div class="flex items-center gap-4 flex-wrap">
+                      <div>
+                        {% if it.dictamen == 'Aprobado' or it.dictamen == 'Reprobado' %}
+                          <strong class="cifras">{{ it.calificacion }}</strong> / {{ cuestionario.calificacion_maxima }}
+                          <span class="badge {% if it.dictamen == 'Aprobado' %}badge-success{% else %}badge-danger{% endif %} ml-2">{{ it.dictamen }}</span>
+                        {% elif it.dictamen == 'En curso' %}
+                          <span class="badge badge-warning">En curso</span>
+                        {% else %}
+                          <span class="badge badge-neutro">{{ it.dictamen }}</span>
+                        {% endif %}
+                      </div>
+                      <div class="inline-flex gap-2">
+                        {% if it.estado != 'en_progreso' %}
+                        <a href="{% url 'evaluaciones:resultado' it.id %}" class="btn btn-outline btn-accion">
+                          <i data-lucide="eye" aria-hidden="true" class="icono-12"></i> Ver respuestas
+                        </a>
+                        {% endif %}
+                        <form method="POST" action="{% url 'reportes:reiniciar_intento' it.id %}" class="inline-flex"
+                              data-confirmar-titulo="¿Anular el intento {{ forloop.revcounter }} de {{ est.nombre }}?" data-confirmar="El intento y su nota se eliminarán, y el estudiante recuperará ese cupo.&#10;Esta acción no se puede deshacer." data-confirmar-boton="Anular intento" data-confirmar-tipo="peligro">
+                          {% csrf_token %}
+                          <button type="submit" class="btn btn-accion btn-peligro" title="Elimina solo este intento">
+                            <i data-lucide="trash-2" aria-hidden="true" class="icono-12"></i> Anular
+                          </button>
+                        </form>
+                      </div>
+                    </div>
+                  </li>
+                  {% endfor %}
+                </ul>
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="5">
+              {% componente "componentes/estado_vacio.html" icono="users" titulo="Todavía no hay intentos" mensaje="Cuando los estudiantes presenten el cuestionario, sus notas aparecerán aquí." %}{% fincomponente %}
+            </td>
+          </tr>
+          {% endfor %}
+          <tr class="fila-sin-resultados" hidden>
+            <td colspan="5" class="tabla__vacia">
+              Ningún estudiante coincide con la búsqueda o el filtro.
+              <button type="button" class="btn btn-outline btn-accion ml-2" data-accion="limpiar-filtros">Limpiar filtros</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Vista 2: historial de intentos -->
+  <div id="vista-historial" role="tabpanel" aria-labelledby="btn-tab-historial" hidden class="card tabla-contenedor">
+    <div class="tabla-desplazable">
+      <table class="tabla tabla--historial">
+        <caption class="sr-only">Historial cronológico de intentos</caption>
+        <thead>
+          <tr>
+            <th scope="col">Estudiante</th>
+            <th scope="col">Inicio y entrega</th>
+            <th scope="col" class="texto-centro">Duración</th>
+            <th scope="col" class="texto-centro">Calificación</th>
+            <th scope="col" class="texto-centro">Resultado</th>
+            <th scope="col" class="texto-derecha">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for i in intentos %}
+          <tr class="fila-historial" data-texto="{{ i.participante_nombre|lower }} {{ i.participante_codigo|lower }}" data-estado="{% if i.dictamen == 'Aprobado' %}aprobado{% elif i.dictamen == 'Reprobado' %}reprobado{% else %}pendiente{% endif %}">
+            <td>
+              <div class="peso-bold texto-base texto-principal">{{ i.participante_nombre }}</div>
+              <div class="texto-xs texto-suave">Código: <strong class="cifras texto-primario">{{ i.participante_codigo }}</strong></div>
+            </td>
+            <td class="cifras texto-sm">
+              <div>{{ i.fecha_inicio|date:"d M Y · H:i" }}</div>
+              {% if i.fecha_fin %}<div class="texto-xs texto-suave">Entregó {{ i.fecha_fin|date:"H:i" }}</div>{% endif %}
+            </td>
+            <td class="cifras texto-sm texto-centro">{{ i.duracion_segundos|duracion }}</td>
+            <td class="cifras texto-centro">
+              {% if i.dictamen == 'Aprobado' or i.dictamen == 'Reprobado' %}
+                <strong class="texto-md texto-principal">{{ i.calificacion }}</strong>
+                <span class="texto-xs texto-suave">/ {{ cuestionario.calificacion_maxima }}</span>
+              {% else %}
+                <span class="texto-suave">—</span>
+              {% endif %}
+            </td>
+            <td class="texto-centro">
+              {% if i.dictamen == 'Aprobado' %}<span class="badge badge-success">Aprobado</span>
+              {% elif i.dictamen == 'Reprobado' %}<span class="badge badge-danger">Reprobado</span>
+              {% elif i.dictamen == 'En curso' %}<span class="badge badge-warning">En curso</span>
+              {% else %}<span class="badge badge-neutro">{{ i.dictamen }}</span>{% endif %}
+            </td>
+            <td class="texto-derecha">
+              <div class="inline-flex items-center gap-2">
+                {% if i.estado != 'en_progreso' %}
+                <a href="{% url 'evaluaciones:resultado' i.id %}" class="btn btn-outline btn-accion">
+                  <i data-lucide="eye" aria-hidden="true" class="icono-12"></i> Ver respuestas
+                </a>
+                {% endif %}
+                <form method="POST" action="{% url 'reportes:reiniciar_intento' i.id %}" class="inline-flex"
+                      data-confirmar-titulo="¿Anular este intento de {{ i.participante_nombre }}?" data-confirmar="El intento y su nota se eliminarán, y el estudiante recuperará ese cupo.&#10;Esta acción no se puede deshacer." data-confirmar-boton="Anular intento" data-confirmar-tipo="peligro">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-accion btn-peligro">
+                    <i data-lucide="trash-2" aria-hidden="true" class="icono-12"></i> Anular
+                  </button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="6" class="tabla__vacia">Todavía no hay intentos registrados.</td></tr>
+          {% endfor %}
+          <tr class="fila-sin-resultados" hidden>
+            <td colspan="6" class="tabla__vacia">
+              Ningún intento coincide con la búsqueda o el filtro.
+              <button type="button" class="btn btn-outline btn-accion ml-2" data-accion="limpiar-filtros">Limpiar filtros</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_head %}<link rel="stylesheet" href="{% static 'css/reportes.css' %}">{% endblock %}
+{% block extra_scripts %}<script src="{% static 'js/reportes/intentos.js' %}"></script>{% endblock %}

@@ -1,0 +1,245 @@
+/* ==========================================================================
+   SALA DE EXAMEN Y PREVISUALIZACIÓN (templates/examen/base_sala.html)
+   ========================================================================== */
+
+.sala {
+  background-color: var(--color-superficie-tenue);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Encabezado */
+.sala-encabezado {
+  background: var(--color-superficie);
+  border-bottom: 1px solid var(--color-borde);
+  padding: var(--espacio-3) var(--espacio-8);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--espacio-4);
+}
+.sala-encabezado__titulo,
+.sala-encabezado__acciones {
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-3);
+  flex-wrap: wrap;
+}
+.sala-volver {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--color-superficie-hundida);
+  color: var(--color-texto);
+}
+.sala-volver:hover { background: var(--color-borde); color: var(--color-texto); }
+.sala-etiqueta {
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-2);
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-bold);
+  color: var(--color-texto-suave);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-mayus);
+}
+.sala-nombre {
+  font-family: var(--fuente-titulos);
+  font-size: var(--texto-md);
+  font-weight: var(--peso-extrabold);
+  color: var(--color-texto);
+}
+.sala-boton-icono {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radio-sm);
+  border: 1px solid var(--color-borde-fuerte);
+  background: var(--color-superficie-hundida);
+  color: var(--color-texto-suave);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+/* Temporizador: normal, aviso (< 10 % o < 5 min) y crítico (< 2 min) — RULE-03 */
+.eval-timer-box[data-estado="aviso"] { background: var(--naranja-500); color: var(--gris-900); }
+.eval-timer-box[data-estado="critico"] { background: var(--rojo-600); color: var(--color-texto-invertido); }
+
+/* Aviso de previsualización */
+.sala-aviso {
+  max-width: 1400px;
+  width: 100%;
+  margin: var(--espacio-4) auto 0;
+  padding: 0 var(--espacio-8);
+}
+.sala-aviso__caja {
+  background: var(--color-aviso-suave);
+  border: 1px solid var(--color-aviso-borde);
+  border-radius: var(--radio-md);
+  padding: var(--espacio-3) var(--espacio-4);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--espacio-3);
+  flex-wrap: wrap;
+  font-size: var(--texto-sm);
+  color: var(--color-aviso-texto);
+}
+
+/* Progreso */
+.sala-progreso {
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+  padding: var(--espacio-4) var(--espacio-8) var(--espacio-2);
+}
+.sala-progreso__fila {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-bold);
+  margin-bottom: var(--espacio-2);
+}
+
+/* Cuerpo en tres columnas */
+.sala-cuerpo {
+  flex: 1;
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+  padding: var(--espacio-3) var(--espacio-8) var(--espacio-10);
+}
+.sala-grid {
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr) 280px;
+  gap: var(--espacio-6);
+  align-items: start;
+}
+@media (max-width: 1100px) {
+  .sala-grid { grid-template-columns: 1fr; }
+  .sala-encabezado, .sala-progreso, .sala-cuerpo, .sala-aviso { padding-left: var(--espacio-4); padding-right: var(--espacio-4); }
+}
+
+.sala-etiquetas { display: flex; gap: var(--espacio-2); margin-bottom: var(--espacio-3); flex-wrap: wrap; }
+.sala-chip { padding: 6px 12px; }
+.badge-neutro { background: var(--color-borde); color: var(--gris-700); }
+.sala-tarjeta { padding: var(--espacio-5); margin-bottom: var(--espacio-4); }
+.sala-subtitulo {
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-2);
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-extrabold);
+  color: var(--color-primario);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-mayus);
+  margin-bottom: var(--espacio-3);
+}
+.sala-tarjeta .text-reading { max-height: 420px; overflow-y: auto; }
+
+.sala-pregunta {
+  padding: var(--espacio-8);
+  min-height: 480px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  margin-bottom: 0;
+}
+.sala-enunciado {
+  font-size: var(--texto-xl);
+  font-weight: var(--peso-bold);
+  line-height: var(--interlineado-titulo);
+  margin-bottom: var(--espacio-6);
+}
+.sala-opciones { display: flex; flex-direction: column; gap: var(--espacio-3); }
+
+/* Opción de respuesta (mínimo 44 px de alto, RULE-03) */
+.option-card { min-height: 56px; margin-bottom: 0; width: 100%; text-align: left; font: inherit; }
+.option-card__texto { flex-grow: 1; font-size: var(--texto-base); color: var(--color-texto); font-weight: var(--peso-medio); }
+.option-card__marca {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid var(--color-borde-fuerte);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-texto-invertido);
+  flex-shrink: 0;
+}
+.option-card.selected .option-card__marca { border-color: var(--color-primario); background: var(--color-primario); }
+.option-card.es-clave { border-color: var(--color-exito); background: var(--color-exito-suave); }
+.option-card.es-clave .option-letter-badge { background: var(--color-exito); color: var(--color-texto-invertido); }
+
+.sala-retroalimentacion {
+  margin-top: var(--espacio-6);
+  background: var(--color-exito-suave);
+  border: 1px solid var(--color-exito-borde);
+  border-radius: var(--radio-md);
+  padding: var(--espacio-4);
+  color: var(--color-exito-texto);
+  font-size: var(--texto-sm);
+}
+
+.sala-navegacion {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--espacio-3);
+  flex-wrap: wrap;
+  margin-top: var(--espacio-8);
+  padding-top: var(--espacio-5);
+  border-top: 1px solid var(--color-superficie-hundida);
+}
+.sala-navegacion .btn[data-final="true"] { background: var(--color-exito); border-color: var(--color-exito); color: var(--color-texto-invertido); }
+
+/* Mapa de preguntas */
+.sala-mapa__titulo { font-size: var(--texto-md); font-weight: var(--peso-extrabold); margin: 0; }
+.q-nav-item { font: inherit; font-weight: var(--peso-bold); font-size: var(--texto-sm); }
+.q-nav-item.answered { background: var(--verde-50); color: var(--verde-800); border-color: var(--verde-500); }
+.q-nav-item.current { background: var(--color-primario-suave); color: var(--color-primario); border: 2px solid var(--color-primario); }
+.sala-leyenda {
+  list-style: none;
+  margin-top: var(--espacio-5);
+  padding-top: var(--espacio-3);
+  border-top: 1px solid var(--color-superficie-hundida);
+  font-size: var(--texto-xs);
+  color: var(--color-texto-suave);
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-2);
+}
+.sala-leyenda li { display: flex; align-items: center; gap: var(--espacio-2); }
+.sala-leyenda__muestra {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  background: var(--color-superficie);
+  border: 1px solid var(--color-borde-fuerte);
+}
+.sala-leyenda__muestra--actual { background: var(--color-primario-suave); border: 2px solid var(--color-primario); }
+.sala-leyenda__muestra--respondida { background: var(--verde-50); border-color: var(--verde-500); }
+
+.sala-ficha {
+  margin-top: var(--espacio-5);
+  padding-top: var(--espacio-3);
+  border-top: 1px solid var(--color-superficie-hundida);
+  font-size: var(--texto-xs);
+  color: var(--color-texto-suave);
+}
+.sala-ficha dl { display: grid; grid-template-columns: 1fr auto; gap: 6px var(--espacio-3); margin-top: var(--espacio-2); }
+.sala-ficha dd { font-weight: var(--peso-bold); color: var(--color-texto); text-align: right; }
+
+.sala-entregar { margin-top: var(--espacio-6); padding: var(--espacio-3); }
+
+/* Indicador de autoguardado (RULE-03 §3.1) */
+.sala-guardado { font-size: var(--texto-xs); font-weight: var(--peso-semibold); color: var(--color-texto-suave); min-width: 9ch; text-align: right; transition: color var(--transicion-normal); }
+.sala-guardado[data-estado="ok"] { color: var(--color-exito); }
+.sala-guardado[data-estado="error"] { color: var(--color-peligro-texto); }

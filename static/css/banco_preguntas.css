@@ -1,0 +1,50 @@
+/* ==========================================================================
+   BANCO DE PREGUNTAS
+   ========================================================================== */
+
+.filtros-banco { display: grid; grid-template-columns: minmax(240px, 2fr) minmax(160px, 1fr) minmax(140px, 1fr); gap: var(--espacio-3); }
+.filtros-banco .buscador { max-width: none; }
+@media (max-width: 760px) { .filtros-banco { grid-template-columns: 1fr; } }
+
+.pregunta-card { margin-bottom: 0; padding: var(--espacio-5); }
+.pregunta-card__enunciado { font-family: var(--fuente-texto); font-size: var(--texto-md); font-weight: var(--peso-bold); margin-bottom: var(--espacio-3); }
+.pregunta-card__contexto {
+  font-size: var(--texto-sm);
+  color: var(--color-texto-suave);
+  background: var(--color-superficie-tenue);
+  border-left: 3px solid var(--color-primario);
+  padding: 10px 14px;
+  margin-bottom: var(--espacio-4);
+  border-radius: 0 var(--radio-sm) var(--radio-sm) 0;
+}
+.pregunta-card__opciones { list-style: none; display: flex; flex-direction: column; gap: 6px; margin-bottom: var(--espacio-4); }
+.pregunta-card__opcion {
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-2);
+  padding: 6px 12px;
+  border-radius: var(--radio-sm);
+  font-size: var(--texto-xs);
+  background: var(--color-superficie-tenue);
+  color: var(--color-texto-suave);
+  border: 1px solid var(--color-borde);
+}
+.pregunta-card__opcion--correcta { background: var(--color-exito-suave); color: var(--color-exito-texto); border-color: var(--color-exito-borde); font-weight: var(--peso-semibold); }
+.pregunta-card__retro {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: var(--texto-xs);
+  color: var(--color-texto-suave);
+  background: var(--color-exito-suave);
+  border-radius: var(--radio-sm);
+  padding: 8px 12px;
+  margin-bottom: var(--espacio-4);
+}
+.pregunta-card__retro .lucide { color: var(--color-exito); margin-top: 2px; }
+.pregunta-card__pie { display: flex; justify-content: space-between; align-items: center; gap: var(--espacio-2); flex-wrap: wrap; border-top: 1px solid var(--color-superficie-hundida); padding-top: var(--espacio-3); }
+
+/* Formulario del modal */
+.opcion-campo { display: grid; grid-template-columns: auto 24px 1fr; align-items: center; gap: var(--espacio-2); }
+.opcion-campo__letra { font-weight: var(--peso-bold); text-align: center; }
+fieldset.form-group { border: 0; padding: 0; min-width: 0; }

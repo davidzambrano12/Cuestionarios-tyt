@@ -1,0 +1,179 @@
+{% extends 'layouts/app_base.html' %}
+{% load static componentes %}
+
+{% block title %}Revisar importación - Simulador Saber TyT{% endblock %}
+{% block nav_title %}Revisar importación{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'css/importaciones.css' %}">{% endblock %}
+
+{% block app_content %}
+<div class="importacion" id="revision-importacion">
+  <a href="{% url 'importaciones:importar' %}" class="enlace-volver mb-4"><i data-lucide="arrow-left" class="icono-16"></i> Volver a subir archivo</a>
+
+  {% include "importaciones/_pasos.html" with paso=2 %}
+
+  <section class="card archivo-cargado">
+    <div class="flex items-center gap-3">
+      <i data-lucide="file-spreadsheet" class="icono-24 texto-primario"></i>
+      <div>
+        <div class="texto-base peso-extrabold">{{ resultado.nombre_archivo }}</div>
+        <div class="texto-xs texto-suave">{{ resultado.total_filas }} fila{{ resultado.total_filas|pluralize }} leída{{ resultado.total_filas|pluralize }}{% if cuestionario %} · se asignarán a <strong>{{ cuestionario.nombre }}</strong>{% endif %}</div>
+      </div>
+    </div>
+    <a href="{% url 'importaciones:importar' %}" class="btn btn-outline btn-accion"><i data-lucide="rotate-cw" class="icono-14"></i> Subir otro archivo</a>
+  </section>
+
+  <div class="metricas metricas--3">
+    {% componente "componentes/metrica.html" etiqueta="Listas para guardar" valor=resultado.validas|length variante="exito" icono="check-circle" %}{% fincomponente %}
+    {% componente "componentes/metrica.html" etiqueta="Duplicadas" valor=resultado.duplicadas|length variante="info" icono="copy" ayuda="Se omiten" %}{% fincomponente %}
+    {% componente "componentes/metrica.html" etiqueta="Con errores" valor=resultado.con_error|length variante="peligro" icono="alert-circle" ayuda="Edítalas aquí" %}{% fincomponente %}
+  </div>
+
+  {% if resultado.filas %}
+  <section class="card revision-filtros" aria-label="Filtrar preguntas">
+    <div class="revision-filtros__estados" role="group" aria-label="Estado">
+      <button type="button" class="btn btn-outline chip-filtro active" data-filtro-estado="todas" aria-pressed="true">Todas <span class="chip-filtro__cuenta">{{ resultado.total_filas }}</span></button>
+      {% if resultado.con_error %}<button type="button" class="btn btn-outline chip-filtro" data-filtro-estado="error" aria-pressed="false">Con errores <span class="chip-filtro__cuenta">{{ resultado.con_error|length }}</span></button>{% endif %}
+      {% if resultado.duplicadas %}<button type="button" class="btn btn-outline chip-filtro" data-filtro-estado="duplicada" aria-pressed="false">Duplicadas <span class="chip-filtro__cuenta">{{ resultado.duplicadas|length }}</span></button>{% endif %}
+      <button type="button" class="btn btn-outline chip-filtro" data-filtro-estado="valida" aria-pressed="false">Listas <span class="chip-filtro__cuenta">{{ resultado.validas|length }}</span></button>
+      {% if resultado.excluidas %}<button type="button" class="btn btn-outline chip-filtro" data-filtro-estado="excluida" aria-pressed="false">No se importarán <span class="chip-filtro__cuenta">{{ resultado.excluidas|length }}</span></button>{% endif %}
+    </div>
+    <div class="revision-filtros__campos">
+      <div class="form-group mb-0">
+        <label class="sr-only" for="filtro-texto">Buscar en las preguntas</label>
+        <input type="search" id="filtro-texto" class="form-input" placeholder="Buscar en enunciados, opciones o textos de apoyo" autocomplete="off">
+      </div>
+      {% if resultado.categorias|length > 1 %}
+      <div class="form-group mb-0">
+        <label class="sr-only" for="filtro-categoria">Categoría</label>
+        <select id="filtro-categoria" class="form-select">
+          <option value="">Todas las categorías</option>
+          {% for categoria in resultado.categorias %}<option value="{{ categoria }}">{{ categoria }}</option>{% endfor %}
+        </select>
+      </div>
+      {% endif %}
+    </div>
+    <p class="texto-xs texto-suave" id="contador-revision" aria-live="polite">Mostrando {{ resultado.total_filas }} de {{ resultado.total_filas }}</p>
+  </section>
+
+  <div class="preguntas-importadas">
+    {% for fila in resultado.filas_para_revision %}
+    {% with v=fila.valores_crudos campos=fila.campos_con_error %}
+    <article class="pregunta-importada pregunta-importada--{{ fila.estado }}" id="fila-{{ fila.fila_excel }}"
+             data-estado="{{ fila.estado }}" data-categoria="{{ v.categoria }}" data-busqueda="{{ fila.texto_busqueda }}"
+             aria-labelledby="fila-{{ fila.fila_excel }}-titulo">
+      <header class="pregunta-importada__cabecera">
+        <div class="pregunta-importada__meta">
+          <h3 class="pregunta-importada__fila" id="fila-{{ fila.fila_excel }}-titulo">Fila {{ fila.fila_excel }}</h3>
+          {% if fila.estado == "error" %}<span class="badge badge-danger"><i data-lucide="alert-circle" aria-hidden="true"></i> Con errores</span>
+          {% elif fila.estado == "duplicada" %}<span class="badge badge-info"><i data-lucide="copy" aria-hidden="true"></i> Duplicada</span>
+          {% elif fila.estado == "valida" %}<span class="badge badge-success"><i data-lucide="check" aria-hidden="true"></i> Lista</span>
+          {% else %}<span class="badge badge-neutro"><i data-lucide="eye-off" aria-hidden="true"></i> No se importará</span>{% endif %}
+          <span class="badge badge-neutro{% if 'categoria' in campos %} campo-error{% endif %}">{{ v.categoria|default:"Sin categoría" }}</span>
+          <span class="texto-xs texto-suave{% if 'tipo' in campos %} campo-error{% endif %}">{% if v.tipo|upper == "MULTIPLE" %}Selección múltiple{% elif v.tipo|upper == "V_F" %}Verdadero / Falso{% else %}Tipo: {{ v.tipo|default:"vacío" }}{% endif %}</span>
+          <span class="texto-xs texto-suave{% if 'puntaje' in campos %} campo-error{% endif %}">Puntaje: {{ v.puntaje|default:"vacío" }}</span>
+        </div>
+        <div class="pregunta-importada__acciones">
+          <button type="button" class="btn btn-outline btn-accion" data-corregir="{{ fila.fila_excel }}" data-fila="{{ fila.json_data }}"><i data-lucide="edit-3" aria-hidden="true"></i> Editar</button>
+          <form method="POST" action="{% url 'importaciones:excluir_fila' %}">
+            {% csrf_token %}
+            <input type="hidden" name="fila_excel" value="{{ fila.fila_excel }}">
+            {% if fila.estado == "excluida" %}
+            <button type="submit" name="accion" value="incluir" class="btn btn-outline btn-accion"><i data-lucide="rotate-ccw" aria-hidden="true"></i> Incluir de nuevo</button>
+            {% else %}
+            <button type="submit" name="accion" value="excluir" class="btn btn-outline btn-accion"><i data-lucide="eye-off" aria-hidden="true"></i> No importar</button>
+            {% endif %}
+          </form>
+        </div>
+      </header>
+
+      {% if fila.estado == "error" %}
+      <ul class="pregunta-importada__errores">{% for err in fila.errores %}<li>{{ err|capfirst }}</li>{% endfor %}</ul>
+      {% elif fila.estado == "duplicada" %}
+      <p class="pregunta-importada__nota">
+        <i data-lucide="info" aria-hidden="true"></i>
+        {% if fila.duplicada_de_id %}
+          Ya existe una pregunta idéntica en el banco. <a href="{% url 'banco_preguntas:editar' fila.duplicada_de_id %}" target="_blank" rel="noopener">Ver la pregunta del banco<span class="sr-only"> (se abre en otra pestaña)</span> <i data-lucide="external-link" aria-hidden="true"></i></a>
+        {% else %}
+          Es igual a la <a href="#fila-{{ fila.duplicada_de_fila }}">fila {{ fila.duplicada_de_fila }}</a> de este archivo; solo se guarda una vez.
+        {% endif %}
+        Si no es la misma, edítala para diferenciarla.
+      </p>
+      {% elif fila.estado == "excluida" %}
+      <p class="pregunta-importada__nota">
+        <i data-lucide="eye-off" aria-hidden="true"></i>
+        La quitaste de esta importación{% if fila.estado_original == "error" %}; además tiene errores: {{ fila.errores|join:"; " }}{% endif %}.
+      </p>
+      {% endif %}
+
+      {% if v.texto_base %}
+      <div class="pregunta-importada__contexto">
+        <span class="pregunta-importada__etiqueta">Texto de apoyo</span>
+        <div class="texto-recortable" data-recortable>{{ v.texto_base|linebreaksbr }}</div>
+      </div>
+      {% endif %}
+
+      <div class="pregunta-importada__enunciado texto-recortable{% if 'pregunta' in campos %} campo-error{% endif %}" data-recortable>{{ v.pregunta|default:"(Sin enunciado)"|linebreaksbr }}</div>
+
+      {% if fila.opciones_vista %}
+      <ol class="opciones-importadas" aria-label="Opciones de respuesta">
+        {% for o in fila.opciones_vista %}
+        <li class="opcion-importada{% if o.es_correcta %} opcion-importada--correcta{% endif %}{% if o.con_error %} campo-error{% endif %}">
+          <span class="opcion-importada__letra" aria-hidden="true">{{ o.letra }}</span>
+          <span class="opcion-importada__texto"><span class="sr-only">Opción {{ o.letra }}: </span>{{ o.texto|default:"(vacía)" }}</span>
+          {% if o.es_correcta %}<span class="opcion-importada__marca"><i data-lucide="check-circle-2" aria-hidden="true"></i> Correcta</span>{% endif %}
+        </li>
+        {% endfor %}
+      </ol>
+      {% endif %}
+      {% if 'respuesta_correcta' in campos %}
+      <p class="pregunta-importada__dato campo-error">Respuesta correcta indicada: «{{ v.respuesta_correcta|default:"vacía" }}»</p>
+      {% endif %}
+
+      {% if v.retroalimentacion %}
+      <p class="pregunta-importada__dato"><strong>Retroalimentación:</strong> {{ v.retroalimentacion }}</p>
+      {% endif %}
+    </article>
+    {% endwith %}
+    {% endfor %}
+
+    <div class="estado-filtro-vacio card" id="revision-sin-resultados" hidden>
+      <p class="texto-sm peso-semibold mb-2">Ninguna pregunta coincide con los filtros.</p>
+      <button type="button" class="btn btn-outline btn-accion" data-accion="limpiar-filtros">Limpiar filtros</button>
+    </div>
+  </div>
+  {% endif %}
+
+  <section class="card bloque-importacion">
+    {% include "importaciones/_columnas_plantilla.html" %}
+    <div class="grid-2 mt-5">
+      <a href="{% static 'plantillas/plantilla_preguntas_simulador_tyt.xlsx' %}" download class="btn btn-outline"><i data-lucide="download" class="icono-14"></i> Descargar plantilla</a>
+      <form method="POST" action="{% url 'importaciones:cancelar' %}" data-confirmar-titulo="¿Cancelar la importación?" data-confirmar="Se descartará el archivo subido junto con las correcciones de esta revisión. No se guardará ninguna pregunta." data-confirmar-boton="Cancelar importación" data-confirmar-cancelar="Seguir revisando" data-confirmar-tipo="peligro">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-peligro btn-full"><i data-lucide="x" class="icono-14"></i> Cancelar importación</button>
+      </form>
+    </div>
+  </section>
+
+  <div class="barra-guardar" role="region" aria-label="Guardar importación">
+    <p class="barra-guardar__resumen">
+      {% if resultado.validas %}
+        Se guardarán <strong>{{ resultado.validas|length }}</strong> de {{ resultado.total_filas }} pregunta{{ resultado.total_filas|pluralize }}.
+        {% if resultado.con_error or resultado.duplicadas or resultado.excluidas %}<span class="texto-suave">Las demás no se guardan{% if resultado.con_error %} ({{ resultado.con_error|length }} con errores){% endif %}.</span>{% endif %}
+      {% else %}
+        <strong>Aún no hay preguntas listas para guardar.</strong> <span class="texto-suave">Edita las filas con errores.</span>
+      {% endif %}
+    </p>
+    {% if resultado.validas %}
+    <form method="POST" action="{% url 'importaciones:confirmar' %}"
+          {% if resultado.con_error %}data-confirmar-titulo="¿Guardar solo {{ resultado.validas|length }} pregunta{{ resultado.validas|length|pluralize }}?" data-confirmar="{{ resultado.con_error|length }} fila{{ resultado.con_error|length|pluralize }} con errores no se guardará{{ resultado.con_error|length|pluralize:'n' }}.&#10;Puedes volver y editarla{{ resultado.con_error|length|pluralize }} antes de guardar." data-confirmar-boton="Guardar {{ resultado.validas|length }}" data-confirmar-cancelar="Revisar errores" data-confirmar-tipo="aviso"{% endif %}>
+      {% csrf_token %}
+      <button type="submit" class="btn btn-primary"><i data-lucide="check-circle-2" class="icono-18"></i> Guardar {{ resultado.validas|length }} en el banco</button>
+    </form>
+    {% endif %}
+  </div>
+</div>
+
+{% include "importaciones/_modal_correccion.html" %}
+{% endblock %}
+
+{% block extra_scripts %}<script src="{% static 'js/importaciones/revision.js' %}"></script>{% endblock %}

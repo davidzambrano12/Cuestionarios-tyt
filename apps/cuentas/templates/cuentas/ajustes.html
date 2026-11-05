@@ -1,0 +1,53 @@
+{% extends 'layouts/app_base.html' %}
+{% load static componentes %}
+
+{% block title %}Ajustes del sistema - {{ config.nombre_sistema }}{% endblock %}
+{% block nav_title %}Ajustes del sistema{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'css/cuentas.css' %}">{% endblock %}
+
+{% block app_content %}
+<div class="columna-angosta">
+  {% if puede_editar %}
+    {% componente "componentes/encabezado.html" etiqueta="Entorno: "|add:entorno titulo="Ajustes del sistema" subtitulo="Estos datos se muestran en la portada, el inicio de sesión y la mesa de ayuda." %}{% fincomponente %}
+  {% else %}
+    {% componente "componentes/encabezado.html" etiqueta="Solo lectura" titulo="Ajustes del sistema" subtitulo="Solo un administrador puede cambiar estos datos." %}{% fincomponente %}
+  {% endif %}
+
+  <form method="POST" novalidate>
+    {% csrf_token %}
+    <fieldset {% if not puede_editar %}disabled{% endif %} class="sin-borde">
+      <section class="card bloque-formulario">
+        <h2 class="bloque-formulario__titulo"><i data-lucide="landmark" class="icono-16"></i> Identidad institucional</h2>
+        {% include "cuentas/_campo.html" with campo=form.nombre_sistema %}
+        {% include "cuentas/_campo.html" with campo=form.institucion %}
+        {% include "cuentas/_campo.html" with campo=form.sigla %}
+      </section>
+
+      <section class="card bloque-formulario">
+        <h2 class="bloque-formulario__titulo"><i data-lucide="headphones" class="icono-16"></i> Mesa de ayuda</h2>
+        {% include "cuentas/_campo.html" with campo=form.correo_soporte %}
+        <div class="grid-2">
+          {% include "cuentas/_campo.html" with campo=form.telefono_soporte %}
+          {% include "cuentas/_campo.html" with campo=form.ubicacion %}
+        </div>
+      </section>
+    </fieldset>
+
+    <section class="card bloque-formulario">
+      <h2 class="bloque-formulario__titulo"><i data-lucide="globe" class="icono-16"></i> Configuración regional</h2>
+      <dl class="ficha-datos">
+        <div><dt>Zona horaria</dt><dd>{{ zona_horaria }}</dd></div>
+        <div><dt>Idioma y formato</dt><dd>{{ idioma }} · fechas DD/MM/AAAA, hora de 24 horas</dd></div>
+      </dl>
+      <p class="texto-xs texto-suave mt-3">Se define en el servidor porque rige los temporizadores y las ventanas de apertura y cierre.</p>
+    </section>
+
+    {% if puede_editar %}
+    <div class="flex justify-between items-center gap-3 flex-wrap">
+      <span class="texto-xs texto-suave">{% if configuracion.actualizado_por %}Última modificación: {{ configuracion.actualizado_en|date:"d M Y · H:i" }} por {{ configuracion.actualizado_por.get_full_name|default:configuracion.actualizado_por.username }}{% endif %}</span>
+      <button type="submit" class="btn btn-primary"><i data-lucide="save" class="icono-16"></i> Guardar ajustes</button>
+    </div>
+    {% endif %}
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,19 @@
+{% comment %}
+  Pregunta asignada al cuestionario. Se usa en el render inicial (con `pregunta`)
+  y como <template> vacío que configurar.js clona y rellena con textContent.
+{% endcomment %}
+<li class="pregunta-asignada" data-id="{{ pregunta.id|default:'' }}" data-puntaje="{{ pregunta.puntaje|default:'0'|stringformat:'s' }}">
+  <input type="hidden" name="preguntas_ids" value="{{ pregunta.id|default:'' }}">
+  <span class="pregunta-asignada__indice" data-ref="indice"></span>
+  <div class="pregunta-asignada__cuerpo">
+    <div class="flex items-center gap-2 flex-wrap mb-1">
+      <span class="badge badge-info" data-ref="categoria">{{ pregunta.categoria.nombre }}</span>
+      <span class="badge badge-neutro" data-ref="tipo">{{ pregunta.get_tipo_display }}</span>
+      <span class="texto-xs peso-bold texto-primario">Valor: <span data-ref="valor">{{ pregunta.puntaje }}</span> pt</span>
+    </div>
+    <div class="pregunta-asignada__enunciado" data-ref="enunciado">{{ pregunta.enunciado }}</div>
+  </div>
+  <button type="button" class="boton-icono boton-icono--peligro" data-quitar title="Quitar del examen" aria-label="Quitar pregunta del examen">
+    <i data-lucide="trash-2" class="icono-16"></i>
+  </button>
+</li>

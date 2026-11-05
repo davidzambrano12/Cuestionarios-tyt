@@ -1,0 +1,91 @@
+{% extends 'layouts/app_base.html' %}
+{% load static componentes %}
+
+{% block title %}Cuestionarios - Simulador Saber TyT{% endblock %}
+{% block nav_title %}Cuestionarios{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'css/cuestionarios.css' %}">{% endblock %}
+
+{% block app_content %}
+<div id="listado-cuestionarios">
+
+  {% componente "componentes/encabezado.html" etiqueta="Evaluaciones Saber TyT" titulo="Cuestionarios" subtitulo="Configuración, publicación y estado de las evaluaciones." %}
+    <a href="{% url 'cuestionarios:crear' %}" class="btn btn-primary"><i data-lucide="plus"></i> Crear cuestionario</a>
+  {% fincomponente %}
+
+  <div class="metricas">
+    {% componente "componentes/metrica.html" etiqueta="Total" valor=total_count icono="clipboard-list" %}{% fincomponente %}
+    {% componente "componentes/metrica.html" etiqueta="Disponibles" valor=disponibles_count icono="check-circle-2" variante="exito" ayuda="Abiertos para presentar" %}{% fincomponente %}
+    {% componente "componentes/metrica.html" etiqueta="Borradores" valor=borradores_count icono="pencil" variante="aviso" ayuda="Sin publicar" %}{% fincomponente %}
+    {% componente "componentes/metrica.html" etiqueta="Cerrados" valor=cerrados_count icono="archive" ayuda="Plazo finalizado" %}{% fincomponente %}
+  </div>
+
+  <div class="card barra-herramientas">
+    <div class="barra-herramientas__fila">
+      <div class="buscador">
+        <label for="filtro-texto" class="sr-only">Buscar cuestionario</label>
+        <i data-lucide="search" class="buscador__icono"></i>
+        <input type="search" id="filtro-texto" placeholder="Buscar por título o descripción…" class="form-input" autocomplete="off">
+      </div>
+      <div role="group" aria-label="Filtrar por estado" class="flex gap-2 flex-wrap">
+        <button type="button" class="btn btn-outline chip-filtro active" data-filtro="todos" aria-pressed="true">Todos</button>
+        <button type="button" class="btn btn-outline chip-filtro" data-filtro="disponible" aria-pressed="false">Disponibles</button>
+        <button type="button" class="btn btn-outline chip-filtro" data-filtro="programado" aria-pressed="false">Programados</button>
+        <button type="button" class="btn btn-outline chip-filtro" data-filtro="borrador" aria-pressed="false">Borradores</button>
+        <button type="button" class="btn btn-outline chip-filtro" data-filtro="cerrado" aria-pressed="false">Cerrados</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="rejilla-cuestionarios">
+    {% for c in cuestionarios %}
+    <article class="card tarjeta-listado" data-estado="{{ c.estado_temporal }}" data-texto="{{ c.nombre|lower }} {{ c.descripcion|default:''|lower }}">
+      <div>
+        <div class="flex justify-between items-center gap-2 mb-3">
+          <div class="flex items-center gap-2 flex-wrap">
+            {% if c.estado_temporal == 'cerrado' %}<span class="badge badge-neutro">Cerrado</span>
+            {% elif c.estado_temporal == 'disponible' %}<span class="badge badge-success">Disponible</span>
+            {% elif c.estado_temporal == 'programado' %}<span class="badge badge-info">Programado</span>
+            {% else %}<span class="badge badge-warning">Borrador</span>{% endif %}
+            <span class="badge {{ c.tiempo_restante_info.clase }}">{{ c.tiempo_restante_info.texto }}</span>
+          </div>
+          <a href="{% url 'cuestionarios:previsualizar' c.id %}" class="btn btn-outline btn-accion"><i data-lucide="eye" class="icono-13"></i> Vista previa</a>
+        </div>
+
+        <h3 class="tarjeta-listado__titulo">{{ c.nombre }}</h3>
+        <p class="card-subtitle mb-3">{{ c.descripcion|default:"Sin instrucciones."|truncatewords:18 }}</p>
+
+        <ul class="tarjeta-cuestionario__datos">
+          <li><i data-lucide="library" class="icono-13"></i> <strong>{{ c.cuestionario_preguntas.all|length }}</strong> preguntas</li>
+          <li><i data-lucide="clock" class="icono-13"></i> <strong>{{ c.tiempo_limite_minutos }}</strong> min</li>
+          <li><i data-lucide="award" class="icono-13"></i> Aprueba con <strong>{{ c.calificacion_aprobacion }}</strong> / {{ c.calificacion_maxima }}</li>
+          <li><i data-lucide="shuffle" class="icono-13"></i> {% if c.mezclar_preguntas %}Orden aleatorio{% else %}Orden fijo{% endif %}</li>
+        </ul>
+
+        <div class="tarjeta-listado__fechas">
+          <span class="inline-flex items-center gap-1"><i data-lucide="calendar" class="icono-13"></i> Cierre: <strong class="{% if c.estado_temporal == 'cerrado' %}texto-peligro{% endif %}">{{ c.fecha_cierre|date:"d M Y · H:i" }}</strong></span>
+          <span class="texto-tenue">Inicio: {{ c.fecha_apertura|date:"d M" }}</span>
+        </div>
+      </div>
+
+      <div class="tarjeta-listado__acciones">
+        <a href="{% url 'reportes:intentos' c.id %}" class="btn btn-secondary"><i data-lucide="users" class="icono-15"></i> Intentos ({{ c.intentos.all|length }})</a>
+        <a href="{% url 'cuestionarios:editar' c.id %}" class="btn btn-primary"><i data-lucide="settings" class="icono-15"></i> Configurar</a>
+      </div>
+    </article>
+    {% empty %}
+    <div class="card rejilla-cuestionarios__completa">
+      {% componente "componentes/estado_vacio.html" icono="clipboard-x" titulo="No hay cuestionarios registrados" mensaje="Crea una evaluación y asígnale preguntas del banco." %}
+        <a href="{% url 'cuestionarios:crear' %}" class="btn btn-primary"><i data-lucide="plus"></i> Crear el primer cuestionario</a>
+      {% fincomponente %}
+    </div>
+    {% endfor %}
+    <div class="card rejilla-cuestionarios__completa" id="sin-resultados" hidden>
+      {% componente "componentes/estado_vacio.html" icono="search-x" titulo="No se encontraron cuestionarios" mensaje="Ajusta la búsqueda o el filtro de estado." %}
+        <button type="button" class="btn btn-outline" data-accion="limpiar-filtros">Limpiar filtros</button>
+      {% fincomponente %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}<script src="{% static 'js/cuestionarios/listado.js' %}"></script>{% endblock %}

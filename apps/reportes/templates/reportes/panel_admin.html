@@ -1,0 +1,84 @@
+{% extends 'layouts/app_base.html' %}
+{% load static componentes %}
+
+{% block title %}Panel de administración - Simulador Saber TyT{% endblock %}
+{% block nav_title %}Panel de administración{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'css/reportes.css' %}">{% endblock %}
+
+{% block app_content %}
+{% componente "componentes/encabezado.html" etiqueta="Administración institucional" titulo="Panel de administración" subtitulo="Estado del banco de preguntas, los cuestionarios y los intentos del simulador." %}
+  <span class="badge badge-info periodo"><i data-lucide="calendar" class="icono-14"></i> Periodo {{ periodo }}</span>
+{% fincomponente %}
+
+<section aria-labelledby="titulo-acciones">
+  <div class="section-header">
+    <h2 class="section-title" id="titulo-acciones">Acciones rápidas</h2>
+  </div>
+  <div class="quick-actions-bar">
+    <a href="{% url 'banco_preguntas:banco' %}#nueva" class="action-card-btn">
+      <span class="action-icon-box"><i data-lucide="plus"></i></span>
+      <span><span class="block peso-bold texto-base">Nueva pregunta</span><span class="texto-xs texto-suave">Banco de preguntas</span></span>
+    </a>
+    <a href="{% url 'cuestionarios:crear' %}" class="action-card-btn">
+      <span class="action-icon-box"><i data-lucide="file-text"></i></span>
+      <span><span class="block peso-bold texto-base">Crear cuestionario</span><span class="texto-xs texto-suave">Configurar un simulacro</span></span>
+    </a>
+    <a href="{% url 'importaciones:importar' %}" class="action-card-btn">
+      <span class="action-icon-box action-icon-box--exito"><i data-lucide="upload"></i></span>
+      <span><span class="block peso-bold texto-base">Importar preguntas</span><span class="texto-xs texto-suave">Desde Excel</span></span>
+    </a>
+  </div>
+</section>
+
+<section aria-labelledby="titulo-metricas">
+  <div class="section-header">
+    <h2 class="section-title" id="titulo-metricas">Métricas de la plataforma</h2>
+  </div>
+  <div class="metricas">
+    {% componente "componentes/metrica.html" etiqueta="Preguntas activas" valor=preguntas_activas icono="library" ayuda=preguntas_inactivas|stringformat:"s"|add:" desactivadas" %}{% fincomponente %}
+    {% componente "componentes/metrica.html" etiqueta="Competencias" valor=categorias_count icono="landmark" ayuda=categorias_con_preguntas|stringformat:"s"|add:" con preguntas" %}{% fincomponente %}
+    {% componente "componentes/metrica.html" etiqueta="Cuestionarios" valor=cuestionarios_count icono="clipboard-list" variante="info" %}{% fincomponente %}
+    {% componente "componentes/metrica.html" etiqueta="Intentos" valor=intentos_count icono="users" variante="exito" ayuda=intentos_finalizados|stringformat:"s"|add:" finalizados" %}{% fincomponente %}
+  </div>
+</section>
+
+<div class="panel-columnas">
+  <section class="card" aria-labelledby="titulo-cobertura">
+    <div class="card-header">
+      <h2 class="card-title" id="titulo-cobertura">Banco por competencia</h2>
+      <span class="texto-xs peso-bold {% if cobertura == 100 %}texto-exito{% else %}texto-aviso{% endif %}">{{ cobertura }} % de cobertura</span>
+    </div>
+    {% if preguntas_activas %}
+    <div class="barra-distribucion" role="img" aria-label="Distribución de preguntas activas por competencia">
+      {% for cat in categorias %}{% if cat.num_preguntas %}<span class="barra-distribucion__tramo" style="flex-grow: {{ cat.num_preguntas }};" title="{{ cat.nombre }}: {{ cat.porcentaje }} %"></span>{% endif %}{% endfor %}
+    </div>
+    {% endif %}
+    <ul class="lista-competencias">
+      {% for cat in categorias %}
+      <li>
+        <span>{{ cat.nombre }}</span>
+        <span class="cifras peso-bold {% if cat.num_preguntas %}texto-suave{% else %}texto-aviso{% endif %}">{{ cat.num_preguntas }}{% if not cat.num_preguntas %} · sin preguntas{% endif %}</span>
+      </li>
+      {% empty %}
+      <li class="texto-suave">Aún no hay competencias registradas.</li>
+      {% endfor %}
+    </ul>
+  </section>
+
+  <section aria-labelledby="titulo-recientes">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="texto-md peso-bold" id="titulo-recientes">Cuestionarios recientes</h2>
+      <a href="{% url 'cuestionarios:listado' %}" class="texto-sm peso-semibold">Ver todos &rarr;</a>
+    </div>
+    <div class="flex flex-col gap-3">
+      {% for c in cuestionarios_recientes %}
+        {% include "reportes/_tarjeta_cuestionario.html" %}
+      {% empty %}
+        <div class="card">
+          {% componente "componentes/estado_vacio.html" icono="clipboard-list" titulo="No hay cuestionarios" mensaje="Crea el primero con la acción rápida «Crear cuestionario»." %}{% fincomponente %}
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+</div>
+{% endblock %}

@@ -1,0 +1,75 @@
+{% extends 'examen/base_sala.html' %}
+{% load static %}
+
+{% block title %}Previsualización: {{ cuestionario.nombre }} - Simulador Saber TyT{% endblock %}
+
+{% block modo %}previsualizacion{% endblock %}
+{% block atributos_sala %}data-url-salir="{% url 'cuestionarios:listado' %}" data-url-editar-pregunta="{% url 'banco_preguntas:banco' %}?editar=__ID__"{% endblock %}
+
+{% block volver_url %}{% url 'cuestionarios:listado' %}{% endblock %}
+{% block etiqueta_superior %}
+<span class="badge badge-warning"><i data-lucide="eye" class="icono-12"></i> Modo previsualización docente</span>
+{% endblock %}
+
+{% block acciones_encabezado %}
+<button type="button" class="btn btn-outline" data-accion="claves" aria-pressed="false">
+  <i data-lucide="key" class="icono-15"></i>
+  <span data-ref="texto-claves">Revelar claves y retroalimentación</span>
+</button>
+<a href="{% url 'cuestionarios:editar' cuestionario.id %}" class="btn btn-outline">
+  <i data-lucide="settings" class="icono-15"></i> Configuración
+</a>
+<a href="{% url 'cuestionarios:listado' %}" class="btn btn-primary">
+  <i data-lucide="log-out" class="icono-15"></i> Salir de la vista previa
+</a>
+{% endblock %}
+
+{% block aviso %}
+<div class="sala-aviso">
+  <div class="sala-aviso__caja">
+    <div class="flex items-center gap-3">
+      <i data-lucide="info" class="icono-18 shrink-0"></i>
+      <span><strong>Simulación de la experiencia del estudiante.</strong> Puedes navegar, revisar los enunciados y revelar las claves sin crear intentos ni alterar notas.</span>
+    </div>
+    <span class="badge badge-warning">Tiempo límite: {{ cuestionario.tiempo_limite_minutos }} min</span>
+  </div>
+</div>
+{% endblock %}
+
+{% block progreso_texto %}0% explorado{% endblock %}
+{% block leyenda_respondida %}Opción probada{% endblock %}
+{% block leyenda_pendiente %}Sin probar{% endblock %}
+
+{% block contexto_extra %}
+<section class="card sala-tarjeta">
+  <div class="sala-subtitulo"><i data-lucide="wrench" class="icono-14"></i> Gestión de la pregunta</div>
+  <p class="texto-xs texto-suave mb-3">¿Encontraste un error en el enunciado o en las opciones?</p>
+  <a href="#" target="_blank" rel="noopener" class="btn btn-outline btn-full" data-ref="editar-pregunta">
+    <i data-lucide="pencil" class="icono-14"></i> Editar en el banco
+  </a>
+</section>
+{% endblock %}
+
+{% block debajo_opciones %}
+<div class="sala-retroalimentacion" data-ref="retroalimentacion" hidden>
+  <div class="flex items-center gap-2 peso-extrabold mb-2">
+    <i data-lucide="check-circle" class="icono-16"></i> Retroalimentación pedagógica
+  </div>
+  <p data-ref="texto-retroalimentacion"></p>
+</div>
+{% endblock %}
+
+{% block mapa_extra %}
+<div class="sala-ficha">
+  <div class="peso-bold mayusculas">Parámetros del cuestionario</div>
+  <dl>
+    <dt>Preguntas</dt><dd>{{ total_preguntas }}</dd>
+    <dt>Calificación máxima</dt><dd>{{ cuestionario.calificacion_maxima }}</dd>
+    <dt>Nota para aprobar</dt><dd>{{ cuestionario.calificacion_aprobacion }}</dd>
+    <dt>Orden de preguntas</dt><dd>{% if cuestionario.mezclar_preguntas %}Aleatorio{% else %}Fijo{% endif %}</dd>
+    <dt>Orden de opciones</dt><dd>{% if cuestionario.mezclar_respuestas %}Aleatorio{% else %}Fijo{% endif %}</dd>
+  </dl>
+</div>
+{% endblock %}
+
+{% block script_pagina %}<script src="{% static 'js/cuestionarios/previsualizacion.js' %}"></script>{% endblock %}
