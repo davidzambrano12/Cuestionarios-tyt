@@ -44,11 +44,11 @@ def requiere_permiso(codigo_permiso: str):
                 }, status=403)
 
             return HttpResponseForbidden(f"""
-                <div style="font-family:sans-serif; text-align:center; padding:50px;">
-                    <h1 style="color:#d9534f;">403 - Acceso Denegado</h1>
+                <div style="font-family:Roboto, 'Segoe UI', sans-serif; color:#231F20; text-align:center; padding:50px;">
+                    <h1 style="color:#A21F1F;">403 - Acceso Denegado</h1>
                     <p>Su rol actual no cuenta con el permiso <code>{codigo_permiso}</code> para realizar esta acción.</p>
                     <p>Esta restricción está validada directamente en el servidor Django.</p>
-                    <a href="javascript:history.back()" style="display:inline-block; margin-top:20px; padding:10px 20px; background:#1b6282; color:#fff; text-decoration:none; border-radius:6px;">Volver</a>
+                    <a href="javascript:history.back()" style="display:inline-block; margin-top:20px; padding:10px 20px; background:#18668F; color:#fff; text-decoration:none; border-radius:6px;">Volver</a>
                 </div>
             """)
         return _wrapped_view

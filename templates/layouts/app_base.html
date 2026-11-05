@@ -64,7 +64,7 @@
     </nav>
 
     <!-- Footer del Sidebar con Identidad del Usuario -->
-    <div style="padding-top:16px; border-top:1px solid #e2e8f0; margin-top:auto;" class="text-xs text-muted">
+    <div style="padding-top:16px; border-top:1px solid var(--color-borde); margin-top:auto;" class="text-xs text-muted">
       <div style="display:flex; align-items:center; justify-content:space-between;">
         <div style="overflow:hidden; padding-right:8px;">
           <div style="text-overflow:ellipsis; overflow:hidden; white-space:nowrap;" class="text-sm font-bold text-main">
@@ -80,7 +80,7 @@
             {% endif %}
           </div>
         </div>
-        <a href="{% url 'cuentas:perfil' %}" title="Ver mi perfil" style="display:inline-flex; align-items:center; justify-content:center; width:30px; height:30px; border-radius:8px; background:#f1f5f9; color:#475569; text-decoration:none; flex-shrink:0;">
+        <a href="{% url 'cuentas:perfil' %}" title="Ver mi perfil" style="display:inline-flex; align-items:center; justify-content:center; width:30px; height:30px; border-radius:8px; background:var(--color-superficie-hundida); color:var(--color-texto-suave); text-decoration:none; flex-shrink:0;">
           <i data-lucide="user" style="width:15px; height:15px;"></i>
         </a>
       </div>
@@ -96,8 +96,8 @@
         Simulador Saber TyT / <span class="text-muted font-normal">{% block nav_title %}Plataforma Institucional{% endblock %}</span>
       </div>
       <div class="navbar-user-info">
-        <a href="{% url 'cuentas:perfil' %}" title="Mi Perfil" style="display:flex; align-items:center; gap:8px; color:#0f172a; text-decoration:none;">
-          <div class="user-avatar-circle" style="background:#186382; color:white;">
+        <a href="{% url 'cuentas:perfil' %}" title="Mi Perfil" style="display:flex; align-items:center; gap:8px; color:var(--color-texto); text-decoration:none;">
+          <div class="user-avatar-circle" style="background:var(--color-primario); color:var(--color-texto-invertido);">
             {{ user.first_name|default:user.username|slice:":1"|upper }}
           </div>
           <span class="text-base font-semibold text-main">{{ user.get_full_name|default:user.username }}</span>
