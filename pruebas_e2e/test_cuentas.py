@@ -79,7 +79,9 @@ class CuentasTests(PruebaNavegador):
         self.assertEqual(raro.first_name, "Dora")
 
         pg.click(f'.tarjeta-cuenta:has([data-editar-usuario="{raro.id}"]) button:has-text("Suspender")')
-        pg.wait_for_load_state("networkidle")
+        with pg.expect_navigation():
+            titulo, _ = self.responder_confirmacion(pg)
+        self.assertIn("¿Suspender a Dora", titulo)
         self.assertFalse(User.objects.get(id=raro.id).is_active)
 
         pg.click('[data-pestana="roles"]')

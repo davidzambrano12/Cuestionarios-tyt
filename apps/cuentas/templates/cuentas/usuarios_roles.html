@@ -64,7 +64,7 @@
       <div class="tarjeta-cuenta__acciones">
         {% if u != user %}
         <form method="POST" action="{% url 'cuentas:toggle_usuario_estado' u.id %}" class="flex-1"
-              {% if u.is_active %}data-confirmar="¿Suspender el acceso de {{ u.get_full_name|default:u.username }}? No podrá iniciar sesión hasta que lo reactives."{% endif %}>
+              {% if u.is_active %}data-confirmar-titulo="¿Suspender a {{ u.get_full_name|default:u.username }}?" data-confirmar="No podrá iniciar sesión hasta que lo reactives.&#10;Sus preguntas y cuestionarios se conservan." data-confirmar-boton="Suspender acceso" data-confirmar-tipo="peligro"{% endif %}>
           {% csrf_token %}
           {% if u.is_active %}
             <button type="submit" class="btn btn-accion btn-peligro btn-full"><i data-lucide="user-x" class="icono-14"></i> Suspender</button>
@@ -104,7 +104,7 @@
       <div class="tarjeta-cuenta__acciones">
         <button type="button" class="btn btn-secondary btn-accion flex-1" data-editar-permisos="{{ r.id }}" data-nombre="{{ r.nombre }}"><i data-lucide="shield" class="icono-15"></i> Editar permisos</button>
         {% if not r.es_sistema %}
-        <form method="POST" action="{% url 'cuentas:toggle_rol_estado' r.id %}" {% if r.activo %}data-confirmar="¿Desactivar el rol {{ r.nombre }}? Sus usuarios perderán esos permisos."{% endif %}>
+        <form method="POST" action="{% url 'cuentas:toggle_rol_estado' r.id %}" {% if r.activo %}data-confirmar-titulo="¿Desactivar el rol {{ r.nombre }}?" data-confirmar="Sus usuarios perderán esos permisos mientras el rol esté inactivo.&#10;Puedes volver a activarlo cuando quieras." data-confirmar-boton="Desactivar rol" data-confirmar-tipo="peligro"{% endif %}>
           {% csrf_token %}
           <button type="submit" class="btn btn-outline btn-accion">{% if r.activo %}Desactivar{% else %}Activar{% endif %}</button>
         </form>
