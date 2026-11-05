@@ -136,10 +136,16 @@ La matrícula la hace la institución, no el estudiante (RULE-04). Se hace en el
 
 1. **El administrador crea el período académico** con "Nuevo período" (año, número y fechas).
 2. **Se crea el curso:** asignatura, grupo, programa, semestre y docente. El docente también puede crearlo, y queda a su cargo.
-3. **Se matricula a los estudiantes** desde el detalle del curso: se buscan por nombre, código o documento, se marcan (o "Seleccionar todos") y se pulsa "Matricular".
-   - Los intentos que esos estudiantes ya presentaron en el período sin curso quedan asociados automáticamente.
-   - Si un estudiante ya está en otro curso del mismo período, se avisa. Sus intentos nuevos se asignan a un solo curso: el primero en orden alfabético.
-4. **Retirar a un estudiante** pide confirmación, y no se permite si ya tiene intentos en el curso, para conservar el historial. Al cerrar el período, el curso se marca como inactivo.
+3. **Se matricula a los estudiantes** con el botón "Matricular estudiantes" del curso, de dos formas:
+   - **Buscar:** los resultados aparecen mientras se escribe (nombre, código o documento). Se marcan y quedan como etiquetas aunque cambie la búsqueda.
+   - **Pegar lista de códigos:** se pegan, por ejemplo, desde una columna de Excel. "Revisar códigos" muestra cuáles no existen, cuáles ya estaban en el curso y cuáles se encontraron. Los encontrados quedan seleccionados. Revisar no matricula a nadie.
+
+   En ambos casos:
+   - Al confirmar, los intentos que esos estudiantes ya presentaron en el período sin curso se asocian automáticamente.
+   - Se avisa si un estudiante ya está en otro curso del mismo período.
+   - Un curso inactivo no admite matrículas.
+4. **La lista del curso** muestra los intentos y la última nota de cada estudiante, con un enlace a su historial en Consultas. Arriba, "matriculados / con intentos / sin presentar aún" también funciona como filtro.
+5. **Retirar a un estudiante** pide confirmación, y no se permite si ya tiene intentos en el curso (aparece un candado), para conservar el historial. Al cerrar el período, el curso se marca como inactivo.
 
 El docente solo ve y gestiona sus cursos. Si en Cursos o en Consultas aparecen intentos terminados sin curso, el administrador recibe un aviso. Los períodos, cursos y matrículas también se pueden editar en `/admin/`.
 - Pruebas automáticas: `apps/reportes/tests/test_consultas.py` y `pruebas_e2e/test_consultas.py`.

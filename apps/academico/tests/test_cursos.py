@@ -70,16 +70,64 @@ class CursosTests(TestCase):
         self.client.post("/cursos/periodos/nuevo/", {**datos, "numero": 2, "fecha_fin": "2027-01-01"})
         self.assertFalse(PeriodoAcademico.objects.filter(anio=2027, numero=2).exists())  # fin antes del inicio
 
-    def test_buscar_y_matricular_varios(self):
+    def buscar(self, q):
+        return self.client.get(f"/cursos/{self.curso.id}/buscar-estudiantes/", {"q": q}).json()["resultados"]
+
+    def test_busqueda_en_vivo_y_matricular_varios(self):
         self.entrar(self.docente)
-        r = self.client.get(f"/cursos/{self.curso.id}/", {"buscar": "E"})
-        encontrados = {e.id for e in r.context["candidatos"]}
-        self.assertTrue({self.ana.id, self.beto.id} <= encontrados)
-        self.assertFalse({self.docente.id, self.otro.id, self.admin.id} & encontrados)  # solo estudiantes
+        self.assertEqual(self.buscar("A"), [])  # menos de 2 letras: no consulta
+        self.assertEqual([e["id"] for e in self.buscar("Gómez")], [self.ana.id])
+        self.assertEqual([e["id"] for e in self.buscar("ruiz")], [self.beto.id])
+        # «Prueba» es el apellido de los docentes y el administrador de prueba: no son estudiantes
+        self.assertFalse({self.docente.id, self.otro.id, self.admin.id} & {e["id"] for e in self.buscar("Prueba")})
+        self.assertEqual(self.buscar("E1")[0]["codigo"], "E1")  # también por código
         self.client.post(f"/cursos/{self.curso.id}/matricular/", {"estudiantes": [self.ana.id, self.beto.id, self.otro.id]})
         self.assertEqual(set(self.curso.matriculas.values_list("estudiante_id", flat=True)), {self.ana.id, self.beto.id})
-        r = self.client.get(f"/cursos/{self.curso.id}/", {"buscar": "Ana"})
-        self.assertEqual(r.context["candidatos"], [])  # ya matriculada
+        self.assertEqual(self.buscar("Ana"), [])  # ya matriculada: no se ofrece
+
+    def test_busqueda_avisa_otro_curso_del_periodo(self):
+        Matricula.objects.create(curso=self.ajeno, estudiante=self.ana)
+        self.entrar(self.admin)
+        self.assertEqual(self.buscar("Ana")[0]["otro_curso"], "Electiva Profesional III")
+
+    def test_revisar_lista_de_codigos(self):
+        Matricula.objects.create(curso=self.curso, estudiante=self.beto)
+        self.entrar(self.docente)
+        r = self.client.post(f"/cursos/{self.curso.id}/revisar-codigos/",
+                             {"codigos": "E1\nE2, NOEXISTE ;E1\n\n  COD-PROF"}).json()
+        self.assertEqual([e["codigo"] for e in r["encontrados"]], ["E1"])  # sin repetir
+        self.assertEqual(r["ya_matriculados"], ["E2"])
+        self.assertEqual(r["no_existen"], ["NOEXISTE", "COD-PROF"])  # un docente no es estudiante
+        self.assertFalse(Matricula.objects.filter(estudiante=self.ana).exists())  # revisar no matricula
+
+    def test_rutas_nuevas_respetan_el_curso_del_docente(self):
+        self.entrar(self.docente)
+        self.assertEqual(self.client.get(f"/cursos/{self.ajeno.id}/buscar-estudiantes/", {"q": "Ana"}).status_code, 403)
+        self.assertEqual(self.client.post(f"/cursos/{self.ajeno.id}/revisar-codigos/", {"codigos": "E1"}).status_code, 403)
+        self.entrar(self.ana)
+        self.assertEqual(self.client.get(f"/cursos/{self.curso.id}/buscar-estudiantes/", {"q": "Ana"}).status_code, 403)
+
+    def test_curso_inactivo_no_admite_matriculas(self):
+        Curso.objects.filter(id=self.curso.id).update(activo=False)
+        self.entrar(self.docente)
+        self.client.post(f"/cursos/{self.curso.id}/matricular/", {"estudiantes": [self.ana.id]})
+        self.assertFalse(Matricula.objects.exists())
+        self.assertNotContains(self.client.get(f"/cursos/{self.curso.id}/"), 'id="modal-matricular"')
+
+    def test_detalle_resume_intentos_y_ultima_nota(self):
+        from decimal import Decimal
+        Matricula.objects.create(curso=self.curso, estudiante=self.ana)
+        Matricula.objects.create(curso=self.curso, estudiante=self.beto)
+        simulacro = crear_cuestionario(num_preguntas=1)
+        for nota in ("2.00", "4.50"):
+            Intento.objects.create(cuestionario=simulacro, curso=self.curso, participante_codigo="E1",
+                                   participante_nombre="Ana", estado="finalizado", calificacion=Decimal(nota))
+        self.entrar(self.docente)
+        r = self.client.get(f"/cursos/{self.curso.id}/")
+        self.assertEqual(r.context["resumen"], {"total": 2, "con_intentos": 1, "sin_intentos": 1})
+        ana = next(m for m in r.context["matriculas"] if m.estudiante == self.ana)
+        self.assertEqual((ana.num_intentos, ana.ultima_nota), (2, Decimal("4.50")))
+        self.assertContains(r, "estudiante=E1")  # enlace al historial en Consultas
 
     def test_matricular_asocia_intentos_anteriores_del_periodo(self):
         simulacro = crear_cuestionario(num_preguntas=1)

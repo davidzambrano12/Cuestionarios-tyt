@@ -1,4 +1,6 @@
 """Cursos y matrículas: el administrador gestiona todos; el docente, los que tiene a cargo."""
+import re
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
@@ -13,7 +15,7 @@ from . import services
 from .forms import CursoForm, PeriodoForm
 from .models import Curso, Matricula, PeriodoAcademico
 
-LIMITE_BUSQUEDA = 50
+LIMITE_BUSQUEDA = 20
 
 
 def _curso_gestionable(request, curso_id) -> Curso:
@@ -99,6 +101,8 @@ def editar_curso(request, curso_id):
 @login_required
 @requiere_permiso("cursos.gestionar")
 def detalle(request, curso_id):
+    from decimal import Decimal
+
     from apps.evaluaciones.models import Intento
 
     curso = _curso_gestionable(request, curso_id)
@@ -108,34 +112,110 @@ def detalle(request, curso_id):
         Intento.objects.filter(curso=curso).values("participante_codigo")
         .annotate(n=Count("id")).values_list("participante_codigo", "n")
     )
+    # Última nota (sobre 5,0) de cada estudiante en este curso
+    ultima_nota = {}
+    for codigo, nota, maxima in (
+        Intento.objects.filter(curso=curso, estado__in=("finalizado", "vencido"), calificacion__isnull=False)
+        .order_by("-fecha_inicio").values_list("participante_codigo", "calificacion", "cuestionario__calificacion_maxima")
+    ):
+        if codigo not in ultima_nota:
+            ultima_nota[codigo] = (nota * Decimal("5") / maxima).quantize(Decimal("0.01"))
     for m in matriculas:
         m.codigo = codigo_participante(m.estudiante)
         m.num_intentos = intentos_por_codigo.get(m.codigo, 0)
-
-    # Buscar estudiantes para matricular (en el servidor, hasta 50 resultados)
-    buscar = request.GET.get("buscar", "").strip()
-    candidatos = []
-    if buscar:
-        ya = {m.estudiante_id for m in matriculas}
-        consulta = services.estudiantes_elegibles().exclude(id__in=ya).filter(
-            Q(first_name__icontains=buscar) | Q(last_name__icontains=buscar) | Q(username__icontains=buscar)
-            | Q(perfil__codigo_institucional__icontains=buscar) | Q(perfil__documento_identidad__icontains=buscar)
-        )
-        candidatos = list(consulta[:LIMITE_BUSQUEDA])
-        otros = dict(
-            Matricula.objects.filter(estudiante__in=candidatos, curso__periodo=curso.periodo)
-            .values_list("estudiante_id", "curso__asignatura")
-        )
-        for est in candidatos:
-            est.codigo = codigo_participante(est)
-            est.otro_curso = otros.get(est.id)
+        m.ultima_nota = ultima_nota.get(m.codigo)
+        m.inicial = (m.estudiante.first_name or m.estudiante.username)[:1].upper()
+    con_intentos = sum(1 for m in matriculas if m.num_intentos)
     return render(request, "academico/detalle.html", {
         "active_tab": "cursos",
         "curso": curso,
         "matriculas": matriculas,
-        "buscar": buscar,
-        "candidatos": candidatos,
-        "limite": LIMITE_BUSQUEDA,
+        "resumen": {"total": len(matriculas), "con_intentos": con_intentos, "sin_intentos": len(matriculas) - con_intentos},
+        "url_historial": (f"{reverse('reportes:consultas')}?anio={curso.periodo.anio}&periodo={curso.periodo_id}"
+                          f"&curso={curso.id}&vista=historial&estudiante="),
+    })
+
+
+def _candidato(est, otros) -> dict:
+    return {
+        "id": est.id,
+        "nombre": est.get_full_name() or est.username,
+        "codigo": codigo_participante(est),
+        "otro_curso": otros.get(est.id, ""),
+    }
+
+
+def _otros_cursos(curso, estudiantes) -> dict:
+    """Otro curso del mismo período en que ya está cada estudiante (para avisar)."""
+    return dict(
+        Matricula.objects.filter(estudiante__in=estudiantes, curso__periodo=curso.periodo)
+        .exclude(curso=curso).values_list("estudiante_id", "curso__asignatura")
+    )
+
+
+@login_required
+@requiere_permiso("cursos.gestionar")
+def buscar_estudiantes(request, curso_id):
+    """Búsqueda en vivo (JSON): estudiantes activos que aún no están en el curso."""
+    from django.http import JsonResponse
+
+    curso = _curso_gestionable(request, curso_id)
+    q = request.GET.get("q", "").strip()[:60]
+    if len(q) < 2:
+        return JsonResponse({"resultados": [], "mas": False})
+    consulta = services.estudiantes_elegibles().exclude(matriculas__curso=curso).filter(
+        Q(first_name__icontains=q) | Q(last_name__icontains=q) | Q(username__icontains=q)
+        | Q(perfil__codigo_institucional__icontains=q) | Q(perfil__documento_identidad__icontains=q)
+    )
+    estudiantes = list(consulta[:LIMITE_BUSQUEDA + 1])
+    mas = len(estudiantes) > LIMITE_BUSQUEDA
+    estudiantes = estudiantes[:LIMITE_BUSQUEDA]
+    otros = _otros_cursos(curso, estudiantes)
+    return JsonResponse({"resultados": [_candidato(e, otros) for e in estudiantes], "mas": mas})
+
+
+MAX_CODIGOS = 500
+
+
+@login_required
+@requiere_permiso("cursos.gestionar")
+def revisar_codigos(request, curso_id):
+    """
+    Revisa una lista pegada de códigos (JSON): cuáles corresponden a estudiantes,
+    cuáles no existen y cuáles ya están en el curso. No matricula a nadie.
+    """
+    from django.http import JsonResponse
+
+    curso = _curso_gestionable(request, curso_id)
+    if request.method != "POST":
+        return JsonResponse({"detail": "Método no permitido."}, status=405)
+    codigos = list(dict.fromkeys(c for c in re.split(r"[\s,;]+", request.POST.get("codigos", "")) if c))
+    if len(codigos) > MAX_CODIGOS:
+        return JsonResponse({"detail": f"Pega como máximo {MAX_CODIGOS} códigos por vez."}, status=400)
+
+    por_codigo = {}
+    for est in services.estudiantes_elegibles().filter(
+        Q(perfil__codigo_institucional__in=codigos) | Q(username__in=codigos)
+    ):
+        por_codigo.setdefault(codigo_participante(est), est)
+        por_codigo.setdefault(est.username, est)
+    ya = set(curso.matriculas.values_list("estudiante_id", flat=True))
+
+    encontrados, ya_matriculados, no_existen, vistos = [], [], [], set()
+    for codigo in codigos:
+        est = por_codigo.get(codigo)
+        if not est:
+            no_existen.append(codigo)
+        elif est.id in ya:
+            ya_matriculados.append(codigo)
+        elif est.id not in vistos:
+            vistos.add(est.id)
+            encontrados.append(est)
+    otros = _otros_cursos(curso, encontrados)
+    return JsonResponse({
+        "encontrados": [_candidato(e, otros) for e in encontrados],
+        "no_existen": no_existen,
+        "ya_matriculados": ya_matriculados,
     })
 
 
@@ -144,6 +224,9 @@ def detalle(request, curso_id):
 def matricular(request, curso_id):
     curso = _curso_gestionable(request, curso_id)
     if request.method != "POST":
+        return redirect("academico:detalle", curso_id=curso.id)
+    if not curso.activo:
+        messages.error(request, "El curso está inactivo: no admite matrículas nuevas.")
         return redirect("academico:detalle", curso_id=curso.id)
     ids = [int(i) for i in request.POST.getlist("estudiantes") if i.isdigit()]
     estudiantes = list(services.estudiantes_elegibles().filter(id__in=ids))
