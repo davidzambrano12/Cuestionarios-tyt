@@ -6,7 +6,7 @@ from .models import Curso, Matricula, PeriodoAcademico
 class CursoInline(admin.TabularInline):
     model = Curso
     extra = 0
-    fields = ("nombre", "programa", "docente", "activo")
+    fields = ("asignatura", "grupo", "programa", "semestre", "docente", "activo")
 
 
 @admin.register(PeriodoAcademico)
@@ -24,9 +24,9 @@ class MatriculaInline(admin.TabularInline):
 
 @admin.register(Curso)
 class CursoAdmin(admin.ModelAdmin):
-    list_display = ("nombre", "periodo", "programa", "docente", "activo", "num_matriculados")
+    list_display = ("asignatura", "grupo", "periodo", "programa", "semestre", "docente", "activo", "num_matriculados")
     list_filter = ("periodo__anio", "periodo", "activo")
-    search_fields = ("nombre", "programa")
+    search_fields = ("asignatura", "grupo", "programa")
     autocomplete_fields = ("docente",)
     inlines = [MatriculaInline]
 

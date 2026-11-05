@@ -25,6 +25,8 @@ class Command(BaseCommand):
             ("evaluaciones.responder", "Responder cuestionarios", "Permite iniciar y enviar intentos de examen", "Evaluaciones"),
             ("evaluaciones.ver_propias", "Consultar calificaciones propias", "Permite revisar notas e historial de intentos propios", "Evaluaciones"),
             ("resultados.consultar_todos", "Consultar resultados generales", "Permite auditar notas e informes de todos los estudiantes", "Reportes"),
+            # Módulo Cursos
+            ("cursos.gestionar", "Gestionar cursos y matrículas", "Permite crear cursos y matricular estudiantes (el docente, solo en sus cursos)", "Cursos"),
         ]
 
         permisos_map = {}
@@ -64,6 +66,7 @@ class Command(BaseCommand):
             permisos_map["preguntas.importar"],
             permisos_map["cuestionarios.gestionar"],
             permisos_map["resultados.consultar_todos"],
+            permisos_map["cursos.gestionar"],
         ]
         rol_docente.permisos.set(docente_permisos)
 

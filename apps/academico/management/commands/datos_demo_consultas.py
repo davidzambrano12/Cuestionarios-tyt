@@ -1,8 +1,8 @@
 """
 Datos de demostración para el módulo de consultas y reportes.
 
-Crea tres períodos (2025-2, 2026-1, 2026-2), cinco cursos, doce estudiantes
-matriculados y simulacros cerrados con intentos terminados y respuestas en
+Crea tres períodos (2025-2, 2026-1, 2026-2), cinco cursos (asignaturas con
+sus grupos), doce estudiantes matriculados y simulacros cerrados con intentos terminados y respuestas en
 varios ejes temáticos. Es repetible: `--limpiar` borra solo lo que este
 comando creó (códigos DEMO-* y simulacros «[Demo] …»).
 
@@ -37,8 +37,13 @@ PERIODOS = [
     (2026, 1, date(2026, 2, 1), date(2026, 6, 20)),
     (2026, 2, date(2026, 7, 15), date(2026, 12, 10)),
 ]
-# período → cursos; cada estudiante pasa por un curso en cada período
-CURSOS = {(2025, 2): ["Cuarto A"], (2026, 1): ["Quinto A", "Quinto B"], (2026, 2): ["Sexto A", "Sexto B"]}
+# período → (asignatura, semestre, grupos); cada estudiante está en un grupo por período
+CURSOS = {
+    (2025, 2): ("Electiva Profesional I – Fundamentos Web", 4, ["01"]),
+    (2026, 1): ("Electiva Profesional II – Bases de Datos", 5, ["01", "02"]),
+    (2026, 2): ("Electiva Profesional III – Frameworks", 6, ["01", "02"]),
+}
+CURSOS_ANTERIORES = ["Cuarto A", "Quinto A", "Quinto B", "Sexto A", "Sexto B"]  # versión escolar retirada
 
 
 class Command(BaseCommand):
@@ -64,10 +69,8 @@ class Command(BaseCommand):
         demo.delete()
         Matricula.objects.filter(estudiante__perfil__codigo_institucional__startswith=PREFIJO_CODIGO).delete()
         User.objects.filter(perfil__codigo_institucional__startswith=PREFIJO_CODIGO).delete()
-        for anio, numero, *_ in PERIODOS:
-            for nombre in CURSOS[(anio, numero)]:
-                Curso.objects.filter(periodo__anio=anio, periodo__numero=numero, nombre=nombre, intentos__isnull=True,
-                                     matriculas__isnull=True).delete()
+        asignaturas = [a for a, _, _ in CURSOS.values()] + CURSOS_ANTERIORES
+        Curso.objects.filter(asignatura__in=asignaturas, intentos__isnull=True, matriculas__isnull=True).delete()
 
     def _crear(self):
         azar = random.Random(2026)
@@ -96,11 +99,12 @@ class Command(BaseCommand):
             periodo, _ = PeriodoAcademico.objects.get_or_create(
                 anio=anio, numero=numero, defaults={"fecha_inicio": inicio, "fecha_fin": fin},
             )
+            asignatura, semestre, grupos = CURSOS[(anio, numero)]
             cursos = [
-                Curso.objects.get_or_create(periodo=periodo, nombre=nombre, defaults={
-                    "docente": docente if j == 0 else None,
+                Curso.objects.get_or_create(periodo=periodo, asignatura=asignatura, grupo=grupo, defaults={
+                    "semestre": semestre, "docente": docente if j == 0 else None,
                 })[0]
-                for j, nombre in enumerate(CURSOS[(anio, numero)])
+                for j, grupo in enumerate(grupos)
             ]
             for k, (user, habilidad, mejora) in enumerate(estudiantes):
                 curso = cursos[k % len(cursos)]
@@ -113,7 +117,7 @@ class Command(BaseCommand):
                         total += 1
 
         self.stdout.write(self.style.SUCCESS(
-            f"Listo: {len(PERIODOS)} períodos, {sum(len(c) for c in CURSOS.values())} cursos, "
+            f"Listo: {len(PERIODOS)} períodos, {sum(len(g) for _, _, g in CURSOS.values())} cursos, "
             f"{len(estudiantes)} estudiantes y {total} intentos terminados."
             + ("" if docente else " (No hay docentes: los cursos quedaron sin docente asignado.)")
         ))

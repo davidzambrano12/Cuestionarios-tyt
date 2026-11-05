@@ -15,7 +15,7 @@ def curso_vigente(user, cuando=None) -> Curso | None:
             curso__periodo__fecha_fin__gte=fecha,
         )
         .select_related("curso")
-        .order_by("-curso__periodo__fecha_inicio", "curso__nombre")
+        .order_by("-curso__periodo__fecha_inicio", "curso__asignatura", "curso__grupo")
         .first()
     )
     return matricula.curso if matricula else None
