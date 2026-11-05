@@ -30,26 +30,52 @@ class CursosTests(PruebaNavegador):
         curso = Curso.objects.get(asignatura__startswith="Electiva")
         self.assertEqual(curso.docente, self.docente)
 
-        # Buscar y matricular a dos estudiantes de una vez
-        pg.fill("#buscar", "2026")  # por código
-        with pg.expect_navigation():
-            pg.click(".buscar-estudiante button")
-        self.assertEqual(pg.locator("[data-candidato]").count(), 2)  # Ana y Andrés
+        # Curso vacío: el estado vacío invita a matricular
+        self.assertIn("aún no tiene estudiantes", pg.inner_text("main"))
+        pg.click("[data-ref='abrir-matricular']")
+        pg.wait_for_function("document.getElementById('modal-matricular').classList.contains('open')")
+        pg.wait_for_function("document.activeElement.id === 'buscar-estudiante'")  # el cursor queda en el buscador
+
+        # Buscar en vivo (sin pulsar «Buscar») y elegir a Ana
+        pg.fill("#buscar-estudiante", "Gómez")
+        pg.wait_for_selector(".resultado-estudiante")
+        self.assertEqual(pg.locator(".resultado-estudiante").count(), 1)
         self.assertTrue(pg.is_disabled("[data-ref='matricular']"))
-        pg.check("[data-seleccionar-todos]")
+        pg.check(".resultado-estudiante input")
+        self.assertIn("Ana Gómez", pg.inner_text("[data-ref='seleccionados']"))
+        # La selección se conserva aunque cambie la búsqueda
+        pg.fill("#buscar-estudiante", "zz")
+        pg.wait_for_function("document.querySelector('[data-ref=\"estado-busqueda\"]').textContent.includes('Ningún')")
+        self.assertIn("Matricular 1 estudiante", pg.inner_text("[data-ref='matricular']"))
+
+        # Pegar una lista de códigos: se revisa antes de matricular
+        pg.click("#tab-pegar")
+        pg.fill("#codigos", "2026002\n2025001, 9999999\n2026001")
+        pg.click("[data-accion='revisar-codigos']")
+        pg.wait_for_selector(".revision-bloque--ok")
+        revision = pg.inner_text("[data-ref='revision']")
+        self.assertIn("3 encontrados", revision)  # Ana (ya elegida: no se duplica), Andrés y Beto
+        self.assertIn("9999999", revision)
+        self.assertIn("Matricular 3 estudiantes", pg.inner_text("[data-ref='matricular']"))
+        pg.click(".chip-estudiante:has-text('Beto') .chip-estudiante__quitar")
         self.assertIn("Matricular 2 estudiantes", pg.inner_text("[data-ref='matricular']"))
+        self.assertFalse(pg.is_checked(".revision-bloque--ok .resultado-estudiante:has-text('Beto') input"))  # lista sincronizada
         self.capturar(pg, "cursos_matricular")
         with pg.expect_navigation():
             pg.click("[data-ref='matricular']")
-        self.assertEqual(Matricula.objects.filter(curso=curso).count(), 2)
+        self.assertEqual(set(Matricula.objects.filter(curso=curso).values_list("estudiante__username", flat=True)),
+                         {"est1", "est2"})
         self.assertEqual(pg.locator(".fila-matricula").count(), 2)
 
         pg.fill("#filtro-matriculados", "munoz")  # sin tilde también encuentra
         self.assertEqual(pg.locator(".fila-matricula:visible").count(), 1)
         pg.fill("#filtro-matriculados", "")
+        pg.click("[data-filtro-matricula='sin']")
+        self.assertEqual(pg.locator(".fila-matricula:visible").count(), 2)  # nadie ha presentado aún
+        pg.click("[data-filtro-matricula='todos']")
 
         # Retirar pide confirmación
-        pg.click(".fila-matricula >> nth=0 >> text=Retirar")
+        pg.click(".fila-matricula >> nth=0 >> button:has-text('Retirar')")
         with pg.expect_navigation():
             titulo, _ = self.responder_confirmacion(pg)
         self.assertIn("Retirar a", titulo)

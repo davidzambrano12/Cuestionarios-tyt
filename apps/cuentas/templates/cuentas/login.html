@@ -66,6 +66,16 @@
       </div>
     </div>
   </main>
+
+  <!-- Bienvenida: cubre la carga del panel después de validar el acceso -->
+  <div class="bienvenida-acceso" id="bienvenida-acceso" role="status" aria-live="polite" hidden>
+    <div class="bienvenida-acceso__caja">
+      <span class="bienvenida-acceso__marca" aria-hidden="true"><i data-lucide="graduation-cap"></i></span>
+      <p class="bienvenida-acceso__saludo" data-ref="saludo"></p>
+      <p class="bienvenida-acceso__destino" data-ref="destino"></p>
+      <span class="bienvenida-acceso__barra" aria-hidden="true"><span></span></span>
+    </div>
+  </div>
 </div>
 {% endblock %}
 

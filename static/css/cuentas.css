@@ -108,3 +108,48 @@
 fieldset.sin-borde { border: 0; padding: 0; margin: 0; min-width: 0; }
 fieldset:disabled .form-input { background: var(--color-superficie-tenue); color: var(--color-texto-suave); }
 .error-campo { font-size: var(--texto-xs); color: var(--color-peligro-texto); margin-top: var(--espacio-1); font-weight: var(--peso-semibold); }
+
+/* Bienvenida al validar el acceso (login.js) */
+.bienvenida-acceso {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-fondo);
+  opacity: 0;
+  transition: opacity var(--transicion-normal);
+}
+.bienvenida-acceso[hidden] { display: none; }
+.bienvenida-acceso--visible { opacity: 1; }
+.bienvenida-acceso__caja {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--espacio-2);
+  text-align: center;
+  transform: translateY(8px);
+  transition: transform var(--transicion-normal);
+}
+.bienvenida-acceso--visible .bienvenida-acceso__caja { transform: none; }
+.bienvenida-acceso__marca {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  margin-bottom: var(--espacio-2);
+  border-radius: var(--radio-lg);
+  background: var(--color-primario);
+  color: var(--color-sobre-primario);
+}
+.bienvenida-acceso__marca .lucide { width: 32px; height: 32px; }
+.bienvenida-acceso__saludo { font-family: var(--fuente-titulos); font-size: var(--texto-3xl); font-weight: var(--peso-extrabold); color: var(--color-texto); }
+.bienvenida-acceso__destino { font-size: var(--texto-base); color: var(--color-texto-suave); }
+.bienvenida-acceso__barra { display: block; width: 180px; height: 4px; margin-top: var(--espacio-4); border-radius: var(--radio-pill); background: var(--color-superficie-hundida); overflow: hidden; }
+.bienvenida-acceso__barra span { display: block; width: 40%; height: 100%; border-radius: inherit; background: var(--color-primario); animation: bienvenida-progreso 1.1s ease-in-out infinite; }
+@keyframes bienvenida-progreso { from { transform: translateX(-100%); } to { transform: translateX(250%); } }
+@media (prefers-reduced-motion: reduce) {
+  .bienvenida-acceso__barra span { animation: none; width: 100%; opacity: 0.4; }
+}

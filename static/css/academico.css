@@ -26,19 +26,80 @@
 .form-check { width: 18px; height: 18px; accent-color: var(--color-primario); cursor: pointer; }
 .acciones-formulario { display: flex; justify-content: flex-end; gap: var(--espacio-3); padding-top: var(--espacio-4); border-top: 1px solid var(--color-superficie-hundida); }
 
-.curso-columnas { display: grid; grid-template-columns: minmax(280px, 380px) 1fr; gap: var(--espacio-5); align-items: start; }
-@media (max-width: 1000px) { .curso-columnas { grid-template-columns: 1fr; } }
+/* Resumen del curso: también filtra la lista */
+.resumen-curso { display: flex; flex-wrap: wrap; gap: var(--espacio-3); margin-bottom: var(--espacio-4); }
+.resumen-curso__item {
+  display: inline-flex; align-items: baseline; gap: 6px;
+  padding: 10px 16px; border: 1px solid var(--color-borde); border-radius: var(--radio-md);
+  background: var(--color-superficie); color: var(--color-texto-suave); font: inherit; font-size: var(--texto-sm); cursor: pointer;
+}
+.resumen-curso__item strong { font-size: var(--texto-lg); color: var(--color-texto); font-variant-numeric: tabular-nums; }
+.resumen-curso__item:hover { border-color: var(--color-primario); }
+.resumen-curso__item.active { border-color: var(--color-primario); background: var(--color-primario-suave); color: var(--color-primario); }
+.resumen-curso__item.active strong { color: var(--color-primario); }
+.resumen-curso__item--aviso:not(.active) strong { color: var(--color-aviso); }
 
-.buscar-estudiante { display: flex; gap: var(--espacio-2); margin-bottom: var(--espacio-3); }
-.buscar-estudiante .form-input { flex: 1; min-width: 0; }
-.candidatos__cabecera { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--espacio-2); margin-bottom: var(--espacio-2); }
-.candidatos__cabecera .campo-casilla { margin-bottom: 0; }
-.candidatos { list-style: none; display: flex; flex-direction: column; gap: 6px; max-height: 420px; overflow-y: auto; margin-bottom: var(--espacio-4); }
-.candidato { display: flex; align-items: flex-start; gap: var(--espacio-3); padding: 10px 12px; border: 1px solid var(--color-borde); border-radius: var(--radio-sm); cursor: pointer; }
-.candidato:hover { border-color: var(--color-primario); }
-.candidato:has(input:checked) { background: var(--color-primario-suave); border-color: var(--color-primario); }
-.candidato input { margin-top: 2px; }
-.candidato__datos { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.candidato__datos .lucide { width: 12px; height: 12px; vertical-align: -1px; }
+/* Lista de estudiantes del curso */
+.lista-matriculados { list-style: none; }
+.fila-matricula {
+  display: grid; grid-template-columns: auto minmax(0, 1fr) 180px auto; align-items: center; gap: var(--espacio-4);
+  padding: 12px var(--espacio-5); border-bottom: 1px solid var(--color-superficie-hundida);
+}
+.fila-matricula:last-of-type { border-bottom: 0; }
+.fila-matricula__persona, .fila-matricula__desempeno { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-width: 0; }
+.fila-matricula__persona > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fila-matricula__acciones { display: flex; align-items: center; justify-content: flex-end; gap: var(--espacio-2); }
+.fila-matricula__acciones .lucide { width: 14px; height: 14px; }
+.lista-matriculados__vacio { padding: var(--espacio-6); text-align: center; font-size: var(--texto-sm); color: var(--color-texto-suave); }
+.avatar-inicial {
+  display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--color-primario-suave); color: var(--color-primario); font-weight: var(--peso-bold); font-size: var(--texto-sm);
+}
+.candado { display: inline-flex; color: var(--color-texto-tenue); cursor: help; }
+.candado .lucide { width: 15px; height: 15px; }
+@media (max-width: 700px) {
+  .fila-matricula { grid-template-columns: auto minmax(0, 1fr); }
+  .fila-matricula__desempeno, .fila-matricula__acciones { grid-column: 2; justify-content: flex-start; }
+}
 
-.form-input--compacto { width: auto; min-width: 180px; min-height: 34px; padding-top: 4px; padding-bottom: 4px; font-size: var(--texto-xs); }
+/* Cuadro de matrícula */
+.matricular { display: flex; flex-direction: column; max-height: 88vh; }
+.matricular__pestanas { display: flex; gap: var(--espacio-1); border-bottom: 1px solid var(--color-borde); margin-bottom: var(--espacio-4); }
+.matricular__pestana {
+  display: inline-flex; align-items: center; gap: 6px; padding: 10px 14px; margin-bottom: -1px;
+  border: 0; border-bottom: 2px solid transparent; background: none; font: inherit; font-size: var(--texto-sm);
+  font-weight: var(--peso-semibold); color: var(--color-texto-suave); cursor: pointer;
+}
+.matricular__pestana .lucide { width: 15px; height: 15px; }
+.matricular__pestana.active { color: var(--color-primario); border-bottom-color: var(--color-primario); }
+.matricular__panel { flex: 1; min-height: 220px; overflow-y: auto; }
+.buscador--ancho { max-width: none; }
+.matricular__estado { margin: var(--espacio-2) 0; }
+.matricular__resultados { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+.resultado-estudiante { display: flex; align-items: center; gap: var(--espacio-3); padding: 8px 12px; border: 1px solid var(--color-borde); border-radius: var(--radio-sm); cursor: pointer; }
+.resultado-estudiante:hover { border-color: var(--color-primario); }
+.resultado-estudiante:has(input:checked) { background: var(--color-primario-suave); border-color: var(--color-primario); }
+.resultado-estudiante .avatar-inicial { width: 30px; height: 30px; font-size: var(--texto-xs); }
+.resultado-estudiante__datos { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.matricular__revision { display: flex; flex-direction: column; gap: var(--espacio-3); margin-top: var(--espacio-4); }
+.revision-bloque { padding: var(--espacio-3); border-radius: var(--radio-sm); font-size: var(--texto-sm); }
+.revision-bloque__titulo { font-weight: var(--peso-semibold); margin-bottom: var(--espacio-2); }
+.revision-bloque:not(:has(ul)) .revision-bloque__titulo { margin-bottom: 0; }
+.revision-bloque--ok { background: var(--color-exito-suave); color: var(--color-exito-texto); }
+.revision-bloque--error { background: var(--color-peligro-suave); color: var(--color-peligro-texto); overflow-wrap: anywhere; }
+.revision-bloque--info { background: var(--color-info-suave); color: var(--color-info-texto); overflow-wrap: anywhere; }
+.revision-bloque .resultado-estudiante { background: var(--color-superficie); }
+.matricular__pie { border-top: 1px solid var(--color-borde); margin-top: var(--espacio-4); padding-top: var(--espacio-3); }
+.matricular__seleccion { display: flex; flex-direction: column; gap: var(--espacio-2); margin-bottom: var(--espacio-2); }
+.matricular__chips { list-style: none; display: flex; flex-wrap: wrap; gap: 6px; max-height: 96px; overflow-y: auto; }
+.matricular__chips:empty { display: none; }
+.chip-estudiante {
+  display: inline-flex; align-items: center; gap: 4px; padding: 3px 4px 3px 10px; border-radius: var(--radio-pill);
+  background: var(--color-primario-suave); color: var(--color-primario); font-size: var(--texto-xs); font-weight: var(--peso-semibold);
+}
+.chip-estudiante__quitar {
+  display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border: 0; border-radius: 50%;
+  background: none; color: inherit; font-size: 15px; line-height: 1; cursor: pointer;
+}
+.chip-estudiante__quitar:hover { background: var(--color-primario); color: var(--color-sobre-primario); }

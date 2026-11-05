@@ -2,112 +2,149 @@
 {% load static componentes %}
 
 {% block title %}{{ curso.nombre }} - {{ config.nombre_sistema }}{% endblock %}
-{% block nav_title %}Matrículas del curso{% endblock %}
+{% block nav_title %}Estudiantes del curso{% endblock %}
 {% block extra_head %}<link rel="stylesheet" href="{% static 'css/academico.css' %}">{% endblock %}
 
 {% block app_content %}
 <div class="academico" id="curso-detalle">
   <a href="{% url 'academico:listado' %}" class="enlace-volver mb-4"><i data-lucide="arrow-left" aria-hidden="true"></i> Cursos</a>
-  {% componente "componentes/encabezado.html" etiqueta=curso.periodo.nombre titulo=curso.asignatura subtitulo="Grupo "|add:curso.grupo|add:" · "|add:curso.programa %}
-    <a href="{% url 'reportes:consultas' %}?anio={{ curso.periodo.anio }}&periodo={{ curso.periodo_id }}&curso={{ curso.id }}" class="btn btn-outline"><i data-lucide="bar-chart-3" aria-hidden="true"></i> Ver resultados</a>
+
+  {% with sub="Grupo "|add:curso.grupo|add:" · "|add:curso.programa %}
+  {% componente "componentes/encabezado.html" etiqueta=curso.periodo.nombre titulo=curso.asignatura subtitulo=sub %}
     <a href="{% url 'academico:editar' curso.id %}" class="btn btn-outline"><i data-lucide="pencil" aria-hidden="true"></i> Editar curso</a>
+    <a href="{% url 'reportes:consultas' %}?anio={{ curso.periodo.anio }}&periodo={{ curso.periodo_id }}&curso={{ curso.id }}" class="btn btn-outline"><i data-lucide="bar-chart-3" aria-hidden="true"></i> Ver resultados</a>
+    {% if curso.activo %}<button type="button" class="btn btn-primary" data-abrir-modal="modal-matricular" data-ref="abrir-matricular"><i data-lucide="user-plus" aria-hidden="true"></i> Matricular estudiantes</button>{% endif %}
   {% fincomponente %}
+  {% endwith %}
 
   <ul class="datos-clave">
     <li><i data-lucide="calendar" aria-hidden="true"></i> {{ curso.periodo.fecha_inicio|date:"d/m/Y" }} – {{ curso.periodo.fecha_fin|date:"d/m/Y" }}</li>
     {% if curso.semestre %}<li><i data-lucide="layers" aria-hidden="true"></i> {{ curso.semestre }}.° semestre</li>{% endif %}
     <li><i data-lucide="user" aria-hidden="true"></i> Docente: <strong>{% if curso.docente %}{{ curso.docente.get_full_name|default:curso.docente.username }}{% else %}sin asignar{% endif %}</strong></li>
-    <li><i data-lucide="users" aria-hidden="true"></i> <strong>{{ matriculas|length }}</strong> matriculado{{ matriculas|length|pluralize }}</li>
-    {% if not curso.activo %}<li><span class="badge badge-neutro">Curso inactivo</span></li>{% endif %}
   </ul>
+  {% if not curso.activo %}
+  <div class="alerta alerta--info" role="status">Este curso está inactivo: conserva su historial, pero no recibe matrículas ni intentos nuevos.</div>
+  {% endif %}
 
-  <div class="curso-columnas">
-    <!-- Matricular -->
-    <section class="card bloque-curso" aria-labelledby="titulo-matricular">
-      <h2 class="bloque-curso__titulo" id="titulo-matricular"><i data-lucide="user-plus" aria-hidden="true"></i> Matricular estudiantes</h2>
-      <form method="GET" action="#titulo-matricular" class="buscar-estudiante" role="search">
-        <label for="buscar" class="sr-only">Buscar estudiante</label>
-        <input type="search" id="buscar" name="buscar" value="{{ buscar }}" class="form-input" placeholder="Nombre, código o documento" autocomplete="off">
-        <button type="submit" class="btn btn-outline">Buscar</button>
-      </form>
+  {% if matriculas %}
+  <div class="resumen-curso" role="group" aria-label="Filtrar estudiantes">
+    <button type="button" class="resumen-curso__item active" data-filtro-matricula="todos" aria-pressed="true">
+      <strong>{{ resumen.total }}</strong> matriculado{{ resumen.total|pluralize }}
+    </button>
+    <button type="button" class="resumen-curso__item" data-filtro-matricula="con" aria-pressed="false">
+      <strong>{{ resumen.con_intentos }}</strong> con intentos
+    </button>
+    <button type="button" class="resumen-curso__item resumen-curso__item--aviso" data-filtro-matricula="sin" aria-pressed="false">
+      <strong>{{ resumen.sin_intentos }}</strong> sin presentar aún
+    </button>
+  </div>
 
-      {% if buscar %}
-        {% if candidatos %}
-        <form method="POST" action="{% url 'academico:matricular' curso.id %}" id="form-matricular">
-          {% csrf_token %}
-          <div class="candidatos__cabecera">
-            <label class="campo-casilla"><input type="checkbox" class="form-check" data-seleccionar-todos> Seleccionar todos ({{ candidatos|length }})</label>
-            {% if candidatos|length == limite %}<span class="texto-xs texto-suave">Se muestran los primeros {{ limite }}; afina la búsqueda.</span>{% endif %}
-          </div>
-          <ul class="candidatos">
-            {% for est in candidatos %}
-            <li>
-              <label class="candidato">
-                <input type="checkbox" name="estudiantes" value="{{ est.id }}" class="form-check" data-candidato>
-                <span class="candidato__datos">
-                  <span class="peso-semibold">{{ est.get_full_name|default:est.username }}</span>
-                  <span class="texto-xs texto-suave">Código {{ est.codigo }}</span>
-                  {% if est.otro_curso %}<span class="texto-xs texto-aviso"><i data-lucide="alert-triangle" aria-hidden="true"></i> Ya está en {{ est.otro_curso }} este período</span>{% endif %}
-                </span>
-              </label>
-            </li>
-            {% endfor %}
-          </ul>
-          <button type="submit" class="btn btn-primary btn-full" data-ref="matricular" disabled><i data-lucide="user-plus" aria-hidden="true"></i> <span data-ref="matricular-texto">Matricular seleccionados</span></button>
-        </form>
-        {% else %}
-          <p class="texto-sm texto-suave" role="status">Ningún estudiante activo sin matricular coincide con «{{ buscar }}».</p>
-        {% endif %}
-      {% else %}
-        <p class="texto-xs texto-suave">Busca por nombre, código institucional o documento. Solo aparecen cuentas activas con rol de estudiante que aún no están en este curso.</p>
-      {% endif %}
-    </section>
-
-    <!-- Matriculados -->
-    <section class="card tabla-contenedor" id="matriculados" aria-labelledby="titulo-matriculados">
-      <div class="tabla-cabecera">
-        <h2 class="texto-sm peso-bold" id="titulo-matriculados">Matriculados ({{ matriculas|length }})</h2>
-        {% if matriculas %}
-        <label for="filtro-matriculados" class="sr-only">Filtrar matriculados</label>
-        <input type="search" id="filtro-matriculados" class="form-input form-input--compacto" placeholder="Filtrar" autocomplete="off">
-        {% endif %}
+  <section class="card tabla-contenedor" id="matriculados" aria-labelledby="titulo-matriculados">
+    <div class="tabla-cabecera">
+      <h2 class="texto-sm peso-bold" id="titulo-matriculados">Estudiantes del curso</h2>
+      <div class="buscador">
+        <label for="filtro-matriculados" class="sr-only">Filtrar estudiantes del curso</label>
+        <i data-lucide="search" aria-hidden="true" class="buscador__icono"></i>
+        <input type="search" id="filtro-matriculados" class="form-input" placeholder="Filtrar por nombre o código" autocomplete="off">
       </div>
-      {% if matriculas %}
-      <div class="tabla-desplazable">
-        <table class="tabla">
-          <caption class="sr-only">Estudiantes matriculados</caption>
-          <thead><tr><th scope="col">Estudiante</th><th scope="col">Matriculado</th><th scope="col" class="texto-derecha">Intentos</th><th scope="col"><span class="sr-only">Acciones</span></th></tr></thead>
-          <tbody>
-            {% for m in matriculas %}
-            <tr class="fila-matricula" data-texto="{{ m.estudiante.get_full_name|lower }} {{ m.codigo|lower }}">
-              <td><div class="peso-semibold">{{ m.estudiante.get_full_name|default:m.estudiante.username }}</div><div class="texto-xs texto-suave">{{ m.codigo }}</div></td>
-              <td class="cifras">{{ m.fecha_matricula|date:"d/m/Y" }}</td>
-              <td class="texto-derecha cifras">{{ m.num_intentos }}</td>
-              <td class="texto-derecha">
-                {% if m.num_intentos %}
-                  <span class="texto-xs texto-suave" title="Tiene intentos en este curso: su historial se conserva">Con historial</span>
-                {% else %}
-                <form method="POST" action="{% url 'academico:retirar' curso.id m.id %}"
-                      data-confirmar-titulo="¿Retirar a {{ m.estudiante.get_full_name|default:m.estudiante.username }} del curso?"
-                      data-confirmar="Dejará de aparecer en este curso. No tiene intentos registrados, así que no se pierde ningún resultado."
-                      data-confirmar-boton="Retirar del curso" data-confirmar-tipo="peligro">
-                  {% csrf_token %}
-                  <button type="submit" class="btn btn-accion btn-peligro"><i data-lucide="user-minus" aria-hidden="true"></i> Retirar</button>
-                </form>
-                {% endif %}
-              </td>
-            </tr>
-            {% endfor %}
-            <tr class="fila-sin-resultados" hidden><td colspan="4" class="tabla__vacia">Ningún matriculado coincide.</td></tr>
-          </tbody>
-        </table>
+    </div>
+    <ul class="lista-matriculados">
+      {% for m in matriculas %}
+      <li class="fila-matricula" data-texto="{{ m.estudiante.get_full_name|lower }} {{ m.codigo|lower }}" data-intentos="{% if m.num_intentos %}con{% else %}sin{% endif %}">
+        <span class="avatar-inicial" aria-hidden="true">{{ m.inicial }}</span>
+        <span class="fila-matricula__persona">
+          <span class="peso-semibold">{{ m.estudiante.get_full_name|default:m.estudiante.username }}</span>
+          <span class="texto-xs texto-suave">{{ m.codigo }} · matriculado el {{ m.fecha_matricula|date:"d/m/Y" }}</span>
+        </span>
+        <span class="fila-matricula__desempeno">
+          {% if m.num_intentos %}
+            <span class="texto-sm">{{ m.num_intentos }} intento{{ m.num_intentos|pluralize }}</span>
+            {% if m.ultima_nota is not None %}<span class="texto-xs texto-suave">Última nota <strong class="cifras">{{ m.ultima_nota }}</strong> / 5,0</span>{% endif %}
+          {% else %}
+            <span class="badge badge-warning">Sin intentos</span>
+          {% endif %}
+        </span>
+        <span class="fila-matricula__acciones">
+          {% if m.num_intentos %}
+            <a href="{{ url_historial }}{{ m.codigo|urlencode }}" class="btn btn-outline btn-accion"><i data-lucide="history" aria-hidden="true"></i> Ver historial</a>
+            <span class="candado" title="Tiene intentos en este curso: su historial se conserva y no se puede retirar."><i data-lucide="lock" aria-hidden="true"></i><span class="sr-only">No se puede retirar: tiene intentos en este curso</span></span>
+          {% else %}
+            <form method="POST" action="{% url 'academico:retirar' curso.id m.id %}"
+                  data-confirmar-titulo="¿Retirar a {{ m.estudiante.get_full_name|default:m.estudiante.username }} del curso?"
+                  data-confirmar="Dejará de aparecer en este curso. No tiene intentos registrados, así que no se pierde ningún resultado."
+                  data-confirmar-boton="Retirar del curso" data-confirmar-tipo="peligro">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-accion btn-peligro"><i data-lucide="user-minus" aria-hidden="true"></i> Retirar</button>
+            </form>
+          {% endif %}
+        </span>
+      </li>
+      {% endfor %}
+      <li class="lista-matriculados__vacio" data-ref="sin-coincidencias" hidden>Ningún estudiante coincide con el filtro.</li>
+    </ul>
+  </section>
+  {% else %}
+  <div class="card">
+    {% componente "componentes/estado_vacio.html" icono="users" titulo="Este curso aún no tiene estudiantes" mensaje="Matricúlalos buscándolos por nombre o pegando la lista de códigos. Sus simulacros aparecerán en los reportes del curso." %}
+      {% if curso.activo %}<button type="button" class="btn btn-primary" data-abrir-modal="modal-matricular"><i data-lucide="user-plus" aria-hidden="true"></i> Matricular estudiantes</button>{% endif %}
+    {% fincomponente %}
+  </div>
+  {% endif %}
+</div>
+
+{% if curso.activo %}
+<!-- Matricular: buscar por nombre o pegar una lista de códigos -->
+<div id="modal-matricular" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="titulo-matricular"
+     data-url-buscar="{% url 'academico:buscar_estudiantes' curso.id %}" data-url-revisar="{% url 'academico:revisar_codigos' curso.id %}">
+  <div class="modal-box modal-box--ancho matricular">
+    <div class="modal-cabecera">
+      <div>
+        <h2 class="texto-md peso-extrabold" id="titulo-matricular">Matricular estudiantes</h2>
+        <p class="texto-xs texto-suave">{{ curso.nombre }} · {{ curso.periodo }}</p>
       </div>
-      {% else %}
-        {% componente "componentes/estado_vacio.html" icono="users" titulo="Sin estudiantes matriculados" mensaje="Busca estudiantes a la izquierda para matricularlos en este curso." %}{% fincomponente %}
-      {% endif %}
-    </section>
+      <button type="button" class="modal-cerrar" data-cerrar-modal aria-label="Cerrar">&times;</button>
+    </div>
+
+    <div class="matricular__pestanas" role="tablist" aria-label="Forma de matricular">
+      <button type="button" class="matricular__pestana active" role="tab" id="tab-buscar" aria-controls="panel-buscar" aria-selected="true" data-pestana-matricula="buscar"><i data-lucide="search" aria-hidden="true"></i> Buscar estudiantes</button>
+      <button type="button" class="matricular__pestana" role="tab" id="tab-pegar" aria-controls="panel-pegar" aria-selected="false" tabindex="-1" data-pestana-matricula="pegar"><i data-lucide="clipboard-list" aria-hidden="true"></i> Pegar lista de códigos</button>
+    </div>
+
+    <div id="panel-buscar" role="tabpanel" aria-labelledby="tab-buscar" class="matricular__panel">
+      <div class="buscador buscador--ancho">
+        <label for="buscar-estudiante" class="sr-only">Buscar estudiante por nombre, código o documento</label>
+        <i data-lucide="search" aria-hidden="true" class="buscador__icono"></i>
+        <input type="search" id="buscar-estudiante" class="form-input" placeholder="Nombre, código o documento" autocomplete="off">
+      </div>
+      <p class="texto-xs texto-suave matricular__estado" data-ref="estado-busqueda" aria-live="polite">Escribe al menos 2 letras. Solo aparecen estudiantes activos que no están en este curso.</p>
+      <ul class="matricular__resultados" data-ref="resultados"></ul>
+    </div>
+
+    <div id="panel-pegar" role="tabpanel" aria-labelledby="tab-pegar" class="matricular__panel" hidden>
+      <label for="codigos" class="form-label">Códigos institucionales</label>
+      <textarea id="codigos" class="form-textarea" rows="5" placeholder="Pega los códigos, uno por línea o separados por comas.&#10;2026001&#10;2026002"></textarea>
+      <div class="flex justify-between items-center gap-2 flex-wrap mt-2">
+        <span class="texto-xs texto-suave">Puedes copiarlos de una columna de Excel. Hasta 500 por vez.</span>
+        <button type="button" class="btn btn-outline btn-accion" data-accion="revisar-codigos"><i data-lucide="list-checks" aria-hidden="true"></i> Revisar códigos</button>
+      </div>
+      <div class="matricular__revision" data-ref="revision" aria-live="polite" hidden></div>
+    </div>
+
+    <form method="POST" action="{% url 'academico:matricular' curso.id %}" class="matricular__pie" id="form-matricular">
+      {% csrf_token %}
+      <div class="matricular__seleccion">
+        <span class="texto-xs peso-semibold texto-suave" data-ref="titulo-seleccion">Ningún estudiante seleccionado</span>
+        <ul class="matricular__chips" data-ref="seleccionados"></ul>
+      </div>
+      <div data-ref="ocultos"></div>
+      <div class="modal-acciones">
+        <button type="button" class="btn btn-outline" data-cerrar-modal>Cancelar</button>
+        <button type="submit" class="btn btn-primary" data-ref="matricular" disabled><i data-lucide="user-plus" aria-hidden="true"></i> <span data-ref="matricular-texto">Matricular</span></button>
+      </div>
+    </form>
   </div>
 </div>
+{% endif %}
 {% endblock %}
 
 {% block extra_scripts %}<script src="{% static 'js/academico/cursos.js' %}"></script>{% endblock %}

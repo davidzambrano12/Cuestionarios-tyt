@@ -24,7 +24,13 @@ class CuentasTests(PruebaNavegador):
         self.assertEqual(pg.get_attribute("#password", "type"), "text")
 
         pg.fill("#password", CLAVE)
+        self.assertTrue(pg.is_hidden("#bienvenida-acceso"))
         pg.click('[data-ref="enviar"]')
+        # Bienvenida con el nombre y el panel de destino mientras carga
+        pg.wait_for_selector("#bienvenida-acceso.bienvenida-acceso--visible")
+        self.assertIn("Hola, Prof", pg.inner_text("#bienvenida-acceso"))
+        self.assertIn("panel docente", pg.inner_text("#bienvenida-acceso"))
+        self.capturar(pg, "bienvenida_acceso")
         pg.wait_for_url("**/dashboard/docente/")
         self.assertIsNotNone(pg.evaluate("localStorage.getItem('access_token')"))
 
