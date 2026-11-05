@@ -19,6 +19,11 @@ class Intento(models.Model):
         "academico.Curso", on_delete=models.PROTECT, db_column="curso_id",
         related_name="intentos", blank=True, null=True,
     )
+    # Período según la fecha del intento: cuenta en los reportes aunque no tenga curso
+    periodo = models.ForeignKey(
+        "academico.PeriodoAcademico", on_delete=models.PROTECT, db_column="periodo_id",
+        related_name="intentos", blank=True, null=True,
+    )
     participante_nombre = models.CharField(max_length=150)
     participante_codigo = models.CharField(max_length=50)
     fecha_inicio = models.DateTimeField(auto_now_add=True)

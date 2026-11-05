@@ -11,7 +11,7 @@ from django.db import transaction
 from django.db.models import Count, Q
 from django.utils import timezone
 
-from apps.academico.services import curso_vigente
+from apps.cuestionarios import acceso
 from apps.core.services.acceso import codigo_participante
 from apps.banco_preguntas.models import OpcionRespuesta, Pregunta
 from apps.cuestionarios.models import Cuestionario, CuestionarioPregunta
@@ -85,12 +85,13 @@ def cerrar_si_vencio(intento: Intento, ahora=None) -> bool:
 @dataclass
 class ResultadoInicio:
     """Desenlace de `iniciar_intento`. `tipo` guía la redirección de la vista."""
-    tipo: str  # "nuevo" | "reanudado" | "vencido" | "rechazado"
+    tipo: str  # "nuevo" | "reanudado" | "vencido" | "rechazado" | "elegir_curso"
     intento: Intento | None = None
     mensaje: str = ""
+    cursos: list = None  # cuando tipo == "elegir_curso"
 
 
-def iniciar_intento(user, cuestionario: Cuestionario, ahora=None) -> ResultadoInicio:
+def iniciar_intento(user, cuestionario: Cuestionario, ahora=None, curso_id=None) -> ResultadoInicio:
     """Valida disponibilidad, fechas e intentos (RF/R08) y crea o reanuda el intento."""
     ahora = ahora or timezone.now()
 
@@ -104,6 +105,11 @@ def iniciar_intento(user, cuestionario: Cuestionario, ahora=None) -> ResultadoIn
         )
     if ahora > cuestionario.fecha_cierre:
         return ResultadoInicio("rechazado", mensaje="El plazo para presentar este cuestionario ha expirado.")
+    cursos = acceso.cursos_para_presentar(user, cuestionario, ahora)
+    if not cuestionario.es_institucional and not cursos:
+        return ResultadoInicio(
+            "rechazado", mensaje="Este cuestionario es de un curso en el que no estás matriculado este período.",
+        )
 
     codigo = codigo_participante(user)
     activos = list(
@@ -132,9 +138,17 @@ def iniciar_intento(user, cuestionario: Cuestionario, ahora=None) -> ResultadoIn
             mensaje=f"Has alcanzado el límite máximo de {cuestionario.intentos_permitidos} intentos permitidos para este cuestionario.",
         )
 
+    # Curso al que cuenta el intento: si hay varios posibles, elige el estudiante
+    curso = cursos[0] if len(cursos) == 1 else None
+    if len(cursos) > 1:
+        curso = next((c for c in cursos if str(c.id) == str(curso_id)), None)
+        if curso is None:
+            return ResultadoInicio("elegir_curso", cursos=cursos)
+
     intento = Intento.objects.create(
         cuestionario=cuestionario,
-        curso=curso_vigente(user, ahora),
+        curso=curso,
+        periodo=curso.periodo if curso else acceso.periodo_vigente(ahora),
         participante_nombre=user.get_full_name() or user.username,
         participante_codigo=codigo,
         estado="en_progreso",
@@ -326,13 +340,14 @@ def panel_estudiante(user, ahora=None) -> dict:
     ahora = ahora or timezone.now()
     codigo = codigo_participante(user)
 
+    visibles = acceso.visibles_para_estudiante(user, ahora)
     disponibles = list(
-        Cuestionario.objects.filter(estado="disponible", fecha_apertura__lte=ahora, fecha_cierre__gte=ahora)
+        visibles.filter(estado="disponible", fecha_apertura__lte=ahora, fecha_cierre__gte=ahora)
         .prefetch_related("cuestionario_preguntas", "intentos")
         .order_by("fecha_cierre")
     )
     programados = list(
-        Cuestionario.objects.filter(Q(estado="programado") | Q(estado="disponible", fecha_apertura__gt=ahora))
+        visibles.filter(Q(estado="programado") | Q(estado="disponible", fecha_apertura__gt=ahora))
         .prefetch_related("cuestionario_preguntas")
         .order_by("fecha_apertura")
     )

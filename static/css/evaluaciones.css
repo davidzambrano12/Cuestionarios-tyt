@@ -121,3 +121,16 @@
   .card { box-shadow: none; break-inside: avoid; }
 }
 .revision__subtitulo { display: flex; align-items: center; gap: var(--espacio-2); font-size: var(--texto-xs); font-weight: var(--peso-extrabold); color: var(--color-primario); text-transform: uppercase; letter-spacing: var(--tracking-mayus); margin-bottom: var(--espacio-2); }
+
+/* Elegir el curso antes de un simulacro institucional */
+.elegir-curso { max-width: 640px; margin: 0 auto; }
+.elegir-curso .enlace-volver { display: inline-flex; align-items: center; gap: 6px; font-size: var(--texto-sm); font-weight: var(--peso-semibold); }
+.elegir-curso .enlace-volver .lucide, .elegir-curso__form p .lucide { width: 14px; height: 14px; vertical-align: -2px; }
+.elegir-curso__form { padding: var(--espacio-5); }
+.elegir-curso__form fieldset { border: 0; padding: 0; margin: 0 0 var(--espacio-3); }
+.elegir-curso__opciones { display: flex; flex-direction: column; gap: var(--espacio-2); }
+.elegir-curso__opcion { display: flex; align-items: flex-start; gap: var(--espacio-3); padding: 12px 14px; border: 1px solid var(--color-borde); border-radius: var(--radio-md); cursor: pointer; }
+.elegir-curso__opcion:hover { border-color: var(--color-primario); }
+.elegir-curso__opcion:has(input:checked) { border-color: var(--color-primario); background: var(--color-primario-suave); }
+.elegir-curso__opcion input { margin-top: 3px; accent-color: var(--color-primario); }
+.elegir-curso__opcion > span { display: flex; flex-direction: column; gap: 2px; }
