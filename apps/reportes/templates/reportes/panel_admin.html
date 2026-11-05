@@ -35,7 +35,7 @@
     <h2 class="section-title" id="titulo-metricas">Métricas de la plataforma</h2>
   </div>
   <div class="metricas">
-    {% componente "componentes/metrica.html" etiqueta="Preguntas activas" valor=preguntas_activas icono="help-circle" ayuda=preguntas_inactivas|stringformat:"s"|add:" desactivadas" %}{% fincomponente %}
+    {% componente "componentes/metrica.html" etiqueta="Preguntas activas" valor=preguntas_activas icono="library" ayuda=preguntas_inactivas|stringformat:"s"|add:" desactivadas" %}{% fincomponente %}
     {% componente "componentes/metrica.html" etiqueta="Competencias" valor=categorias_count icono="landmark" ayuda=categorias_con_preguntas|stringformat:"s"|add:" con preguntas" %}{% fincomponente %}
     {% componente "componentes/metrica.html" etiqueta="Cuestionarios" valor=cuestionarios_count icono="clipboard-list" variante="info" %}{% fincomponente %}
     {% componente "componentes/metrica.html" etiqueta="Intentos" valor=intentos_count icono="users" variante="exito" ayuda=intentos_finalizados|stringformat:"s"|add:" finalizados" %}{% fincomponente %}

@@ -55,7 +55,7 @@
         <p class="card-subtitle mb-3">{{ c.descripcion|default:"Sin instrucciones."|truncatewords:18 }}</p>
 
         <ul class="tarjeta-cuestionario__datos">
-          <li><i data-lucide="help-circle" class="icono-13"></i> <strong>{{ c.cuestionario_preguntas.all|length }}</strong> preguntas</li>
+          <li><i data-lucide="library" class="icono-13"></i> <strong>{{ c.cuestionario_preguntas.all|length }}</strong> preguntas</li>
           <li><i data-lucide="clock" class="icono-13"></i> <strong>{{ c.tiempo_limite_minutos }}</strong> min</li>
           <li><i data-lucide="award" class="icono-13"></i> Aprueba con <strong>{{ c.calificacion_aprobacion }}</strong> / {{ c.calificacion_maxima }}</li>
           <li><i data-lucide="shuffle" class="icono-13"></i> {% if c.mezclar_preguntas %}Orden aleatorio{% else %}Orden fijo{% endif %}</li>

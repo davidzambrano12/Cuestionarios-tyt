@@ -13,7 +13,7 @@
 <div class="metricas">
   {% componente "componentes/metrica.html" etiqueta="Cuestionarios" valor=cuestionarios_count icono="clipboard-list" ayuda=borradores_count|stringformat:"s"|add:" en borrador" %}{% fincomponente %}
   {% componente "componentes/metrica.html" etiqueta="Publicados" valor=publicados_count icono="send" variante="exito" %}{% fincomponente %}
-  {% componente "componentes/metrica.html" etiqueta="Preguntas activas" valor=preguntas_count icono="help-circle" variante="info" ayuda=categorias_count|stringformat:"s"|add:" competencias" %}{% fincomponente %}
+  {% componente "componentes/metrica.html" etiqueta="Preguntas activas" valor=preguntas_count icono="library" variante="info" ayuda=categorias_count|stringformat:"s"|add:" competencias" %}{% fincomponente %}
 </div>
 
 <section aria-labelledby="titulo-trabajo">
@@ -34,7 +34,7 @@
     </article>
     <article class="card tarjeta-modulo">
       <div class="tarjeta-modulo__cabecera">
-        <span class="metrica__icono"><i data-lucide="help-circle" class="icono-18"></i></span>
+        <span class="metrica__icono"><i data-lucide="library" class="icono-18"></i></span>
         <h3 class="card-title m-0">Banco de preguntas</h3>
       </div>
       <p class="card-subtitle">{{ preguntas_count }} pregunta{{ preguntas_count|pluralize }} activa{{ preguntas_count|pluralize }}{% if preguntas_inactivas %} · {{ preguntas_inactivas }} desactivada{{ preguntas_inactivas|pluralize }}{% endif %}</p>

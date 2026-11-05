@@ -32,7 +32,7 @@
       </div>
       <h2 class="texto-xl peso-extrabold mb-3" id="titulo-destacado">{{ c.nombre }}</h2>
       <ul class="destacado__datos">
-        <li><i data-lucide="help-circle" class="icono-14"></i> {{ c.cuestionario_preguntas.all|length }} preguntas</li>
+        <li><i data-lucide="library" class="icono-14"></i> {{ c.cuestionario_preguntas.all|length }} preguntas</li>
         <li><i data-lucide="clock" class="icono-14"></i> {{ c.tiempo_limite_minutos }} minutos</li>
         <li><i data-lucide="rotate-cw" class="icono-14"></i> Intentos: <strong>{{ c.intentos_hechos }} de {{ c.intentos_permitidos }}</strong></li>
         <li><i data-lucide="target" class="icono-14"></i> Apruebas con {{ c.calificacion_aprobacion }} / {{ c.calificacion_maxima }}</li>
@@ -68,7 +68,7 @@
           <span class="badge {{ c.tiempo_restante_info.clase }}"><i data-lucide="clock" class="icono-12"></i> {{ c.tiempo_restante_info.texto }}</span>
         </div>
         <ul class="destacado__datos">
-          <li><i data-lucide="help-circle" class="icono-14"></i> {{ c.cuestionario_preguntas.all|length }} preguntas</li>
+          <li><i data-lucide="library" class="icono-14"></i> {{ c.cuestionario_preguntas.all|length }} preguntas</li>
           <li><i data-lucide="clock" class="icono-14"></i> {{ c.tiempo_limite_minutos }} min</li>
           <li><i data-lucide="rotate-cw" class="icono-14"></i> {{ c.intentos_hechos }}/{{ c.intentos_permitidos }} intentos</li>
         </ul>

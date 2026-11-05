@@ -6,7 +6,7 @@
   </div>
   <ul class="tarjeta-cuestionario__datos">
     <li><i data-lucide="calendar" class="icono-14"></i> {{ c.fecha_apertura|date:"d M" }} – {{ c.fecha_cierre|date:"d M Y" }}</li>
-    <li><i data-lucide="help-circle" class="icono-14"></i> {{ c.num_preguntas }} pregunta{{ c.num_preguntas|pluralize }}</li>
+    <li><i data-lucide="library" class="icono-14"></i> {{ c.num_preguntas }} pregunta{{ c.num_preguntas|pluralize }}</li>
     <li><i data-lucide="clock" class="icono-14"></i> {{ c.tiempo_limite_minutos }} min</li>
   </ul>
   <div class="tarjeta-cuestionario__pie">
