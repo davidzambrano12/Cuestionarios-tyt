@@ -86,7 +86,7 @@
       const refresh = localStorage.getItem('refresh_token') || getCookie('refresh_token');
       try {
         if (refresh) {
-          await fetch('{% url 'core:jwt_logout' %}', {
+          await fetch('{% url 'cuentas:jwt_logout' %}', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',

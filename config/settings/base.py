@@ -24,11 +24,18 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "preguntas",
-    'rest_framework',
-    'rest_framework_simplejwt',
-    'rest_framework_simplejwt.token_blacklist', 
-    'core',
+    "rest_framework",
+    "rest_framework_simplejwt",
+    "rest_framework_simplejwt.token_blacklist",
+    # Apps del proyecto (las dependencias van de arriba hacia abajo)
+    "apps.core",
+    "apps.cuentas",
+    "apps.banco_preguntas",
+    "apps.cuestionarios",
+    "apps.importaciones",
+    "apps.evaluaciones",
+    "apps.reportes",
+    "apps.preguntas_legado",  # solo historial de migraciones; ver su apps.py
 ]
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -51,7 +58,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
-    "core.middleware.JWTAuthCookieMiddleware",
+    "apps.cuentas.middleware.JWTAuthCookieMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
@@ -144,6 +151,6 @@ MAILERS = {
 
 # Redirecciones de Autenticación
 LOGIN_URL = "login"
-LOGIN_REDIRECT_URL = "core:estudiante_dashboard"
+LOGIN_REDIRECT_URL = "evaluaciones:panel_estudiante"
 LOGOUT_REDIRECT_URL = "login"
 

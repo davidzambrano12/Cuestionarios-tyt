@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'layouts/base.html' %}
 
 {% block title %}Simulador Saber TyT - Uniputumayo{% endblock %}
 
@@ -22,42 +22,42 @@
 
     <nav class="sidebar-nav">
       {% if user.is_superuser or user.perfil.es_admin %}
-        <a href="{% url 'core:admin_dashboard' %}" class="nav-item {% if '/dashboard/' in request.path or active_tab == 'inicio' %}active{% endif %}">
+        <a href="{% url 'reportes:panel_admin' %}" class="nav-item {% if '/dashboard/' in request.path or active_tab == 'inicio' %}active{% endif %}">
           <i data-lucide="home"></i> Inicio
         </a>
-        <a href="{% url 'preguntas:banco' %}" class="nav-item {% if '/preguntas/' in request.path or active_tab == 'preguntas' %}active{% endif %}">
+        <a href="{% url 'banco_preguntas:banco' %}" class="nav-item {% if '/preguntas/' in request.path or active_tab == 'preguntas' %}active{% endif %}">
           <i data-lucide="help-circle"></i> Preguntas
         </a>
-        <a href="{% url 'core:usuarios_roles' %}" class="nav-item {% if '/usuarios/' in request.path or '/roles/' in request.path or active_tab == 'usuarios' %}active{% endif %}">
+        <a href="{% url 'cuentas:usuarios_roles' %}" class="nav-item {% if '/usuarios/' in request.path or '/roles/' in request.path or active_tab == 'usuarios' %}active{% endif %}">
           <i data-lucide="users"></i> Usuarios
         </a>
-        <a href="{% url 'preguntas:cuestionarios_list' %}" class="nav-item {% if '/cuestionarios/' in request.path or active_tab == 'cuestionarios' %}active{% endif %}">
+        <a href="{% url 'cuestionarios:listado' %}" class="nav-item {% if '/cuestionarios/' in request.path or active_tab == 'cuestionarios' %}active{% endif %}">
           <i data-lucide="clipboard-list"></i> Cuestionarios
         </a>
-        <a href="{% url 'core:ajustes' %}" class="nav-item {% if '/ajustes/' in request.path or active_tab == 'ajustes' %}active{% endif %}">
+        <a href="{% url 'cuentas:ajustes' %}" class="nav-item {% if '/ajustes/' in request.path or active_tab == 'ajustes' %}active{% endif %}">
           <i data-lucide="settings"></i> Ajustes
         </a>
       {% elif user.perfil.es_docente %}
-        <a href="{% url 'core:docente_dashboard' %}" class="nav-item {% if '/dashboard/' in request.path or active_tab == 'inicio' %}active{% endif %}">
+        <a href="{% url 'reportes:panel_docente' %}" class="nav-item {% if '/dashboard/' in request.path or active_tab == 'inicio' %}active{% endif %}">
           <i data-lucide="home"></i> Inicio
         </a>
-        <a href="{% url 'preguntas:banco' %}" class="nav-item {% if '/preguntas/' in request.path or active_tab == 'preguntas' %}active{% endif %}">
+        <a href="{% url 'banco_preguntas:banco' %}" class="nav-item {% if '/preguntas/' in request.path or active_tab == 'preguntas' %}active{% endif %}">
           <i data-lucide="help-circle"></i> Preguntas
         </a>
-        <a href="{% url 'preguntas:cuestionarios_list' %}" class="nav-item {% if '/cuestionarios/' in request.path or active_tab == 'cuestionarios' %}active{% endif %}">
+        <a href="{% url 'cuestionarios:listado' %}" class="nav-item {% if '/cuestionarios/' in request.path or active_tab == 'cuestionarios' %}active{% endif %}">
           <i data-lucide="clipboard-list"></i> Cuestionarios
         </a>
-        <a href="{% url 'core:ajustes' %}" class="nav-item {% if '/ajustes/' in request.path or active_tab == 'ajustes' %}active{% endif %}">
+        <a href="{% url 'cuentas:ajustes' %}" class="nav-item {% if '/ajustes/' in request.path or active_tab == 'ajustes' %}active{% endif %}">
           <i data-lucide="settings"></i> Ajustes
         </a>
       {% else %}
-        <a href="{% url 'core:estudiante_dashboard' %}" onclick="if (window.location.pathname.startsWith('/dashboard/estudiante')) { event.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); if (history.pushState) history.pushState(null, null, '/dashboard/estudiante/'); }" class="nav-item {% if '/dashboard/' in request.path or active_tab == 'inicio' %}active{% endif %}">
+        <a href="{% url 'evaluaciones:panel_estudiante' %}" onclick="if (window.location.pathname.startsWith('/dashboard/estudiante')) { event.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); if (history.pushState) history.pushState(null, null, '/dashboard/estudiante/'); }" class="nav-item {% if '/dashboard/' in request.path or active_tab == 'inicio' %}active{% endif %}">
           <i data-lucide="home"></i> Inicio
         </a>
-        <a href="{% url 'core:estudiante_dashboard' %}#cuestionarios" onclick="if (window.location.pathname.startsWith('/dashboard/estudiante')) { event.preventDefault(); irACuestionariosEstudiante(); }" class="nav-item {% if '/cuestionarios/' in request.path or active_tab == 'cuestionarios' %}active{% endif %}">
+        <a href="{% url 'evaluaciones:panel_estudiante' %}#cuestionarios" onclick="if (window.location.pathname.startsWith('/dashboard/estudiante')) { event.preventDefault(); irACuestionariosEstudiante(); }" class="nav-item {% if '/cuestionarios/' in request.path or active_tab == 'cuestionarios' %}active{% endif %}">
           <i data-lucide="clipboard-list"></i> Cuestionarios
         </a>
-        <a href="{% url 'core:perfil' %}" class="nav-item {% if '/perfil/' in request.path or active_tab == 'perfil' %}active{% endif %}">
+        <a href="{% url 'cuentas:perfil' %}" class="nav-item {% if '/perfil/' in request.path or active_tab == 'perfil' %}active{% endif %}">
           <i data-lucide="user"></i> Mi Perfil
         </a>
       {% endif %}
@@ -80,7 +80,7 @@
             {% endif %}
           </div>
         </div>
-        <a href="{% url 'core:perfil' %}" title="Ver mi perfil" style="display:inline-flex; align-items:center; justify-content:center; width:30px; height:30px; border-radius:8px; background:#f1f5f9; color:#475569; text-decoration:none; flex-shrink:0;">
+        <a href="{% url 'cuentas:perfil' %}" title="Ver mi perfil" style="display:inline-flex; align-items:center; justify-content:center; width:30px; height:30px; border-radius:8px; background:#f1f5f9; color:#475569; text-decoration:none; flex-shrink:0;">
           <i data-lucide="user" style="width:15px; height:15px;"></i>
         </a>
       </div>
@@ -96,7 +96,7 @@
         Simulador Saber TyT / <span class="text-muted font-normal">{% block nav_title %}Plataforma Institucional{% endblock %}</span>
       </div>
       <div class="navbar-user-info">
-        <a href="{% url 'core:perfil' %}" title="Mi Perfil" style="display:flex; align-items:center; gap:8px; color:#0f172a; text-decoration:none;">
+        <a href="{% url 'cuentas:perfil' %}" title="Mi Perfil" style="display:flex; align-items:center; gap:8px; color:#0f172a; text-decoration:none;">
           <div class="user-avatar-circle" style="background:#186382; color:white;">
             {{ user.first_name|default:user.username|slice:":1"|upper }}
           </div>
@@ -128,7 +128,7 @@
         location.hash = '#cuestionarios';
       }
     } else {
-      window.location.href = '{% url 'core:estudiante_dashboard' %}#cuestionarios';
+      window.location.href = '{% url 'evaluaciones:panel_estudiante' %}#cuestionarios';
     }
   }
 </script>

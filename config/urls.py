@@ -2,24 +2,22 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
-from core import views as core_views
+
+from apps.cuentas import views as cuentas_views
+from apps.cuestionarios import views as cuestionarios_views
 
 urlpatterns = [
-    # Portada principal institucional
-    path("", core_views.landing_view, name="landing"),
-
-    # Autenticación Web
-    path("login/", core_views.login_view, name="login"),
-    path("logout/", core_views.logout_view, name="logout"),
-
-    # Django Admin
+    path("", cuestionarios_views.landing, name="landing"),
+    path("login/", cuentas_views.login_view, name="login"),
+    path("logout/", cuentas_views.logout_view, name="logout"),
     path("admin/", admin.site.urls),
 
-    # Módulos Core (Dashboards, Usuarios, Roles, Perfil, JWT)
-    path("", include("core.urls")),
-
-    # Módulos Preguntas, Cuestionarios y Evaluación
-    path("", include("preguntas.urls")),
+    path("", include("apps.cuentas.urls")),
+    path("", include("apps.banco_preguntas.urls")),
+    path("", include("apps.importaciones.urls")),
+    path("", include("apps.cuestionarios.urls")),
+    path("", include("apps.evaluaciones.urls")),
+    path("", include("apps.reportes.urls")),
 ]
 
 if settings.DEBUG:
