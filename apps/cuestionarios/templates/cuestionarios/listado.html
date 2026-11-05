@@ -47,12 +47,18 @@
             {% elif c.estado_temporal == 'programado' %}<span class="badge badge-info">Programado</span>
             {% else %}<span class="badge badge-warning">Borrador</span>{% endif %}
             <span class="badge {{ c.tiempo_restante_info.clase }}">{{ c.tiempo_restante_info.texto }}</span>
+            {% if c.es_institucional %}<span class="badge badge-info badge-visibilidad"><i data-lucide="globe" aria-hidden="true"></i> Institucional</span>
+            {% else %}<span class="badge badge-neutro badge-visibilidad"><i data-lucide="lock" aria-hidden="true"></i> De curso</span>{% endif %}
           </div>
           <a href="{% url 'cuestionarios:previsualizar' c.id %}" class="btn btn-outline btn-accion"><i data-lucide="eye" class="icono-13"></i> Vista previa</a>
         </div>
 
         <h3 class="tarjeta-listado__titulo">{{ c.nombre }}</h3>
         <p class="card-subtitle mb-3">{{ c.descripcion|default:"Sin instrucciones."|truncatewords:18 }}</p>
+        <p class="texto-xs texto-suave mb-3">
+          {% if c.es_institucional %}Todos los estudiantes{% else %}{% for curso in c.cursos.all %}{{ curso.nombre }} ({{ curso.periodo }}){% if not forloop.last %}, {% endif %}{% empty %}Sin cursos asignados{% endfor %}{% endif %}
+          {% if c.creado_por %}· Creado por {{ c.creado_por.get_full_name|default:c.creado_por.username }}{% endif %}
+        </p>
 
         <ul class="tarjeta-cuestionario__datos">
           <li><i data-lucide="library" class="icono-13"></i> <strong>{{ c.cuestionario_preguntas.all|length }}</strong> preguntas</li>
@@ -68,8 +74,12 @@
       </div>
 
       <div class="tarjeta-listado__acciones">
+        {% if c.editable %}
         <a href="{% url 'reportes:intentos' c.id %}" class="btn btn-secondary"><i data-lucide="users" class="icono-15"></i> Intentos ({{ c.intentos.all|length }})</a>
         <a href="{% url 'cuestionarios:editar' c.id %}" class="btn btn-primary"><i data-lucide="settings" class="icono-15"></i> Configurar</a>
+        {% else %}
+        <p class="texto-xs texto-suave">Lo gestiona la institución. Los resultados de tus estudiantes están en <a href="{% url 'reportes:consultas' %}">Consultas y reportes</a>.</p>
+        {% endif %}
       </div>
     </article>
     {% empty %}

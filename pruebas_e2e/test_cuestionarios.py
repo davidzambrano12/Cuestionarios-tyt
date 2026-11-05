@@ -1,6 +1,8 @@
 """Editor de cuestionarios en tres pasos."""
+from datetime import date
 from decimal import Decimal
 
+from apps.academico.models import Curso, PeriodoAcademico
 from apps.banco_preguntas.models import Categoria
 from apps.core.tests.factories import crear_pregunta, crear_usuario, sembrar_roles
 from apps.cuestionarios.models import Cuestionario
@@ -15,6 +17,8 @@ class EditorCuestionarioTests(PruebaNavegador):
         categoria = Categoria.objects.create(nombre="Lectura Crítica")
         self.p1 = crear_pregunta(categoria, "Primera <b>pregunta</b>", puntaje=Decimal("1.00"))
         self.p2 = crear_pregunta(categoria, "Segunda pregunta", puntaje=Decimal("2.50"))
+        periodo = PeriodoAcademico.objects.create(anio=2026, numero=2, fecha_inicio=date(2026, 7, 1), fecha_fin=date(2026, 12, 15))
+        self.curso = Curso.objects.create(periodo=periodo, asignatura="Electiva Profesional III", docente=self.docente)
 
     def test_crear_y_publicar(self):
         pg, errores = self.abrir("/cuestionarios/crear/", self.docente)
@@ -54,10 +58,17 @@ class EditorCuestionarioTests(PruebaNavegador):
         self.assertTrue(visible(1))
         self.assertFalse(Cuestionario.objects.exists())
         pg.fill("#campo-descripcion", "Lee con atención.")
+
+        # Visibilidad: el docente publica «De curso» en su curso (institucional requiere permiso)
+        self.assertTrue(pg.is_checked('[data-visibilidad][value="privado"]'))
+        self.assertTrue(pg.is_disabled('[data-visibilidad][value="institucional"]'))
+        self.assertTrue(pg.is_visible('[data-ref="cursos-asignados"]'))
+        pg.check(f'input[name="cursos"][value="{self.curso.id}"]')
         self.capturar(pg, "editor_cuestionario")
         pg.click('button[value="publicar"]')
         pg.wait_for_url("**/editar/")
         cuestionario = Cuestionario.objects.get()
         self.assertEqual(cuestionario.estado, "disponible")
+        self.assertEqual((cuestionario.creado_por, list(cuestionario.cursos.all())), (self.docente, [self.curso]))
         self.assertEqual(list(cuestionario.cuestionario_preguntas.values_list("pregunta_id", flat=True)), [self.p1.id])
         self.assertEqual(errores, [])

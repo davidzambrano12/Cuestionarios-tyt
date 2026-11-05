@@ -1,8 +1,10 @@
 """Módulo C: creación y edición de cuestionarios con sus preguntas."""
+from datetime import date
 from decimal import Decimal
 
 from django.test import TestCase
 
+from apps.academico.models import Curso, PeriodoAcademico
 from apps.banco_preguntas.models import Categoria
 from apps.cuestionarios.models import Cuestionario
 from apps.core.tests.factories import crear_pregunta, crear_usuario, sembrar_roles
@@ -16,6 +18,8 @@ class ConfigurarCuestionarioTests(TestCase):
         categoria = Categoria.objects.create(nombre="Inglés")
         cls.p1 = crear_pregunta(categoria, "Uno", puntaje=Decimal("1.00"))
         cls.p2 = crear_pregunta(categoria, "Dos", puntaje=Decimal("2.50"))
+        periodo = PeriodoAcademico.objects.create(anio=2026, numero=2, fecha_inicio=date(2026, 7, 1), fecha_fin=date(2026, 12, 15))
+        cls.curso = Curso.objects.create(periodo=periodo, asignatura="Inglés IV", docente=cls.docente)
 
     def setUp(self):
         self.client.force_login(self.docente)
@@ -53,7 +57,7 @@ class ConfigurarCuestionarioTests(TestCase):
         cuestionario = Cuestionario.objects.get()
         self.client.post(
             f"/cuestionarios/{cuestionario.id}/editar/",
-            self._datos([self.p2], accion="publicar", nombre="Renombrado"),
+            self._datos([self.p2], accion="publicar", nombre="Renombrado", cursos=[self.curso.id]),
         )
         cuestionario.refresh_from_db()
         self.assertEqual(cuestionario.estado, "disponible")
