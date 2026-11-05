@@ -2,8 +2,12 @@
  * Comportamiento común a todas las páginas (cargado desde layouts/base.html).
  *
  * Interacciones declarativas, sin onclick en el HTML:
- *   <form data-confirmar="¿Seguro?">        pide confirmación antes de enviar
- *   <a data-confirmar="¿Seguro?">            pide confirmación antes de navegar
+ *   <form data-confirmar="Explicación">     pide confirmación antes de enviar
+ *   <a data-confirmar="Explicación">         pide confirmación antes de navegar
+ *       data-confirmar-titulo="¿Anular el intento?"   título (la acción y su objeto)
+ *       data-confirmar-boton="Anular intento"         verbo exacto del botón
+ *       data-confirmar-cancelar="Seguir revisando"    texto de cancelar (opcional)
+ *       data-confirmar-tipo="peligro|aviso|primario"  peligro = botón rojo y foco en Cancelar
  *   <button data-abrir-modal="id">          abre el modal #id
  *   <button data-cerrar-modal>              cierra el modal que lo contiene
  *                                           (o data-cerrar-modal="id")
@@ -19,6 +23,7 @@
  * API global usada por los scripts de página:
  *   window.mostrarNotificacion(mensaje, tipo, titulo)
  *   window.openModal(id) / window.closeModal(id)
+ *   window.confirmar({ titulo, mensaje, boton, cancelar, tipo }) → Promise<boolean>
  *   window.csrfToken()
  */
 (function () {
@@ -114,6 +119,91 @@
   function closeModal(id) {
     const modal = document.getElementById(id);
     if (modal) modal.classList.remove('open');
+  }
+
+  /* ---------------------------------------------------------------- Confirmaciones */
+
+  // Cuadro de confirmación propio con <dialog>: el navegador encierra el foco,
+  // bloquea el fondo, cierra con Escape y lo anuncia como diálogo.
+  let dialogoConfirmar = null;
+
+  function crearDialogoConfirmar() {
+    const dialogo = document.createElement('dialog');
+    dialogo.className = 'confirmacion';
+    dialogo.setAttribute('aria-labelledby', 'confirmacion-titulo');
+    dialogo.setAttribute('aria-describedby', 'confirmacion-mensaje');
+    // Marcado fijo; los textos se asignan después con textContent
+    dialogo.innerHTML = `
+      <form method="dialog" class="confirmacion__caja">
+        <span class="confirmacion__icono confirmacion__icono--peligro" aria-hidden="true"><i data-lucide="alert-triangle"></i></span>
+        <span class="confirmacion__icono confirmacion__icono--aviso" aria-hidden="true"><i data-lucide="alert-circle"></i></span>
+        <span class="confirmacion__icono confirmacion__icono--primario" aria-hidden="true"><i data-lucide="help-circle"></i></span>
+        <div class="confirmacion__cuerpo">
+          <h2 class="confirmacion__titulo" id="confirmacion-titulo"></h2>
+          <div class="confirmacion__mensaje" id="confirmacion-mensaje"></div>
+        </div>
+        <div class="confirmacion__acciones">
+          <button type="submit" value="cancelar" class="btn btn-outline" data-ref="cancelar"></button>
+          <button type="submit" value="aceptar" class="btn" data-ref="aceptar"></button>
+        </div>
+      </form>`;
+    // Clic en el fondo oscuro = cancelar (el fondo pertenece al propio <dialog>)
+    dialogo.addEventListener('click', (evento) => {
+      if (evento.target === dialogo) dialogo.close('cancelar');
+    });
+    document.body.appendChild(dialogo);
+    refrescarIconos(dialogo);
+    return dialogo;
+  }
+
+  function confirmar({ titulo = '', mensaje = '', boton = 'Aceptar', cancelar = 'Cancelar', tipo = 'primario' } = {}) {
+    // Respaldo para navegadores sin <dialog>
+    if (typeof HTMLDialogElement === 'undefined') {
+      return Promise.resolve(window.confirm([titulo, mensaje].filter(Boolean).join('\n\n')));
+    }
+    if (!dialogoConfirmar) dialogoConfirmar = crearDialogoConfirmar();
+    const dialogo = dialogoConfirmar;
+    if (dialogo.open) return Promise.resolve(false);
+
+    const clase = ['peligro', 'aviso'].includes(tipo) ? tipo : 'primario';
+    dialogo.dataset.tipo = clase;
+    dialogo.querySelector('#confirmacion-titulo').textContent = titulo || '¿Confirmar la acción?';
+
+    const cuerpo = dialogo.querySelector('#confirmacion-mensaje');
+    const parrafos = String(mensaje).split('\n').map((t) => t.trim()).filter(Boolean);
+    cuerpo.replaceChildren(...parrafos.map((texto) => {
+      const p = document.createElement('p');
+      p.textContent = texto;
+      return p;
+    }));
+    cuerpo.hidden = parrafos.length === 0;
+
+    const botonAceptar = dialogo.querySelector('[data-ref="aceptar"]');
+    const botonCancelar = dialogo.querySelector('[data-ref="cancelar"]');
+    botonAceptar.textContent = boton;
+    botonAceptar.className = `btn ${clase === 'peligro' ? 'btn-danger' : 'btn-primary'}`;
+    botonCancelar.textContent = cancelar;
+
+    dialogo.returnValue = '';
+    dialogo.showModal();
+    // En lo destructivo o con advertencias, el foco arranca en Cancelar:
+    // un Enter apurado no ejecuta la acción
+    (clase === 'primario' ? botonAceptar : botonCancelar).focus();
+
+    return new Promise((resolver) => {
+      dialogo.addEventListener('close', () => resolver(dialogo.returnValue === 'aceptar'), { once: true });
+    });
+  }
+
+  function opcionesDeConfirmacion(el) {
+    const datos = el.dataset;
+    return {
+      titulo: datos.confirmarTitulo || datos.confirmar,
+      mensaje: datos.confirmarTitulo ? datos.confirmar : '',
+      boton: datos.confirmarBoton || 'Aceptar',
+      cancelar: datos.confirmarCancelar || 'Cancelar',
+      tipo: datos.confirmarTipo || 'primario',
+    };
   }
 
   /* ---------------------------------------------------------------- Sesión */
@@ -316,7 +406,10 @@
       evento.preventDefault();
       cerrarSesion();
     } else if (el.matches('a[data-confirmar]')) {
-      if (!window.confirm(el.dataset.confirmar)) evento.preventDefault();
+      evento.preventDefault();
+      confirmar(opcionesDeConfirmacion(el)).then((aceptado) => {
+        if (aceptado) window.location.href = el.href;
+      });
     } else if (el.matches('[data-ancla-local]')) {
       const destino = document.getElementById(el.dataset.anclaLocal);
       if (destino && new URL(el.href, location.href).pathname === location.pathname) {
@@ -332,9 +425,19 @@
 
   document.addEventListener('submit', (evento) => {
     const form = evento.target;
-    if (form.matches('form[data-confirmar]') && !window.confirm(form.dataset.confirmar)) {
-      evento.preventDefault();
+    if (!form.matches('form[data-confirmar]')) return;
+    if (form.dataset.confirmado === 'si') {
+      delete form.dataset.confirmado; // ya se confirmó: dejar que se envíe
+      return;
     }
+    evento.preventDefault();
+    const boton = evento.submitter; // conserva name/value del botón pulsado
+    confirmar(opcionesDeConfirmacion(form)).then((aceptado) => {
+      if (!aceptado) return;
+      form.dataset.confirmado = 'si';
+      if (boton && boton.form === form) form.requestSubmit(boton);
+      else form.requestSubmit();
+    });
   });
 
   // Cerrar el modal abierto con Escape o al hacer clic en el fondo
@@ -359,6 +462,7 @@
   window.mostrarNotificacion = mostrarNotificacion;
   window.openModal = openModal;
   window.closeModal = closeModal;
+  window.confirmar = confirmar;
   window.csrfToken = csrfToken;
   window.getCookie = getCookie;
 })();

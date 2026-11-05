@@ -76,6 +76,18 @@ class PruebaNavegador(StaticLiveServerTestCase):
         pagina.goto(self.live_server_url + ruta)
         return pagina, errores
 
+    @staticmethod
+    def responder_confirmacion(pagina, aceptar=True):
+        """Espera el cuadro de confirmación propio (<dialog>), lo acepta o lo
+        cancela y retorna (título, mensaje) para verificar los textos."""
+        dialogo = pagina.locator("dialog.confirmacion[open]")
+        dialogo.wait_for()
+        titulo = dialogo.locator(".confirmacion__titulo").inner_text()
+        mensaje = dialogo.locator(".confirmacion__mensaje").inner_text()
+        dialogo.locator('[data-ref="aceptar"]' if aceptar else '[data-ref="cancelar"]').click()
+        pagina.wait_for_selector("dialog.confirmacion[open]", state="hidden")
+        return titulo, mensaje
+
     def capturar(self, pagina, nombre):
         carpeta = os.environ.get("E2E_CAPTURAS")
         if carpeta:
