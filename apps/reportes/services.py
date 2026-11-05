@@ -16,23 +16,7 @@ from openpyxl.utils import get_column_letter
 from apps.banco_preguntas.models import Categoria, Pregunta
 from apps.cuestionarios.models import Cuestionario
 from apps.evaluaciones.models import Intento
-
-ESTADOS_CERRADOS = ("finalizado", "vencido")
-
-
-def intento_calificado(intento) -> bool:
-    """Un intento cuenta para la nota solo si está cerrado y tiene calificación."""
-    return intento.estado in ESTADOS_CERRADOS and intento.calificacion is not None
-
-
-def dictamen_intento(intento, cuestionario) -> str:
-    """Dictamen legible y coherente para pantallas y exportaciones."""
-    if intento.estado == "en_progreso":
-        return "En curso"
-    if not intento_calificado(intento):
-        return "Vencido sin calificar"
-    return "Aprobado" if intento.calificacion >= cuestionario.calificacion_aprobacion else "Reprobado"
-
+from apps.evaluaciones.services import dictamen_intento, intento_calificado
 
 def resumen_por_estudiante(cuestionario, intentos):
     """

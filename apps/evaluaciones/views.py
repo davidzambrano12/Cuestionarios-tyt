@@ -5,6 +5,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils.formats import localize
 
 from apps.core.services.acceso import es_dueno_del_intento, es_personal_docente, puede_auditar_resultados
 from apps.cuestionarios.models import Cuestionario
@@ -108,7 +109,7 @@ def finalizar_evaluacion(request, intento_id):
 
     messages.success(
         request,
-        f"¡Evaluación completada! Calificación obtenida: {intento.calificacion} / {intento.cuestionario.calificacion_maxima}",
+        f"¡Evaluación completada! Calificación obtenida: {localize(intento.calificacion)} / {localize(intento.cuestionario.calificacion_maxima)}",
     )
     return redirect("evaluaciones:resultado", intento_id=intento.id)
 
@@ -127,6 +128,7 @@ def resultado_evaluacion(request, intento_id):
         "cuestionario": intento.cuestionario,
         "permitir_revision": permitir_revision,
         "es_auditor": es_auditor,
+        "dictamen": servicio.dictamen_intento(intento, intento.cuestionario),
         **servicio.revision_intento(intento, detallada=permitir_revision),
     })
 

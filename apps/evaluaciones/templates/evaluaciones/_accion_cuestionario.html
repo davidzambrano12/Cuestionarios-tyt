@@ -1,0 +1,8 @@
+{% comment %}Botón principal de un cuestionario según su estado. `grande` lo hace de ancho completo.{% endcomment %}
+{% if c.intento_activo %}
+<a href="{% url 'evaluaciones:sala' c.intento_activo.id %}" class="btn btn-aviso{% if grande %} btn-full btn-grande{% endif %}"><i data-lucide="play-circle"></i> Continuar intento en curso</a>
+{% elif c.intentos_agotados %}
+<button type="button" class="btn btn-outline{% if grande %} btn-full btn-grande{% endif %}" data-ir-pestana="historial"><i data-lucide="history"></i> Intentos agotados ({{ c.intentos_hechos }}/{{ c.intentos_permitidos }}) · ver resultados</button>
+{% else %}
+<a href="{% url 'evaluaciones:iniciar' c.id %}" class="btn btn-primary{% if grande %} btn-full btn-grande{% endif %}"><i data-lucide="play"></i> Iniciar intento {{ c.siguiente_intento_num }} de {{ c.intentos_permitidos }}</a>
+{% endif %}

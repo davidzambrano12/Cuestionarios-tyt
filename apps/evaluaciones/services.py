@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from decimal import Decimal
 
 from django.db import transaction
-from django.db.models import Avg, Count, Q
+from django.db.models import Count, Q
 from django.utils import timezone
 
 from apps.core.services.acceso import codigo_participante
@@ -18,6 +18,27 @@ from apps.evaluaciones.models import Intento, RespuestaIntento
 
 VENTANA_GRACIA_SEG = 30  # tolerancia de red al vencer el tiempo (RULE-04)
 LETRAS = ["A", "B", "C", "D", "E"]
+
+
+# ------------------------------------------------------------------------------
+# Dictamen de un intento
+# ------------------------------------------------------------------------------
+
+ESTADOS_CERRADOS = ("finalizado", "vencido")
+
+
+def intento_calificado(intento) -> bool:
+    """Un intento cuenta para la nota solo si está cerrado y tiene calificación."""
+    return intento.estado in ESTADOS_CERRADOS and intento.calificacion is not None
+
+
+def dictamen_intento(intento, cuestionario) -> str:
+    """Dictamen legible y coherente para pantallas y exportaciones."""
+    if intento.estado == "en_progreso":
+        return "En curso"
+    if not intento_calificado(intento):
+        return "Vencido sin calificar"
+    return "Aprobado" if intento.calificacion >= cuestionario.calificacion_aprobacion else "Reprobado"
 
 
 # ------------------------------------------------------------------------------
@@ -338,14 +359,20 @@ def panel_estudiante(user, ahora=None) -> dict:
     for cuestionario in disponibles:
         _anotar_intentos(cuestionario, activos, hechos)
 
-    historial = Intento.objects.filter(participante_codigo=codigo).order_by("-fecha_inicio")
-    promedio = historial.aggregate(prom=Avg("calificacion"))["prom"]
+    historial = list(
+        Intento.objects.filter(participante_codigo=codigo).select_related("cuestionario").order_by("-fecha_inicio")
+    )
+    for intento in historial:
+        intento.dictamen = dictamen_intento(intento, intento.cuestionario)
+    calificados = [i.calificacion for i in historial if intento_calificado(i)]
+    promedio = sum(calificados) / len(calificados) if calificados else None
 
     return {
         "cuestionarios_disponibles": disponibles,
         "cuestionarios_programados": programados,
         "cuestionario_destacado": disponibles[0] if disponibles else None,
         "intentos_estudiante": historial,
+        "presentados_count": sum(1 for i in historial if i.estado != "en_progreso"),
         "disponibles_count": len(disponibles),
         "programados_count": len(programados),
         # Decimal para que la plantilla lo formatee según el idioma (5,00)
