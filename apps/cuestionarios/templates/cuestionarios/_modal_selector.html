@@ -1,0 +1,40 @@
+{% load componentes %}
+<div id="modal-selector-preguntas" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="selector-titulo">
+  <div class="modal-box modal-box--selector">
+    <div class="modal-cabecera">
+      <div>
+        <h2 class="texto-lg peso-extrabold" id="selector-titulo">Banco de preguntas</h2>
+        <p class="texto-xs texto-suave">Marca las preguntas activas que quieres incluir.</p>
+      </div>
+      <button type="button" class="modal-cerrar" data-cerrar-modal aria-label="Cerrar">&times;</button>
+    </div>
+
+    <div class="buscador buscador--completo mb-3">
+      <label for="filtro-selector" class="sr-only">Buscar en el banco</label>
+      <i data-lucide="search" class="buscador__icono"></i>
+      <input type="search" id="filtro-selector" placeholder="Buscar por palabra clave o competencia…" class="form-input" autocomplete="off">
+    </div>
+
+    <div class="selector-lista">
+      {% for p in todas_preguntas %}
+      <label class="selector-item" data-texto="{{ p.categoria.nombre|lower }} {{ p.enunciado|lower }}">
+        <input type="checkbox" class="selector-item__casilla" value="{{ p.id }}" data-categoria="{{ p.categoria.nombre }}" data-tipo="{{ p.get_tipo_display }}" data-puntaje="{{ p.puntaje|stringformat:'s' }}" data-enunciado="{{ p.enunciado }}">
+        <span class="flex-1">
+          <span class="flex items-center gap-2 mb-1"><span class="badge badge-info">{{ p.categoria.nombre }}</span><span class="texto-xs texto-suave">{{ p.puntaje }} pt</span></span>
+          <span class="block peso-medio">{{ p.enunciado }}</span>
+        </span>
+      </label>
+      {% empty %}
+        {% componente "componentes/estado_vacio.html" icono="help-circle" titulo="No hay preguntas activas en el banco" %}{% fincomponente %}
+      {% endfor %}
+    </div>
+
+    <div class="modal-acciones justify-between">
+      <span class="texto-xs texto-suave" data-ref="seleccionadas" aria-live="polite">0 seleccionadas</span>
+      <span class="flex gap-3">
+        <button type="button" class="btn btn-outline" data-cerrar-modal>Cancelar</button>
+        <button type="button" class="btn btn-primary" data-accion="agregar">Añadir al cuestionario</button>
+      </span>
+    </div>
+  </div>
+</div>

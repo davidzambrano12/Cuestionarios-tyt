@@ -80,3 +80,32 @@ class ConfigurarCuestionarioTests(TestCase):
         self.client.force_login(estudiante)
         r = self.client.get(f"/cuestionarios/{cuestionario.id}/previsualizar/")
         self.assertEqual(r.status_code, 302)
+
+    # --- Validación de reglas R01-R04 -----------------------------------------
+
+    def _rechazado(self, **extra):
+        r = self.client.post("/cuestionarios/crear/", self._datos([self.p1], **extra))
+        self.assertEqual(r.status_code, 400)
+        self.assertFalse(Cuestionario.objects.exists())
+        return r
+
+    def test_rechaza_cierre_anterior_a_la_apertura(self):
+        r = self._rechazado(fecha_cierre="2026-10-01T08:00")
+        self.assertContains(r, "La fecha de cierre debe ser posterior a la de apertura.", status_code=400)
+
+    def test_rechaza_aprobacion_mayor_que_la_maxima(self):
+        r = self._rechazado(calificacion_aprobacion="6")
+        self.assertContains(r, "entre 0 y la calificación máxima", status_code=400)
+
+    def test_rechaza_numeros_invalidos(self):
+        r = self._rechazado(tiempo_limite_minutos="abc")
+        self.assertContains(r, "El tiempo límite debe ser un número.", status_code=400)
+
+    def test_no_publica_sin_preguntas(self):
+        r = self.client.post("/cuestionarios/crear/", self._datos([], accion="publicar"))
+        self.assertContains(r, "No se puede publicar un cuestionario sin preguntas.", status_code=400)
+
+    def test_formulario_rechazado_conserva_lo_escrito(self):
+        r = self._rechazado(fecha_cierre="2026-10-01T08:00", nombre="Mi simulacro")
+        self.assertEqual(r.context["cuestionario"].nombre, "Mi simulacro")
+        self.assertEqual([cp.pregunta_id for cp in r.context["reactivos_asignados"]], [self.p1.id])

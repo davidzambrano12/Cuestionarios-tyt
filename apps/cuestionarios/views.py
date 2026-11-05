@@ -24,6 +24,10 @@ def cuestionarios_list(request):
     })
 
 
+def _preguntas_activas():
+    return Pregunta.objects.filter(activa=True).select_related("categoria").order_by("categoria", "id")
+
+
 @login_required
 @requiere_permiso("cuestionarios.gestionar")
 def configurar_cuestionario(request, cuestionario_id=None):
@@ -31,7 +35,20 @@ def configurar_cuestionario(request, cuestionario_id=None):
     cuestionario = get_object_or_404(Cuestionario, id=cuestionario_id) if cuestionario_id else None
 
     if request.method == "POST":
-        cuestionario = servicio.guardar_cuestionario(servicio.datos_desde_formulario(request.POST), cuestionario)
+        try:
+            datos = servicio.datos_desde_formulario(request.POST)
+        except servicio.DatosInvalidos as error:
+            # Se vuelve a mostrar el formulario con lo que escribió el docente
+            for mensaje in error.errores:
+                messages.error(request, mensaje)
+            asignadas, puntaje_total = servicio.preguntas_por_ids(error.datos.preguntas_ids)
+            return render(request, "cuestionarios/configurar.html", {
+                "cuestionario": servicio.cuestionario_sin_guardar(error.datos, cuestionario),
+                "todas_preguntas": _preguntas_activas(),
+                "reactivos_asignados": asignadas,
+                "puntaje_total": puntaje_total,
+            }, status=400)
+        cuestionario = servicio.guardar_cuestionario(datos, cuestionario)
         messages.success(
             request,
             f"Cuestionario '{cuestionario.nombre}' guardado exitosamente ({cuestionario.get_estado_display()}).",
@@ -41,7 +58,7 @@ def configurar_cuestionario(request, cuestionario_id=None):
     asignadas, puntaje_total = servicio.preguntas_asignadas(cuestionario)
     return render(request, "cuestionarios/configurar.html", {
         "cuestionario": cuestionario,
-        "todas_preguntas": Pregunta.objects.filter(activa=True).select_related("categoria").order_by("categoria", "id"),
+        "todas_preguntas": _preguntas_activas(),
         "reactivos_asignados": asignadas,
         "puntaje_total": puntaje_total,
     })

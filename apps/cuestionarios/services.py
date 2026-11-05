@@ -4,9 +4,11 @@ barajado determinista y serialización para la sala o la previsualización).
 """
 import random
 from dataclasses import dataclass, field
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 
 from django.db import transaction
+from django.utils import timezone
+from django.utils.dateparse import parse_datetime
 
 from apps.banco_preguntas.models import Pregunta
 from apps.cuestionarios.models import Cuestionario, CuestionarioPregunta
@@ -23,8 +25,8 @@ CAMPOS_CONFIGURABLES = (
 class DatosCuestionario:
     nombre: str
     descripcion: str
-    fecha_apertura: str
-    fecha_cierre: str
+    fecha_apertura: object
+    fecha_cierre: object
     tiempo_limite_minutos: int
     intentos_permitidos: int
     calificacion_maxima: Decimal
@@ -36,22 +38,90 @@ class DatosCuestionario:
     preguntas_ids: list = field(default_factory=list)
 
 
+class DatosInvalidos(Exception):
+    """El formulario no cumple las reglas R01-R04 del cuestionario."""
+
+    def __init__(self, errores, datos=None):
+        super().__init__("; ".join(errores))
+        self.errores = errores
+        self.datos = datos
+
+
+def _fecha(valor):
+    fecha = parse_datetime(valor or "")
+    if fecha and timezone.is_naive(fecha):
+        fecha = timezone.make_aware(fecha)
+    return fecha
+
+
 def datos_desde_formulario(post) -> DatosCuestionario:
-    return DatosCuestionario(
+    """Traduce el POST del editor y valida las reglas de la tabla cuestionarios."""
+    errores = []
+
+    def numero(campo, tipo, por_defecto, etiqueta):
+        try:
+            return tipo(post.get(campo) or por_defecto)
+        except (ValueError, InvalidOperation):
+            errores.append(f"{etiqueta} debe ser un número.")
+            return tipo(por_defecto)
+
+    datos = DatosCuestionario(
         nombre=post.get("nombre", "").strip(),
         descripcion=post.get("descripcion", "").strip(),
-        fecha_apertura=post.get("fecha_apertura"),
-        fecha_cierre=post.get("fecha_cierre"),
-        tiempo_limite_minutos=int(post.get("tiempo_limite_minutos", 120)),
-        intentos_permitidos=int(post.get("intentos_permitidos", 5)),
-        calificacion_maxima=Decimal(post.get("calificacion_maxima", "5.00")),
-        calificacion_aprobacion=Decimal(post.get("calificacion_aprobacion", "3.00")),
+        fecha_apertura=_fecha(post.get("fecha_apertura")),
+        fecha_cierre=_fecha(post.get("fecha_cierre")),
+        tiempo_limite_minutos=numero("tiempo_limite_minutos", int, 120, "El tiempo límite"),
+        intentos_permitidos=numero("intentos_permitidos", int, 5, "Los intentos permitidos"),
+        calificacion_maxima=numero("calificacion_maxima", Decimal, "5.00", "La calificación máxima"),
+        calificacion_aprobacion=numero("calificacion_aprobacion", Decimal, "3.00", "La nota de aprobación"),
         mezclar_preguntas=bool(post.get("mezclar_preguntas")),
         mezclar_respuestas=bool(post.get("mezclar_respuestas")),
         permitir_revision=bool(post.get("permitir_revision")),
         estado="disponible" if post.get("accion") == "publicar" else "borrador",
         preguntas_ids=post.getlist("preguntas_ids"),
     )
+
+    # Reglas R01-R04: las mismas CHECK de la tabla cuestionarios en MariaDB
+    if not datos.nombre:
+        errores.append("El nombre del cuestionario es obligatorio.")
+    if not datos.fecha_apertura or not datos.fecha_cierre:
+        errores.append("Las fechas de apertura y cierre son obligatorias.")
+    elif datos.fecha_cierre <= datos.fecha_apertura:
+        errores.append("La fecha de cierre debe ser posterior a la de apertura.")
+    if datos.calificacion_maxima <= 0:
+        errores.append("La calificación máxima debe ser mayor que cero.")
+    elif not (0 <= datos.calificacion_aprobacion <= datos.calificacion_maxima):
+        errores.append("La nota de aprobación debe estar entre 0 y la calificación máxima.")
+    if datos.tiempo_limite_minutos <= 0:
+        errores.append("El tiempo límite debe ser mayor que cero.")
+    if datos.intentos_permitidos <= 0:
+        errores.append("Debe permitirse al menos un intento.")
+    if datos.estado == "disponible" and not datos.preguntas_ids:
+        errores.append("No se puede publicar un cuestionario sin preguntas.")
+
+    if errores:
+        raise DatosInvalidos(errores, datos)
+    return datos
+
+
+def cuestionario_sin_guardar(datos, original=None) -> Cuestionario:
+    """Instancia con lo que escribió el docente, para volver a mostrar el formulario."""
+    cuestionario = Cuestionario(id=original.id if original else None)
+    for campo in CAMPOS_CONFIGURABLES:
+        setattr(cuestionario, campo, getattr(datos, campo))
+    cuestionario.estado = original.estado if original else "borrador"
+    return cuestionario
+
+
+def preguntas_por_ids(ids):
+    """(asignaciones sin guardar, puntaje total) en el orden recibido."""
+    ids = [int(i) for i in ids if str(i).isdigit()]
+    preguntas = Pregunta.objects.select_related("categoria").in_bulk(ids)
+    asignadas = [
+        CuestionarioPregunta(pregunta=preguntas[i], puntaje_asignado=preguntas[i].puntaje, orden=n)
+        for n, i in enumerate(ids, start=1) if i in preguntas
+    ]
+    return asignadas, sum((cp.puntaje_asignado for cp in asignadas), Decimal("0.00"))
 
 
 @transaction.atomic
