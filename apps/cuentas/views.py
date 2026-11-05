@@ -1,4 +1,5 @@
 """Cuentas: autenticación, perfil, ajustes y gestión de usuarios y roles."""
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
@@ -6,10 +7,13 @@ from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
-from apps.core.decorators import requiere_permiso, solo_roles
+from apps.core.decorators import requiere_permiso
 from apps.core.models import PerfilUsuario, PermisoSistema, Rol
 from . import tokens
 from .services import url_panel
+
+LONGITUD_MINIMA_CLAVE = 8
+CORREO_SOPORTE = "soporte.sistemas@uniputumayo.edu.co"
 
 
 def login_view(request):
@@ -36,7 +40,7 @@ def login_view(request):
             access, refresh = tokens.emitir_tokens(user)
             return tokens.guardar_en_cookies(redirect(url_panel(user)), access, refresh)
 
-    return render(request, "cuentas/login.html")
+    return render(request, "cuentas/login.html", {"accesos_demo": settings.MOSTRAR_ACCESOS_DEMO})
 
 
 def logout_view(request):
@@ -240,8 +244,8 @@ def cambiar_password_view(request):
         nueva = request.POST.get("nueva_password", "")
         confirmar = request.POST.get("confirmar_password", "")
 
-        if len(nueva) < 6:
-            messages.error(request, "La nueva contraseña debe tener al menos 6 caracteres.")
+        if len(nueva) < LONGITUD_MINIMA_CLAVE:
+            messages.error(request, f"La nueva contraseña debe tener al menos {LONGITUD_MINIMA_CLAVE} caracteres.")
             return redirect("cuentas:perfil")
         if nueva != confirmar:
             messages.error(request, "Las contraseñas no coinciden.")
@@ -256,14 +260,10 @@ def cambiar_password_view(request):
 
 @login_required
 def ajustes_view(request):
-    """Vista de configuración general del sistema."""
-    return render(request, "cuentas/ajustes.html")
-
-
-@login_required
-@solo_roles("admin")
-def guardar_ajustes_view(request):
-    """Guarda parámetros institucionales."""
-    if request.method == "POST":
-        messages.success(request, "Ajustes del sistema guardados exitosamente.")
-    return redirect("cuentas:ajustes")
+    """Información de la configuración vigente del sistema (solo lectura)."""
+    return render(request, "cuentas/ajustes.html", {
+        "zona_horaria": settings.TIME_ZONE,
+        "idioma": settings.LANGUAGE_CODE,
+        "entorno": "Desarrollo" if settings.DEBUG else "Producción",
+        "correo_soporte": CORREO_SOPORTE,
+    })

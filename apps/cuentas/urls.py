@@ -24,7 +24,6 @@ urlpatterns = [
     path("perfil/actualizar/", views.actualizar_perfil_view, name="actualizar_perfil"),
     path("perfil/cambiar-password/", views.cambiar_password_view, name="cambiar_password"),
     path("ajustes/", views.ajustes_view, name="ajustes"),
-    path("ajustes/guardar/", views.guardar_ajustes_view, name="guardar_ajustes"),
 
     # API JWT Endpoints
     path("api/auth/token/", CustomTokenObtainPairView.as_view(), name="token_obtain_pair"),

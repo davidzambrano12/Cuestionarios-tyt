@@ -1,95 +1,37 @@
 {% extends 'layouts/app_base.html' %}
+{% load static componentes %}
 
-{% block title %}Configuración General del Sistema - Simulador Saber TyT{% endblock %}
-
-{% block nav_title %}Ajustes del Sistema{% endblock %}
+{% block title %}Ajustes del sistema - Simulador Saber TyT{% endblock %}
+{% block nav_title %}Ajustes del sistema{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'css/cuentas.css' %}">{% endblock %}
 
 {% block app_content %}
-<div style="max-width:680px; margin:0 auto;">
+<div class="columna-angosta">
+  {% componente "componentes/encabezado.html" etiqueta="Entorno: "|add:entorno titulo="Ajustes del sistema" subtitulo="Configuración vigente del simulador. Estos valores se definen en el servidor." %}{% fincomponente %}
 
-    <!-- Card Configuración General -->
-    <div class="card" style="padding:28px 24px; border-radius:20px;">
-      
-      <div class="mb-5">
-        <span class="badge badge-success" style="font-size:var(--texto-xs); margin-bottom:6px;">● Versión activa en producción · Todos los servicios en línea</span>
-        <h1 class="page-title text-2xl font-extrabold text-main mb-1">Configuración General del Sistema</h1>
-        <p class="texto-xs texto-suave">Ajuste de parámetros institucionales, identidad visual, zona horaria y canales oficiales de soporte.</p>
-      </div>
+  <section class="card bloque-formulario">
+    <h2 class="bloque-formulario__titulo"><i data-lucide="landmark" class="icono-16"></i> Identidad institucional</h2>
+    <dl class="ficha-datos">
+      <div><dt>Sistema</dt><dd>Simulador de Cuestionarios Saber TyT</dd></div>
+      <div><dt>Institución</dt><dd>Institución Universitaria del Putumayo (Uniputumayo)</dd></div>
+      <div><dt>Identidad visual</dt><dd>Manual de Identidad Visual UNIPUTUMAYO 2025</dd></div>
+    </dl>
+  </section>
 
-      <form method="POST" action="{% url 'cuentas:guardar_ajustes' %}">
-        {% csrf_token %}
+  <section class="card bloque-formulario">
+    <h2 class="bloque-formulario__titulo"><i data-lucide="globe" class="icono-16"></i> Configuración regional</h2>
+    <dl class="ficha-datos">
+      <div><dt>Zona horaria</dt><dd>{{ zona_horaria }}</dd></div>
+      <div><dt>Idioma y formato</dt><dd>{{ idioma }} · fechas DD/MM/AAAA, hora de 24 horas</dd></div>
+    </dl>
+    <p class="texto-xs texto-suave mt-3">La zona horaria rige los temporizadores y las ventanas de apertura y cierre de los cuestionarios.</p>
+  </section>
 
-        <!-- Identidad Institucional -->
-        <div style="border-top:1px solid var(--color-superficie-hundida); padding-top:18px; margin-bottom:20px;">
-          <div class="flex items-center gap-2 mb-3">
-            <i data-lucide="landmark" class="icono-16 texto-primario"></i>
-            <h3 class="card-title text-base font-bold text-main m-0">Identidad Institucional</h3>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Nombre Oficial del Sistema</label>
-            <input type="text" name="sistema_nombre" value="Simulador de Cuestionarios Saber TyT" class="form-input">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Institución de Educación Superior</label>
-            <input type="text" name="institucion" value="Institución Universitaria del Putumayo" class="form-input">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Sigla o Identificador Corto</label>
-            <input type="text" name="sigla" value="IUP-SABER-TYT" class="form-input">
-          </div>
-        </div>
-
-        <!-- Configuración Regional y Servidor -->
-        <div style="border-top:1px solid var(--color-superficie-hundida); padding-top:18px; margin-bottom:20px;">
-          <div class="flex items-center gap-2 mb-3">
-            <i data-lucide="globe" class="icono-16 texto-primario"></i>
-            <h3 class="texto-base peso-extrabold texto-principal m-0">Configuración Regional y Servidor</h3>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Zona Horaria Oficial</label>
-            <select name="zona_horaria" class="form-select">
-              <option value="America/Bogota" selected>America/Bogota (GMT -05:00)</option>
-            </select>
-            <span class="texto-xs texto-suave">Utilizada para los cronómetros y ventanas de apertura/cierre.</span>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Formato de Fecha y Hora</label>
-            <input type="text" value="DD/MM/AAAA - HH:mm (24 horas)" readonly class="form-input" style="background:var(--color-superficie-tenue); color:var(--color-texto-suave);">
-          </div>
-        </div>
-
-        <!-- Mesa de Ayuda y Soporte -->
-        <div style="border-top:1px solid var(--color-superficie-hundida); padding-top:18px; margin-bottom:24px;">
-          <div class="flex items-center gap-2 mb-3">
-            <i data-lucide="headphones" class="icono-16 texto-primario"></i>
-            <h3 class="texto-base peso-extrabold texto-principal m-0">Mesa de Ayuda y Soporte</h3>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Correo de Soporte Técnico</label>
-            <input type="email" name="correo_soporte" value="soporte.sistemas@uniputumayo.edu.co" class="form-input">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Teléfono / PBX de Atención</label>
-            <input type="text" name="telefono_soporte" value="(+57) 8 429 6000 ext. 104" class="form-input">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Ubicación / Dirección</label>
-            <input type="text" name="ubicacion" value="Sede Principal Mocoa, Putumayo - Bloque B" class="form-input">
-          </div>
-        </div>
-
-        <button type="submit" class="btn btn-primary btn-full" style="padding:12px; font-size:var(--texto-base); margin-bottom:10px; display:inline-flex; align-items:center; justify-content:center; gap:6px;">
-          <i data-lucide="save" class="icono-16"></i> Guardar y Aplicar Cambios
-        </button>
-        <button type="button" onclick="mostrarNotificacion('Configuración predeterminada institucional restaurada.', 'success', 'Ajustes del Sistema');" class="btn btn-outline btn-full" style="padding:10px; font-size:var(--texto-sm); display:inline-flex; align-items:center; justify-content:center; gap:6px;">
-          <i data-lucide="rotate-ccw" class="icono-15"></i> Restaurar Predeterminados
-        </button>
-      </form>
-
-    </div>
+  <section class="card bloque-formulario">
+    <h2 class="bloque-formulario__titulo"><i data-lucide="headphones" class="icono-16"></i> Mesa de ayuda</h2>
+    <dl class="ficha-datos">
+      <div><dt>Correo de soporte</dt><dd><a href="mailto:{{ correo_soporte }}">{{ correo_soporte }}</a></dd></div>
+    </dl>
+  </section>
 </div>
 {% endblock %}

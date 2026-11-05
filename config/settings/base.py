@@ -14,6 +14,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 # DEBUG, SECRET_KEY y ALLOWED_HOSTS se definen en dev.py / prod.py
 DEBUG = False
 
+# Botones de acceso rápido con usuarios de demostración en el login
+# (solo para la sustentación; nunca en producción)
+MOSTRAR_ACCESOS_DEMO = False
+
 
 # Application definition
 

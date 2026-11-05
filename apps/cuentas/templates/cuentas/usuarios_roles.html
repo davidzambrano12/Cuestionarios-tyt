@@ -1,487 +1,127 @@
 {% extends 'layouts/app_base.html' %}
+{% load static componentes %}
 
-{% block title %}Gestión de Usuarios y Roles - Simulador Saber TyT{% endblock %}
-
-{% block nav_title %}Usuarios y Roles{% endblock %}
+{% block title %}Usuarios y roles - Simulador Saber TyT{% endblock %}
+{% block nav_title %}Usuarios y roles{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'css/cuentas.css' %}">{% endblock %}
 
 {% block app_content %}
-<div>
-  <!-- Header Banner -->
-  <div class="dashboard-banner">
-    <div class="flex justify-between items-start flex-wrap gap-4">
-      <div>
-        <div class="banner-badge">● Administración Institucional Uniputumayo</div>
-        <h1 class="banner-title">Gestión de Usuarios y Roles</h1>
-        <p class="banner-subtitle">Control de acceso, perfiles institucionales y asignación de permisos del sistema</p>
+<div id="usuarios-roles" data-url-editar-usuario="{% url 'cuentas:editar_usuario' 0 %}" data-url-editar-permisos="{% url 'cuentas:editar_rol_permisos' 0 %}" data-url-permisos-rol="{% url 'cuentas:api_rol_permisos' 0 %}">
+
+  {% componente "componentes/encabezado.html" etiqueta="Administración institucional" titulo="Usuarios y roles" subtitulo="Control de acceso, perfiles institucionales y permisos del sistema." %}
+    <button type="button" class="btn btn-primary" data-abrir-modal="modal-nuevo-usuario"><i data-lucide="user-plus"></i> Nuevo usuario</button>
+    <button type="button" class="btn btn-outline" data-abrir-modal="modal-nuevo-rol"><i data-lucide="shield"></i> Nuevo rol</button>
+  {% fincomponente %}
+
+  <div class="card barra-herramientas">
+    <div class="barra-herramientas__fila">
+      <div class="tabs-header" role="tablist" aria-label="Secciones">
+        <button type="button" class="tab-btn active" id="tab-usuarios" role="tab" aria-selected="true" aria-controls="panel-usuarios" data-pestana="usuarios">
+          <i data-lucide="users" class="icono-16"></i> Usuarios <span class="badge badge-info">{{ usuarios|length }}</span>
+        </button>
+        <button type="button" class="tab-btn" id="tab-roles" role="tab" aria-selected="false" aria-controls="panel-roles" tabindex="-1" data-pestana="roles">
+          <i data-lucide="shield" class="icono-16"></i> Roles y permisos <span class="badge badge-neutro">{{ roles|length }}</span>
+        </button>
       </div>
-      <div style="display:flex; gap:10px; flex-wrap:wrap;">
-        <button type="button" onclick="openModal('modal-nuevo-usuario')" class="btn btn-primary" style="padding:10px 18px; border-radius:10px; font-weight:700; display:inline-flex; align-items:center; gap:6px;">
-          <i data-lucide="user-plus"></i> Nuevo Usuario
-        </button>
-        <button type="button" onclick="openModal('modal-nuevo-rol')" class="btn btn-outline" style="padding:10px 16px; border-radius:10px; background:var(--color-superficie); font-weight:600; display:inline-flex; align-items:center; gap:6px;">
-          <i data-lucide="shield"></i> Nuevo Rol
-        </button>
+      <div class="buscador">
+        <label for="filtro-texto" class="sr-only">Buscar</label>
+        <i data-lucide="search" class="buscador__icono"></i>
+        <input type="search" id="filtro-texto" placeholder="Buscar por nombre, código o correo…" class="form-input" autocomplete="off">
+      </div>
+    </div>
+    <div class="barra-herramientas__fila" data-solo-pestana="usuarios">
+      <div class="flex items-center gap-2 flex-wrap" role="group" aria-label="Filtrar por rol">
+        <span class="texto-xs texto-suave peso-semibold">Rol:</span>
+        <button type="button" class="btn btn-outline chip-filtro active" data-filtro-rol="" aria-pressed="true">Todos</button>
+        {% for r in roles %}<button type="button" class="btn btn-outline chip-filtro" data-filtro-rol="{{ r.codigo }}" aria-pressed="false">{{ r.nombre }}</button>{% endfor %}
+      </div>
+      <div class="flex items-center gap-2 flex-wrap" role="group" aria-label="Filtrar por estado">
+        <span class="texto-xs texto-suave peso-semibold">Estado:</span>
+        <button type="button" class="btn btn-outline chip-filtro active" data-filtro-estado="" aria-pressed="true">Todos</button>
+        <button type="button" class="btn btn-outline chip-filtro" data-filtro-estado="activo" aria-pressed="false">Activos</button>
+        <button type="button" class="btn btn-outline chip-filtro" data-filtro-estado="inactivo" aria-pressed="false">Suspendidos</button>
       </div>
     </div>
   </div>
+  <p class="texto-xs texto-suave mb-3" id="contador" aria-live="polite"></p>
 
-    <!-- Admin profile card en cabecera -->
-    <div class="card" style="padding:16px 20px; display:flex; align-items:center; gap:16px; margin-bottom:24px;">
-      <div class="user-avatar-circle" style="width:48px; height:48px; font-size:var(--texto-lg); background:var(--color-primario); color:var(--color-texto-invertido);">
-        {{ user.first_name|default:user.username|slice:":1"|upper }}
-      </div>
-      <div class="flex-grow">
-        <div class="flex items-center gap-2">
-          <h3 class="texto-md peso-extrabold texto-principal m-0">{{ user.get_full_name|default:user.username }}</h3>
-          <span class="badge badge-info texto-xs inline-flex items-center gap-1">
-            <i data-lucide="shield" class="icono-12"></i> Super Admin
-          </span>
+  <!-- Usuarios -->
+  <section id="panel-usuarios" role="tabpanel" aria-labelledby="tab-usuarios" class="rejilla-cuentas">
+    {% for u in usuarios %}
+    <article class="card tarjeta-cuenta" data-texto="{{ u.get_full_name|lower }} {{ u.username|lower }} {{ u.email|lower }} {{ u.perfil.codigo_institucional|default:''|lower }}" data-rol="{{ u.perfil.rol.codigo|default:'' }}" data-estado="{% if u.is_active %}activo{% else %}inactivo{% endif %}">
+      <div class="tarjeta-cuenta__cabecera">
+        <span class="user-avatar-circle">{{ u.first_name|default:u.username|slice:":2"|upper }}</span>
+        <div class="flex-1">
+          <h3 class="texto-md peso-extrabold">{{ u.get_full_name|default:u.username }}</h3>
+          <div class="texto-xs texto-suave">{{ u.email|default:"Sin correo" }}</div>
+          <div class="texto-xs texto-tenue">Cód: {{ u.perfil.codigo_institucional|default:u.username }} · {{ u.perfil.rol.nombre|default:"Sin rol" }}</div>
         </div>
-        <div class="texto-xs texto-suave">Administrador del Sistema · Uniputumayo</div>
+        {% if u.is_active %}<span class="badge badge-success">Activo</span>{% else %}<span class="badge badge-danger"><i data-lucide="lock" class="icono-12"></i> Suspendido</span>{% endif %}
       </div>
-    </div>
-
-    <!-- Título y descripción -->
-    <div class="mb-5">
-      <h1 class="texto-xl peso-extrabold texto-principal mb-1">Gestión de Usuarios y Roles</h1>
-      <p class="texto-sm texto-suave">Control de acceso, perfiles institucionales y asignación de permisos del sistema.</p>
-    </div>
-
-    <!-- Tab Selector -->
-    <div style="background:var(--color-borde); border-radius:14px; padding:4px; display:flex; gap:4px; margin-bottom:20px;">
-      <button type="button" id="tab-btn-usuarios" onclick="switchTab('usuarios')" style="flex:1; border:none; padding:10px; border-radius:10px; font-weight:700; font-size:var(--texto-sm); cursor:pointer; background:var(--color-superficie); color:var(--color-texto); display:flex; align-items:center; justify-content:center; gap:8px; box-shadow:0 1px 3px rgba(0,0,0,0.1);">
-        <i data-lucide="users" class="icono-16"></i> Usuarios <span class="badge badge-info texto-xs">{{ usuarios.count }}</span>
-      </button>
-      <button type="button" id="tab-btn-roles" onclick="switchTab('roles')" style="flex:1; border:none; padding:10px; border-radius:10px; font-weight:700; font-size:var(--texto-sm); cursor:pointer; background:transparent; color:var(--color-texto-suave); display:flex; align-items:center; justify-content:center; gap:8px;">
-        <i data-lucide="shield" class="icono-16"></i> Roles y Permisos <span class="badge" style="background:var(--color-borde-fuerte); color:var(--gris-700); font-size:var(--texto-xs);">{{ roles.count }}</span>
-      </button>
-    </div>
-
-    <!-- ================= PESTAÑA 1: USUARIOS ================= -->
-    <div id="tab-usuarios">
-      <!-- Buscador -->
-      <div style="position:relative; margin-bottom:14px;">
-        <i data-lucide="search" style="position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--color-texto-tenue); width:16px; height:16px;"></i>
-        <input type="text" id="filtro-texto-usuarios" onkeyup="filtrarUsuarios()" placeholder="Buscar por nombre, código o correo institucional" class="form-input" style="padding-left:40px; height:44px; border-radius:12px;">
-      </div>
-
-      <!-- Botón Nuevo Usuario -->
-      <button type="button" onclick="openModal('modal-nuevo-usuario')" class="btn btn-primary btn-full" style="height:46px; border-radius:12px; margin-bottom:18px; font-size:var(--texto-base); display:inline-flex; align-items:center; justify-content:center; gap:8px;">
-        <i data-lucide="user-plus" class="icono-18"></i> Nuevo Usuario
-      </button>
-
-      <!-- Filtros de Rol y Estado -->
-      <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:20px; font-size:var(--texto-xs);">
-        <div class="flex items-center gap-2 flex-wrap">
-          <span class="texto-suave peso-semibold">Rol:</span>
-          <button type="button" class="btn btn-primary" onclick="filtrarRol('')" style="padding:4px 12px; font-size:var(--texto-xs); border-radius:9999px;">Todos</button>
-          <button type="button" class="btn btn-outline" onclick="filtrarRol('admin')" style="padding:4px 12px; font-size:var(--texto-xs); border-radius:9999px;">Admin</button>
-          <button type="button" class="btn btn-outline" onclick="filtrarRol('docente')" style="padding:4px 12px; font-size:var(--texto-xs); border-radius:9999px;">Docente</button>
-          <button type="button" class="btn btn-outline" onclick="filtrarRol('estudiante')" style="padding:4px 12px; font-size:var(--texto-xs); border-radius:9999px;">Estudiante</button>
-        </div>
-        <div class="flex items-center gap-2 flex-wrap">
-          <span class="texto-suave peso-semibold">Estado:</span>
-          <button type="button" class="btn btn-outline" onclick="filtrarEstado('activos')" style="padding:4px 12px; font-size:var(--texto-xs); border-radius:9999px; background:var(--verde-100); color:var(--verde-800); border-color:var(--verde-200);">Activos</button>
-          <button type="button" class="btn btn-outline" onclick="filtrarEstado('inactivos')" style="padding:4px 12px; font-size:var(--texto-xs); border-radius:9999px; background:var(--rojo-50); color:var(--rojo-700); border-color:var(--rojo-200);">Inactivos / Bloqueados</button>
-          <button type="button" class="btn btn-outline" onclick="filtrarEstado('')" style="padding:4px 12px; font-size:var(--texto-xs); border-radius:9999px;">Todos</button>
-        </div>
-      </div>
-
-      <!-- Lista de Usuarios -->
-      <div id="lista-usuarios" style="display:flex; flex-direction:column; gap:14px;">
-        {% for u in usuarios %}
-        <div class="card usuario-item" data-nombre="{{ u.get_full_name }} {{ u.username }} {{ u.email }}" data-rol="{{ u.perfil.rol.codigo|default:'' }}" data-activo="{% if u.is_active %}activos{% else %}inactivos{% endif %}" style="margin-bottom:0; padding:18px 20px;">
-          <div class="flex justify-between items-start mb-2">
-            <div style="display:flex; gap:14px; align-items:center;">
-              <div class="user-avatar-circle" style="width:44px; height:44px; font-size:var(--texto-md);">
-                {{ u.first_name|default:u.username|slice:":2"|upper }}
-              </div>
-              <div>
-                <h3 class="texto-md peso-extrabold texto-principal m-0">{{ u.get_full_name|default:u.username }}</h3>
-                <div class="texto-xs texto-suave">{{ u.email|default:"Sin correo" }}</div>
-                <div style="font-size:var(--texto-xs); color:var(--color-texto-tenue); margin-top:2px;">
-                  Cód: {{ u.perfil.codigo_institucional|default:u.username }} · {{ u.perfil.rol.nombre|default:"Sin Rol" }}
-                </div>
-              </div>
-            </div>
-            <div>
-              {% if u.is_active %}
-                <span class="badge badge-success">● Activo</span>
-              {% else %}
-                <span class="badge badge-danger inline-flex items-center gap-1">
-                  <i data-lucide="lock" class="icono-12"></i> Inactivo
-                </span>
-              {% endif %}
-            </div>
-          </div>
-
-          {% if u.perfil.modulo_asignado %}
-          <div style="background:var(--azul-50); border-radius:8px; padding:8px 12px; font-size:var(--texto-xs); color:var(--azul-700); margin-bottom:12px;">
-            <strong>Módulo asignado:</strong> {{ u.perfil.modulo_asignado }}
-          </div>
+      {% if u.perfil.modulo_asignado %}
+      <div class="tarjeta-cuenta__nota"><strong>Módulo asignado:</strong> {{ u.perfil.modulo_asignado }}</div>
+      {% endif %}
+      <div class="tarjeta-cuenta__acciones">
+        {% if u != user %}
+        <form method="POST" action="{% url 'cuentas:toggle_usuario_estado' u.id %}" class="flex-1"
+              {% if u.is_active %}data-confirmar="¿Suspender el acceso de {{ u.get_full_name|default:u.username }}? No podrá iniciar sesión hasta que lo reactives."{% endif %}>
+          {% csrf_token %}
+          {% if u.is_active %}
+            <button type="submit" class="btn btn-accion btn-peligro btn-full"><i data-lucide="user-x" class="icono-14"></i> Suspender</button>
+          {% else %}
+            <button type="submit" class="btn btn-outline btn-accion btn-full texto-exito"><i data-lucide="user-check" class="icono-14"></i> Reactivar acceso</button>
           {% endif %}
+        </form>
+        {% endif %}
+        <button type="button" class="btn btn-primary btn-accion flex-1" data-editar-usuario="{{ u.id }}"
+                data-nombre="{{ u.first_name }}" data-apellido="{{ u.last_name }}" data-email="{{ u.email }}"
+                data-rol="{{ u.perfil.rol.id|default:'' }}" data-codigo="{{ u.perfil.codigo_institucional|default:'' }}">
+          <i data-lucide="edit-3" class="icono-14"></i> Editar
+        </button>
+      </div>
+    </article>
+    {% empty %}
+    <div class="card rejilla-cuentas__completa">{% componente "componentes/estado_vacio.html" icono="users" titulo="No hay usuarios registrados" %}{% fincomponente %}</div>
+    {% endfor %}
+  </section>
 
-          <div style="display:flex; gap:10px; border-top:1px solid var(--color-superficie-hundida); padding-top:12px;">
-            <form method="POST" action="{% url 'cuentas:toggle_usuario_estado' u.id %}" class="flex-1">
-              {% csrf_token %}
-              {% if u.is_active %}
-                <button type="submit" class="btn btn-outline btn-full" style="padding:6px 12px; font-size:var(--texto-xs); color:var(--rojo-700); border-color:var(--rojo-200); display:inline-flex; align-items:center; justify-content:center; gap:4px;">
-                  <i data-lucide="user-x" class="icono-14"></i> Suspender
-                </button>
-              {% else %}
-                <button type="submit" class="btn btn-outline btn-full" style="padding:6px 12px; font-size:var(--texto-xs); color:var(--verde-800); border-color:var(--verde-200); background:var(--verde-100); display:inline-flex; align-items:center; justify-content:center; gap:4px;">
-                  <i data-lucide="user-check" class="icono-14"></i> Reactivar Acceso
-                </button>
-              {% endif %}
-            </form>
-
-            <button type="button" onclick="editarUsuario('{{ u.id }}', '{{ u.first_name }}', '{{ u.last_name }}', '{{ u.email }}', '{{ u.perfil.rol.id|default:'' }}', '{{ u.perfil.codigo_institucional|default:'' }}')" class="btn btn-primary" style="flex:1; padding:6px 12px; font-size:var(--texto-xs); display:inline-flex; align-items:center; justify-content:center; gap:4px;">
-              <i data-lucide="edit-3" class="icono-14"></i> Editar
-            </button>
-          </div>
+  <!-- Roles -->
+  <section id="panel-roles" role="tabpanel" aria-labelledby="tab-roles" class="rejilla-cuentas" hidden>
+    {% for r in roles %}
+    <article class="card tarjeta-cuenta" data-texto="{{ r.nombre|lower }} {{ r.codigo|lower }} {{ r.descripcion|lower }}">
+      <div class="tarjeta-cuenta__cabecera">
+        <span class="user-avatar-circle">{{ r.nombre|slice:":2"|upper }}</span>
+        <div class="flex-1">
+          <h3 class="texto-md peso-extrabold">{{ r.nombre }}</h3>
+          <div class="texto-xs texto-suave">{{ r.descripcion|default:"Sin descripción." }}</div>
         </div>
-        {% empty %}
-        <div class="card" style="text-align:center; padding:30px; color:var(--color-texto-suave);">
-          No se encontraron usuarios registrados.
-        </div>
-        {% endfor %}
+        {% if r.activo %}<span class="badge badge-success">Activo</span>{% else %}<span class="badge badge-danger">Inactivo</span>{% endif %}
       </div>
-    </div>
+      <div class="tarjeta-cuenta__nota tarjeta-cuenta__nota--neutra">
+        <span><strong>{{ r.permisos.all|length }}</strong> permiso{{ r.permisos.all|length|pluralize }} habilitado{{ r.permisos.all|length|pluralize }}</span>
+        <span>Cód: {{ r.codigo }}{% if r.es_sistema %} · del sistema{% endif %}</span>
+      </div>
+      <div class="tarjeta-cuenta__acciones">
+        <button type="button" class="btn btn-secondary btn-accion flex-1" data-editar-permisos="{{ r.id }}" data-nombre="{{ r.nombre }}"><i data-lucide="shield" class="icono-15"></i> Editar permisos</button>
+        {% if not r.es_sistema %}
+        <form method="POST" action="{% url 'cuentas:toggle_rol_estado' r.id %}" {% if r.activo %}data-confirmar="¿Desactivar el rol {{ r.nombre }}? Sus usuarios perderán esos permisos."{% endif %}>
+          {% csrf_token %}
+          <button type="submit" class="btn btn-outline btn-accion">{% if r.activo %}Desactivar{% else %}Activar{% endif %}</button>
+        </form>
+        {% endif %}
+      </div>
+    </article>
+    {% endfor %}
+  </section>
 
-    <!-- ================= PESTAÑA 2: ROLES Y PERMISOS ================= -->
-    <div id="tab-roles" style="display:none;">
-      <!-- Buscador -->
-      <div style="position:relative; margin-bottom:14px;">
-        <i data-lucide="search" style="position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--color-texto-tenue); width:16px; height:16px;"></i>
-        <input type="text" id="filtro-texto-roles" placeholder="Buscar por rol..." class="form-input" style="padding-left:40px; height:44px; border-radius:12px;">
-      </div>
-
-      <!-- Botón Nuevo Rol -->
-      <button type="button" onclick="openModal('modal-nuevo-rol')" class="btn btn-primary btn-full" style="height:46px; border-radius:12px; margin-bottom:20px; font-size:var(--texto-base); display:inline-flex; align-items:center; justify-content:center; gap:6px;">
-        <i data-lucide="shield-plus" class="icono-18"></i> Nuevo Rol
-      </button>
-
-      <!-- Lista de Roles -->
-      <div class="flex flex-col gap-4">
-        {% for r in roles %}
-        <div class="card mb-0 p-5">
-          <div class="flex justify-between items-start mb-2">
-            <div style="display:flex; gap:14px; align-items:center;">
-              <div class="user-avatar-circle" style="width:44px; height:44px; font-size:var(--texto-md); background:var(--azul-50); color:var(--azul-600);">
-                {{ r.nombre|slice:":2"|upper }}
-              </div>
-              <div>
-                <h3 class="texto-md peso-extrabold texto-principal m-0">{{ r.nombre }}</h3>
-                <div class="texto-xs texto-suave">{{ r.descripcion|default:"Configuración institucional y permisos del sistema" }}</div>
-              </div>
-            </div>
-            <div>
-              {% if r.activo %}
-                <span class="badge badge-success">● Activo</span>
-              {% else %}
-                <span class="badge badge-danger">Inactivo</span>
-              {% endif %}
-            </div>
-          </div>
-
-          <div style="background:var(--color-superficie-hundida); border-radius:8px; padding:8px 14px; font-size:var(--texto-xs); color:var(--color-texto-suave); margin:12px 0; display:flex; justify-content:space-between; align-items:center;">
-            <span><strong>{{ r.permisos.count }}</strong> permisos habilitados</span>
-            <span class="texto-xs texto-suave">Cód: {{ r.codigo }}</span>
-          </div>
-
-          <div style="display:flex; gap:10px;">
-            <button type="button" onclick="abrirModalPermisos('{{ r.id }}', '{{ r.nombre }}')" class="btn btn-outline btn-full" style="background:var(--azul-50); color:var(--color-primario); border-color:var(--azul-100); font-size:var(--texto-sm); padding:8px; display:inline-flex; align-items:center; justify-content:center; gap:6px;">
-              <i data-lucide="shield" class="icono-15"></i> Editar Permisos
-            </button>
-            {% if not r.es_sistema %}
-            <form method="POST" action="{% url 'cuentas:toggle_rol_estado' r.id %}" class="shrink-0">
-              {% csrf_token %}
-              <button type="submit" class="btn btn-outline" style="font-size:var(--texto-xs); padding:8px 12px;">
-                {% if r.activo %}Desactivar{% else %}Activar{% endif %}
-              </button>
-            </form>
-            {% endif %}
-          </div>
-        </div>
-        {% endfor %}
-      </div>
-    </div>
-</div>
-
-<!-- MODAL: NUEVO USUARIO -->
-<div id="modal-nuevo-usuario" class="modal-backdrop">
-  <div class="modal-box">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
-      <h3 class="texto-lg peso-extrabold texto-principal">Registrar Nuevo Usuario</h3>
-      <button onclick="closeModal('modal-nuevo-usuario')" style="background:none; border:none; font-size:var(--texto-xl); cursor:pointer;">&times;</button>
-    </div>
-
-    <form method="POST" action="{% url 'cuentas:crear_usuario' %}">
-      {% csrf_token %}
-      <div class="form-group">
-        <label class="form-label">Nombre de Usuario (Login)</label>
-        <input type="text" name="username" required class="form-input" placeholder="ej. docente2 o c.villota">
-      </div>
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
-        <div class="form-group">
-          <label class="form-label">Nombres</label>
-          <input type="text" name="first_name" required class="form-input" placeholder="Carlos Andrés">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Apellidos</label>
-          <input type="text" name="last_name" required class="form-input" placeholder="Villota">
-        </div>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Correo Institucional</label>
-        <input type="email" name="email" required class="form-input" placeholder="usuario@uniputumayo.edu.co">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Contraseña</label>
-        <input type="password" name="password" required class="form-input" placeholder="••••••••">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Rol Institucional</label>
-        <select name="rol_id" required class="form-select">
-          {% for r in roles %}
-          <option value="{{ r.id }}">{{ r.nombre }} ({{ r.codigo }})</option>
-          {% endfor %}
-        </select>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Código Institucional</label>
-        <input type="text" name="codigo_institucional" class="form-input" placeholder="ej. EST-20242-8819 o DOC-104">
-      </div>
-
-      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:24px;">
-        <button type="button" onclick="closeModal('modal-nuevo-usuario')" class="btn btn-outline">Cancelar</button>
-        <button type="submit" class="btn btn-primary">Guardar Usuario</button>
-      </div>
-    </form>
+  <div class="card" id="sin-resultados" hidden>
+    {% componente "componentes/estado_vacio.html" icono="search-x" titulo="Nada coincide con la búsqueda o los filtros" %}
+      <button type="button" class="btn btn-outline" data-accion="limpiar-filtros">Limpiar filtros</button>
+    {% fincomponente %}
   </div>
 </div>
 
-<!-- MODAL: EDITAR USUARIO -->
-<div id="modal-editar-usuario" class="modal-backdrop">
-  <div class="modal-box">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
-      <div>
-        <h3 class="texto-lg peso-extrabold texto-principal">Editar Usuario Institucional</h3>
-        <div id="editar-usuario-subtitulo" style="font-size:var(--texto-xs); color:var(--azul-600); font-weight:600;"></div>
-      </div>
-      <button onclick="closeModal('modal-editar-usuario')" style="background:none; border:none; font-size:var(--texto-xl); cursor:pointer;">&times;</button>
-    </div>
-
-    <form id="form-editar-usuario" method="POST" action="">
-      {% csrf_token %}
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
-        <div class="form-group">
-          <label class="form-label">Nombres</label>
-          <input type="text" name="first_name" id="editar-user-nombre" required class="form-input">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Apellidos</label>
-          <input type="text" name="last_name" id="editar-user-apellido" required class="form-input">
-        </div>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Correo Institucional</label>
-        <input type="email" name="email" id="editar-user-email" required class="form-input">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Rol Institucional</label>
-        <select name="rol_id" id="editar-user-rol" required class="form-select">
-          {% for r in roles %}
-          <option value="{{ r.id }}">{{ r.nombre }} ({{ r.codigo }})</option>
-          {% endfor %}
-        </select>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Código Institucional</label>
-        <input type="text" name="codigo_institucional" id="editar-user-codigo" class="form-input">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Cambiar Contraseña (Dejar en blanco para mantener la actual)</label>
-        <input type="password" name="password" class="form-input" placeholder="Nueva contraseña opcional...">
-      </div>
-
-      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:24px;">
-        <button type="button" onclick="closeModal('modal-editar-usuario')" class="btn btn-outline">Cancelar</button>
-        <button type="submit" class="btn btn-primary">Actualizar Usuario</button>
-      </div>
-    </form>
-  </div>
-</div>
-
-<!-- MODAL: NUEVO ROL -->
-<div id="modal-nuevo-rol" class="modal-backdrop">
-  <div class="modal-box">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
-      <h3 class="texto-lg peso-extrabold texto-principal">Crear Rol Personalizado</h3>
-      <button onclick="closeModal('modal-nuevo-rol')" style="background:none; border:none; font-size:var(--texto-xl); cursor:pointer;">&times;</button>
-    </div>
-
-    <form method="POST" action="{% url 'cuentas:crear_rol' %}">
-      {% csrf_token %}
-      <div class="form-group">
-        <label class="form-label">Nombre del Rol</label>
-        <input type="text" name="nombre" required class="form-input" placeholder="ej. Docente Evaluador">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Código Único (sin espacios)</label>
-        <input type="text" name="codigo" required class="form-input" placeholder="ej. docente_evaluador">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Descripción del Rol</label>
-        <textarea name="descripcion" class="form-textarea" placeholder="Responsabilidades asignadas en el sistema..."></textarea>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label" style="margin-bottom:10px;">Permisos Habilitados Individuales:</label>
-        <div style="max-height:220px; overflow-y:auto; border:1px solid var(--color-borde); border-radius:10px; padding:12px; display:flex; flex-direction:column; gap:8px;">
-          {% for p in todos_permisos %}
-          <label style="display:flex; align-items:center; gap:8px; font-size:var(--texto-sm); cursor:pointer;">
-            <input type="checkbox" name="permisos" value="{{ p.id }}" class="icono-16">
-            <span><strong>{{ p.modulo }}:</strong> {{ p.nombre }}</span>
-          </label>
-          {% endfor %}
-        </div>
-      </div>
-
-      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:24px;">
-        <button type="button" onclick="closeModal('modal-nuevo-rol')" class="btn btn-outline">Cancelar</button>
-        <button type="submit" class="btn btn-primary">Guardar Rol</button>
-      </div>
-    </form>
-  </div>
-</div>
-
-<!-- MODAL: EDITAR PERMISOS DE ROL -->
-<div id="modal-editar-permisos" class="modal-backdrop">
-  <div class="modal-box">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
-      <div>
-        <h3 class="texto-lg peso-extrabold texto-principal">Configurar Permisos de Rol</h3>
-        <div id="nombre-rol-permisos" style="font-size:var(--texto-sm); color:var(--azul-600); font-weight:600;"></div>
-      </div>
-      <button onclick="closeModal('modal-editar-permisos')" style="background:none; border:none; font-size:var(--texto-xl); cursor:pointer;">&times;</button>
-    </div>
-
-    <form id="form-editar-permisos" method="POST" action="">
-      {% csrf_token %}
-      <div class="form-group">
-        <label class="form-label" style="margin-bottom:10px;">Seleccione las funcionalidades autorizadas para este rol:</label>
-        <div style="max-height:280px; overflow-y:auto; border:1px solid var(--color-borde); border-radius:10px; padding:14px; display:flex; flex-direction:column; gap:10px;">
-          {% for p in todos_permisos %}
-          <label style="display:flex; align-items:center; gap:10px; font-size:var(--texto-sm); cursor:pointer; padding:4px 0;">
-            <input type="checkbox" name="permisos" value="{{ p.id }}" id="permiso-chk-{{ p.id }}" class="icono-16">
-            <div>
-              <div class="peso-semibold texto-principal">{{ p.modulo }}: {{ p.nombre }}</div>
-              <div class="texto-xs texto-suave">{{ p.descripcion }}</div>
-            </div>
-          </label>
-          {% endfor %}
-        </div>
-      </div>
-
-      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:24px;">
-        <button type="button" onclick="closeModal('modal-editar-permisos')" class="btn btn-outline">Cancelar</button>
-        <button type="submit" class="btn btn-primary">Actualizar Permisos</button>
-      </div>
-    </form>
-  </div>
-</div>
+{% include "cuentas/_modales_usuarios.html" %}
 {% endblock %}
 
-{% block extra_scripts %}
-<script>
-  function switchTab(tab) {
-    const tabU = document.getElementById('tab-usuarios');
-    const tabR = document.getElementById('tab-roles');
-    const btnU = document.getElementById('tab-btn-usuarios');
-    const btnR = document.getElementById('tab-btn-roles');
-
-    if (tab === 'usuarios') {
-      tabU.style.display = 'block';
-      tabR.style.display = 'none';
-      btnU.style.background = 'white';
-      btnU.style.color = 'var(--color-texto)';
-      btnR.style.background = 'transparent';
-      btnR.style.color = 'var(--color-texto-suave)';
-    } else {
-      tabU.style.display = 'none';
-      tabR.style.display = 'block';
-      btnR.style.background = 'white';
-      btnR.style.color = 'var(--color-texto)';
-      btnU.style.background = 'transparent';
-      btnU.style.color = 'var(--color-texto-suave)';
-    }
-  }
-
-  function filtrarUsuarios() {
-    const query = document.getElementById('filtro-texto-usuarios').value.toLowerCase();
-    const items = document.querySelectorAll('.usuario-item');
-    items.forEach(el => {
-      const text = el.getAttribute('data-nombre').toLowerCase();
-      el.style.display = text.includes(query) ? 'block' : 'none';
-    });
-  }
-
-  let filtroRolActual = '';
-  let filtroEstadoActual = '';
-
-  function filtrarRol(rol) {
-    filtroRolActual = rol;
-    aplicarFiltros();
-  }
-
-  function filtrarEstado(estado) {
-    filtroEstadoActual = estado;
-    aplicarFiltros();
-  }
-
-  function aplicarFiltros() {
-    const items = document.querySelectorAll('.usuario-item');
-    items.forEach(el => {
-      const matchRol = !filtroRolActual || el.getAttribute('data-rol') === filtroRolActual;
-      const matchEstado = !filtroEstadoActual || el.getAttribute('data-activo') === filtroEstadoActual;
-      el.style.display = (matchRol && matchEstado) ? 'block' : 'none';
-    });
-  }
-
-  async function abrirModalPermisos(rolId, rolNombre) {
-    document.getElementById('nombre-rol-permisos').innerText = `Rol: ${rolNombre}`;
-    document.getElementById('form-editar-permisos').action = `/roles/${rolId}/editar-permisos/`;
-    
-    document.querySelectorAll('#form-editar-permisos input[type="checkbox"]').forEach(c => c.checked = false);
-
-    try {
-      const res = await fetch(`/api/roles/${rolId}/permisos/`);
-      if (res.ok) {
-        const data = await res.json();
-        data.permisos_ids.forEach(id => {
-          const chk = document.getElementById(`permiso-chk-${id}`);
-          if (chk) chk.checked = true;
-        });
-      }
-    } catch (e) {
-      console.error(e);
-    }
-
-    openModal('modal-editar-permisos');
-  }
-
-  function editarUsuario(id, nombre, apellido, email, rolId, codigo) {
-    document.getElementById('form-editar-usuario').action = `/usuarios/${id}/editar/`;
-    document.getElementById('editar-usuario-subtitulo').textContent = `Usuario ID #${id} · ${nombre} ${apellido}`;
-    document.getElementById('editar-user-nombre').value = nombre || '';
-    document.getElementById('editar-user-apellido').value = apellido || '';
-    document.getElementById('editar-user-email').value = email || '';
-    document.getElementById('editar-user-codigo').value = codigo || '';
-    if (rolId) {
-      document.getElementById('editar-user-rol').value = rolId;
-    }
-    openModal('modal-editar-usuario');
-  }
-</script>
-{% endblock %}
+{% block extra_scripts %}<script src="{% static 'js/cuentas/usuarios_roles.js' %}"></script>{% endblock %}

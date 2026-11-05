@@ -1,0 +1,18 @@
+{% comment %}Casillas de permisos agrupadas por módulo. `prefijo` evita ids repetidos entre modales.{% endcomment %}
+<div class="lista-permisos">
+  {% regroup todos_permisos by modulo as por_modulo %}
+  {% for grupo in por_modulo %}
+  <div class="lista-permisos__grupo">
+    <div class="lista-permisos__modulo">{{ grupo.grouper }}</div>
+    {% for p in grupo.list %}
+    <label class="lista-permisos__item" for="{{ prefijo }}-permiso-{{ p.id }}">
+      <input type="checkbox" name="permisos" value="{{ p.id }}" id="{{ prefijo }}-permiso-{{ p.id }}">
+      <span>
+        <span class="block peso-semibold">{{ p.nombre }}</span>
+        {% if p.descripcion %}<span class="texto-xs texto-suave">{{ p.descripcion }}</span>{% endif %}
+      </span>
+    </label>
+    {% endfor %}
+  </div>
+  {% endfor %}
+</div>

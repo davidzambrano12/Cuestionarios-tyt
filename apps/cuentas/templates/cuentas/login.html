@@ -1,172 +1,72 @@
 {% extends 'layouts/base.html' %}
+{% load static %}
 
-{% block title %}Iniciar Sesión - Simulador Saber TyT{% endblock %}
+{% block title %}Iniciar sesión - Simulador Saber TyT{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'css/cuentas.css' %}">{% endblock %}
 
 {% block content %}
-<div style="background-color: var(--color-superficie-tenue); min-height: 100vh; display:flex; flex-direction:column;">
-
-  <!-- Header con botón volver -->
-  <div style="padding:20px 32px;">
-    <a href="{% url 'landing' %}" style="display:inline-flex; align-items:center; justify-content:center; width:40px; height:40px; border-radius:50%; background:var(--color-superficie); border:1px solid var(--color-borde); color:var(--color-texto); text-decoration:none; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
-      <i data-lucide="arrow-left" class="icono-18"></i>
-    </a>
+<div class="acceso">
+  <div class="acceso__volver">
+    <a href="{% url 'landing' %}" class="acceso__boton-volver" title="Volver a la portada"><i data-lucide="arrow-left" class="icono-18"></i><span class="sr-only">Volver a la portada</span></a>
   </div>
 
-  <!-- Contenedor central -->
-  <div class="flex-grow flex items-center justify-center p-5">
-    <div style="width:100%; max-width:440px;">
-      
-      <!-- Card Login -->
-      <div class="card" style="padding:40px 32px; border-radius:24px; box-shadow:0 10px 25px -5px rgba(0,0,0,0.05); border:1px solid var(--color-borde);">
-        
-        <!-- Badge y Título -->
-        <div style="text-align:center; margin-bottom:28px;">
-          <div style="display:inline-flex; align-items:center; gap:6px; background:var(--azul-50); color:var(--azul-600); padding:6px 14px; border-radius:9999px; font-size:var(--texto-xs); font-weight:700; margin-bottom:14px;">
-            <i data-lucide="graduation-cap" class="icono-15"></i> Portal de Evaluación Institucional
-          </div>
-          <h1 style="font-size:var(--texto-2xl); font-weight:800; color:var(--color-texto); margin-bottom:6px;">Simulador Saber TyT</h1>
-          <p class="texto-sm texto-suave">Acceso unificado para Estudiantes, Docentes y Administradores</p>
+  <main class="acceso__centro">
+    <div class="acceso__contenedor">
+      <div class="card acceso__tarjeta">
+        <div class="acceso__cabecera">
+          <span class="badge badge-info acceso__insignia"><i data-lucide="graduation-cap" class="icono-15"></i> Portal de evaluación institucional</span>
+          <h1 class="acceso__titulo">Simulador Saber TyT</h1>
+          <p class="texto-sm texto-suave">Acceso para estudiantes, docentes y administradores</p>
         </div>
 
-        <!-- Alerta de Error -->
-        <div id="login-error" style="display:none; background:var(--rojo-50); border:1px solid var(--rojo-200); color:var(--rojo-700); padding:10px 14px; border-radius:8px; font-size:var(--texto-sm); margin-bottom:18px;"></div>
+        <div class="alerta alerta--error" id="login-error" role="alert" hidden></div>
 
-        <!-- Formulario Login con soporte dual: AJAX JWT y POST tradicional -->
-        <form id="form-login" method="POST" action="{% url 'login' %}" onsubmit="handleLogin(event)">
+        <form id="form-login" method="POST" action="{% url 'login' %}" data-url-token="{% url 'cuentas:token_obtain_pair' %}">
           {% csrf_token %}
-          
           <div class="form-group">
-            <label class="form-label" style="font-size:var(--texto-sm); font-weight:600; color:var(--gris-700);">Usuario institucional o Correo electrónico</label>
-            <div style="position:relative;">
-              <span style="position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--color-texto-tenue); font-size:var(--texto-md);">@</span>
-              <input type="text" id="username" name="username" required class="form-input" placeholder="ejemplo@uniputumayo.edu.co" style="padding-left:40px; height:46px; border-radius:10px;">
+            <label class="form-label" for="username">Usuario o correo institucional</label>
+            <div class="campo-icono">
+              <i data-lucide="at-sign" class="campo-icono__icono"></i>
+              <input type="text" id="username" name="username" required autocomplete="username" class="form-input" placeholder="ejemplo@uniputumayo.edu.co">
             </div>
           </div>
 
-          <div class="form-group" style="margin-bottom:14px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-              <label class="form-label" style="margin-bottom:0; font-size:var(--texto-sm); font-weight:600; color:var(--gris-700);">Contraseña</label>
-              <a href="#" onclick="mostrarNotificacion('Por favor contacte a la Dirección de Sistemas: soporte.sistemas@uniputumayo.edu.co', 'info', 'Recuperación de Clave'); return false;" class="texto-xs texto-primario peso-semibold">¿Olvidó su clave?</a>
+          <div class="form-group">
+            <div class="flex justify-between items-center mb-1">
+              <label class="form-label mb-0" for="password">Contraseña</label>
+              <a href="#" class="texto-xs peso-semibold" data-notificar="Escribe a la Dirección de Sistemas: soporte.sistemas@uniputumayo.edu.co" data-notificar-titulo="Recuperación de contraseña">¿Olvidaste tu contraseña?</a>
             </div>
-            <div style="position:relative;">
-              <i data-lucide="lock" style="position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--color-texto-tenue); width:16px; height:16px;"></i>
-              <input type="password" id="password" name="password" required class="form-input" placeholder="••••••••••••" style="padding-left:40px; padding-right:40px; height:46px; border-radius:10px;">
-              <button type="button" onclick="togglePassword()" style="position:absolute; right:14px; top:50%; transform:translateY(-50%); background:none; border:none; color:var(--color-texto-tenue); cursor:pointer; display:flex; align-items:center;">
+            <div class="campo-icono">
+              <i data-lucide="lock" class="campo-icono__icono"></i>
+              <input type="password" id="password" name="password" required autocomplete="current-password" class="form-input campo-icono__input--accion" placeholder="••••••••">
+              <button type="button" class="campo-icono__accion" data-accion="ver-clave" aria-label="Mostrar contraseña" aria-pressed="false">
                 <i data-lucide="eye" class="icono-16"></i>
               </button>
             </div>
           </div>
 
-          <div class="flex items-center gap-2 mb-6">
-            <input type="checkbox" id="remember" style="width:16px; height:16px; accent-color:var(--color-primario); cursor:pointer;">
-            <label for="remember" style="font-size:var(--texto-sm); color:var(--color-texto-suave); cursor:pointer;">Recordar en este equipo</label>
-          </div>
-
-          <button type="submit" id="btn-submit" class="btn btn-primary btn-full" style="height:48px; font-size:var(--texto-md); border-radius:10px; background:var(--color-primario);">
-            Iniciar Sesión &rarr;
-          </button>
+          <button type="submit" class="btn btn-primary btn-full acceso__enviar" data-ref="enviar">Iniciar sesión</button>
         </form>
 
-        <!-- Accesos directos de prueba para sustentación -->
-        <div style="margin-top:24px; padding-top:18px; border-top:1px dashed var(--color-borde); text-align:center;">
-          <span style="font-size:var(--texto-xs); font-weight:700; color:var(--color-texto-tenue); text-transform:uppercase; letter-spacing:0.5px;">Acceso Rápido para Sustentación</span>
+        {% if accesos_demo %}
+        <div class="acceso__demo">
+          <span class="metrica__etiqueta">Acceso rápido · solo en desarrollo</span>
           <div class="flex gap-2 justify-center mt-2 flex-wrap">
-            <button type="button" onclick="quickFill('david', '1234')" class="btn btn-outline" style="font-size:var(--texto-xs); padding:6px 12px; cursor:pointer; font-weight:700; display:inline-flex; align-items:center; gap:4px;">
-              <i data-lucide="shield" class="icono-13"></i> Admin (david / 1234)
-            </button>
-            <button type="button" onclick="quickFill('docente', '123456')" class="btn btn-outline" style="font-size:var(--texto-xs); padding:6px 12px; cursor:pointer; font-weight:700; display:inline-flex; align-items:center; gap:4px;">
-              <i data-lucide="briefcase" class="icono-13"></i> Docente (docente / 123456)
-            </button>
-            <button type="button" onclick="quickFill('estudiante', '123456')" class="btn btn-outline" style="font-size:var(--texto-xs); padding:6px 12px; cursor:pointer; font-weight:700; display:inline-flex; align-items:center; gap:4px;">
-              <i data-lucide="graduation-cap" class="icono-13"></i> Estudiante (estudiante / 123456)
-            </button>
+            <button type="button" class="btn btn-outline btn-accion" data-demo-usuario="david" data-demo-clave="1234"><i data-lucide="shield" class="icono-13"></i> Admin</button>
+            <button type="button" class="btn btn-outline btn-accion" data-demo-usuario="docente" data-demo-clave="123456"><i data-lucide="briefcase" class="icono-13"></i> Docente</button>
+            <button type="button" class="btn btn-outline btn-accion" data-demo-usuario="estudiante" data-demo-clave="123456"><i data-lucide="graduation-cap" class="icono-13"></i> Estudiante</button>
           </div>
         </div>
-
+        {% endif %}
       </div>
 
-      <!-- Footer soporte técnico -->
       <div class="texto-centro mt-6 texto-sm texto-suave">
-        <div style="font-weight:600; color:var(--gris-700); margin-bottom:2px; display:inline-flex; align-items:center; gap:6px;">
-          <i data-lucide="headphones" class="icono-14"></i> Soporte Técnico: Dirección de Sistemas IUP
-        </div>
-        <div>Mesa de ayuda: <a href="mailto:soporte.sistemas@uniputumayo.edu.co" class="texto-primario peso-medio">soporte.sistemas@uniputumayo.edu.co</a></div>
+        <div class="inline-flex items-center gap-2 peso-semibold"><i data-lucide="headphones" class="icono-14"></i> Soporte técnico: Dirección de Sistemas</div>
+        <div>Mesa de ayuda: <a href="mailto:soporte.sistemas@uniputumayo.edu.co" class="peso-medio">soporte.sistemas@uniputumayo.edu.co</a></div>
       </div>
-
     </div>
-  </div>
-
+  </main>
 </div>
 {% endblock %}
 
-{% block extra_scripts %}
-<script>
-  function togglePassword() {
-    const input = document.getElementById('password');
-    input.type = input.type === 'password' ? 'text' : 'password';
-  }
-
-  function quickFill(user, pass) {
-    document.getElementById('username').value = user;
-    document.getElementById('password').value = pass;
-    document.getElementById('btn-submit').click();
-  }
-
-  async function handleLogin(e) {
-    if (window._jwt_validated) {
-      return true;
-    }
-
-    e.preventDefault();
-    const btn = document.getElementById('btn-submit');
-    const errorBox = document.getElementById('login-error');
-    errorBox.style.display = 'none';
-
-    const username = document.getElementById('username').value.trim();
-    const password = document.getElementById('password').value;
-
-    btn.disabled = true;
-    btn.innerText = 'Validando credenciales JWT...';
-
-    try {
-      const response = await fetch('{% url 'cuentas:token_obtain_pair' %}', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ username: username, password: password })
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        let msg = data.detail || data.non_field_errors || 'Credenciales incorrectas o cuenta inactiva.';
-        if (typeof msg === 'string' && (msg.includes('No active account') || msg.includes('credentials'))) {
-          msg = 'Credenciales incorrectas: No se encontró ninguna cuenta activa con los datos ingresados.';
-        }
-        throw new Error(msg);
-      }
-
-      localStorage.setItem('access_token', data.access);
-      localStorage.setItem('refresh_token', data.refresh);
-      localStorage.setItem('user_data', JSON.stringify(data.user));
-
-      const maxAge = 86400; // 1 día
-      document.cookie = `access_token=${data.access}; path=/; max-age=${maxAge}; SameSite=Lax`;
-      document.cookie = `refresh_token=${data.refresh}; path=/; max-age=${maxAge}; SameSite=Lax`;
-
-      window._jwt_validated = true;
-      document.getElementById('form-login').submit();
-
-    } catch (err) {
-      errorBox.innerText = err.message;
-      errorBox.style.display = 'block';
-      if (typeof mostrarNotificacion === 'function') {
-        mostrarNotificacion(err.message, 'error', 'Error de Autenticación');
-      }
-      btn.disabled = false;
-      btn.innerText = 'Iniciar Sesión →';
-    }
-  }
-</script>
-{% endblock %}
+{% block extra_scripts %}<script src="{% static 'js/cuentas/login.js' %}"></script>{% endblock %}

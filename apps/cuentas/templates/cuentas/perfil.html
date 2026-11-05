@@ -1,98 +1,69 @@
 {% extends 'layouts/app_base.html' %}
+{% load static %}
 
-{% block title %}Perfil Institucional - Simulador Saber TyT{% endblock %}
-
-{% block nav_title %}Mi Perfil Institucional{% endblock %}
+{% block title %}Mi perfil - Simulador Saber TyT{% endblock %}
+{% block nav_title %}Mi perfil{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'css/cuentas.css' %}">{% endblock %}
 
 {% block app_content %}
-<div style="max-width:640px; margin:0 auto;">
-
-    <!-- Card Perfil Principal -->
-    <div class="card" style="padding:28px 24px; border-radius:20px; margin-bottom:20px;">
-      
-      <!-- Avatar y Nombres -->
-      <div class="texto-centro mb-6">
-        <div class="user-avatar-circle" style="width:72px; height:72px; font-size:var(--texto-2xl); margin:0 auto 12px; background:var(--color-primario); color:var(--color-texto-invertido);">
-          {{ user.first_name|default:user.username|slice:":2"|upper }}
-        </div>
-        <div style="display:flex; justify-content:center; gap:8px; margin-bottom:6px;">
-          <span class="badge badge-info">{{ user.perfil.rol.nombre|default:"Usuario" }}</span>
-          <span class="badge badge-success">● Cuenta Activa y Verificada</span>
-        </div>
-        <h1 class="page-title text-2xl font-extrabold text-main" style="margin-bottom:2px;">{{ user.get_full_name|default:user.username }}</h1>
-        <div class="texto-xs texto-suave">Institución Universitaria del Putumayo · Mocoa</div>
+<div class="columna-angosta">
+  <section class="card perfil">
+    <div class="perfil__cabecera">
+      <span class="user-avatar-circle perfil__avatar">{{ user.first_name|default:user.username|slice:":2"|upper }}</span>
+      <div class="flex justify-center gap-2 mb-2">
+        <span class="badge badge-info">{{ user.perfil.rol.nombre|default:"Usuario" }}</span>
+        <span class="badge badge-success">Cuenta activa</span>
       </div>
-
-      <!-- Datos Personales y Programa -->
-      <div style="border-top:1px solid var(--color-superficie-hundida); padding-top:20px; margin-bottom:24px;">
-        <div style="display:flex; align-items:center; gap:8px; margin-bottom:14px;">
-          <i data-lucide="graduation-cap" class="icono-16 texto-primario"></i>
-          <h3 class="card-title text-base font-bold text-main m-0">Datos Personales y Programa</h3>
-        </div>
-
-        <form method="POST" action="{% url 'cuentas:actualizar_perfil' %}">
-          {% csrf_token %}
-          <div class="form-group">
-            <label class="form-label">Código Institucional</label>
-            <input type="text" value="{{ user.perfil.codigo_institucional|default:user.username }}" readonly class="form-input" style="background:var(--color-superficie-tenue); color:var(--color-texto-suave);">
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Programa Académico & Semestre</label>
-            <input type="text" name="programa" value="{{ user.perfil.programa_academico }} - {{ user.perfil.semestre }}" class="form-input">
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Correo Institucional IUP</label>
-            <input type="email" value="{{ user.email }}" readonly class="form-input" style="background:var(--color-superficie-tenue); color:var(--color-texto-suave);">
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Teléfono Celular de Contacto</label>
-            <input type="text" name="telefono" value="{{ user.perfil.telefono|default:'+57 312 456 7890' }}" class="form-input">
-          </div>
-
-          <button type="submit" class="btn btn-primary btn-full" style="padding:10px; font-size:var(--texto-sm);">
-            Actualizar Información Personal
-          </button>
-        </form>
-      </div>
-
-      <!-- Seguridad y Credenciales -->
-      <div style="border-top:1px solid var(--color-superficie-hundida); padding-top:20px; margin-bottom:20px;">
-        <div style="display:flex; align-items:center; gap:8px; margin-bottom:14px;">
-          <i data-lucide="lock" class="icono-16 texto-primario"></i>
-          <h3 class="texto-base peso-extrabold texto-principal m-0">Seguridad y Credenciales</h3>
-        </div>
-
-        <form method="POST" action="{% url 'cuentas:cambiar_password' %}">
-          {% csrf_token %}
-          <div class="form-group">
-            <label class="form-label">Nueva Contraseña</label>
-            <input type="password" name="nueva_password" required class="form-input" placeholder="Mínimo 8 caracteres">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Confirmar Nueva Contraseña</label>
-            <input type="password" name="confirmar_password" required class="form-input" placeholder="Repite la nueva contraseña">
-          </div>
-
-          <button type="submit" class="btn btn-outline btn-full" style="padding:10px; font-size:var(--texto-sm); color:var(--color-primario); border-color:var(--azul-200); display:inline-flex; align-items:center; justify-content:center; gap:6px;">
-            <i data-lucide="save" class="icono-14"></i> Guardar Nueva Contraseña
-          </button>
-        </form>
-      </div>
-
-      <!-- Sesión Activa Segura y Logout -->
-      <div style="background:var(--color-superficie-tenue); border-radius:12px; padding:16px; border:1px solid var(--color-borde);">
-        <div class="flex justify-between items-center texto-xs texto-suave mb-3">
-          <span class="inline-flex items-center gap-1"><i data-lucide="globe" class="icono-13"></i> Red IUP Campus Mocoa</span>
-          <span class="texto-exito peso-bold">● Sesión Activa Segura</span>
-        </div>
-        <a href="{% url 'logout' %}" onclick="cerrarSesion(); return false;" class="btn btn-danger btn-full" style="padding:10px; font-size:var(--texto-sm); text-decoration:none; display:inline-flex; align-items:center; justify-content:center; gap:8px;">
-          <i data-lucide="log-out" class="icono-15"></i> Cerrar Sesión Segura (Revocar JWT)
-        </a>
-      </div>
-
+      <h1 class="texto-2xl peso-extrabold">{{ user.get_full_name|default:user.username }}</h1>
+      <div class="texto-xs texto-suave">Institución Universitaria del Putumayo</div>
     </div>
+
+    <div class="perfil__seccion">
+      <h2 class="bloque-formulario__titulo"><i data-lucide="graduation-cap" class="icono-16"></i> Datos personales y programa</h2>
+      <form method="POST" action="{% url 'cuentas:actualizar_perfil' %}">
+        {% csrf_token %}
+        <div class="grid-2">
+          <div class="form-group">
+            <label class="form-label" for="perfil-codigo">Código institucional</label>
+            <input type="text" id="perfil-codigo" value="{{ user.perfil.codigo_institucional|default:user.username }}" readonly class="form-input form-input--lectura">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="perfil-correo">Correo institucional</label>
+            <input type="email" id="perfil-correo" value="{{ user.email }}" readonly class="form-input form-input--lectura">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="perfil-programa">Programa académico y semestre</label>
+          <input type="text" id="perfil-programa" name="programa" value="{{ user.perfil.programa_academico }} - {{ user.perfil.semestre }}" class="form-input">
+          <span class="texto-xs texto-suave">Formato: programa - semestre (ej.: Ingeniería de Sistemas - 6° Semestre)</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="perfil-telefono">Teléfono de contacto</label>
+          <input type="tel" id="perfil-telefono" name="telefono" value="{{ user.perfil.telefono|default:'' }}" class="form-input" placeholder="+57 300 000 0000" autocomplete="tel">
+        </div>
+        <button type="submit" class="btn btn-primary btn-full">Guardar datos</button>
+      </form>
+    </div>
+
+    <div class="perfil__seccion">
+      <h2 class="bloque-formulario__titulo"><i data-lucide="lock" class="icono-16"></i> Contraseña</h2>
+      <form method="POST" action="{% url 'cuentas:cambiar_password' %}">
+        {% csrf_token %}
+        <div class="form-group">
+          <label class="form-label" for="perfil-clave">Nueva contraseña</label>
+          <input type="password" id="perfil-clave" name="nueva_password" required minlength="8" autocomplete="new-password" class="form-input" placeholder="Mínimo 8 caracteres">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="perfil-clave-2">Confirmar nueva contraseña</label>
+          <input type="password" id="perfil-clave-2" name="confirmar_password" required minlength="8" autocomplete="new-password" class="form-input">
+        </div>
+        <button type="submit" class="btn btn-secondary btn-full"><i data-lucide="save" class="icono-14"></i> Cambiar contraseña</button>
+      </form>
+    </div>
+
+    <div class="perfil__seccion">
+      <a href="{% url 'logout' %}" data-cerrar-sesion class="btn btn-danger btn-full"><i data-lucide="log-out" class="icono-15"></i> Cerrar sesión</a>
+    </div>
+  </section>
 </div>
 {% endblock %}

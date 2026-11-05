@@ -89,3 +89,27 @@ class PerfilTests(TestCase):
         r = self.client.get("/logout/")
         self.assertRedirects(r, "/login/", fetch_redirect_response=False)
         self.assertNotIn("_auth_user_id", self.client.session)
+
+    def test_clave_corta_se_rechaza(self):
+        self.client.force_login(self.user)
+        self.client.post("/perfil/cambiar-password/", {"nueva_password": "corta1", "confirmar_password": "corta1"})
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.check_password(CLAVE))
+
+
+class AccesosDemoTests(TestCase):
+    def test_ocultos_si_la_opcion_esta_desactivada(self):
+        with self.settings(MOSTRAR_ACCESOS_DEMO=False):
+            self.assertNotContains(self.client.get("/login/"), "data-demo-usuario")
+
+    def test_visibles_en_desarrollo(self):
+        with self.settings(MOSTRAR_ACCESOS_DEMO=True):
+            self.assertContains(self.client.get("/login/"), "data-demo-usuario")
+
+    def test_ajustes_es_de_solo_lectura(self):
+        sembrar_roles()
+        self.client.force_login(crear_usuario("prof", "docente"))
+        r = self.client.get("/ajustes/")
+        self.assertContains(r, "America/Bogota")
+        self.assertNotContains(r, "<form")
+        self.assertEqual(self.client.post("/ajustes/guardar/").status_code, 404)
