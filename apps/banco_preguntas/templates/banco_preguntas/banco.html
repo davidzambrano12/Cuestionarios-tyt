@@ -8,7 +8,7 @@
 <div>
   <!-- Header Banner -->
   <div class="dashboard-banner">
-    <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:16px;">
+    <div class="flex justify-between items-start flex-wrap gap-4">
       <div>
         <div class="banner-badge">● Preguntas Institucionales Saber TyT</div>
         <h1 class="banner-title">Banco de Preguntas</h1>
@@ -16,7 +16,7 @@
       </div>
       <div style="display:flex; gap:10px; flex-wrap:wrap;">
         <a href="{% url 'importaciones:importar' %}" class="btn btn-outline" style="padding:10px 16px; border-radius:10px; background:var(--color-superficie); font-weight:600; display:inline-flex; align-items:center; gap:6px;">
-          <i data-lucide="upload" style="width:16px; height:16px;"></i> Importar Excel
+          <i data-lucide="upload" class="icono-16"></i> Importar Excel
         </a>
         <button type="button" onclick="openModal('modal-nueva-pregunta')" class="btn btn-primary" style="padding:10px 18px; border-radius:10px; font-weight:700; display:inline-flex; align-items:center; gap:6px;">
           <i data-lucide="plus"></i> Nueva Pregunta
@@ -26,8 +26,8 @@
   </div>
 
     <!-- Buscador y Filtros -->
-    <div class="card" style="padding:16px; margin-bottom:20px;">
-      <div style="display:flex; gap:12px; flex-wrap:wrap;">
+    <div class="card p-4 mb-5">
+      <div class="flex gap-3 flex-wrap">
         <div style="flex:2; min-width:240px; position:relative;">
           <i data-lucide="search" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--color-texto-tenue); width:16px; height:16px;"></i>
           <input type="text" id="filtro-pregunta" onkeyup="filtrarPreguntas()" placeholder="Buscar por enunciado o palabra clave..." class="form-input" style="padding-left:36px;">
@@ -53,17 +53,17 @@
     </div>
 
     <!-- Lista de Preguntas -->
-    <div id="contenedor-preguntas" style="display:flex; flex-direction:column; gap:16px;">
+    <div id="contenedor-preguntas" class="flex flex-col gap-4">
       {% for p in preguntas %}
-      <div class="card pregunta-card" data-enunciado="{{ p.enunciado|lower }}" data-cat="{{ p.categoria.id }}" data-tipo="{{ p.tipo }}" style="margin-bottom:0; padding:20px;">
+      <div class="card pregunta-card mb-0 p-5" data-enunciado="{{ p.enunciado|lower }}" data-cat="{{ p.categoria.id }}" data-tipo="{{ p.tipo }}">
         
         <!-- Badges superiores -->
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-          <div style="display:flex; align-items:center; gap:8px;">
-            <span class="badge badge-info" style="font-size:var(--texto-xs);">{{ p.categoria.nombre }}</span>
-            <span style="font-size:var(--texto-xs); color:var(--color-texto-suave); font-weight:600;">{{ p.get_tipo_display }}</span>
+        <div class="flex justify-between items-center mb-3">
+          <div class="flex items-center gap-2">
+            <span class="badge badge-info texto-xs">{{ p.categoria.nombre }}</span>
+            <span class="texto-xs texto-suave peso-semibold">{{ p.get_tipo_display }}</span>
           </div>
-          <div style="display:flex; align-items:center; gap:8px;">
+          <div class="flex items-center gap-2">
             {% if p.activa %}
               <span class="badge badge-success">● Activa</span>
             {% else %}
@@ -74,7 +74,7 @@
         </div>
 
         <!-- Código y Enunciado -->
-        <div style="font-size:var(--texto-xs); color:var(--color-texto-tenue); font-weight:700; margin-bottom:4px;">Cód. P-{{ p.id }}</div>
+        <div class="texto-xs texto-tenue peso-bold mb-1">Cód. P-{{ p.id }}</div>
         <h3 class="text-md font-bold text-main" style="margin-bottom:10px;">
           {{ p.enunciado }}
         </h3>
@@ -92,7 +92,7 @@
           <div style="display:flex; flex-direction:column; gap:6px;">
             {% for op in p.opciones.all %}
             <div style="display:flex; align-items:center; gap:8px; padding:6px 12px; border-radius:6px; font-size:var(--texto-xs); {% if op.es_correcta %}background:var(--verde-100); color:var(--verde-800); border:1px solid var(--verde-200); font-weight:600;{% else %}background:var(--color-superficie-tenue); color:var(--color-texto-suave); border:1px solid var(--color-borde);{% endif %}">
-              <span style="display:inline-flex; align-items:center; gap:4px;">{% if op.es_correcta %}<i data-lucide="check" style="width:14px; height:14px;"></i> Correcta{% else %}<i data-lucide="circle" style="width:12px; height:12px;"></i>{% endif %}:</span>
+              <span class="inline-flex items-center gap-1">{% if op.es_correcta %}<i data-lucide="check" class="icono-14"></i> Correcta{% else %}<i data-lucide="circle" class="icono-12"></i>{% endif %}:</span>
               <span>{{ op.texto }}</span>
             </div>
             {% endfor %}
@@ -109,20 +109,20 @@
 
         <!-- Botones de Acción -->
         <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--color-superficie-hundida); padding-top:12px;">
-          <span style="font-size:var(--texto-xs); color:var(--color-texto-tenue);">Huella SHA-256 validada</span>
-          <div style="display:flex; gap:8px;">
+          <span class="texto-xs texto-tenue">Huella SHA-256 validada</span>
+          <div class="flex gap-2">
             <button type="button" onclick="cargarPreguntaEditar('{{ p.id }}')" class="btn btn-outline" style="padding:4px 10px; font-size:var(--texto-xs); color:var(--color-primario); background:var(--azul-50); border-color:var(--azul-200); display:inline-flex; align-items:center; gap:4px;">
-              <i data-lucide="edit-3" style="width:13px; height:13px;"></i> Editar
+              <i data-lucide="edit-3" class="icono-13"></i> Editar
             </button>
             <form method="POST" action="{% url 'banco_preguntas:toggle_estado' p.id %}">
               {% csrf_token %}
               {% if p.activa %}
                 <button type="submit" class="btn btn-outline" style="padding:4px 10px; font-size:var(--texto-xs); color:var(--rojo-700); display:inline-flex; align-items:center; gap:4px;">
-                  <i data-lucide="eye-off" style="width:13px; height:13px;"></i> Desactivar
+                  <i data-lucide="eye-off" class="icono-13"></i> Desactivar
                 </button>
               {% else %}
                 <button type="submit" class="btn btn-outline" style="padding:4px 10px; font-size:var(--texto-xs); color:var(--verde-800); background:var(--verde-100); display:inline-flex; align-items:center; gap:4px;">
-                  <i data-lucide="eye" style="width:13px; height:13px;"></i> Activar
+                  <i data-lucide="eye" class="icono-13"></i> Activar
                 </button>
               {% endif %}
             </form>
@@ -142,7 +142,7 @@
 <div id="modal-nueva-pregunta" class="modal-backdrop">
   <div class="modal-box" style="max-width:680px;">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
-      <h3 style="font-size:var(--texto-lg); font-weight:800; color:var(--color-texto);">Crear Nueva Pregunta</h3>
+      <h3 class="texto-lg peso-extrabold texto-principal">Crear Nueva Pregunta</h3>
       <button onclick="closeModal('modal-nueva-pregunta')" style="background:none; border:none; font-size:var(--texto-xl); cursor:pointer;">&times;</button>
     </div>
 
@@ -178,26 +178,26 @@
 
       <!-- Opciones Múltiple -->
       <div id="opciones-multiple-box">
-        <label class="form-label" style="margin-bottom:8px;">Opciones de Respuesta y Respuesta Correcta:</label>
+        <label class="form-label mb-2">Opciones de Respuesta y Respuesta Correcta:</label>
         
-        <div style="display:flex; flex-direction:column; gap:8px;">
-          <div style="display:flex; align-items:center; gap:8px;">
-            <input type="radio" name="correcta" value="A" checked style="accent-color:var(--color-primario);">
+        <div class="flex flex-col gap-2">
+          <div class="flex items-center gap-2">
+            <input type="radio" name="correcta" value="A" checked>
             <span style="font-weight:700; width:20px;">A:</span>
             <input type="text" name="opcion_a" required class="form-input" placeholder="Opción A">
           </div>
-          <div style="display:flex; align-items:center; gap:8px;">
-            <input type="radio" name="correcta" value="B" style="accent-color:var(--color-primario);">
+          <div class="flex items-center gap-2">
+            <input type="radio" name="correcta" value="B">
             <span style="font-weight:700; width:20px;">B:</span>
             <input type="text" name="opcion_b" required class="form-input" placeholder="Opción B">
           </div>
-          <div style="display:flex; align-items:center; gap:8px;">
-            <input type="radio" name="correcta" value="C" style="accent-color:var(--color-primario);">
+          <div class="flex items-center gap-2">
+            <input type="radio" name="correcta" value="C">
             <span style="font-weight:700; width:20px;">C:</span>
             <input type="text" name="opcion_c" required class="form-input" placeholder="Opción C">
           </div>
-          <div style="display:flex; align-items:center; gap:8px;">
-            <input type="radio" name="correcta" value="D" style="accent-color:var(--color-primario);">
+          <div class="flex items-center gap-2">
+            <input type="radio" name="correcta" value="D">
             <span style="font-weight:700; width:20px;">D:</span>
             <input type="text" name="opcion_d" required class="form-input" placeholder="Opción D">
           </div>
@@ -206,14 +206,14 @@
 
       <!-- Opciones V/F -->
       <div id="opciones-vf-box" style="display:none;">
-        <label class="form-label" style="margin-bottom:8px;">Respuesta Correcta para Verdadero/Falso:</label>
-        <div style="display:flex; gap:20px;">
+        <label class="form-label mb-2">Respuesta Correcta para Verdadero/Falso:</label>
+        <div class="flex gap-5">
           <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
-            <input type="radio" name="correcta_vf" value="V" checked style="accent-color:var(--color-primario);">
+            <input type="radio" name="correcta_vf" value="V" checked>
             <span>Verdadero</span>
           </label>
           <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
-            <input type="radio" name="correcta_vf" value="F" style="accent-color:var(--color-primario);">
+            <input type="radio" name="correcta_vf" value="F">
             <span>Falso</span>
           </label>
         </div>
@@ -243,7 +243,7 @@
   <div class="modal-box" style="max-width:680px;">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
       <div>
-        <h3 style="font-size:var(--texto-lg); font-weight:800; color:var(--color-texto);">Editar Pregunta</h3>
+        <h3 class="texto-lg peso-extrabold texto-principal">Editar Pregunta</h3>
         <div id="editar-pregunta-subtitulo" style="font-size:var(--texto-xs); color:var(--azul-600); font-weight:600;"></div>
       </div>
       <button onclick="closeModal('modal-editar-pregunta')" style="background:none; border:none; font-size:var(--texto-xl); cursor:pointer;">&times;</button>
@@ -281,26 +281,26 @@
 
       <!-- Opciones Múltiple Edición -->
       <div id="editar-opciones-multiple-box">
-        <label class="form-label" style="margin-bottom:8px;">Opciones de Respuesta y Respuesta Correcta:</label>
+        <label class="form-label mb-2">Opciones de Respuesta y Respuesta Correcta:</label>
         
-        <div style="display:flex; flex-direction:column; gap:8px;">
-          <div style="display:flex; align-items:center; gap:8px;">
-            <input type="radio" name="correcta" id="edit-radio-a" value="A" style="accent-color:var(--color-primario);">
+        <div class="flex flex-col gap-2">
+          <div class="flex items-center gap-2">
+            <input type="radio" name="correcta" id="edit-radio-a" value="A">
             <span style="font-weight:700; width:20px;">A:</span>
             <input type="text" name="opcion_a" id="editar-opcion-a" class="form-input" placeholder="Opción A">
           </div>
-          <div style="display:flex; align-items:center; gap:8px;">
-            <input type="radio" name="correcta" id="edit-radio-b" value="B" style="accent-color:var(--color-primario);">
+          <div class="flex items-center gap-2">
+            <input type="radio" name="correcta" id="edit-radio-b" value="B">
             <span style="font-weight:700; width:20px;">B:</span>
             <input type="text" name="opcion_b" id="editar-opcion-b" class="form-input" placeholder="Opción B">
           </div>
-          <div style="display:flex; align-items:center; gap:8px;">
-            <input type="radio" name="correcta" id="edit-radio-c" value="C" style="accent-color:var(--color-primario);">
+          <div class="flex items-center gap-2">
+            <input type="radio" name="correcta" id="edit-radio-c" value="C">
             <span style="font-weight:700; width:20px;">C:</span>
             <input type="text" name="opcion_c" id="editar-opcion-c" class="form-input" placeholder="Opción C">
           </div>
-          <div style="display:flex; align-items:center; gap:8px;">
-            <input type="radio" name="correcta" id="edit-radio-d" value="D" style="accent-color:var(--color-primario);">
+          <div class="flex items-center gap-2">
+            <input type="radio" name="correcta" id="edit-radio-d" value="D">
             <span style="font-weight:700; width:20px;">D:</span>
             <input type="text" name="opcion_d" id="editar-opcion-d" class="form-input" placeholder="Opción D">
           </div>
@@ -309,15 +309,15 @@
 
       <!-- Opciones V/F Edición -->
       <div id="editar-opciones-vf-box" style="display:none;">
-        <label class="form-label" style="margin-bottom:8px;">Seleccione la respuesta correcta:</label>
+        <label class="form-label mb-2">Seleccione la respuesta correcta:</label>
         <div style="display:flex; gap:20px; align-items:center; padding:12px; background:var(--color-superficie-tenue); border-radius:8px;">
           <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
-            <input type="radio" name="correcta_vf" id="edit-radio-vf-v" value="V" style="accent-color:var(--color-primario);">
-            <span style="font-weight:700;">Verdadero</span>
+            <input type="radio" name="correcta_vf" id="edit-radio-vf-v" value="V">
+            <span class="peso-bold">Verdadero</span>
           </label>
           <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
-            <input type="radio" name="correcta_vf" id="edit-radio-vf-f" value="F" style="accent-color:var(--color-primario);">
-            <span style="font-weight:700;">Falso</span>
+            <input type="radio" name="correcta_vf" id="edit-radio-vf-f" value="F">
+            <span class="peso-bold">Falso</span>
           </label>
         </div>
       </div>
