@@ -18,6 +18,7 @@ urlpatterns = [
     path("", include("apps.cuestionarios.urls")),
     path("", include("apps.evaluaciones.urls")),
     path("", include("apps.reportes.urls")),
+    path("", include("apps.academico.urls")),
 ]
 
 if settings.DEBUG:

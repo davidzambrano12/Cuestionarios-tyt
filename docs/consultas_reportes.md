@@ -21,7 +21,7 @@ erDiagram
 |---|---|
 | Año | `periodos_academicos.anio` |
 | Período | `periodos_academicos` (`anio`-`numero`, p. ej. 2026-2) |
-| Curso / grupo | `cursos` (pertenece a un período; tiene docente a cargo) |
+| Curso / grupo | `cursos`: una asignatura dictada a un grupo en un período (p. ej. *Electiva Profesional III · G01 · 2026-2*), con programa, semestre y docente a cargo |
 | Eje temático | `categorias`, a través de `respuestas_intento → preguntas` |
 | Estudiante | `intentos.participante_codigo` = código institucional del estudiante matriculado |
 
@@ -94,6 +94,18 @@ python manage.py datos_demo_consultas            # 3 períodos, 5 cursos, 12 est
 python manage.py datos_demo_consultas --limpiar  # borra solo esos datos
 ```
 
-- Los cursos "A" quedan a cargo del primer docente activo.
-- Períodos, cursos y matrículas se administran en `/admin/` → *Estructura académica*.
+- El grupo 01 de cada asignatura queda a cargo del primer docente activo.
+
+## 7. Cómo se matricula un estudiante
+
+La matrícula la hace la institución, no el estudiante (RULE-04). Se hace en el menú **Cursos**:
+
+1. **El administrador crea el período académico** con "Nuevo período" (año, número y fechas).
+2. **Se crea el curso:** asignatura, grupo, programa, semestre y docente. El docente también puede crearlo, y queda a su cargo.
+3. **Se matricula a los estudiantes** desde el detalle del curso: se buscan por nombre, código o documento, se marcan (o "Seleccionar todos") y se pulsa "Matricular".
+   - Los intentos que esos estudiantes ya presentaron en el período sin curso quedan asociados automáticamente.
+   - Si un estudiante ya está en otro curso del mismo período, se avisa. Sus intentos nuevos se asignan a un solo curso: el primero en orden alfabético.
+4. **Retirar a un estudiante** pide confirmación, y no se permite si ya tiene intentos en el curso, para conservar el historial. Al cerrar el período, el curso se marca como inactivo.
+
+El docente solo ve y gestiona sus cursos. Si en Cursos o en Consultas aparecen intentos terminados sin curso, el administrador recibe un aviso. Los períodos, cursos y matrículas también se pueden editar en `/admin/`.
 - Pruebas automáticas: `apps/reportes/tests/test_consultas.py` y `pruebas_e2e/test_consultas.py`.
