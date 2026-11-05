@@ -4,25 +4,25 @@
 {% block title %}Auditoría y Corrección de Importación - Simulador Saber TyT{% endblock %}
 
 {% block content %}
-<div style="background:#f8fafc; min-height:100vh; padding:24px 20px;">
+<div style="background:var(--color-superficie-tenue); min-height:100vh; padding:24px 20px;">
   <div style="max-width:760px; margin:0 auto;">
 
     <!-- Topbar -->
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-      <a href="{% url 'importaciones:importar' %}" style="display:inline-flex; align-items:center; justify-content:center; width:38px; height:38px; border-radius:50%; background:white; border:1px solid #e2e8f0; color:#0f172a; text-decoration:none;" title="Volver a Carga">
+      <a href="{% url 'importaciones:importar' %}" style="display:inline-flex; align-items:center; justify-content:center; width:38px; height:38px; border-radius:50%; background:var(--color-superficie); border:1px solid var(--color-borde); color:var(--color-texto); text-decoration:none;" title="Volver a Carga">
         <i data-lucide="arrow-left" style="width:18px; height:18px;"></i>
       </a>
-      <h2 style="font-size:18px; font-weight:800; color:#0f172a; margin:0;">Validación y Auditoría de Ingesta</h2>
+      <h2 style="font-size:var(--texto-lg); font-weight:800; color:var(--color-texto); margin:0;">Validación y Auditoría de Ingesta</h2>
       <div style="width:38px;"></div>
     </div>
 
     <!-- Stepper Asistente de Ingesta -->
-    <div class="card" style="padding:14px 20px; margin-bottom:20px; background:#f0f9ff; border-color:#bae6fd;">
+    <div class="card" style="padding:14px 20px; margin-bottom:20px; background:var(--azul-50); border-color:var(--azul-200);">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-        <span style="font-size:11px; font-weight:800; color:#0369a1; text-transform:uppercase; letter-spacing:0.5px;">ASISTENTE DE INGESTA MASIVA</span>
-        <span class="badge badge-info" style="font-size:11px;">Paso 2 y 3 de 4</span>
+        <span style="font-size:var(--texto-xs); font-weight:800; color:var(--azul-700); text-transform:uppercase; letter-spacing:0.5px;">ASISTENTE DE INGESTA MASIVA</span>
+        <span class="badge badge-info" style="font-size:var(--texto-xs);">Paso 2 y 3 de 4</span>
       </div>
-      <div style="display:flex; justify-content:space-between; font-size:12px; color:#0c4a6e; font-weight:600;">
+      <div style="display:flex; justify-content:space-between; font-size:var(--texto-xs); color:var(--azul-800); font-weight:600;">
         <span>1. Carga</span>
         <span><strong>2. Validación</strong></span>
         <span><strong>3. Corrección en Línea</strong></span>
@@ -32,11 +32,11 @@
 
     <!-- Cuestionario de destino si se indicó -->
     {% if cuestionario %}
-    <div class="card" style="padding:14px 20px; margin-bottom:16px; display:flex; align-items:center; gap:12px; background:#ffffff;">
-      <i data-lucide="clipboard-list" style="width:22px; height:22px; color:#0284c7;"></i>
+    <div class="card" style="padding:14px 20px; margin-bottom:16px; display:flex; align-items:center; gap:12px; background:var(--color-superficie);">
+      <i data-lucide="clipboard-list" style="width:22px; height:22px; color:var(--azul-600);"></i>
       <div>
-        <div style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase;">Cuestionario de Destino Vinculado</div>
-        <div style="font-size:14px; font-weight:800; color:#0f172a;">{{ cuestionario.nombre }}</div>
+        <div style="font-size:var(--texto-xs); font-weight:700; color:var(--color-texto-suave); text-transform:uppercase;">Cuestionario de Destino Vinculado</div>
+        <div style="font-size:var(--texto-base); font-weight:800; color:var(--color-texto);">{{ cuestionario.nombre }}</div>
       </div>
     </div>
     {% endif %}
@@ -44,16 +44,16 @@
     <!-- Archivo cargado verificado -->
     <div class="card" style="padding:16px 20px; margin-bottom:20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
       <div style="display:flex; align-items:center; gap:12px;">
-        <i data-lucide="file-spreadsheet" style="width:28px; height:28px; color:#186382;"></i>
+        <i data-lucide="file-spreadsheet" style="width:28px; height:28px; color:var(--color-primario);"></i>
         <div>
-          <div style="font-size:14px; font-weight:800; color:#0f172a;">{{ resultado.nombre_archivo }}</div>
-          <div style="font-size:12px; color:#16a34a; font-weight:600; display:inline-flex; align-items:center; gap:4px;">
+          <div style="font-size:var(--texto-base); font-weight:800; color:var(--color-texto);">{{ resultado.nombre_archivo }}</div>
+          <div style="font-size:var(--texto-xs); color:var(--verde-700); font-weight:600; display:inline-flex; align-items:center; gap:4px;">
             <i data-lucide="check" style="width:13px; height:13px;"></i> Archivo en procesamiento activo
           </div>
         </div>
       </div>
       <div style="display:flex; gap:8px;">
-        <a href="{% url 'importaciones:importar' %}" class="btn btn-outline" style="font-size:12px; padding:6px 12px; display:inline-flex; align-items:center; gap:6px;">
+        <a href="{% url 'importaciones:importar' %}" class="btn btn-outline" style="font-size:var(--texto-xs); padding:6px 12px; display:inline-flex; align-items:center; gap:6px;">
           <i data-lucide="rotate-cw" style="width:14px; height:14px;"></i> Subir Otro Archivo
         </a>
       </div>
@@ -62,28 +62,28 @@
     <!-- Auditoría de Registros -->
     <div class="card" style="padding:24px; border-radius:20px; margin-bottom:20px;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-        <h3 style="font-size:16px; font-weight:800; color:#0f172a; margin:0;">Auditoría de Filas</h3>
-        <span style="font-size:12px; color:#64748b;">Total procesadas: <strong>{{ resultado.total_filas }}</strong> filas</span>
+        <h3 style="font-size:var(--texto-md); font-weight:800; color:var(--color-texto); margin:0;">Auditoría de Filas</h3>
+        <span style="font-size:var(--texto-xs); color:var(--color-texto-suave);">Total procesadas: <strong>{{ resultado.total_filas }}</strong> filas</span>
       </div>
 
       <!-- 3 Cajas de conteo -->
       <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:12px; margin-bottom:24px; text-align:center;">
-        <div style="background:#f0fdf4; border:1px solid #86efac; border-radius:12px; padding:14px; display:flex; flex-direction:column; align-items:center;">
-          <i data-lucide="check-circle" style="width:20px; height:20px; color:#16a34a; margin-bottom:4px;"></i>
-          <div style="font-size:24px; font-weight:800; color:#15803d;">{{ resultado.validas|length }}</div>
-          <div style="font-size:11px; font-weight:600; color:#15803d;">Listas para Guardar</div>
+        <div style="background:var(--verde-50); border:1px solid var(--verde-200); border-radius:12px; padding:14px; display:flex; flex-direction:column; align-items:center;">
+          <i data-lucide="check-circle" style="width:20px; height:20px; color:var(--verde-700); margin-bottom:4px;"></i>
+          <div style="font-size:var(--texto-2xl); font-weight:800; color:var(--verde-700);">{{ resultado.validas|length }}</div>
+          <div style="font-size:var(--texto-xs); font-weight:600; color:var(--verde-700);">Listas para Guardar</div>
         </div>
 
-        <div style="background:#eff6ff; border:1px solid #93c5fd; border-radius:12px; padding:14px; display:flex; flex-direction:column; align-items:center;">
-          <i data-lucide="copy" style="width:20px; height:20px; color:#2563eb; margin-bottom:4px;"></i>
-          <div style="font-size:24px; font-weight:800; color:#1d4ed8;">{{ resultado.duplicadas|length }}</div>
-          <div style="font-size:11px; font-weight:600; color:#1d4ed8;">Duplicadas (Omitidas)</div>
+        <div style="background:var(--azul-50); border:1px solid var(--azul-200); border-radius:12px; padding:14px; display:flex; flex-direction:column; align-items:center;">
+          <i data-lucide="copy" style="width:20px; height:20px; color:var(--azul-600); margin-bottom:4px;"></i>
+          <div style="font-size:var(--texto-2xl); font-weight:800; color:var(--azul-700);">{{ resultado.duplicadas|length }}</div>
+          <div style="font-size:var(--texto-xs); font-weight:600; color:var(--azul-700);">Duplicadas (Omitidas)</div>
         </div>
 
-        <div style="background:#fef2f2; border:1px solid #fca5a5; border-radius:12px; padding:14px; display:flex; flex-direction:column; align-items:center;">
-          <i data-lucide="alert-circle" style="width:20px; height:20px; color:#dc2626; margin-bottom:4px;"></i>
-          <div style="font-size:24px; font-weight:800; color:#b91c1c;">{{ resultado.con_error|length }}</div>
-          <div style="font-size:11px; font-weight:600; color:#b91c1c;">Con Errores</div>
+        <div style="background:var(--rojo-50); border:1px solid var(--rojo-200); border-radius:12px; padding:14px; display:flex; flex-direction:column; align-items:center;">
+          <i data-lucide="alert-circle" style="width:20px; height:20px; color:var(--rojo-600); margin-bottom:4px;"></i>
+          <div style="font-size:var(--texto-2xl); font-weight:800; color:var(--rojo-700);">{{ resultado.con_error|length }}</div>
+          <div style="font-size:var(--texto-xs); font-weight:600; color:var(--rojo-700);">Con Errores</div>
         </div>
       </div>
 
@@ -91,26 +91,26 @@
       {% if resultado.con_error %}
       <div style="margin-bottom:24px;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-          <div style="font-size:13px; font-weight:800; color:#991b1b; display:flex; align-items:center; gap:6px;">
-            <i data-lucide="alert-triangle" style="width:16px; height:16px; color:#dc2626;"></i> Preguntas que requieren Corrección ({{ resultado.con_error|length }})
+          <div style="font-size:var(--texto-sm); font-weight:800; color:var(--rojo-700); display:flex; align-items:center; gap:6px;">
+            <i data-lucide="alert-triangle" style="width:16px; height:16px; color:var(--rojo-600);"></i> Preguntas que requieren Corrección ({{ resultado.con_error|length }})
           </div>
-          <span style="font-size:11px; color:#64748b;">Corrige los campos directo aquí sin salir al Excel</span>
+          <span style="font-size:var(--texto-xs); color:var(--color-texto-suave);">Corrige los campos directo aquí sin salir al Excel</span>
         </div>
 
         <div style="display:flex; flex-direction:column; gap:10px;">
           {% for fila in resultado.con_error %}
-          <div style="background:#fff5f5; border:1px solid #fecaca; border-left:4px solid #dc2626; padding:14px 16px; border-radius:10px; display:flex; justify-content:space-between; align-items:flex-start; gap:16px;">
+          <div style="background:var(--rojo-50); border:1px solid var(--rojo-200); border-left:4px solid var(--rojo-600); padding:14px 16px; border-radius:10px; display:flex; justify-content:space-between; align-items:flex-start; gap:16px;">
             <div style="flex:1;">
               <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
-                <span class="badge badge-danger" style="font-size:11px; padding:3px 8px; font-weight:800;">Fila #{{ fila.fila_excel }}</span>
+                <span class="badge badge-danger" style="font-size:var(--texto-xs); padding:3px 8px; font-weight:800;">Fila #{{ fila.fila_excel }}</span>
                 {% if fila.valores_crudos.categoria %}
-                <span class="badge" style="background:#e2e8f0; color:#334155; font-size:11px;">{{ fila.valores_crudos.categoria }}</span>
+                <span class="badge" style="background:var(--color-borde); color:var(--gris-700); font-size:var(--texto-xs);">{{ fila.valores_crudos.categoria }}</span>
                 {% endif %}
               </div>
-              <div style="font-size:13px; font-weight:700; color:#0f172a; margin-bottom:6px;">
+              <div style="font-size:var(--texto-sm); font-weight:700; color:var(--color-texto); margin-bottom:6px;">
                 {{ fila.valores_crudos.pregunta|default:"(Sin enunciado registrado en el Excel)"|truncatechars:100 }}
               </div>
-              <div style="font-size:11px; color:#b91c1c; display:flex; flex-direction:column; gap:2px;">
+              <div style="font-size:var(--texto-xs); color:var(--rojo-700); display:flex; flex-direction:column; gap:2px;">
                 {% for err in fila.errores %}
                 <div><strong>• Error:</strong> {{ err }}</div>
                 {% endfor %}
@@ -120,7 +120,7 @@
             <!-- Botón de Corrección Directa -->
             <button type="button"
                     class="btn btn-danger"
-                    style="font-size:12px; padding:8px 14px; font-weight:700; background:#dc2626; border:none; border-radius:8px; display:inline-flex; align-items:center; gap:6px; cursor:pointer; box-shadow:0 2px 4px rgba(220,38,38,0.2);"
+                    style="font-size:var(--texto-xs); padding:8px 14px; font-weight:700; background:var(--rojo-600); border:none; border-radius:8px; display:inline-flex; align-items:center; gap:6px; cursor:pointer; box-shadow:0 2px 4px rgba(220,38,38,0.2);"
                     onclick='abrirModalCorreccion({{ fila.fila_excel }}, {{ fila.json_data|safe }})'>
               <i data-lucide="edit-3" style="width:14px; height:14px;"></i> Corregir
             </button>
@@ -133,11 +133,11 @@
       <!-- SECCIÓN: Preguntas Duplicadas -->
       {% if resultado.duplicadas %}
       <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:20px;">
-        <div style="font-size:12px; font-weight:700; color:#1e40af; display:inline-flex; align-items:center; gap:6px;">
+        <div style="font-size:var(--texto-xs); font-weight:700; color:var(--azul-700); display:inline-flex; align-items:center; gap:6px;">
           <i data-lucide="copy" style="width:14px; height:14px;"></i> Preguntas Duplicadas Omitidas
         </div>
         {% for fila in resultado.duplicadas %}
-        <div style="background:#eff6ff; border-left:4px solid #3b82f6; padding:10px 14px; border-radius:0 8px 8px 0; font-size:12px; color:#1e40af;">
+        <div style="background:var(--azul-50); border-left:4px solid var(--azul-500); padding:10px 14px; border-radius:0 8px 8px 0; font-size:var(--texto-xs); color:var(--azul-700);">
           <strong>Fila #{{ fila.fila_excel }}:</strong> {{ fila.enunciado|truncatechars:80 }} — <em>Pregunta ya registrada previamente en el banco (SHA-256 idéntico).</em>
         </div>
         {% endfor %}
@@ -146,30 +146,30 @@
 
       <!-- SECCIÓN: Preguntas Válidas (Desplegable para inspección/edición) -->
       {% if resultado.validas %}
-      <details style="margin-bottom:20px; background:#f0fdf4; border:1px solid #86efac; border-radius:12px; padding:12px 16px;">
-        <summary style="font-size:13px; font-weight:800; color:#15803d; cursor:pointer; display:flex; justify-content:space-between; align-items:center;">
+      <details style="margin-bottom:20px; background:var(--verde-50); border:1px solid var(--verde-200); border-radius:12px; padding:12px 16px;">
+        <summary style="font-size:var(--texto-sm); font-weight:800; color:var(--verde-700); cursor:pointer; display:flex; justify-content:space-between; align-items:center;">
           <span style="display:inline-flex; align-items:center; gap:6px;">
             <i data-lucide="check-circle" style="width:15px; height:15px;"></i> Ver las {{ resultado.validas|length }} pregunta(s) válidas listas para importar
           </span>
-          <span style="font-size:11px; font-weight:normal; text-decoration:underline;">(Clic para desplegar)</span>
+          <span style="font-size:var(--texto-xs); font-weight:normal; text-decoration:underline;">(Clic para desplegar)</span>
         </summary>
         <div style="margin-top:12px; display:flex; flex-direction:column; gap:8px;">
           {% for fila in resultado.validas %}
-          <div style="background:white; border:1px solid #bbf7d0; border-radius:8px; padding:10px 14px; display:flex; justify-content:space-between; align-items:center; gap:12px;">
+          <div style="background:var(--color-superficie); border:1px solid var(--verde-200); border-radius:8px; padding:10px 14px; display:flex; justify-content:space-between; align-items:center; gap:12px;">
             <div style="flex:1;">
               <div style="display:flex; align-items:center; gap:6px; margin-bottom:2px;">
-                <span style="font-size:11px; font-weight:800; color:#15803d;">#{{ fila.fila_excel }}</span>
-                <span class="badge" style="background:#dcfce7; color:#15803d; font-size:10px;">{{ fila.categoria }}</span>
-                <span class="badge" style="background:#f1f5f9; color:#475569; font-size:10px;">{{ fila.tipo }}</span>
-                <span style="font-size:11px; color:#64748b;">(Puntaje: {{ fila.puntaje }})</span>
+                <span style="font-size:var(--texto-xs); font-weight:800; color:var(--verde-700);">#{{ fila.fila_excel }}</span>
+                <span class="badge" style="background:var(--verde-100); color:var(--verde-800); font-size:var(--texto-xs);">{{ fila.categoria }}</span>
+                <span class="badge" style="background:var(--color-superficie-hundida); color:var(--color-texto-suave); font-size:var(--texto-xs);">{{ fila.tipo }}</span>
+                <span style="font-size:var(--texto-xs); color:var(--color-texto-suave);">(Puntaje: {{ fila.puntaje }})</span>
               </div>
-              <div style="font-size:12px; color:#0f172a; font-weight:600;">
+              <div style="font-size:var(--texto-xs); color:var(--color-texto); font-weight:600;">
                 {{ fila.enunciado|truncatechars:90 }}
               </div>
             </div>
             <button type="button"
                     class="btn btn-outline"
-                    style="font-size:11px; padding:4px 10px; border-radius:6px; cursor:pointer; display:inline-flex; align-items:center; gap:4px;"
+                    style="font-size:var(--texto-xs); padding:4px 10px; border-radius:6px; cursor:pointer; display:inline-flex; align-items:center; gap:4px;"
                     onclick='abrirModalCorreccion({{ fila.fila_excel }}, {{ fila.json_data|safe }})'>
               <i data-lucide="edit-3" style="width:12px; height:12px;"></i> Modificar
             </button>
@@ -180,23 +180,23 @@
       {% endif %}
 
       <!-- Esquema Reconocido Oficial -->
-      <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:14px; margin-bottom:20px;">
+      <div style="background:var(--color-superficie-tenue); border:1px solid var(--color-borde); border-radius:12px; padding:14px; margin-bottom:20px;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-          <span style="font-size:12px; font-weight:700; color:#334155;">Esquema Reconocido Oficial</span>
-          <span class="badge badge-success" style="font-size:11px;">11/11 Columnas Mapeadas</span>
+          <span style="font-size:var(--texto-xs); font-weight:700; color:var(--gris-700);">Esquema Reconocido Oficial</span>
+          <span class="badge badge-success" style="font-size:var(--texto-xs);">11/11 Columnas Mapeadas</span>
         </div>
-        <div style="display:flex; flex-wrap:wrap; gap:6px; font-size:11px;">
-          <span class="badge" style="background:#e0f2fe; color:#0369a1;">● categoria</span>
-          <span class="badge" style="background:#e0f2fe; color:#0369a1;">● tipo</span>
-          <span class="badge" style="background:#e0f2fe; color:#0369a1;">● texto_base</span>
-          <span class="badge" style="background:#e0f2fe; color:#0369a1;">● pregunta</span>
-          <span class="badge" style="background:#e0f2fe; color:#0369a1;">● opcion_a</span>
-          <span class="badge" style="background:#e0f2fe; color:#0369a1;">● opcion_b</span>
-          <span class="badge" style="background:#e0f2fe; color:#0369a1;">● opcion_c</span>
-          <span class="badge" style="background:#e0f2fe; color:#0369a1;">● opcion_d</span>
-          <span class="badge" style="background:#e0f2fe; color:#0369a1;">● respuesta_correcta</span>
-          <span class="badge" style="background:#e0f2fe; color:#0369a1;">● retroalimentacion</span>
-          <span class="badge" style="background:#e0f2fe; color:#0369a1;">● puntaje</span>
+        <div style="display:flex; flex-wrap:wrap; gap:6px; font-size:var(--texto-xs);">
+          <span class="badge" style="background:var(--azul-50); color:var(--azul-700);">● categoria</span>
+          <span class="badge" style="background:var(--azul-50); color:var(--azul-700);">● tipo</span>
+          <span class="badge" style="background:var(--azul-50); color:var(--azul-700);">● texto_base</span>
+          <span class="badge" style="background:var(--azul-50); color:var(--azul-700);">● pregunta</span>
+          <span class="badge" style="background:var(--azul-50); color:var(--azul-700);">● opcion_a</span>
+          <span class="badge" style="background:var(--azul-50); color:var(--azul-700);">● opcion_b</span>
+          <span class="badge" style="background:var(--azul-50); color:var(--azul-700);">● opcion_c</span>
+          <span class="badge" style="background:var(--azul-50); color:var(--azul-700);">● opcion_d</span>
+          <span class="badge" style="background:var(--azul-50); color:var(--azul-700);">● respuesta_correcta</span>
+          <span class="badge" style="background:var(--azul-50); color:var(--azul-700);">● retroalimentacion</span>
+          <span class="badge" style="background:var(--azul-50); color:var(--azul-700);">● puntaje</span>
         </div>
       </div>
 
@@ -204,24 +204,24 @@
       {% if resultado.validas %}
       <form method="POST" action="{% url 'importaciones:confirmar' %}">
         {% csrf_token %}
-        <button type="submit" class="btn btn-primary btn-full" style="padding:14px; font-size:15px; border-radius:12px; margin-bottom:12px; background:#186382; font-weight:700; display:inline-flex; align-items:center; justify-content:center; gap:8px;">
+        <button type="submit" class="btn btn-primary btn-full" style="padding:14px; font-size:var(--texto-md); border-radius:12px; margin-bottom:12px; background:var(--color-primario); font-weight:700; display:inline-flex; align-items:center; justify-content:center; gap:8px;">
           <i data-lucide="check-circle-2" style="width:18px; height:18px;"></i> Confirmar e Importar {{ resultado.validas|length }} Pregunta(s) Válida(s)
         </button>
       </form>
       {% else %}
-      <div style="background:#fef2f2; color:#991b1b; padding:16px; border-radius:12px; font-size:13px; text-align:center; margin-bottom:14px; border:1px solid #fecaca;">
+      <div style="background:var(--rojo-50); color:var(--rojo-700); padding:16px; border-radius:12px; font-size:var(--texto-sm); text-align:center; margin-bottom:14px; border:1px solid var(--rojo-200);">
         <strong>Aún no hay preguntas válidas para importar.</strong>
-        <div style="font-size:12px; color:#7f1d1d; margin-top:4px;">Utiliza el botón <strong>"Corregir"</strong> en las filas rojas arriba para solucionar los errores directamente aquí.</div>
+        <div style="font-size:var(--texto-xs); color:var(--rojo-800); margin-top:4px;">Utiliza el botón <strong>"Corregir"</strong> en las filas rojas arriba para solucionar los errores directamente aquí.</div>
       </div>
       {% endif %}
 
       <div style="display:flex; gap:10px;">
-        <a href="{% static 'plantillas/plantilla_preguntas_simulador_tyt.xlsx' %}" download class="btn btn-outline" style="flex:1; font-size:12px; padding:10px; text-align:center; display:inline-flex; align-items:center; justify-content:center; gap:6px;">
+        <a href="{% static 'plantillas/plantilla_preguntas_simulador_tyt.xlsx' %}" download class="btn btn-outline" style="flex:1; font-size:var(--texto-xs); padding:10px; text-align:center; display:inline-flex; align-items:center; justify-content:center; gap:6px;">
           <i data-lucide="download" style="width:14px; height:14px;"></i> Descargar Plantilla Oficial
         </a>
         <form method="POST" action="{% url 'importaciones:cancelar' %}" style="flex:1;">
           {% csrf_token %}
-          <button type="submit" class="btn btn-outline btn-full" style="font-size:12px; padding:10px; color:#b91c1c; border-color:#fca5a5; display:inline-flex; align-items:center; justify-content:center; gap:6px;">
+          <button type="submit" class="btn btn-outline btn-full" style="font-size:var(--texto-xs); padding:10px; color:var(--rojo-700); border-color:var(--rojo-200); display:inline-flex; align-items:center; justify-content:center; gap:6px;">
             <i data-lucide="x" style="width:14px; height:14px;"></i> Cancelar Ingesta
           </button>
         </form>
@@ -236,21 +236,21 @@
 <!-- MODAL DE CORRECCIÓN DIRECTA DE PREGUNTA EN CALIENTE                           -->
 <!-- ============================================================================== -->
 <div id="modalCorreccion" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(15,23,42,0.65); backdrop-filter:blur(3px); z-index:99999; align-items:center; justify-content:center; padding:16px;">
-  <div style="background:white; border-radius:18px; max-width:680px; width:100%; max-height:92vh; overflow-y:auto; box-shadow:0 25px 50px -12px rgba(0,0,0,0.35); border:1px solid #e2e8f0; display:flex; flex-direction:column;">
+  <div style="background:var(--color-superficie); border-radius:18px; max-width:680px; width:100%; max-height:92vh; overflow-y:auto; box-shadow:0 25px 50px -12px rgba(0,0,0,0.35); border:1px solid var(--color-borde); display:flex; flex-direction:column;">
     
     <!-- Header del Modal -->
-    <div style="padding:18px 24px; border-bottom:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center; background:#f8fafc; border-radius:18px 18px 0 0;">
+    <div style="padding:18px 24px; border-bottom:1px solid var(--color-borde); display:flex; justify-content:space-between; align-items:center; background:var(--color-superficie-tenue); border-radius:18px 18px 0 0;">
       <div>
-        <h3 style="margin:0; font-size:16px; font-weight:800; color:#0f172a; display:flex; align-items:center; gap:8px;">
-          <i data-lucide="edit-3" style="width:16px; height:16px; color:#186382;"></i> Corregir Reactivo — <span id="modalFilaTitulo" style="color:#186382;">Fila #</span>
+        <h3 style="margin:0; font-size:var(--texto-md); font-weight:800; color:var(--color-texto); display:flex; align-items:center; gap:8px;">
+          <i data-lucide="edit-3" style="width:16px; height:16px; color:var(--color-primario);"></i> Corregir Reactivo — <span id="modalFilaTitulo" style="color:var(--color-primario);">Fila #</span>
         </h3>
-        <div style="font-size:12px; color:#64748b; margin-top:2px;">Los cambios se guardan y revalidan automáticamente.</div>
+        <div style="font-size:var(--texto-xs); color:var(--color-texto-suave); margin-top:2px;">Los cambios se guardan y revalidan automáticamente.</div>
       </div>
-      <button type="button" onclick="cerrarModalCorreccion()" style="background:none; border:none; font-size:22px; font-weight:bold; color:#64748b; cursor:pointer; padding:4px 8px;">&times;</button>
+      <button type="button" onclick="cerrarModalCorreccion()" style="background:none; border:none; font-size:var(--texto-xl); font-weight:bold; color:var(--color-texto-suave); cursor:pointer; padding:4px 8px;">&times;</button>
     </div>
 
     <!-- Caja de errores detectados en la fila -->
-    <div id="modalCajaErrores" style="display:none; margin:16px 24px 0 24px; padding:12px 14px; background:#fef2f2; border:1px solid #fecaca; border-radius:10px; font-size:12px; color:#991b1b;">
+    <div id="modalCajaErrores" style="display:none; margin:16px 24px 0 24px; padding:12px 14px; background:var(--rojo-50); border:1px solid var(--rojo-200); border-radius:10px; font-size:var(--texto-xs); color:var(--rojo-700);">
       <div style="font-weight:800; margin-bottom:4px;">Observaciones detectadas en esta fila:</div>
       <div id="modalListaErrores"></div>
     </div>
@@ -263,13 +263,13 @@
       <!-- Fila 1: Categoría, Tipo y Puntaje -->
       <div style="display:grid; grid-template-columns: 2fr 1.6fr 1fr; gap:12px;">
         <div class="form-group" style="margin:0;">
-          <label class="form-label" style="font-size:12px; font-weight:700;">Categoría / Módulo *</label>
-          <input type="text" name="categoria" id="input_categoria" class="form-control" placeholder="Ej: Lectura Crítica" required style="font-size:13px; padding:8px 12px; border:1px solid #cbd5e1; border-radius:8px; width:100%;">
+          <label class="form-label" style="font-size:var(--texto-xs); font-weight:700;">Categoría / Módulo *</label>
+          <input type="text" name="categoria" id="input_categoria" class="form-control" placeholder="Ej: Lectura Crítica" required style="font-size:var(--texto-sm); padding:8px 12px; border:1px solid var(--color-borde-fuerte); border-radius:8px; width:100%;">
         </div>
 
         <div class="form-group" style="margin:0;">
-          <label class="form-label" style="font-size:12px; font-weight:700;">Tipo de Reactivo *</label>
-          <select name="tipo" id="input_tipo" class="form-control" onchange="toggleTipoPregunta()" required style="font-size:13px; padding:8px 12px; border:1px solid #cbd5e1; border-radius:8px; width:100%;">
+          <label class="form-label" style="font-size:var(--texto-xs); font-weight:700;">Tipo de Reactivo *</label>
+          <select name="tipo" id="input_tipo" class="form-control" onchange="toggleTipoPregunta()" required style="font-size:var(--texto-sm); padding:8px 12px; border:1px solid var(--color-borde-fuerte); border-radius:8px; width:100%;">
             <option value="" disabled selected>-- Selecciona un tipo --</option>
             <option value="MULTIPLE">MULTIPLE (A-D)</option>
             <option value="V_F">V_F (Verdadero/Falso)</option>
@@ -277,46 +277,46 @@
         </div>
 
         <div class="form-group" style="margin:0;">
-          <label class="form-label" style="font-size:12px; font-weight:700;">Puntaje *</label>
-          <input type="number" step="0.1" min="0.1" name="puntaje" id="input_puntaje" class="form-control" value="1.0" required style="font-size:13px; padding:8px 12px; border:1px solid #cbd5e1; border-radius:8px; width:100%;">
+          <label class="form-label" style="font-size:var(--texto-xs); font-weight:700;">Puntaje *</label>
+          <input type="number" step="0.1" min="0.1" name="puntaje" id="input_puntaje" class="form-control" value="1.0" required style="font-size:var(--texto-sm); padding:8px 12px; border:1px solid var(--color-borde-fuerte); border-radius:8px; width:100%;">
         </div>
       </div>
 
       <!-- Texto Base (Opcional) -->
       <div class="form-group" style="margin:0;">
-        <label class="form-label" style="font-size:12px; font-weight:700; color:#475569;">Texto Base / Contexto de Lectura (Opcional)</label>
-        <textarea name="texto_base" id="input_texto_base" class="form-control" rows="2" placeholder="Fragmento de texto o contexto común para la pregunta..." style="font-size:12px; padding:8px 12px; border:1px solid #cbd5e1; border-radius:8px; width:100%;"></textarea>
+        <label class="form-label" style="font-size:var(--texto-xs); font-weight:700; color:var(--color-texto-suave);">Texto Base / Contexto de Lectura (Opcional)</label>
+        <textarea name="texto_base" id="input_texto_base" class="form-control" rows="2" placeholder="Fragmento de texto o contexto común para la pregunta..." style="font-size:var(--texto-xs); padding:8px 12px; border:1px solid var(--color-borde-fuerte); border-radius:8px; width:100%;"></textarea>
       </div>
 
       <!-- Enunciado / Pregunta -->
       <div class="form-group" style="margin:0;">
-        <label class="form-label" style="font-size:12px; font-weight:700;">Enunciado de la Pregunta *</label>
-        <textarea name="pregunta" id="input_pregunta" class="form-control" rows="3" placeholder="Redacta la pregunta..." required style="font-size:13px; padding:8px 12px; border:1px solid #cbd5e1; border-radius:8px; width:100%;"></textarea>
+        <label class="form-label" style="font-size:var(--texto-xs); font-weight:700;">Enunciado de la Pregunta *</label>
+        <textarea name="pregunta" id="input_pregunta" class="form-control" rows="3" placeholder="Redacta la pregunta..." required style="font-size:var(--texto-sm); padding:8px 12px; border:1px solid var(--color-borde-fuerte); border-radius:8px; width:100%;"></textarea>
       </div>
 
       <!-- Opciones de Respuesta -->
       <div>
-        <label class="form-label" style="font-size:12px; font-weight:800; color:#0f172a; margin-bottom:8px; display:block;">Opciones de Respuesta</label>
+        <label class="form-label" style="font-size:var(--texto-xs); font-weight:800; color:var(--color-texto); margin-bottom:8px; display:block;">Opciones de Respuesta</label>
         <div style="display:flex; flex-direction:column; gap:8px;">
           
           <div style="display:flex; align-items:center; gap:8px;">
-            <span class="badge" style="background:#e2e8f0; font-weight:800; min-width:28px; text-align:center;">A</span>
-            <input type="text" name="opcion_a" id="input_opcion_a" class="form-control" placeholder="Opción A" required style="font-size:12px; padding:8px 12px; border:1px solid #cbd5e1; border-radius:8px; flex:1;">
+            <span class="badge" style="background:var(--color-borde); font-weight:800; min-width:28px; text-align:center;">A</span>
+            <input type="text" name="opcion_a" id="input_opcion_a" class="form-control" placeholder="Opción A" required style="font-size:var(--texto-xs); padding:8px 12px; border:1px solid var(--color-borde-fuerte); border-radius:8px; flex:1;">
           </div>
 
           <div style="display:flex; align-items:center; gap:8px;">
-            <span class="badge" style="background:#e2e8f0; font-weight:800; min-width:28px; text-align:center;">B</span>
-            <input type="text" name="opcion_b" id="input_opcion_b" class="form-control" placeholder="Opción B" required style="font-size:12px; padding:8px 12px; border:1px solid #cbd5e1; border-radius:8px; flex:1;">
+            <span class="badge" style="background:var(--color-borde); font-weight:800; min-width:28px; text-align:center;">B</span>
+            <input type="text" name="opcion_b" id="input_opcion_b" class="form-control" placeholder="Opción B" required style="font-size:var(--texto-xs); padding:8px 12px; border:1px solid var(--color-borde-fuerte); border-radius:8px; flex:1;">
           </div>
 
           <div id="grupo_opcion_c" style="display:flex; align-items:center; gap:8px;">
-            <span class="badge" style="background:#e2e8f0; font-weight:800; min-width:28px; text-align:center;">C</span>
-            <input type="text" name="opcion_c" id="input_opcion_c" class="form-control" placeholder="Opción C" style="font-size:12px; padding:8px 12px; border:1px solid #cbd5e1; border-radius:8px; flex:1;">
+            <span class="badge" style="background:var(--color-borde); font-weight:800; min-width:28px; text-align:center;">C</span>
+            <input type="text" name="opcion_c" id="input_opcion_c" class="form-control" placeholder="Opción C" style="font-size:var(--texto-xs); padding:8px 12px; border:1px solid var(--color-borde-fuerte); border-radius:8px; flex:1;">
           </div>
 
           <div id="grupo_opcion_d" style="display:flex; align-items:center; gap:8px;">
-            <span class="badge" style="background:#e2e8f0; font-weight:800; min-width:28px; text-align:center;">D</span>
-            <input type="text" name="opcion_d" id="input_opcion_d" class="form-control" placeholder="Opción D" style="font-size:12px; padding:8px 12px; border:1px solid #cbd5e1; border-radius:8px; flex:1;">
+            <span class="badge" style="background:var(--color-borde); font-weight:800; min-width:28px; text-align:center;">D</span>
+            <input type="text" name="opcion_d" id="input_opcion_d" class="form-control" placeholder="Opción D" style="font-size:var(--texto-xs); padding:8px 12px; border:1px solid var(--color-borde-fuerte); border-radius:8px; flex:1;">
           </div>
 
         </div>
@@ -325,8 +325,8 @@
       <!-- Respuesta Correcta y Retroalimentación -->
       <div style="display:grid; grid-template-columns: 1fr 2fr; gap:12px;">
         <div class="form-group" style="margin:0;">
-          <label class="form-label" style="font-size:12px; font-weight:700; color:#166534;">Respuesta Correcta *</label>
-          <select name="respuesta_correcta" id="input_respuesta_correcta" class="form-control" required style="font-size:13px; font-weight:800; padding:8px 12px; border:2px solid #86efac; border-radius:8px; width:100%; color:#166534; background:#f0fdf4;">
+          <label class="form-label" style="font-size:var(--texto-xs); font-weight:700; color:var(--verde-800);">Respuesta Correcta *</label>
+          <select name="respuesta_correcta" id="input_respuesta_correcta" class="form-control" required style="font-size:var(--texto-sm); font-weight:800; padding:8px 12px; border:2px solid var(--verde-200); border-radius:8px; width:100%; color:var(--verde-800); background:var(--verde-50);">
             <option value="A">Opción A</option>
             <option value="B">Opción B</option>
             <option value="C" id="opt_correcta_c">Opción C</option>
@@ -335,17 +335,17 @@
         </div>
 
         <div class="form-group" style="margin:0;">
-          <label class="form-label" style="font-size:12px; font-weight:700; color:#475569;">Retroalimentación / Justificación</label>
-          <input type="text" name="retroalimentacion" id="input_retroalimentacion" class="form-control" placeholder="Por qué esta es la respuesta correcta..." style="font-size:12px; padding:8px 12px; border:1px solid #cbd5e1; border-radius:8px; width:100%;">
+          <label class="form-label" style="font-size:var(--texto-xs); font-weight:700; color:var(--color-texto-suave);">Retroalimentación / Justificación</label>
+          <input type="text" name="retroalimentacion" id="input_retroalimentacion" class="form-control" placeholder="Por qué esta es la respuesta correcta..." style="font-size:var(--texto-xs); padding:8px 12px; border:1px solid var(--color-borde-fuerte); border-radius:8px; width:100%;">
         </div>
       </div>
 
       <!-- Botones de Acción -->
-      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:8px; padding-top:12px; border-top:1px solid #e2e8f0;">
-        <button type="button" class="btn btn-outline" onclick="cerrarModalCorreccion()" style="padding:10px 16px; font-size:13px; border-radius:8px;">
+      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:8px; padding-top:12px; border-top:1px solid var(--color-borde);">
+        <button type="button" class="btn btn-outline" onclick="cerrarModalCorreccion()" style="padding:10px 16px; font-size:var(--texto-sm); border-radius:8px;">
           Cancelar
         </button>
-        <button type="submit" class="btn btn-primary" style="padding:10px 20px; font-size:13px; font-weight:700; border-radius:8px; background:#186382; display:inline-flex; align-items:center; gap:6px;">
+        <button type="submit" class="btn btn-primary" style="padding:10px 20px; font-size:var(--texto-sm); font-weight:700; border-radius:8px; background:var(--color-primario); display:inline-flex; align-items:center; gap:6px;">
           <i data-lucide="save" style="width:15px; height:15px;"></i> Guardar Corrección y Revalidar
         </button>
       </div>
@@ -368,12 +368,12 @@
     const tipoVal = (data.tipo || '').toUpperCase().trim();
     if (tipoVal === 'MULTIPLE' || tipoVal === 'V_F') {
       inputTipo.value = tipoVal;
-      inputTipo.style.borderColor = '#cbd5e1';
-      inputTipo.style.background = '#ffffff';
+      inputTipo.style.borderColor = 'var(--color-borde-fuerte)';
+      inputTipo.style.background = 'var(--color-superficie)';
     } else {
       inputTipo.value = '';
-      inputTipo.style.borderColor = '#dc2626';
-      inputTipo.style.background = '#fef2f2';
+      inputTipo.style.borderColor = 'var(--rojo-600)';
+      inputTipo.style.background = 'var(--rojo-50)';
     }
 
     document.getElementById('input_puntaje').value = data.puntaje || '1.0';
@@ -421,8 +421,8 @@
     const inputD = document.getElementById('input_opcion_d');
 
     if (tipo) {
-      inputTipo.style.borderColor = '#cbd5e1';
-      inputTipo.style.background = '#ffffff';
+      inputTipo.style.borderColor = 'var(--color-borde-fuerte)';
+      inputTipo.style.background = 'var(--color-superficie)';
     }
 
     if (tipo === 'V_F') {
@@ -456,8 +456,8 @@
     const inputTipo = document.getElementById('input_tipo');
     if (!inputTipo.value || (inputTipo.value !== 'MULTIPLE' && inputTipo.value !== 'V_F')) {
       e.preventDefault();
-      inputTipo.style.borderColor = '#dc2626';
-      inputTipo.style.background = '#fef2f2';
+      inputTipo.style.borderColor = 'var(--rojo-600)';
+      inputTipo.style.background = 'var(--rojo-50)';
       inputTipo.focus();
       alert('Debes seleccionar un Tipo de reactivo válido (MULTIPLE o V_F) antes de guardar.');
       return false;
