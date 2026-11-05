@@ -6,10 +6,11 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
-from core.services.acceso import es_dueno_del_intento, es_personal_docente, puede_auditar_resultados
-from preguntas.models import Cuestionario, Intento
-from preguntas.services import evaluacion as servicio
-from preguntas.services.cuestionarios import serializar_preguntas
+from apps.core.services.acceso import es_dueno_del_intento, es_personal_docente, puede_auditar_resultados
+from apps.cuestionarios.models import Cuestionario
+from apps.evaluaciones.models import Intento
+from apps.evaluaciones import services as servicio
+from apps.cuestionarios.services import serializar_preguntas
 
 
 def _puede_operar(user, intento) -> bool:
@@ -23,18 +24,18 @@ def iniciar_evaluacion(request, cuestionario_id):
     # Los docentes previsualizan para no alterar las estadísticas estudiantiles
     if es_personal_docente(request.user):
         messages.info(request, "Acceso como docente: Has sido redirigido al modo de previsualización para no alterar las estadísticas estudiantiles.")
-        return redirect("preguntas:cuestionario_previsualizar", cuestionario_id=cuestionario.id)
+        return redirect("cuestionarios:previsualizar", cuestionario_id=cuestionario.id)
 
     resultado = servicio.iniciar_intento(request.user, cuestionario)
     if resultado.tipo == "rechazado":
         messages.error(request, resultado.mensaje)
-        return redirect("core:estudiante_dashboard")
+        return redirect("evaluaciones:panel_estudiante")
     if resultado.tipo == "vencido":
         messages.warning(request, resultado.mensaje)
-        return redirect("preguntas:resultado_evaluacion", intento_id=resultado.intento.id)
+        return redirect("evaluaciones:resultado", intento_id=resultado.intento.id)
     if resultado.mensaje:
         messages.info(request, resultado.mensaje)
-    return redirect("preguntas:evaluacion_en_vivo", intento_id=resultado.intento.id)
+    return redirect("evaluaciones:sala", intento_id=resultado.intento.id)
 
 
 @login_required
@@ -43,17 +44,17 @@ def evaluacion_en_vivo(request, intento_id):
     if not _puede_operar(request.user, intento):
         return HttpResponseForbidden("Acceso denegado: este intento no pertenece a su usuario.")
     if intento.estado != "en_progreso":
-        return redirect("preguntas:resultado_evaluacion", intento_id=intento.id)
+        return redirect("evaluaciones:resultado", intento_id=intento.id)
     if servicio.cerrar_si_vencio(intento):
         messages.warning(request, "El tiempo límite para este examen ha vencido.")
-        return redirect("preguntas:resultado_evaluacion", intento_id=intento.id)
+        return redirect("evaluaciones:resultado", intento_id=intento.id)
 
     preguntas = serializar_preguntas(intento.cuestionario, semilla=intento.id, incluir_claves=False)
     respuestas_previas = dict(
         intento.respuestas.filter(opcion_seleccionada__isnull=False)
         .values_list("pregunta_id", "opcion_seleccionada_id")
     )
-    return render(request, "evaluacion_en_vivo.html", {
+    return render(request, "evaluaciones/sala.html", {
         "intento": intento,
         "cuestionario": intento.cuestionario,
         "total_preguntas": len(preguntas),
@@ -95,7 +96,7 @@ def finalizar_evaluacion(request, intento_id):
         return HttpResponseForbidden("Acceso denegado a este intento.")
     if intento.estado == "finalizado" or request.method != "POST":
         return redirect(
-            "preguntas:resultado_evaluacion" if intento.estado == "finalizado" else "preguntas:evaluacion_en_vivo",
+            "evaluaciones:resultado" if intento.estado == "finalizado" else "evaluaciones:sala",
             intento_id=intento.id,
         )
 
@@ -109,7 +110,7 @@ def finalizar_evaluacion(request, intento_id):
         request,
         f"¡Evaluación completada! Calificación obtenida: {intento.calificacion} / {intento.cuestionario.calificacion_maxima}",
     )
-    return redirect("preguntas:resultado_evaluacion", intento_id=intento.id)
+    return redirect("evaluaciones:resultado", intento_id=intento.id)
 
 
 @login_required
@@ -121,10 +122,16 @@ def resultado_evaluacion(request, intento_id):
         return HttpResponseForbidden("Acceso denegado a este reporte.")
 
     permitir_revision = intento.cuestionario.permitir_revision or es_auditor or request.user.is_staff
-    return render(request, "resultado_evaluacion.html", {
+    return render(request, "evaluaciones/resultado.html", {
         "intento": intento,
         "cuestionario": intento.cuestionario,
         "permitir_revision": permitir_revision,
         "es_auditor": es_auditor,
         **servicio.revision_intento(intento, detallada=permitir_revision),
     })
+
+
+@login_required
+def panel_estudiante(request):
+    """Panel del estudiante: cuestionarios vigentes, programados e historial propio."""
+    return render(request, "evaluaciones/panel_estudiante.html", servicio.panel_estudiante(request.user))

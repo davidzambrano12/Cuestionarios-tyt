@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'layouts/base.html' %}
 
 {% block title %}Resultado y Revisión: {{ intento.cuestionario.nombre }} - Simulador Saber TyT{% endblock %}
 
@@ -9,11 +9,11 @@
     <!-- Barra de Navegación Superior -->
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
       {% if es_auditor %}
-      <a href="{% url 'preguntas:cuestionario_intentos' cuestionario.id %}" class="btn btn-outline" style="font-size:13px; padding:8px 16px; border-radius:10px; display:inline-flex; align-items:center; gap:6px;">
+      <a href="{% url 'reportes:intentos' cuestionario.id %}" class="btn btn-outline" style="font-size:13px; padding:8px 16px; border-radius:10px; display:inline-flex; align-items:center; gap:6px;">
         <i data-lucide="arrow-left" style="width:15px; height:15px;"></i> Volver al reporte de intentos
       </a>
       {% else %}
-      <a href="{% url 'core:estudiante_dashboard' %}" class="btn btn-outline" style="font-size:13px; padding:8px 16px; border-radius:10px; display:inline-flex; align-items:center; gap:6px;">
+      <a href="{% url 'evaluaciones:panel_estudiante' %}" class="btn btn-outline" style="font-size:13px; padding:8px 16px; border-radius:10px; display:inline-flex; align-items:center; gap:6px;">
         <i data-lucide="arrow-left" style="width:15px; height:15px;"></i> Volver al Panel de Estudiante
       </a>
       {% endif %}
@@ -267,11 +267,11 @@
     <!-- Acciones Inferiores -->
     <div style="margin-top:36px; display:flex; justify-content:center; gap:16px; flex-wrap:wrap;">
       {% if es_auditor %}
-      <a href="{% url 'preguntas:cuestionario_intentos' cuestionario.id %}" class="btn btn-primary" style="padding:12px 28px; font-size:14px; border-radius:12px; display:inline-flex; align-items:center; gap:8px;">
+      <a href="{% url 'reportes:intentos' cuestionario.id %}" class="btn btn-primary" style="padding:12px 28px; font-size:14px; border-radius:12px; display:inline-flex; align-items:center; gap:8px;">
         <i data-lucide="arrow-left" style="width:16px; height:16px;"></i> Volver al reporte de intentos
       </a>
       {% else %}
-      <a href="{% url 'core:estudiante_dashboard' %}" class="btn btn-primary" style="padding:12px 28px; font-size:14px; border-radius:12px; display:inline-flex; align-items:center; gap:8px;">
+      <a href="{% url 'evaluaciones:panel_estudiante' %}" class="btn btn-primary" style="padding:12px 28px; font-size:14px; border-radius:12px; display:inline-flex; align-items:center; gap:8px;">
         <i data-lucide="arrow-left" style="width:16px; height:16px;"></i> Volver al Dashboard de Estudiante
       </a>
       {% endif %}

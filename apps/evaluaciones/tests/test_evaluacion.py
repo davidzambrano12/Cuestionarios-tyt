@@ -6,8 +6,8 @@ from decimal import Decimal
 from django.test import TestCase
 from django.utils import timezone
 
-from preguntas.models import Intento, RespuestaIntento
-from .factories import (
+from apps.evaluaciones.models import Intento, RespuestaIntento
+from apps.core.tests.factories import (
     crear_cuestionario,
     crear_usuario,
     respuestas_correctas,

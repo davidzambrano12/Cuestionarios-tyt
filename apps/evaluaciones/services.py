@@ -11,15 +11,10 @@ from django.db import transaction
 from django.db.models import Avg, Count, Q
 from django.utils import timezone
 
-from core.services.acceso import codigo_participante
-from preguntas.models import (
-    Cuestionario,
-    CuestionarioPregunta,
-    Intento,
-    OpcionRespuesta,
-    Pregunta,
-    RespuestaIntento,
-)
+from apps.core.services.acceso import codigo_participante
+from apps.banco_preguntas.models import OpcionRespuesta, Pregunta
+from apps.cuestionarios.models import Cuestionario, CuestionarioPregunta
+from apps.evaluaciones.models import Intento, RespuestaIntento
 
 VENTANA_GRACIA_SEG = 30  # tolerancia de red al vencer el tiempo (RULE-04)
 LETRAS = ["A", "B", "C", "D", "E"]
