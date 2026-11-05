@@ -97,6 +97,7 @@ def panel_docente(request):
 def consultas(request):
     from django.core.paginator import Paginator
 
+    from apps.academico.services import resumen_sin_curso
     from apps.reportes import consultas as c
     from apps.reportes.templatetags.consultas import nota, porcentaje
 
@@ -126,6 +127,7 @@ def consultas(request):
         "catalogo": catalogo,
         "alcance": alcance,
         "indicadores": ind,
+        "sin_curso": resumen_sin_curso() if alcance.es_admin else None,
         "ordenes": [("fecha", "Fecha (más reciente)"), ("nombre", "Nombre (A–Z)"), ("nota", "Calificación (mayor a menor)")],
     }
     vista = filtros.vista

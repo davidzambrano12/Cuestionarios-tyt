@@ -15,6 +15,14 @@
   </div>
   {% endif %}
 
+  {% if sin_curso and sin_curso.intentos %}
+  <div class="alerta alerta--info mb-5" role="status" data-ref="aviso-sin-curso">
+    <strong>{{ sin_curso.intentos }} intento{{ sin_curso.intentos|pluralize }} terminado{{ sin_curso.intentos|pluralize }} sin curso</strong>
+    ({{ sin_curso.estudiantes }} estudiante{{ sin_curso.estudiantes|pluralize }} sin matrícula en ese período). Se incluyen con «Todos», pero no al filtrar por año, período o curso.
+    <a href="{% url 'academico:listado' %}">Matricularlos en su curso</a>.
+  </div>
+  {% endif %}
+
   {{ catalogo|json_script:"catalogo-consultas" }}
 
   <!-- Filtros jerárquicos: año → período → curso → eje → estudiante -->

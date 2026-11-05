@@ -99,7 +99,6 @@
 .exportar-consulta .lucide, .paginacion .lucide { width: 14px; height: 14px; }
 .barra-herramientas .tabs-header a.tab-btn { text-decoration: none; }
 
-.tabla-cabecera { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--espacio-3); padding: var(--espacio-4) var(--espacio-5); border-bottom: 1px solid var(--color-borde); }
 .tabla-cabecera p { flex-basis: 100%; }
 .tabla--consulta { min-width: 760px; }
 .tabla--consulta th[scope="row"] { font-weight: var(--peso-semibold); text-align: left; }
