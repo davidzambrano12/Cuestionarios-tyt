@@ -62,11 +62,20 @@
 
   function confirmarEntrega() {
     const { total, respondidas, pendientes } = motor.estado;
-    let mensaje = `¿Finalizar y entregar tu examen?\n\n• Respondidas: ${respondidas} de ${total}\n• Pendientes: ${pendientes}`;
+    const mensaje = [`Respondiste ${respondidas} de ${total} preguntas.`];
     if (pendientes > 0) {
-      mensaje += `\n\nAún tienes ${pendientes} pregunta(s) sin responder: se calificarán con 0 puntos.`;
+      mensaje.push(`Te ${pendientes === 1 ? 'falta 1 pregunta' : `faltan ${pendientes} preguntas`}: se calificarán con 0 puntos.`);
     }
-    if (window.confirm(mensaje)) entregar();
+    mensaje.push('Después de entregar no podrás cambiar tus respuestas.');
+    window.confirmar({
+      titulo: '¿Entregar tu examen?',
+      mensaje: mensaje.join('\n'),
+      boton: 'Entregar examen',
+      cancelar: 'Volver al examen',
+      tipo: pendientes > 0 ? 'aviso' : 'primario',
+    }).then((aceptado) => {
+      if (aceptado) entregar();
+    });
   }
 
   // Temporizador regresivo con alertas progresivas (RULE-03 §2.3)
@@ -106,7 +115,17 @@
   });
   document.querySelector('[data-accion="entregar"]').addEventListener('click', confirmarEntrega);
   document.querySelector('[data-confirmar-salida]').addEventListener('click', (evento) => {
-    if (!window.confirm('¿Seguro que deseas salir? El temporizador seguirá corriendo.')) evento.preventDefault();
+    evento.preventDefault();
+    const destino = evento.currentTarget.href;
+    window.confirmar({
+      titulo: '¿Salir de la sala de examen?',
+      mensaje: 'El temporizador seguirá corriendo aunque salgas.\nLas respuestas ya guardadas se conservan y podrás volver mientras quede tiempo.',
+      boton: 'Salir de la sala',
+      cancelar: 'Seguir en el examen',
+      tipo: 'aviso',
+    }).then((aceptado) => {
+      if (aceptado) window.location.href = destino;
+    });
   });
 
   sincronizarCampo();

@@ -48,8 +48,20 @@ class ExamenTests(PruebaNavegador):
         pg.wait_for_selector(".option-card")
         self.assertIn("2 respondidas", pg.inner_text('[data-ref="resumen"]'))
 
-        # Entrega y resultado
+        # Entrega: el cuadro resume lo respondido y arranca en «Volver al examen»
         pg.click('[data-accion="entregar"]')
+        self.assertEqual(pg.evaluate("document.activeElement.textContent"), "Volver al examen")
+        pg.keyboard.press("Escape")  # cancelar no entrega
+        pg.wait_for_selector("dialog.confirmacion[open]", state="hidden")
+        self.assertNotIn("/resultado/", pg.url)
+        self.assertEqual(Intento.objects.get(id=intento.id).estado, "en_progreso")
+        pg.click('[data-accion="entregar"]')
+        pg.wait_for_function("document.querySelector('dialog.confirmacion').getAnimations().length === 0")
+        self.capturar(pg, "confirmar_entrega")
+        titulo, mensaje = self.responder_confirmacion(pg)
+        self.assertEqual(titulo, "¿Entregar tu examen?")
+        self.assertIn("Respondiste 2 de 3", mensaje)
+        self.assertIn("Te falta 1 pregunta", mensaje)
         pg.wait_for_url("**/resultado/")
         intento.refresh_from_db()
         self.assertEqual(intento.estado, "finalizado")
@@ -64,6 +76,7 @@ class ExamenTests(PruebaNavegador):
         self.assertIn("No aprobado", pg.inner_text("#pestana-historial"))
         self.capturar(pg, "panel_estudiante")
         self.assertEqual(errores, [])
+        self.assertEqual(self.dialogos, [])  # ningún cuadro nativo del navegador
 
     def test_previsualizacion_docente(self):
         pg, errores = self.abrir(f"/cuestionarios/{self.cuestionario.id}/previsualizar/", self.docente)
