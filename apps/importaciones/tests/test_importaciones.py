@@ -84,7 +84,7 @@ class ImportacionExcelTests(TestCase):
         self.assertEqual(multiple.opciones.get(es_correcta=True).texto, "Dos")
 
     def test_importar_hacia_un_cuestionario(self):
-        cuestionario = crear_cuestionario(num_preguntas=0)
+        cuestionario = crear_cuestionario(num_preguntas=0, visibilidad="privado", creado_por=self.docente)
         self._subir(excel(FILA_VALIDA, FILA_VF), cuestionario=cuestionario.id)
         self.client.post("/preguntas/importar/confirmar/")
         self.assertEqual(CuestionarioPregunta.objects.filter(cuestionario=cuestionario).count(), 2)

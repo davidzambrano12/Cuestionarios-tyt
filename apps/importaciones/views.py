@@ -51,7 +51,7 @@ def _descartar_pendiente(request):
 def importar_preguntas(request):
     """Paso 1: subida del archivo."""
     if request.method == "POST":
-        form = ImportarPreguntasForm(request.POST, request.FILES)
+        form = ImportarPreguntasForm(request.POST, request.FILES, usuario=request.user)
         if form.is_valid():
             archivo = form.cleaned_data["archivo"]
             cuestionario = form.cleaned_data.get("cuestionario")
@@ -65,7 +65,7 @@ def importar_preguntas(request):
             }
             return redirect("importaciones:previsualizar")
     else:
-        form = ImportarPreguntasForm()
+        form = ImportarPreguntasForm(usuario=request.user)
 
     return render(request, "importaciones/importar.html", {
         "form": form,

@@ -18,6 +18,14 @@ class ImportarPreguntasForm(forms.Form):
         widget=forms.Select(attrs={"class": "form-select"}),
     )
 
+    def __init__(self, *args, usuario=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        if usuario is not None:
+            from apps.cuestionarios.acceso import editables
+
+            # Solo se importan preguntas hacia cuestionarios que el usuario gestiona
+            self.fields["cuestionario"].queryset = editables(usuario).order_by("-id")
+
     def clean_archivo(self):
         archivo = self.cleaned_data["archivo"]
         nombre = archivo.name.lower()
