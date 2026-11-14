@@ -1,0 +1,34 @@
+<section class="mt-5" aria-labelledby="analisis-evaluacion">
+  <h2 id="analisis-evaluacion">Análisis de respuestas</h2>
+  <p class="texto-sm">
+    Distribución de resultados: {{ estudiantes_aprobados_count }} aprobados,
+    {{ estudiantes_reprobados_count }} reprobados y {{ estudiantes_sin_nota_count }} sin nota.
+  </p>
+  <p class="texto-suave">Los porcentajes se calculan sobre las preguntas contestadas en intentos terminados.</p>
+  <div class="card tabla-contenedor tabla-desplazable mb-5">
+    <table class="tabla">
+      <caption>Desempeño por eje, de mayor a menor porcentaje de aciertos</caption>
+      <thead><tr><th scope="col">Eje</th><th scope="col">Aciertos</th><th scope="col">Errores</th><th scope="col">Omisiones</th><th scope="col">% de aciertos</th></tr></thead>
+      <tbody>
+        {% for fila in ejes_evaluacion %}
+        <tr><th scope="row">{{ fila.eje }}</th><td>{{ fila.aciertos }}</td><td>{{ fila.errores }}</td><td>{{ fila.omitidas }}</td><td>{% if fila.respondidas %}{{ fila.porcentaje_aciertos }} %{% else %}—{% endif %}</td></tr>
+        {% empty %}
+        <tr><td colspan="5" class="tabla__vacia">Aún no hay respuestas registradas en intentos terminados.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="card tabla-contenedor tabla-desplazable">
+    <table class="tabla">
+      <caption>Dificultad por pregunta, de menor a mayor porcentaje de aciertos</caption>
+      <thead><tr><th scope="col">Pregunta</th><th scope="col">Eje</th><th scope="col">Aciertos</th><th scope="col">Errores</th><th scope="col">% de aciertos</th></tr></thead>
+      <tbody>
+        {% for fila in preguntas_evaluacion %}
+        <tr><th scope="row">{{ fila.enunciado }}</th><td>{{ fila.eje }}</td><td>{{ fila.aciertos }}</td><td>{{ fila.errores }}</td><td>{{ fila.porcentaje_aciertos }} %</td></tr>
+        {% empty %}
+        <tr><td colspan="5" class="tabla__vacia">Aún no hay preguntas contestadas en intentos terminados.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>

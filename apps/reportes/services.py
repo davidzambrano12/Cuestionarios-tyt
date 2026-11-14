@@ -17,6 +17,7 @@ from apps.banco_preguntas.models import Categoria, Pregunta
 from apps.cuestionarios.models import Cuestionario
 from apps.evaluaciones.models import Intento
 from apps.evaluaciones.services import dictamen_intento, intento_calificado
+from apps.reportes import consultas
 
 def resumen_por_estudiante(cuestionario, intentos):
     """
@@ -77,16 +78,26 @@ def resumen_por_estudiante(cuestionario, intentos):
 
 def reporte_intentos(cuestionario) -> dict:
     """Contexto completo del panel de intentos: estudiantes agrupados, historial y métricas."""
-    intentos = list(cuestionario.intentos.all().order_by("-fecha_inicio"))
+    base = cuestionario.intentos.all()
+    intentos = list(base.order_by("-fecha_inicio"))
     for intento in intentos:
         intento.dictamen = dictamen_intento(intento, cuestionario)
     estudiantes, metricas = resumen_por_estudiante(cuestionario, intentos)
     calificados = metricas["estudiantes_calificados_count"]
+    filtros = consultas.Filtros()
+    ejes = sorted(
+        consultas.por_eje(base, filtros),
+        key=lambda eje: (not eje["respondidas"], -(eje["porcentaje_aciertos"] or 0), eje["eje"]),
+    )
     resumen_aprobacion = (
         f"{number_format(metricas['tasa_aprobacion'], 1, use_l10n=True)} % de {calificados} con nota"
         if calificados else "Aún no hay estudiantes con nota"
     )
     return {
+        "ejes_evaluacion": ejes,
+        "preguntas_evaluacion": [
+            consultas.fila_dificultad(fila) for fila in consultas.dificultad(base, filtros)
+        ],
         "resumen_aprobacion": resumen_aprobacion,
         "estudiantes_agrupados": estudiantes,
         "intentos": intentos,

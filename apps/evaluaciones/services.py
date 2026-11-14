@@ -166,8 +166,12 @@ def _peso(cp: CuestionarioPregunta | None, pregunta: Pregunta) -> Decimal:
     return pregunta.puntaje or Decimal("1.00")
 
 
+@transaction.atomic
 def guardar_respuesta(intento: Intento, pregunta_id: int, opcion_id=None, marcada: bool = False) -> RespuestaIntento:
     """Autoguardado asíncrono de una selección (o de su borrado si `opcion_id` es None)."""
+    intento = Intento.objects.select_for_update().get(pk=intento.pk)
+    if intento.estado != "en_progreso":
+        raise ValueError("El examen ya no está activo.")
     pregunta = Pregunta.objects.get(id=pregunta_id)
     opcion = None
     if opcion_id:
@@ -201,6 +205,9 @@ def calificar_intento(intento: Intento, respuestas: dict, ahora=None) -> Intento
     fórmula institucional y cierra el intento como `finalizado`.
     `respuestas` es {pregunta_id: opcion_id} con claves str o int.
     """
+    intento = Intento.objects.select_for_update().get(pk=intento.pk)
+    if intento.estado == "finalizado":
+        return intento
     ahora = ahora or timezone.now()
     cuestionario = intento.cuestionario
     asignaciones = cuestionario.cuestionario_preguntas.select_related("pregunta").order_by("orden", "id")

@@ -109,6 +109,13 @@ def datos_desde_formulario(post, *, puede_institucional: bool = True, cursos_per
         errores.append("Debe permitirse al menos un intento.")
     if datos.estado == "disponible" and not datos.preguntas_ids:
         errores.append("No se puede publicar un cuestionario sin preguntas.")
+    if datos.preguntas_ids:
+        ids = set(_ids_preguntas(datos.preguntas_ids))
+        preguntas = Pregunta.objects.filter(pk__in=ids)
+        if len(ids) != len(datos.preguntas_ids) or preguntas.count() != len(ids):
+            errores.append("Selecciona preguntas existentes sin repetirlas.")
+        elif datos.estado == "disponible" and preguntas.filter(activa=False).exists():
+            errores.append("Retira las preguntas inactivas antes de publicar.")
 
     # Visibilidad
     if datos.visibilidad == Cuestionario.INSTITUCIONAL:
@@ -137,9 +144,13 @@ def cuestionario_sin_guardar(datos, original=None) -> Cuestionario:
     return cuestionario
 
 
+def _ids_preguntas(ids):
+    return [int(i) for i in ids if str(i).isascii() and str(i).isdigit() and len(str(i)) <= 19]
+
+
 def preguntas_por_ids(ids):
     """(asignaciones sin guardar, puntaje total) en el orden recibido."""
-    ids = [int(i) for i in ids if str(i).isdigit()]
+    ids = _ids_preguntas(ids)
     preguntas = Pregunta.objects.select_related("categoria").in_bulk(ids)
     asignadas = [
         CuestionarioPregunta(pregunta=preguntas[i], puntaje_asignado=preguntas[i].puntaje, orden=n)

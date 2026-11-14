@@ -109,6 +109,17 @@ class ConfigurarCuestionarioTests(TestCase):
         r = self.client.post("/cuestionarios/crear/", self._datos([], accion="publicar"))
         self.assertContains(r, "No se puede publicar un cuestionario sin preguntas.", status_code=400)
 
+    def test_publicacion_rechaza_preguntas_inactivas_o_inexistentes(self):
+        self.p1.activa = False
+        self.p1.save(update_fields=["activa"])
+        datos = self._datos([self.p1], accion="publicar")
+        r = self.client.post("/cuestionarios/crear/", datos)
+        self.assertContains(r, "Retira las preguntas inactivas antes de publicar.", status_code=400)
+        datos["preguntas_ids"] = [self.p1.pk + 1000]
+        r = self.client.post("/cuestionarios/crear/", datos)
+        self.assertContains(r, "Selecciona preguntas existentes sin repetirlas.", status_code=400)
+        self.assertFalse(Cuestionario.objects.exists())
+
     def test_formulario_rechazado_conserva_lo_escrito(self):
         r = self._rechazado(fecha_cierre="2026-10-01T08:00", nombre="Mi simulacro")
         self.assertEqual(r.context["cuestionario"].nombre, "Mi simulacro")

@@ -7,6 +7,7 @@ from django.test import TestCase
 from django.utils import timezone
 
 from apps.evaluaciones.models import Intento, RespuestaIntento
+from apps.evaluaciones.services import calificar_intento
 from apps.core.tests.factories import (
     crear_cuestionario,
     crear_usuario,
@@ -36,6 +37,15 @@ class EvaluacionTests(TestCase):
             f"/evaluacion/{intento.id}/finalizar/",
             {"respuestas_json": json.dumps(respuestas)},
         )
+
+    def test_entrega_repetida_con_intento_desactualizado_conserva_la_primera(self):
+        self._iniciar()
+        intento = Intento.objects.get()
+        primera = calificar_intento(intento, respuestas_correctas(self.cuestionario))
+        repetida = calificar_intento(intento, {}, ahora=primera.fecha_fin + timedelta(seconds=1))
+        self.assertEqual(repetida.fecha_fin, primera.fecha_fin)
+        self.assertEqual(repetida.calificacion, Decimal("5.00"))
+        self.assertEqual(repetida.respuestas.filter(es_correcta=True).count(), 2)
 
     # --- Inicio y reglas de acceso -------------------------------------------------
 
