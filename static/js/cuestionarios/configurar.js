@@ -31,6 +31,15 @@
   }
 
   function primerInvalido(seccion) {
+    if (seccion.dataset.paso === '1') {
+      const apertura = form.elements.fecha_apertura;
+      const cierre = form.elements.fecha_cierre;
+      cierre.setCustomValidity('');
+      if (apertura.value && cierre.value && apertura.validity.valid &&
+          cierre.validity.valid && cierre.value <= apertura.value) {
+        cierre.setCustomValidity('La fecha de cierre debe ser posterior a la de apertura.');
+      }
+    }
     return [...seccion.querySelectorAll('input, textarea, select')].find((campo) => !campo.checkValidity());
   }
 
@@ -61,14 +70,6 @@
         setTimeout(() => campo.reportValidity(), 300);
         return;
       }
-    }
-    const apertura = form.elements.fecha_apertura.value;
-    const cierre = form.elements.fecha_cierre.value;
-    if (apertura && cierre && cierre <= apertura) {
-      evento.preventDefault();
-      mostrarPaso(1);
-      window.mostrarNotificacion('La fecha de cierre debe ser posterior a la de apertura.', 'error', 'Revisa las fechas');
-      return;
     }
     const maxima = Number(form.elements.calificacion_maxima.value);
     const aprobacion = Number(form.elements.calificacion_aprobacion.value);

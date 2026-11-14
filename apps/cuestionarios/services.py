@@ -50,7 +50,12 @@ class DatosInvalidos(Exception):
 
 
 def _fecha(valor):
-    fecha = parse_datetime(valor or "")
+    try:
+        fecha = parse_datetime(valor or "")
+    except ValueError:
+        return None
+    if fecha and fecha.year < 1000:
+        return None
     if fecha and timezone.is_naive(fecha):
         fecha = timezone.make_aware(fecha)
     return fecha
@@ -96,17 +101,19 @@ def datos_desde_formulario(post, *, puede_institucional: bool = True, cursos_per
     if not datos.nombre:
         errores.append("El nombre del cuestionario es obligatorio.")
     if not datos.fecha_apertura or not datos.fecha_cierre:
-        errores.append("Las fechas de apertura y cierre son obligatorias.")
+        errores.append("Ingresa fechas y horas válidas de apertura y cierre con un año de cuatro dígitos.")
     elif datos.fecha_cierre <= datos.fecha_apertura:
         errores.append("La fecha de cierre debe ser posterior a la de apertura.")
-    if datos.calificacion_maxima <= 0:
+    if not datos.calificacion_maxima.is_finite() or datos.calificacion_maxima <= 0:
         errores.append("La calificación máxima debe ser mayor que cero.")
-    elif not (0 <= datos.calificacion_aprobacion <= datos.calificacion_maxima):
+    elif not datos.calificacion_aprobacion.is_finite() or not (
+        0 <= datos.calificacion_aprobacion <= datos.calificacion_maxima
+    ):
         errores.append("La nota de aprobación debe estar entre 0 y la calificación máxima.")
-    if datos.tiempo_limite_minutos <= 0:
-        errores.append("El tiempo límite debe ser mayor que cero.")
-    if datos.intentos_permitidos <= 0:
-        errores.append("Debe permitirse al menos un intento.")
+    if not 5 <= datos.tiempo_limite_minutos <= 360:
+        errores.append("El tiempo límite debe estar entre 5 y 360 minutos.")
+    if not 1 <= datos.intentos_permitidos <= 10:
+        errores.append("Los intentos permitidos deben estar entre 1 y 10.")
     if datos.estado == "disponible" and not datos.preguntas_ids:
         errores.append("No se puede publicar un cuestionario sin preguntas.")
     if datos.preguntas_ids:

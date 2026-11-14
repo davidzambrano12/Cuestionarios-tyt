@@ -90,11 +90,11 @@
             <div class="grid-2">
               <div class="form-group">
                 <label class="form-label" for="campo-apertura">Apertura *</label>
-                <input type="datetime-local" id="campo-apertura" name="fecha_apertura" value="{{ cuestionario.fecha_apertura|date:'Y-m-d\TH:i' }}" required class="form-input">
+                <input type="datetime-local" id="campo-apertura" name="fecha_apertura" value="{{ cuestionario.fecha_apertura|date:'Y-m-d\TH:i' }}" min="1000-01-01T00:00" max="9999-12-31T23:59" required class="form-input">
               </div>
               <div class="form-group">
                 <label class="form-label" for="campo-cierre">Cierre *</label>
-                <input type="datetime-local" id="campo-cierre" name="fecha_cierre" value="{{ cuestionario.fecha_cierre|date:'Y-m-d\TH:i' }}" required class="form-input">
+                <input type="datetime-local" id="campo-cierre" name="fecha_cierre" value="{{ cuestionario.fecha_cierre|date:'Y-m-d\TH:i' }}" min="1000-01-01T00:00" max="9999-12-31T23:59" required class="form-input">
               </div>
             </div>
             <div class="form-group">
