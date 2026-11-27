@@ -62,27 +62,6 @@
             {% if not p.activa %}<span class="badge badge-neutro">Inactiva</span>{% endif %}
           </div>
           <h3 class="fila-pregunta__enunciado">{{ p.enunciado }}</h3>
-
-          <details class="fila-pregunta__detalle">
-            <summary>Ver {{ p.opciones.all|length }} opciones{% if p.retroalimentacion %} y retroalimentación{% endif %}</summary>
-            {% if p.texto_base %}
-            <blockquote class="pregunta-card__contexto text-reading"><strong>Texto de apoyo:</strong> {{ p.texto_base|truncatewords:40 }}</blockquote>
-            {% endif %}
-            <ol class="pregunta-card__opciones">
-              {% for op in p.opciones.all %}
-              <li class="pregunta-card__opcion{% if op.es_correcta %} pregunta-card__opcion--correcta{% endif %}">
-                {% if op.es_correcta %}<i data-lucide="check" class="icono-14" aria-hidden="true"></i><span class="sr-only">Correcta:</span>{% else %}<i data-lucide="circle" class="icono-12" aria-hidden="true"></i>{% endif %}
-                <span>{{ op.texto }}</span>
-              </li>
-              {% endfor %}
-            </ol>
-            {% if p.retroalimentacion %}
-            <div class="pregunta-card__retro">
-              <i data-lucide="lightbulb" class="icono-14 shrink-0" aria-hidden="true"></i>
-              <div><strong>Retroalimentación:</strong> {{ p.retroalimentacion }}</div>
-            </div>
-            {% endif %}
-          </details>
         </div>
 
         <dl class="fila-pregunta__datos">
@@ -113,6 +92,36 @@
             </div>
           </div>
         </div>
+
+        <!-- Detalle a demanda: ocupa todo el ancho de la fila, en secciones -->
+        <details class="fila-pregunta__detalle">
+          <summary>Ver {{ p.opciones.all|length }} opciones{% if p.retroalimentacion %} y retroalimentación{% endif %}</summary>
+          <div class="detalle-pregunta">
+            {% if p.texto_base %}
+            <section class="detalle-pregunta__seccion">
+              <h4 class="detalle-pregunta__titulo">Texto de apoyo</h4>
+              <p class="detalle-pregunta__apoyo text-reading">{{ p.texto_base|truncatewords:60 }}</p>
+            </section>
+            {% endif %}
+            <section class="detalle-pregunta__seccion">
+              <h4 class="detalle-pregunta__titulo">Opciones</h4>
+              <ol class="opciones-detalle">
+                {% for op in p.opciones.all %}
+                <li class="opciones-detalle__item{% if op.es_correcta %} opciones-detalle__item--correcta{% endif %}">
+                  <span class="opciones-detalle__texto">{{ op.texto }}</span>
+                  {% if op.es_correcta %}<span class="opciones-detalle__marca"><i data-lucide="check" aria-hidden="true"></i> Correcta</span>{% endif %}
+                </li>
+                {% endfor %}
+              </ol>
+            </section>
+            {% if p.retroalimentacion %}
+            <section class="detalle-pregunta__seccion">
+              <h4 class="detalle-pregunta__titulo">Retroalimentación</h4>
+              <p class="detalle-pregunta__retro">{{ p.retroalimentacion }}</p>
+            </section>
+            {% endif %}
+          </div>
+        </details>
       </li>
       {% endfor %}
     </ol>
