@@ -7,6 +7,7 @@ from django.core.exceptions import PermissionDenied
 from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.views.decorators.http import require_POST
 
 from apps.core.decorators import requiere_permiso
 from apps.core.services.acceso import codigo_participante
@@ -28,7 +29,7 @@ def _curso_gestionable(request, curso_id) -> Curso:
 @login_required
 @requiere_permiso("cursos.gestionar")
 def listado(request):
-    cursos = services.cursos_visibles(request.user).annotate(
+    cursos = services.cursos_visibles(request.user).select_related("periodo", "docente").annotate(
         num_matriculados=Count("matriculas", distinct=True),
         num_intentos=Count("intentos", distinct=True),
     )
@@ -47,26 +48,76 @@ def listado(request):
         "periodo_id": int(periodo_id) if periodo_id.isdigit() else None,
         "q": q,
         "es_admin": es_admin,
-        "form_periodo": PeriodoForm(),
         "sin_curso": services.resumen_sin_curso() if es_admin else None,
+    })
+
+
+def _solo_admin(request):
+    if not services.es_admin(request.user):
+        raise PermissionDenied("Solo un administrador gestiona los períodos académicos.")
+
+
+def _errores(form) -> str:
+    return " ".join(e for lista in form.errors.values() for e in lista)
+
+
+@login_required
+@requiere_permiso("cursos.gestionar")
+def periodos(request):
+    """Períodos académicos con su uso: se editan siempre y se eliminan solo si están vacíos."""
+    _solo_admin(request)
+    lista = PeriodoAcademico.objects.annotate(
+        n_cursos=Count("cursos", distinct=True), n_intentos=Count("intentos", distinct=True),
+    ).order_by("-anio", "-numero")
+    return render(request, "academico/periodos.html", {
+        "active_tab": "cursos",
+        "periodos": lista,
+        "form_periodo": PeriodoForm(),
     })
 
 
 @login_required
 @requiere_permiso("cursos.gestionar")
+@require_POST
 def crear_periodo(request):
-    if not services.es_admin(request.user):
-        raise PermissionDenied("Solo un administrador crea períodos académicos.")
-    if request.method != "POST":
-        return redirect("academico:listado")
+    _solo_admin(request)
     form = PeriodoForm(request.POST)
     if form.is_valid():
         periodo = form.save()
         messages.success(request, f"Período {periodo} creado.")
     else:
-        errores = "; ".join(e for lista in form.errors.values() for e in lista)
-        messages.error(request, f"No se creó el período: {errores}")
-    return redirect("academico:listado")
+        messages.error(request, f"No se creó el período: {_errores(form)}")
+    return redirect("academico:periodos")
+
+
+@login_required
+@requiere_permiso("cursos.gestionar")
+@require_POST
+def editar_periodo(request, periodo_id):
+    _solo_admin(request)
+    periodo = get_object_or_404(PeriodoAcademico, id=periodo_id)
+    form = PeriodoForm(request.POST, instance=periodo)
+    if form.is_valid():
+        form.save()
+        messages.success(request, f"Período {periodo} actualizado.")
+    else:
+        messages.error(request, f"No se guardó el período {periodo}: {_errores(form)}")
+    return redirect("academico:periodos")
+
+
+@login_required
+@requiere_permiso("cursos.gestionar")
+@require_POST
+def eliminar_periodo(request, periodo_id):
+    _solo_admin(request)
+    periodo = get_object_or_404(PeriodoAcademico, id=periodo_id)
+    if periodo.cursos.exists() or periodo.intentos.exists():
+        messages.error(request, f"El período {periodo} tiene cursos o intentos: no se puede eliminar sin perder ese historial.")
+    else:
+        nombre = str(periodo)
+        periodo.delete()
+        messages.success(request, f"Período {nombre} eliminado.")
+    return redirect("academico:periodos")
 
 
 def _formulario_curso(request, curso=None):

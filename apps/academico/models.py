@@ -37,6 +37,16 @@ class PeriodoAcademico(models.Model):
     def nombre(self) -> str:
         return f"{self.anio}-{self.numero}"
 
+    @property
+    def estado(self) -> str:
+        """Según la fecha de hoy: «en_curso», «proximo» o «finalizado»."""
+        from django.utils import timezone
+
+        hoy = timezone.localdate()
+        if hoy < self.fecha_inicio:
+            return "proximo"
+        return "finalizado" if hoy > self.fecha_fin else "en_curso"
+
     def __str__(self):
         return self.nombre
 
