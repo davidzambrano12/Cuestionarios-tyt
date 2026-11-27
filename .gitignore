@@ -51,3 +51,6 @@ staticfiles/
 
 # Vercel
 .vercel/
+
+# Configuración local de Claude Code
+.claude/
