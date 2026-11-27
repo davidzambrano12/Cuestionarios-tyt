@@ -49,3 +49,11 @@ def componente(parser, token):
     interior = parser.parse(("fincomponente",))
     parser.delete_first_token()
     return NodoComponente(nombre, parametros, interior)
+
+
+@register.simple_tag(takes_context=True)
+def url_pagina(context, numero):
+    """Enlace a otra página del listado conservando los filtros de la URL actual."""
+    consulta = context["request"].GET.copy()
+    consulta["page"] = numero
+    return "?" + consulta.urlencode()
