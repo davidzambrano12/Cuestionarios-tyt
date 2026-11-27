@@ -11,6 +11,7 @@ urlpatterns = [
     path("login/", cuentas_views.login_view, name="login"),
     path("logout/", cuentas_views.logout_view, name="logout"),
     path("admin/", admin.site.urls),
+    path("api/", include("apps.api.urls")),
 
     path("", include("apps.cuentas.urls")),
     path("", include("apps.banco_preguntas.urls")),

@@ -1,8 +1,13 @@
 asgiref==3.12.1
+attrs==26.1.0
 Django==6.1.2
 djangorestframework==3.18.3
 djangorestframework_simplejwt==5.5.1
+drf-spectacular==0.30.0
 et_xmlfile==2.0.0
+inflection==0.5.1
+jsonschema==4.26.0
+jsonschema-specifications==2025.9.1
 numpy==2.5.4
 openpyxl==3.1.5
 pandas==3.0.6
@@ -10,6 +15,10 @@ python-dotenv==1.2.4
 PyJWT==2.15.1
 PyMySQL==1.2.3
 python-dateutil==2.9.0.post0
+PyYAML==6.0.4
+referencing==0.37.0
+rpds-py==2026.9.1
 six==1.17.0
 sqlparse==0.6.0
 tzdata==2026.5
+uritemplate==4.2.0
