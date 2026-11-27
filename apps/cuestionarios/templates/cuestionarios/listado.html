@@ -31,22 +31,21 @@
         <button type="button" class="btn btn-outline chip-filtro" data-filtro="disponible" aria-pressed="false">Disponibles</button>
         <button type="button" class="btn btn-outline chip-filtro" data-filtro="programado" aria-pressed="false">Programados</button>
         <button type="button" class="btn btn-outline chip-filtro" data-filtro="borrador" aria-pressed="false">Borradores</button>
+        <button type="button" class="btn btn-outline chip-filtro" data-filtro="oculto" aria-pressed="false">Ocultos</button>
         <button type="button" class="btn btn-outline chip-filtro" data-filtro="cerrado" aria-pressed="false">Cerrados</button>
+        <button type="button" class="btn btn-outline chip-filtro" data-filtro="archivado" aria-pressed="false">Archivados</button>
       </div>
     </div>
   </div>
 
   <div class="rejilla-cuestionarios">
     {% for c in cuestionarios %}
-    <article class="card tarjeta-listado" data-estado="{{ c.estado_temporal }}" data-texto="{{ c.nombre|lower }} {{ c.descripcion|default:''|lower }}">
+    <article class="card tarjeta-listado" data-estado="{{ c.estado_temporal }}"{% if c.estado == 'archivado' %} hidden{% endif %} data-texto="{{ c.nombre|lower }} {{ c.descripcion|default:''|lower }}">
       <div>
         <div class="flex justify-between items-center gap-2 mb-3">
           <div class="flex items-center gap-2 flex-wrap">
-            {% if c.estado_temporal == 'cerrado' %}<span class="badge badge-neutro">Cerrado</span>
-            {% elif c.estado_temporal == 'disponible' %}<span class="badge badge-success">Disponible</span>
-            {% elif c.estado_temporal == 'programado' %}<span class="badge badge-info">Programado</span>
-            {% else %}<span class="badge badge-warning">Borrador</span>{% endif %}
-            <span class="badge {{ c.tiempo_restante_info.clase }}">{{ c.tiempo_restante_info.texto }}</span>
+            {% include "cuestionarios/_insignia_estado.html" with estado=c.estado_temporal %}
+            {% if c.estado_temporal != 'oculto' and c.estado_temporal != 'archivado' %}<span class="badge {{ c.tiempo_restante_info.clase }}">{{ c.tiempo_restante_info.texto }}</span>{% endif %}
             {% if c.es_institucional %}<span class="badge badge-info badge-visibilidad"><i data-lucide="globe" aria-hidden="true"></i> Institucional</span>
             {% else %}<span class="badge badge-neutro badge-visibilidad"><i data-lucide="lock" aria-hidden="true"></i> De curso</span>{% endif %}
           </div>
@@ -77,6 +76,18 @@
         {% if c.editable %}
         <a href="{% url 'reportes:intentos' c.id %}" class="btn btn-secondary"><i data-lucide="users" class="icono-15"></i> Intentos ({{ c.intentos.all|length }})</a>
         <a href="{% url 'cuestionarios:editar' c.id %}" class="btn btn-primary"><i data-lucide="settings" class="icono-15"></i> Configurar</a>
+        {% if c.acciones_estado %}
+        <div class="acciones-estado" role="group" aria-label="Cambiar el estado de {{ c.nombre }}">
+          {% for accion in c.acciones_estado %}
+          <form method="POST" action="{% url 'cuestionarios:cambiar_estado' c.id %}"
+                {% if accion.confirmar %}data-confirmar-titulo="¿{{ accion.etiqueta }} «{{ c.nombre }}»?" data-confirmar="{{ accion.confirmar }}" data-confirmar-boton="{{ accion.etiqueta }}" data-confirmar-tipo="{{ accion.tipo_confirmacion }}"{% endif %}>
+            {% csrf_token %}
+            <input type="hidden" name="accion" value="{{ accion.codigo }}">
+            <button type="submit" class="btn btn-outline btn-accion{% if accion.tipo_confirmacion == 'peligro' %} btn-accion--peligro{% endif %}"><i data-lucide="{{ accion.icono }}" class="icono-13" aria-hidden="true"></i> {{ accion.etiqueta }}</button>
+          </form>
+          {% endfor %}
+        </div>
+        {% endif %}
         {% else %}
         <p class="texto-xs texto-suave">Lo gestiona la institución. Los resultados de tus estudiantes están en <a href="{% url 'reportes:consultas' %}">Consultas y reportes</a>.</p>
         {% endif %}

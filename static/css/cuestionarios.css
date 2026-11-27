@@ -182,6 +182,7 @@
 .rejilla-cuestionarios { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: var(--espacio-5); }
 .rejilla-cuestionarios__completa { grid-column: 1 / -1; }
 .tarjeta-listado { margin-bottom: 0; display: flex; flex-direction: column; justify-content: space-between; padding: var(--espacio-5); }
+.tarjeta-listado[hidden] { display: none; }
 .tarjeta-listado__titulo { font-size: var(--texto-xl); font-weight: var(--peso-bold); margin-bottom: 6px; }
 .tarjeta-listado__fechas {
   display: flex;
@@ -195,6 +196,10 @@
   margin-bottom: var(--espacio-4);
 }
 .tarjeta-listado__acciones { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: auto; }
+/* Cambios de estado: fila completa bajo Intentos y Configurar */
+.acciones-estado { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 8px; padding-top: 10px; border-top: 1px solid var(--color-borde); }
+.acciones-estado form { margin: 0; }
+.btn-accion--peligro { color: var(--color-peligro-texto); }
 
 /* Visibilidad: de curso o institucional */
 .opciones-visibilidad { border: 0; padding: 0; margin: 0 0 var(--espacio-4); display: grid; grid-template-columns: 1fr 1fr; gap: var(--espacio-3); }

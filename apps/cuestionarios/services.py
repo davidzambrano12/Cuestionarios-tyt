@@ -61,8 +61,17 @@ def _fecha(valor):
     return fecha
 
 
+def _estado_segun_accion(accion: str, estado_actual: str | None) -> str:
+    """«Publicar» y «Guardar como borrador» fijan el estado; «Guardar cambios» conserva el actual."""
+    if accion == "publicar":
+        return Cuestionario.PUBLICADO
+    if accion == "guardar" and estado_actual in dict(Cuestionario.ESTADO_CHOICES):
+        return estado_actual
+    return Cuestionario.BORRADOR
+
+
 def datos_desde_formulario(post, *, puede_institucional: bool = True, cursos_permitidos=None,
-                           cursos_actuales=()) -> DatosCuestionario:
+                           cursos_actuales=(), estado_actual: str | None = None) -> DatosCuestionario:
     """
     Traduce el POST del editor y valida las reglas de la tabla cuestionarios,
     además de la visibilidad: un institucional exige permiso para publicarlo y
@@ -90,7 +99,7 @@ def datos_desde_formulario(post, *, puede_institucional: bool = True, cursos_per
         mezclar_preguntas=bool(post.get("mezclar_preguntas")),
         mezclar_respuestas=bool(post.get("mezclar_respuestas")),
         permitir_revision=bool(post.get("permitir_revision")),
-        estado="disponible" if post.get("accion") == "publicar" else "borrador",
+        estado=_estado_segun_accion(post.get("accion", ""), estado_actual),
         visibilidad=(post.get("visibilidad") if post.get("visibilidad") in dict(Cuestionario.VISIBILIDAD_CHOICES)
                      else Cuestionario.PRIVADO),
         preguntas_ids=post.getlist("preguntas_ids"),
@@ -207,8 +216,9 @@ def preguntas_asignadas(cuestionario: Cuestionario | None):
 
 
 def resumen_listado(cuestionarios) -> dict:
+    """Métricas del listado; los archivados no cuentan en el total."""
     return {
-        "total_count": len(cuestionarios),
+        "total_count": sum(1 for c in cuestionarios if c.estado != Cuestionario.ARCHIVADO),
         "disponibles_count": sum(1 for c in cuestionarios if c.estado_temporal == "disponible"),
         "borradores_count": sum(1 for c in cuestionarios if c.estado_temporal == "borrador"),
         "cerrados_count": sum(1 for c in cuestionarios if c.estado_temporal == "cerrado"),

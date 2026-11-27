@@ -1,0 +1,7 @@
+{# Insignia del estado efectivo del cuestionario (ver Cuestionario.estado_temporal) #}
+{% if estado == 'disponible' %}<span class="badge badge-success">Disponible</span>
+{% elif estado == 'programado' %}<span class="badge badge-info">Programado</span>
+{% elif estado == 'cerrado' %}<span class="badge badge-neutro">Cerrado</span>
+{% elif estado == 'oculto' %}<span class="badge badge-neutro"><i data-lucide="eye-off" class="icono-12" aria-hidden="true"></i> Oculto</span>
+{% elif estado == 'archivado' %}<span class="badge badge-neutro"><i data-lucide="archive" class="icono-12" aria-hidden="true"></i> Archivado</span>
+{% else %}<span class="badge badge-warning">Borrador</span>{% endif %}
