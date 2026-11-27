@@ -1,6 +1,6 @@
 /**
  * Cursos y matrículas.
- *   - Listado: aplicar el período al elegirlo.
+ *   - Listado: aplicar el período al elegirlo y abrir el curso al hacer clic en su fila.
  *   - Detalle: filtrar estudiantes (texto y «con / sin intentos»).
  *   - Matricular: buscar en vivo o pegar una lista de códigos; los elegidos se
  *     acumulan como etiquetas y se envían juntos. Todo el texto que llega del
@@ -11,6 +11,15 @@
 
   document.querySelectorAll('[data-enviar-al-cambiar]').forEach((select) => {
     select.addEventListener('change', () => select.form.submit());
+  });
+
+  // Listado: toda la fila abre el curso; los enlaces, botones y el menú conservan su propia acción
+  document.querySelectorAll('tr[data-href]').forEach((fila) => {
+    fila.addEventListener('click', (evento) => {
+      if (evento.target.closest('a, button, form, [data-menu-desplegable]')) return;
+      if (window.getSelection().toString()) return; // estaba seleccionando texto
+      window.location.href = fila.dataset.href;
+    });
   });
 
   const normalizar = (t) => (t || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');

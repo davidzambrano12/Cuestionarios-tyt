@@ -1,0 +1,106 @@
+{% extends 'layouts/app_base.html' %}
+{% load static componentes %}
+
+{% block title %}Períodos académicos - {{ config.nombre_sistema }}{% endblock %}
+{% block nav_title %}Períodos académicos{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'css/academico.css' %}">{% endblock %}
+
+{% block app_content %}
+<div class="academico" id="periodos" data-url-editar="{% url 'academico:editar_periodo' 0 %}">
+  <a href="{% url 'academico:listado' %}" class="enlace-volver mb-4"><i data-lucide="arrow-left" aria-hidden="true"></i> Cursos</a>
+
+  {% componente "componentes/encabezado.html" etiqueta="Estructura académica" titulo="Períodos académicos" subtitulo="Cada intento queda en el período de su fecha, por eso dos períodos no pueden compartir días. Un período con cursos o intentos se puede corregir, pero no eliminar." %}
+    <button type="button" class="btn btn-primary" data-nuevo-periodo><i data-lucide="calendar-plus" aria-hidden="true"></i> Nuevo período</button>
+  {% fincomponente %}
+
+  {% if periodos %}
+  <div class="card tabla-contenedor">
+    <div class="tabla-desplazable">
+      <table class="tabla tabla--periodos">
+        <caption class="sr-only">Períodos académicos</caption>
+        <thead>
+          <tr>
+            <th scope="col">Período</th>
+            <th scope="col">Fechas</th>
+            <th scope="col" class="texto-derecha">Cursos</th>
+            <th scope="col" class="texto-derecha">Intentos</th>
+            <th scope="col"><span class="sr-only">Acciones</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in periodos %}
+          <tr>
+            <th scope="row">
+              <span class="periodo-nombre cifras">{{ p.nombre }}</span>
+              {% if p.estado == "en_curso" %}<span class="badge badge-success">En curso</span>
+              {% elif p.estado == "proximo" %}<span class="badge badge-info">Próximo</span>
+              {% else %}<span class="badge badge-neutro">Finalizado</span>{% endif %}
+            </th>
+            <td class="cifras nowrap">{{ p.fecha_inicio|date:"j M Y" }} – {{ p.fecha_fin|date:"j M Y" }}</td>
+            <td class="texto-derecha cifras">{% if p.n_cursos %}<a href="{% url 'academico:listado' %}?periodo={{ p.id }}">{{ p.n_cursos }}</a>{% else %}<span class="texto-tenue">0</span>{% endif %}</td>
+            <td class="texto-derecha cifras">{% if p.n_intentos %}{{ p.n_intentos }}{% else %}<span class="texto-tenue">0</span>{% endif %}</td>
+            <td>
+              <div class="fila-acciones">
+                <button type="button" class="btn btn-outline btn-accion" data-editar-periodo="{{ p.id }}"
+                        data-nombre="{{ p.nombre }}" data-anio="{{ p.anio }}" data-numero="{{ p.numero }}"
+                        data-inicio="{{ p.fecha_inicio|date:'Y-m-d' }}" data-fin="{{ p.fecha_fin|date:'Y-m-d' }}"
+                        data-en-uso="{% if p.n_cursos or p.n_intentos %}1{% endif %}"
+                        aria-label="Editar el período {{ p.nombre }}">
+                  <i data-lucide="pencil" aria-hidden="true"></i> Editar
+                </button>
+                {% if p.n_cursos or p.n_intentos %}
+                <span class="candado" title="Tiene {{ p.n_cursos }} curso{{ p.n_cursos|pluralize }} y {{ p.n_intentos }} intento{{ p.n_intentos|pluralize }}: su historial se conserva y no se puede eliminar.">
+                  <i data-lucide="lock" aria-hidden="true"></i><span class="sr-only">No se puede eliminar: tiene cursos o intentos</span>
+                </span>
+                {% else %}
+                <form method="POST" action="{% url 'academico:eliminar_periodo' p.id %}"
+                      data-confirmar-titulo="¿Eliminar el período {{ p.nombre }}?" data-confirmar="No tiene cursos ni intentos, así que no se pierde ningún historial." data-confirmar-boton="Eliminar período" data-confirmar-tipo="peligro">
+                  {% csrf_token %}
+                  <button type="submit" class="boton-icono boton-icono--peligro" aria-label="Eliminar el período {{ p.nombre }}" title="Eliminar"><i data-lucide="trash-2" aria-hidden="true"></i></button>
+                </form>
+                {% endif %}
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% else %}
+  <div class="card">
+    {% componente "componentes/estado_vacio.html" icono="calendar" titulo="Aún no hay períodos" mensaje="Crea el período académico (por ejemplo 2026-2) antes de crear sus cursos." %}
+      <button type="button" class="btn btn-primary" data-nuevo-periodo>Crear el primer período</button>
+    {% fincomponente %}
+  </div>
+  {% endif %}
+</div>
+
+<!-- Un solo cuadro para crear o editar -->
+<div id="modal-periodo" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="titulo-periodo">
+  <div class="modal-box">
+    <div class="modal-cabecera">
+      <div>
+        <h2 class="texto-md peso-extrabold" id="titulo-periodo" data-ref="titulo">Nuevo período académico</h2>
+        <p class="texto-xs texto-suave" data-ref="nota" hidden>Tiene cursos o intentos: el año y el número no se cambian, solo las fechas.</p>
+      </div>
+      <button type="button" class="modal-cerrar" data-cerrar-modal aria-label="Cerrar">&times;</button>
+    </div>
+    <form method="POST" action="{% url 'academico:crear_periodo' %}" data-url-crear="{% url 'academico:crear_periodo' %}">
+      {% csrf_token %}
+      <div class="grid-2">
+        {% include "componentes/campo.html" with campo=form_periodo.anio %}
+        {% include "componentes/campo.html" with campo=form_periodo.numero %}
+        {% include "componentes/campo.html" with campo=form_periodo.fecha_inicio %}
+        {% include "componentes/campo.html" with campo=form_periodo.fecha_fin %}
+      </div>
+      <div class="modal-acciones">
+        <button type="button" class="btn btn-outline" data-cerrar-modal>Cancelar</button>
+        <button type="submit" class="btn btn-primary" data-ref="guardar">Crear período</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}<script src="{% static 'js/academico/periodos.js' %}"></script>{% endblock %}

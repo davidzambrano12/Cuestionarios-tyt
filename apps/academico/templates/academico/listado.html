@@ -8,7 +8,7 @@
 {% block app_content %}
 <div class="academico">
   {% componente "componentes/encabezado.html" etiqueta="Estructura académica" titulo="Cursos y matrículas" subtitulo="Cada curso es una asignatura dictada a un grupo en un período. Los resultados de los simulacros se consultan por curso." %}
-    {% if es_admin %}<button type="button" class="btn btn-outline" data-abrir-modal="modal-periodo"><i data-lucide="calendar-plus" aria-hidden="true"></i> Nuevo período</button>{% endif %}
+    {% if es_admin %}<a href="{% url 'academico:periodos' %}" class="btn btn-outline"><i data-lucide="calendar-range" aria-hidden="true"></i> Períodos</a>{% endif %}
     <a href="{% url 'academico:crear' %}" class="btn btn-primary"><i data-lucide="plus" aria-hidden="true"></i> Nuevo curso</a>
   {% fincomponente %}
 
@@ -43,26 +43,54 @@
   <div class="card tabla-contenedor">
     <div class="tabla-desplazable">
       <table class="tabla tabla--cursos">
-        <caption class="sr-only">Cursos</caption>
+        <caption class="sr-only">Cursos agrupados por período</caption>
         <thead>
-          <tr><th scope="col">Asignatura</th><th scope="col">Período</th><th scope="col">Programa</th><th scope="col">Docente</th><th scope="col" class="texto-derecha">Matriculados</th><th scope="col" class="texto-derecha">Intentos</th><th scope="col"><span class="sr-only">Acciones</span></th></tr>
+          <tr><th scope="col">Asignatura</th><th scope="col">Programa</th><th scope="col">Docente</th><th scope="col" class="texto-derecha">Matriculados</th><th scope="col" class="texto-derecha">Intentos</th><th scope="col"><span class="sr-only">Acciones</span></th></tr>
         </thead>
+        {% regroup cursos by periodo as grupos %}
+        {% for grupo in grupos %}
         <tbody>
-          {% for c in cursos %}
-          <tr class="fila-curso{% if not c.activo %} fila-curso--inactivo{% endif %}">
+          <tr class="fila-periodo">
+            <th scope="colgroup" colspan="6">
+              <span class="fila-periodo__nombre cifras">{{ grupo.grouper.nombre }}</span>
+              {% if grupo.grouper.estado == "en_curso" %}<span class="badge badge-success">En curso</span>
+              {% elif grupo.grouper.estado == "proximo" %}<span class="badge badge-info">Próximo</span>
+              {% else %}<span class="badge badge-neutro">Finalizado</span>{% endif %}
+              <span class="fila-periodo__detalle cifras">{{ grupo.grouper.fecha_inicio|date:"j M" }} – {{ grupo.grouper.fecha_fin|date:"j M Y" }} · {{ grupo.list|length }} curso{{ grupo.list|length|pluralize }}</span>
+            </th>
+          </tr>
+          {% for c in grupo.list %}
+          <tr class="fila-curso{% if not c.activo %} fila-curso--inactivo{% endif %}" data-href="{% url 'academico:detalle' c.id %}">
             <td>
-              <a href="{% url 'academico:detalle' c.id %}" class="peso-semibold">{{ c.asignatura }}</a>
-              <div class="texto-xs texto-suave">Grupo {{ c.grupo }}{% if not c.activo %} · <span class="badge badge-neutro">Inactivo</span>{% endif %}</div>
+              <div class="fila-curso__titulo">
+                <a href="{% url 'academico:detalle' c.id %}" class="fila-curso__enlace">{{ c.asignatura }}</a>
+                <span class="etiqueta-grupo">Grupo {{ c.grupo }}</span>
+                {% if not c.activo %}<span class="badge badge-neutro">Inactivo</span>{% endif %}
+              </div>
             </td>
-            <td class="cifras">{{ c.periodo }}</td>
             <td>{{ c.programa }}{% if c.semestre %}<div class="texto-xs texto-suave">{{ c.semestre }}.° semestre</div>{% endif %}</td>
-            <td>{% if c.docente %}{{ c.docente.get_full_name|default:c.docente.username }}{% else %}<span class="texto-suave">Sin asignar</span>{% endif %}</td>
-            <td class="texto-derecha cifras">{{ c.num_matriculados }}</td>
-            <td class="texto-derecha cifras">{{ c.num_intentos }}</td>
-            <td class="texto-derecha"><a href="{% url 'academico:detalle' c.id %}" class="btn btn-outline btn-accion"><i data-lucide="users" aria-hidden="true"></i> Matrículas</a></td>
+            <td>{% if c.docente %}{{ c.docente.get_full_name|default:c.docente.username }}{% else %}<span class="sin-docente"><i data-lucide="alert-circle" aria-hidden="true"></i> Sin asignar</span>{% endif %}</td>
+            <td class="texto-derecha cifras"><span class="fila-curso__cifra">{{ c.num_matriculados }}</span></td>
+            <td class="texto-derecha cifras texto-suave">{{ c.num_intentos }}</td>
+            <td>
+              <div class="fila-acciones">
+                <div class="menu-tarjeta" data-menu-desplegable>
+                  <button type="button" class="boton-icono menu-tarjeta__boton" aria-haspopup="menu" aria-expanded="false" aria-controls="menu-curso-{{ c.id }}" aria-label="Más acciones para {{ c.asignatura }}, grupo {{ c.grupo }}">
+                    <i data-lucide="more-horizontal" aria-hidden="true"></i>
+                  </button>
+                  <div class="menu-cuenta__lista" id="menu-curso-{{ c.id }}" role="menu" hidden>
+                    <a href="{% url 'academico:detalle' c.id %}" role="menuitem" class="menu-cuenta__item"><i data-lucide="users" aria-hidden="true"></i> Estudiantes y matrículas</a>
+                    <a href="{% url 'academico:editar' c.id %}" role="menuitem" class="menu-cuenta__item"><i data-lucide="pencil" aria-hidden="true"></i> Editar curso</a>
+                    <a href="{% url 'reportes:consultas' %}?anio={{ c.periodo.anio }}&periodo={{ c.periodo_id }}&curso={{ c.id }}" role="menuitem" class="menu-cuenta__item"><i data-lucide="bar-chart-3" aria-hidden="true"></i> Ver resultados</a>
+                  </div>
+                </div>
+                <i data-lucide="chevron-right" class="fila-curso__flecha" aria-hidden="true"></i>
+              </div>
+            </td>
           </tr>
           {% endfor %}
         </tbody>
+        {% endfor %}
       </table>
     </div>
   </div>
@@ -75,29 +103,6 @@
   {% endif %}
 </div>
 
-{% if es_admin %}
-<div id="modal-periodo" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="titulo-periodo">
-  <div class="modal-box">
-    <div class="modal-cabecera">
-      <h2 class="texto-md peso-extrabold" id="titulo-periodo">Nuevo período académico</h2>
-      <button type="button" class="modal-cerrar" data-cerrar-modal aria-label="Cerrar">&times;</button>
-    </div>
-    <form method="POST" action="{% url 'academico:crear_periodo' %}">
-      {% csrf_token %}
-      <div class="grid-2">
-        {% include "componentes/campo.html" with campo=form_periodo.anio %}
-        {% include "componentes/campo.html" with campo=form_periodo.numero %}
-        {% include "componentes/campo.html" with campo=form_periodo.fecha_inicio %}
-        {% include "componentes/campo.html" with campo=form_periodo.fecha_fin %}
-      </div>
-      <div class="modal-acciones">
-        <button type="button" class="btn btn-outline" data-cerrar-modal>Cancelar</button>
-        <button type="submit" class="btn btn-primary">Crear período</button>
-      </div>
-    </form>
-  </div>
-</div>
-{% endif %}
 {% endblock %}
 
 {% block extra_scripts %}<script src="{% static 'js/academico/cursos.js' %}"></script>{% endblock %}
