@@ -215,14 +215,20 @@ def preguntas_asignadas(cuestionario: Cuestionario | None):
     return asignadas, total
 
 
+FILTROS_LISTADO = (
+    ("disponible", "Disponibles"), ("programado", "Programados"), ("borrador", "Borradores"),
+    ("oculto", "Ocultos"), ("cerrado", "Cerrados"), ("archivado", "Archivados"),
+)
+
+
 def resumen_listado(cuestionarios) -> dict:
-    """Métricas del listado; los archivados no cuentan en el total."""
-    return {
-        "total_count": sum(1 for c in cuestionarios if c.estado != Cuestionario.ARCHIVADO),
-        "disponibles_count": sum(1 for c in cuestionarios if c.estado_temporal == "disponible"),
-        "borradores_count": sum(1 for c in cuestionarios if c.estado_temporal == "borrador"),
-        "cerrados_count": sum(1 for c in cuestionarios if c.estado_temporal == "cerrado"),
-    }
+    """Filtros del listado con su conteo; «Todos» no incluye los archivados."""
+    conteo = {}
+    for c in cuestionarios:
+        conteo[c.estado_temporal] = conteo.get(c.estado_temporal, 0) + 1
+    filtros = [("todos", "Todos", len(cuestionarios) - conteo.get("archivado", 0))]
+    filtros += [(clave, etiqueta, conteo.get(clave, 0)) for clave, etiqueta in FILTROS_LISTADO]
+    return {"filtros_estado": filtros}
 
 
 def serializar_preguntas(cuestionario: Cuestionario, semilla: int, *, incluir_claves: bool) -> list[dict]:

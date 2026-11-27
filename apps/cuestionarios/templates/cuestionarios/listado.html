@@ -12,13 +12,7 @@
     <a href="{% url 'cuestionarios:crear' %}" class="btn btn-primary"><i data-lucide="plus"></i> Crear cuestionario</a>
   {% fincomponente %}
 
-  <div class="metricas">
-    {% componente "componentes/metrica.html" etiqueta="Total" valor=total_count icono="clipboard-list" %}{% fincomponente %}
-    {% componente "componentes/metrica.html" etiqueta="Disponibles" valor=disponibles_count icono="check-circle-2" variante="exito" ayuda="Abiertos para presentar" %}{% fincomponente %}
-    {% componente "componentes/metrica.html" etiqueta="Borradores" valor=borradores_count icono="pencil" variante="aviso" ayuda="Sin publicar" %}{% fincomponente %}
-    {% componente "componentes/metrica.html" etiqueta="Cerrados" valor=cerrados_count icono="archive" ayuda="Plazo finalizado" %}{% fincomponente %}
-  </div>
-
+  {# Sin tarjetas de métricas: cada filtro muestra cuántos cuestionarios hay en ese estado #}
   <div class="card barra-herramientas">
     <div class="barra-herramientas__fila">
       <div class="buscador">
@@ -27,13 +21,9 @@
         <input type="search" id="filtro-texto" placeholder="Buscar por título o descripción…" class="form-input" autocomplete="off">
       </div>
       <div role="group" aria-label="Filtrar por estado" class="flex gap-2 flex-wrap">
-        <button type="button" class="btn btn-outline chip-filtro active" data-filtro="todos" aria-pressed="true">Todos</button>
-        <button type="button" class="btn btn-outline chip-filtro" data-filtro="disponible" aria-pressed="false">Disponibles</button>
-        <button type="button" class="btn btn-outline chip-filtro" data-filtro="programado" aria-pressed="false">Programados</button>
-        <button type="button" class="btn btn-outline chip-filtro" data-filtro="borrador" aria-pressed="false">Borradores</button>
-        <button type="button" class="btn btn-outline chip-filtro" data-filtro="oculto" aria-pressed="false">Ocultos</button>
-        <button type="button" class="btn btn-outline chip-filtro" data-filtro="cerrado" aria-pressed="false">Cerrados</button>
-        <button type="button" class="btn btn-outline chip-filtro" data-filtro="archivado" aria-pressed="false">Archivados</button>
+        {% for clave, etiqueta, total in filtros_estado %}
+        <button type="button" class="btn btn-outline chip-filtro{% if forloop.first %} active{% endif %}" data-filtro="{{ clave }}" aria-pressed="{% if forloop.first %}true{% else %}false{% endif %}">{{ etiqueta }} <span class="chip-filtro__cuenta">{{ total }}</span></button>
+        {% endfor %}
       </div>
     </div>
   </div>
