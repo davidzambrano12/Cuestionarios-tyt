@@ -5,11 +5,19 @@ from django.db import models
 
 
 class Cuestionario(models.Model):
+    # Estado que decide el docente (RF-15). "Programado" no se guarda: se deduce
+    # de un cuestionario publicado cuya fecha de apertura no ha llegado.
+    BORRADOR = "borrador"
+    PUBLICADO = "disponible"  # el valor se conserva por compatibilidad con los datos existentes
+    OCULTO = "oculto"
+    CERRADO = "cerrado"
+    ARCHIVADO = "archivado"
     ESTADO_CHOICES = [
-        ("borrador", "Borrador"),
-        ("programado", "Programado"),
-        ("disponible", "Disponible"),
-        ("cerrado", "Cerrado"),
+        (BORRADOR, "Borrador"),
+        (PUBLICADO, "Publicado"),
+        (OCULTO, "Oculto"),
+        (CERRADO, "Cerrado"),
+        (ARCHIVADO, "Archivado"),
     ]
 
     id = models.BigAutoField(primary_key=True)
@@ -54,22 +62,23 @@ class Cuestionario(models.Model):
 
     @property
     def estado_temporal(self):
-        """Retorna el estado dinámico evaluando las fechas del servidor."""
-        if self.estado == "borrador":
-            return "borrador"
+        """
+        Estado efectivo: combina el que eligió el docente con las fechas del servidor.
+        Devuelve borrador, oculto, archivado, cerrado, programado o disponible.
+        """
+        if self.estado in (self.BORRADOR, self.OCULTO, self.ARCHIVADO):
+            return self.estado
         ahora = timezone.now()
-        if self.estado == "cerrado" or (self.fecha_cierre and ahora > self.fecha_cierre):
+        if self.estado == self.CERRADO or (self.fecha_cierre and ahora > self.fecha_cierre):
             return "cerrado"
         if self.fecha_apertura and ahora < self.fecha_apertura:
             return "programado"
-        if self.estado == "disponible":
-            return "disponible"
-        return self.estado
+        return "disponible"
 
     @property
     def esta_vigente(self):
         """True si el cuestionario está publicado y dentro del rango de apertura y cierre."""
-        if self.estado != "disponible":
+        if self.estado != self.PUBLICADO:
             return False
         ahora = timezone.now()
         if not self.fecha_apertura or not self.fecha_cierre:
@@ -78,18 +87,50 @@ class Cuestionario(models.Model):
 
     @property
     def esta_vencido(self):
-        """True si el plazo de entrega ya expiró o fue forzado a cerrado."""
-        if self.estado == "cerrado":
+        """True si el plazo de entrega ya expiró o el docente lo cerró o archivó."""
+        if self.estado in (self.CERRADO, self.ARCHIVADO):
             return True
         if self.fecha_cierre and timezone.now() > self.fecha_cierre:
             return True
         return False
 
     @property
+    def resumen_estado(self):
+        """
+        Estado efectivo en una sola línea para las tarjetas: etiqueta, detalle
+        (tiempo o motivo, sin repetir la etiqueta) y tono del indicador.
+        """
+        estado = self.estado_temporal
+        info = self.tiempo_restante_info
+        etiquetas = {
+            "disponible": ("Disponible", "exito"), "programado": ("Programado", "info"),
+            "cerrado": ("Cerrado", "neutro"), "oculto": ("Oculto", "neutro"),
+            "archivado": ("Archivado", "neutro"), "borrador": ("Borrador", "aviso"),
+        }
+        etiqueta, tono = etiquetas.get(estado, (estado.capitalize(), "neutro"))
+        detalles = {
+            "borrador": "sin publicar",
+            "oculto": "los estudiantes no lo ven",
+            "archivado": "",
+            "cerrado": "por el docente" if info["texto"] == "Cerrado por el docente" else "plazo finalizado",
+        }
+        detalle = detalles.get(estado, info["texto"][:1].lower() + info["texto"][1:])
+        return {
+            "etiqueta": etiqueta, "detalle": detalle, "tono": tono,
+            "urgente": estado == "disponible" and info["urgencia"] in ("critica", "alta"),
+        }
+
+    @property
     def tiempo_restante_info(self):
         """Genera un diccionario semántico para los badges y alertas de tiempo."""
-        if self.estado == "borrador":
+        if self.estado == self.BORRADOR:
             return {"texto": "Borrador sin publicar", "clase": "badge-warning", "urgencia": "baja"}
+        if self.estado == self.OCULTO:
+            return {"texto": "Oculto para estudiantes", "clase": "badge-neutro", "urgencia": "baja"}
+        if self.estado == self.ARCHIVADO:
+            return {"texto": "Archivado", "clase": "badge-neutro", "urgencia": "vencido"}
+        if self.estado == self.CERRADO and self.fecha_cierre and timezone.now() <= self.fecha_cierre:
+            return {"texto": "Cerrado por el docente", "clase": "badge-danger", "urgencia": "vencido"}
         ahora = timezone.now()
         if self.esta_vencido:
             return {"texto": "Plazo finalizado", "clase": "badge-danger", "urgencia": "vencido"}

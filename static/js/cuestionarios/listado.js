@@ -1,6 +1,7 @@
 /**
- * Listado de cuestionarios: búsqueda por texto y filtro por estado temporal
- * (disponible, programado, borrador o cerrado según las fechas).
+ * Listado de cuestionarios: búsqueda por texto y filtro por estado efectivo
+ * (disponible, programado, borrador, oculto, cerrado o archivado).
+ * «Todos» deja fuera los archivados; se ven con su propio filtro.
  */
 (function () {
   'use strict';
@@ -16,7 +17,10 @@
     const q = buscador.value.toLowerCase().trim();
     let visibles = 0;
     tarjetas.forEach((tarjeta) => {
-      const visible = (!q || tarjeta.dataset.texto.includes(q)) && (estado === 'todos' || tarjeta.dataset.estado === estado);
+      const coincideEstado = estado === 'todos'
+        ? tarjeta.dataset.estado !== 'archivado'
+        : tarjeta.dataset.estado === estado;
+      const visible = (!q || tarjeta.dataset.texto.includes(q)) && coincideEstado;
       tarjeta.hidden = !visible;
       if (visible) visibles += 1;
     });

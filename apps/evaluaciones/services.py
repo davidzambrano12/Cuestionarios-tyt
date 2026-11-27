@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from decimal import Decimal
 
 from django.db import transaction
-from django.db.models import Count, Q
+from django.db.models import Count
 from django.utils import timezone
 
 from apps.cuestionarios import acceso
@@ -91,14 +91,52 @@ class ResultadoInicio:
     cursos: list = None  # cuando tipo == "elegir_curso"
 
 
+_MOTIVO_NO_DISPONIBLE = {
+    Cuestionario.OCULTO: "El docente ocultó temporalmente esta evaluación. Intenta más tarde.",
+    Cuestionario.CERRADO: "El docente cerró esta evaluación; ya no admite intentos nuevos.",
+    Cuestionario.ARCHIVADO: "Esta evaluación fue archivada y ya no admite intentos.",
+}
+
+
+def _reanudar_intento_activo(cuestionario: Cuestionario, codigo: str, ahora) -> ResultadoInicio | None:
+    """Reanuda (o cierra si venció) el intento en curso del participante; None si no tiene."""
+    activos = list(
+        Intento.objects.filter(cuestionario=cuestionario, participante_codigo=codigo, estado="en_progreso")
+        .select_related("cuestionario")
+        .order_by("-fecha_inicio")
+    )
+    if not activos:
+        return None
+    actual, *huerfanos = activos
+    for extra in huerfanos:  # no debería haber más de uno abierto
+        cerrar_como_vencido(extra, ahora)
+    if cerrar_si_vencio(actual, ahora):
+        return ResultadoInicio(
+            "vencido", actual, "Tu intento previo expiró por límite de tiempo y ha sido cerrado.",
+        )
+    return ResultadoInicio(
+        "reanudado", actual, "Reanudando tu intento en curso. El tiempo continúa corriendo en el servidor.",
+    )
+
+
 def iniciar_intento(user, cuestionario: Cuestionario, ahora=None, curso_id=None) -> ResultadoInicio:
     """Valida disponibilidad, fechas e intentos (RF/R08) y crea o reanuda el intento."""
     ahora = ahora or timezone.now()
 
     if not user.is_active:
         return ResultadoInicio("rechazado", mensaje="Su cuenta se encuentra suspendida.")
-    if cuestionario.estado != "disponible":
-        return ResultadoInicio("rechazado", mensaje="Esta evaluación no se encuentra disponible actualmente.")
+    if cuestionario.estado != Cuestionario.PUBLICADO:
+        # Ocultar, cerrar o archivar no corta a quien ya estaba presentando
+        if cuestionario.estado in _MOTIVO_NO_DISPONIBLE:
+            reanudado = _reanudar_intento_activo(cuestionario, codigo_participante(user), ahora)
+            if reanudado:
+                return reanudado
+        return ResultadoInicio(
+            "rechazado",
+            mensaje=_MOTIVO_NO_DISPONIBLE.get(
+                cuestionario.estado, "Esta evaluación no se encuentra disponible actualmente.",
+            ),
+        )
     if ahora < cuestionario.fecha_apertura:
         return ResultadoInicio(
             "rechazado", mensaje=f"La evaluación aún no ha iniciado. Abre el {cuestionario.fecha_apertura}.",
@@ -112,22 +150,9 @@ def iniciar_intento(user, cuestionario: Cuestionario, ahora=None, curso_id=None)
         )
 
     codigo = codigo_participante(user)
-    activos = list(
-        Intento.objects.filter(cuestionario=cuestionario, participante_codigo=codigo, estado="en_progreso")
-        .select_related("cuestionario")
-        .order_by("-fecha_inicio")
-    )
-    if activos:
-        actual, *huerfanos = activos
-        for extra in huerfanos:  # no debería haber más de uno abierto
-            cerrar_como_vencido(extra, ahora)
-        if cerrar_si_vencio(actual, ahora):
-            return ResultadoInicio(
-                "vencido", actual, "Tu intento previo expiró por límite de tiempo y ha sido cerrado.",
-            )
-        return ResultadoInicio(
-            "reanudado", actual, "Reanudando tu intento en curso. El tiempo continúa corriendo en el servidor.",
-        )
+    reanudado = _reanudar_intento_activo(cuestionario, codigo, ahora)
+    if reanudado:
+        return reanudado
 
     usados = Intento.objects.filter(
         cuestionario=cuestionario, participante_codigo=codigo, estado__in=["finalizado", "vencido"],
@@ -349,12 +374,12 @@ def panel_estudiante(user, ahora=None) -> dict:
 
     visibles = acceso.visibles_para_estudiante(user, ahora)
     disponibles = list(
-        visibles.filter(estado="disponible", fecha_apertura__lte=ahora, fecha_cierre__gte=ahora)
+        visibles.filter(estado=Cuestionario.PUBLICADO, fecha_apertura__lte=ahora, fecha_cierre__gte=ahora)
         .prefetch_related("cuestionario_preguntas", "intentos")
         .order_by("fecha_cierre")
     )
     programados = list(
-        visibles.filter(Q(estado="programado") | Q(estado="disponible", fecha_apertura__gt=ahora))
+        visibles.filter(estado=Cuestionario.PUBLICADO, fecha_apertura__gt=ahora)
         .prefetch_related("cuestionario_preguntas")
         .order_by("fecha_apertura")
     )
@@ -373,6 +398,14 @@ def panel_estudiante(user, ahora=None) -> dict:
             cerrar_como_vencido(intento, ahora)
         else:
             activos[intento.cuestionario_id] = intento
+
+    # Si el docente ocultó o cerró el cuestionario mientras presentaba, se le
+    # sigue mostrando para que pueda terminar su intento en curso
+    ya_listados = {c.id for c in disponibles}
+    disponibles += [
+        intento.cuestionario for intento in activos.values()
+        if intento.cuestionario_id not in ya_listados and intento.cuestionario.estado != Cuestionario.BORRADOR
+    ]
 
     hechos = {
         fila["cuestionario_id"]: fila["total"]

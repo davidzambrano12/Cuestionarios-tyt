@@ -202,8 +202,14 @@
           <div class="ficha-resumen__nombre"><dt>Disponibilidad</dt><dd data-ref="r-fechas">{% if cuestionario.fecha_apertura and cuestionario.fecha_cierre %}{{ cuestionario.fecha_apertura|date:"d M Y H:i" }} → {{ cuestionario.fecha_cierre|date:"d M Y H:i" }}{% else %}Define las fechas en el paso 1{% endif %}</dd></div>
         </dl>
         <div class="ficha-resumen__acciones">
+          {% if cuestionario.pk and cuestionario.estado != 'borrador' %}
+          {# Ya publicado: guardar no cambia el estado; eso se hace desde el listado #}
+          <button type="submit" name="accion" value="guardar" class="btn btn-primary btn-full"><i data-lucide="save" class="icono-16"></i> Guardar cambios</button>
+          <p class="texto-xs texto-suave">Estado: <strong>{{ cuestionario.get_estado_display }}</strong>. Para ocultarlo, cerrarlo o archivarlo usa los botones de la <a href="{% url 'cuestionarios:listado' %}">lista de cuestionarios</a>.</p>
+          {% else %}
           <button type="submit" name="accion" value="borrador" class="btn btn-outline btn-full"><i data-lucide="save" class="icono-16"></i> Guardar como borrador</button>
           <button type="submit" name="accion" value="publicar" class="btn btn-primary btn-full"><i data-lucide="send" class="icono-16"></i> Publicar y habilitar</button>
+          {% endif %}
         </div>
       </aside>
     </div>

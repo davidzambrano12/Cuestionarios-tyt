@@ -101,6 +101,16 @@ body {
   text-rendering: optimizeLegibility;
 }
 
+/* Botones y campos no heredan la fuente por defecto del navegador
+   (los <button> salían en Arial); se igualan al resto de la interfaz. */
+button, input, select, textarea, optgroup { font-family: inherit; }
+
+/* Contenido dentro de títulos (enunciados de preguntas): se lee en la
+   fuente de interfaz, no en la de títulos. */
+.sala-enunciado, .revision__enunciado, .pregunta-importada__enunciado, .pregunta-asignada__enunciado {
+  font-family: var(--fuente-texto);
+}
+
 /* Títulos: Raleway (tipografía primaria del manual). Raleway trae cifras
    antiguas por defecto; se fuerzan cifras alineadas para notas y conteos. */
 h1, h2, h3, h4, h5, h6,
@@ -125,7 +135,7 @@ h1, h2, h3, h4, h5, h6,
    JERARQUÍA TIPOGRÁFICA GLOBAL
    ========================================================================== */
 h1, .h1 {
-  font-family: var(--font-sans);
+  font-family: var(--fuente-titulos);
   font-size: var(--text-3xl);
   font-weight: var(--weight-extrabold);
   line-height: var(--leading-tight);
@@ -135,7 +145,7 @@ h1, .h1 {
 }
 
 h2, .h2 {
-  font-family: var(--font-sans);
+  font-family: var(--fuente-titulos);
   font-size: var(--text-2xl);
   font-weight: var(--weight-extrabold);
   line-height: var(--leading-snug);
@@ -145,7 +155,7 @@ h2, .h2 {
 }
 
 h3, .h3 {
-  font-family: var(--font-sans);
+  font-family: var(--fuente-titulos);
   font-size: var(--text-xl);
   font-weight: var(--weight-bold);
   line-height: var(--leading-snug);
@@ -154,7 +164,7 @@ h3, .h3 {
 }
 
 h4, .h4 {
-  font-family: var(--font-sans);
+  font-family: var(--fuente-titulos);
   font-size: var(--text-lg);
   font-weight: var(--weight-semibold);
   line-height: var(--leading-normal);
@@ -163,7 +173,7 @@ h4, .h4 {
 }
 
 h5, .h5 {
-  font-family: var(--font-sans);
+  font-family: var(--fuente-titulos);
   font-size: var(--text-md);
   font-weight: var(--weight-semibold);
   line-height: var(--leading-normal);

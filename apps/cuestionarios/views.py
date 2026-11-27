@@ -1,33 +1,68 @@
 """Módulo C: configuración y previsualización de cuestionarios."""
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.db.models import Avg, Count, Q
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.views.decorators.http import require_POST
 
 from apps.core.decorators import requiere_permiso
 from apps.core.services.acceso import es_personal_docente
 from apps.banco_preguntas.models import Pregunta
 from apps.cuestionarios.models import Cuestionario
-from apps.cuestionarios import acceso
+from apps.cuestionarios import acceso, estados
 from apps.cuestionarios import services as servicio
+from apps.reportes.consultas import TERMINADOS
 
 
 @login_required
 @requiere_permiso("cuestionarios.gestionar")
 def cuestionarios_list(request):
+    # Participación: solo intentos terminados y calificados (los mismos que cuentan en reportes)
+    calificados = Q(intentos__estado__in=TERMINADOS, intentos__calificacion__isnull=False)
     cuestionarios = list(
         acceso.visibles_para_docente(request.user)
-        .select_related("creado_por").prefetch_related("cuestionario_preguntas", "intentos", "cursos__periodo")
+        .select_related("creado_por").prefetch_related("cuestionario_preguntas", "cursos__periodo")
+        .annotate(
+            n_intentos=Count("intentos", filter=calificados, distinct=True),
+            n_aprobados=Count("intentos", filter=calificados & Q(intentos__aprobado=True), distinct=True),
+            promedio=Avg("intentos__calificacion", filter=calificados),
+        )
         .order_by("-id")
     )
     for c in cuestionarios:
         c.editable = acceso.puede_editar(request.user, c)
+        acciones = estados.acciones_disponibles(c) if c.editable else []
+        # «Publicar» va como botón visible en la tarjeta; el resto, en el menú «⋯»
+        c.accion_publicar = next((a for a in acciones if a.codigo == "publicar"), None)
+        c.acciones_menu = [a for a in acciones if a.codigo != "publicar"]
+        c.porcentaje_aprobacion = round(100 * c.n_aprobados / c.n_intentos) if c.n_intentos else None
+        cursos = list(c.cursos.all())
+        c.cursos_resumen = ", ".join(f"{curso.nombre} ({curso.periodo})" for curso in cursos)
+        c.n_cursos = len(cursos)
     return render(request, "cuestionarios/listado.html", {
         "cuestionarios": cuestionarios,
         "active_tab": "cuestionarios",
         **servicio.resumen_listado(cuestionarios),
     })
+
+
+@login_required
+@requiere_permiso("cuestionarios.gestionar")
+@require_POST
+def cambiar_estado(request, cuestionario_id):
+    """Publicar, ocultar, mostrar, cerrar, reabrir, archivar o desarchivar (RF-15)."""
+    cuestionario = get_object_or_404(Cuestionario, id=cuestionario_id)
+    if not acceso.puede_editar(request.user, cuestionario):
+        raise PermissionDenied("Este cuestionario lo gestiona otro docente o la institución.")
+    try:
+        accion = estados.aplicar_accion(cuestionario, request.POST.get("accion", ""))
+    except estados.CambioNoPermitido as error:
+        messages.error(request, f"«{cuestionario.nombre}»: {error}")
+    else:
+        messages.success(request, f"Cuestionario «{cuestionario.nombre}» {accion.exito}.")
+    return redirect("cuestionarios:listado")
 
 
 def _preguntas_activas():
@@ -58,6 +93,7 @@ def configurar_cuestionario(request, cuestionario_id=None):
                 puede_institucional=contexto_visibilidad["puede_institucional"],
                 cursos_permitidos=[c.id for c in cursos],
                 cursos_actuales=actuales,
+                estado_actual=cuestionario.estado if cuestionario else None,
             )
         except servicio.DatosInvalidos as error:
             # Se vuelve a mostrar el formulario con lo que escribió el docente
