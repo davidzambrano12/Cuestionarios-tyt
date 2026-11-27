@@ -80,3 +80,53 @@ class BancoPreguntasTests(TestCase):
         self.client.post("/preguntas/crear/", self._datos_multiple())
         r = self.client.get("/preguntas/")
         self.assertContains(r, "¿Cuál es la idea principal?")
+
+
+class ListadoBancoTests(TestCase):
+    """Búsqueda, filtros y paginación del banco en el servidor."""
+
+    @classmethod
+    def setUpTestData(cls):
+        sembrar_roles()
+        cls.docente = crear_usuario("prof", "docente")
+        cls.lectura = Categoria.objects.create(nombre="Lectura Crítica")
+        cls.ingles = Categoria.objects.create(nombre="Inglés")
+        for i in range(20):
+            Pregunta.objects.create(categoria=cls.lectura, tipo="MULTIPLE", enunciado=f"Lectura {i}")
+        cls.vf = Pregunta.objects.create(categoria=cls.ingles, tipo="V_F", enunciado="Is it true?", activa=False)
+
+    def setUp(self):
+        self.client.force_login(self.docente)
+
+    def _ids(self, **filtros):
+        return [p.id for p in self.client.get("/preguntas/", filtros).context["pagina"]]
+
+    def test_pagina_de_quince(self):
+        r = self.client.get("/preguntas/")
+        self.assertEqual(len(r.context["pagina"]), 15)
+        self.assertContains(r, "Página 1 de 2")
+        self.assertEqual(len(self._ids(page=2)), 6)
+
+    def test_filtros_por_competencia_tipo_estado_y_texto(self):
+        self.assertEqual(self._ids(categoria=self.ingles.id), [self.vf.id])
+        self.assertEqual(self._ids(tipo="V_F"), [self.vf.id])
+        self.assertEqual(self._ids(estado="inactivas"), [self.vf.id])
+        self.assertEqual(self._ids(q="true"), [self.vf.id])
+        self.assertEqual(self._ids(q=f"P-{self.vf.id}"), [self.vf.id])
+
+    def test_valores_invalidos_se_ignoran(self):
+        r = self.client.get("/preguntas/", {"categoria": "x", "tipo": "OTRO", "estado": "?", "page": "99"})
+        self.assertEqual(r.status_code, 200)
+        self.assertFalse(r.context["hay_filtros"])
+
+    def test_la_paginacion_conserva_los_filtros(self):
+        r = self.client.get("/preguntas/", {"categoria": self.lectura.id})
+        self.assertContains(r, f"?categoria={self.lectura.id}&amp;page=2")
+
+    def test_tras_desactivar_vuelve_a_la_misma_pagina_y_filtros(self):
+        pregunta = Pregunta.objects.filter(categoria=self.lectura).first()
+        r = self.client.post(
+            f"/preguntas/{pregunta.id}/toggle-estado/",
+            {"volver": f"categoria={self.lectura.id}&page=2&next=https://otro.sitio"},
+        )
+        self.assertRedirects(r, f"/preguntas/?categoria={self.lectura.id}&page=2", fetch_redirect_response=False)
