@@ -123,20 +123,6 @@
 }
 .pregunta-asignada__cuerpo { flex: 1; min-width: 0; }
 .pregunta-asignada__enunciado { font-size: var(--texto-sm); font-weight: var(--peso-semibold); overflow-wrap: anywhere; }
-.boton-icono {
-  width: 36px;
-  height: 36px;
-  border-radius: var(--radio-sm);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  flex-shrink: 0;
-  border: 1px solid var(--color-borde);
-  background: var(--color-superficie);
-}
-.boton-icono--peligro { background: var(--color-peligro-suave); border-color: var(--color-peligro-borde); color: var(--color-peligro); }
-.boton-icono--peligro:hover { background: var(--rojo-100); }
 .vacio-asignadas { border: 2px dashed var(--color-borde); border-radius: var(--radio-lg); }
 
 /* Ficha resumen */
