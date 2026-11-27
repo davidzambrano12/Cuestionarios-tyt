@@ -40,59 +40,74 @@
 
   <div class="rejilla-cuestionarios">
     {% for c in cuestionarios %}
+    {% with r=c.resumen_estado %}
     <article class="card tarjeta-listado" data-estado="{{ c.estado_temporal }}"{% if c.estado == 'archivado' %} hidden{% endif %} data-texto="{{ c.nombre|lower }} {{ c.descripcion|default:''|lower }}">
-      <div>
-        <div class="flex justify-between items-center gap-2 mb-3">
-          <div class="flex items-center gap-2 flex-wrap">
-            {% include "cuestionarios/_insignia_estado.html" with estado=c.estado_temporal %}
-            {% if c.estado_temporal != 'oculto' and c.estado_temporal != 'archivado' %}<span class="badge {{ c.tiempo_restante_info.clase }}">{{ c.tiempo_restante_info.texto }}</span>{% endif %}
-            {% if c.es_institucional %}<span class="badge badge-info badge-visibilidad"><i data-lucide="globe" aria-hidden="true"></i> Institucional</span>
-            {% else %}<span class="badge badge-neutro badge-visibilidad"><i data-lucide="lock" aria-hidden="true"></i> De curso</span>{% endif %}
-          </div>
-          <a href="{% url 'cuestionarios:previsualizar' c.id %}" class="btn btn-outline btn-accion"><i data-lucide="eye" class="icono-13"></i> Vista previa</a>
-        </div>
-
-        <h3 class="tarjeta-listado__titulo">{{ c.nombre }}</h3>
-        <p class="card-subtitle mb-3">{{ c.descripcion|default:"Sin instrucciones."|truncatewords:18 }}</p>
-        <p class="texto-xs texto-suave mb-3">
-          {% if c.es_institucional %}Todos los estudiantes{% else %}{% for curso in c.cursos.all %}{{ curso.nombre }} ({{ curso.periodo }}){% if not forloop.last %}, {% endif %}{% empty %}Sin cursos asignados{% endfor %}{% endif %}
-          {% if c.creado_por %}· Creado por {{ c.creado_por.get_full_name|default:c.creado_por.username }}{% endif %}
+      <div class="tarjeta-listado__cabecera">
+        <p class="linea-estado linea-estado--{{ r.tono }}{% if r.urgente %} linea-estado--urgente{% endif %}">
+          <span class="linea-estado__punto" aria-hidden="true"></span>
+          <strong>{{ r.etiqueta }}</strong>{% if r.detalle %}<span class="linea-estado__detalle"> · {{ r.detalle }}</span>{% endif %}
         </p>
 
-        <ul class="tarjeta-cuestionario__datos">
-          <li><i data-lucide="library" class="icono-13"></i> <strong>{{ c.cuestionario_preguntas.all|length }}</strong> preguntas</li>
-          <li><i data-lucide="clock" class="icono-13"></i> <strong>{{ c.tiempo_limite_minutos }}</strong> min</li>
-          <li><i data-lucide="award" class="icono-13"></i> Aprueba con <strong>{{ c.calificacion_aprobacion }}</strong> / {{ c.calificacion_maxima }}</li>
-          <li><i data-lucide="shuffle" class="icono-13"></i> {% if c.mezclar_preguntas %}Orden aleatorio{% else %}Orden fijo{% endif %}</li>
-        </ul>
-
-        <div class="tarjeta-listado__fechas">
-          <span class="inline-flex items-center gap-1"><i data-lucide="calendar" class="icono-13"></i> Cierre: <strong class="{% if c.estado_temporal == 'cerrado' %}texto-peligro{% endif %}">{{ c.fecha_cierre|date:"d M Y · H:i" }}</strong></span>
-          <span class="texto-tenue">Inicio: {{ c.fecha_apertura|date:"d M" }}</span>
+        <div class="menu-tarjeta" data-menu-desplegable>
+          <button type="button" class="boton-icono menu-tarjeta__boton" aria-haspopup="menu" aria-expanded="false" aria-controls="menu-cuestionario-{{ c.id }}" aria-label="Más acciones para {{ c.nombre }}">
+            <i data-lucide="ellipsis" aria-hidden="true"></i>
+          </button>
+          <div class="menu-cuenta__lista" id="menu-cuestionario-{{ c.id }}" role="menu" hidden>
+            {% if c.editable %}
+            <a href="{% url 'cuestionarios:editar' c.id %}" role="menuitem" class="menu-cuenta__item"><i data-lucide="settings" aria-hidden="true"></i> Configurar</a>
+            {% endif %}
+            <a href="{% url 'cuestionarios:previsualizar' c.id %}" role="menuitem" class="menu-cuenta__item"><i data-lucide="eye" aria-hidden="true"></i> Vista previa</a>
+            {% if c.editable %}
+            <a href="{% url 'reportes:intentos' c.id %}" role="menuitem" class="menu-cuenta__item"><i data-lucide="users" aria-hidden="true"></i> Ver intentos</a>
+            {% endif %}
+            {% for accion in c.acciones_menu %}
+            {% if forloop.first %}<hr class="menu-tarjeta__separador">{% endif %}
+            <form method="POST" action="{% url 'cuestionarios:cambiar_estado' c.id %}"
+                  {% if accion.confirmar %}data-confirmar-titulo="¿{{ accion.etiqueta }} «{{ c.nombre }}»?" data-confirmar="{{ accion.confirmar }}" data-confirmar-boton="{{ accion.etiqueta }}" data-confirmar-tipo="{{ accion.tipo_confirmacion }}"{% endif %}>
+              {% csrf_token %}
+              <input type="hidden" name="accion" value="{{ accion.codigo }}">
+              <button type="submit" role="menuitem" class="menu-cuenta__item{% if accion.tipo_confirmacion == 'peligro' %} menu-cuenta__item--peligro{% endif %}"><i data-lucide="{{ accion.icono }}" aria-hidden="true"></i> {{ accion.etiqueta }}</button>
+            </form>
+            {% endfor %}
+          </div>
         </div>
       </div>
 
-      <div class="tarjeta-listado__acciones">
-        {% if c.editable %}
-        <a href="{% url 'reportes:intentos' c.id %}" class="btn btn-secondary"><i data-lucide="users" class="icono-15"></i> Intentos ({{ c.intentos.all|length }})</a>
-        <a href="{% url 'cuestionarios:editar' c.id %}" class="btn btn-primary"><i data-lucide="settings" class="icono-15"></i> Configurar</a>
-        {% if c.acciones_estado %}
-        <div class="acciones-estado" role="group" aria-label="Cambiar el estado de {{ c.nombre }}">
-          {% for accion in c.acciones_estado %}
-          <form method="POST" action="{% url 'cuestionarios:cambiar_estado' c.id %}"
-                {% if accion.confirmar %}data-confirmar-titulo="¿{{ accion.etiqueta }} «{{ c.nombre }}»?" data-confirmar="{{ accion.confirmar }}" data-confirmar-boton="{{ accion.etiqueta }}" data-confirmar-tipo="{{ accion.tipo_confirmacion }}"{% endif %}>
-            {% csrf_token %}
-            <input type="hidden" name="accion" value="{{ accion.codigo }}">
-            <button type="submit" class="btn btn-outline btn-accion{% if accion.tipo_confirmacion == 'peligro' %} btn-accion--peligro{% endif %}"><i data-lucide="{{ accion.icono }}" class="icono-13" aria-hidden="true"></i> {{ accion.etiqueta }}</button>
-          </form>
-          {% endfor %}
-        </div>
-        {% endif %}
+      <h3 class="tarjeta-listado__titulo">
+        <a href="{% if c.editable %}{% url 'cuestionarios:editar' c.id %}{% else %}{% url 'cuestionarios:previsualizar' c.id %}{% endif %}">{{ c.nombre }}</a>
+      </h3>
+      <p class="tarjeta-listado__meta">
+        {{ c.cuestionario_preguntas.all|length }} preguntas · {{ c.tiempo_limite_minutos }} min ·
+        {% if c.es_institucional %}Institucional
+        {% elif c.n_cursos %}<span title="{{ c.cursos_resumen }}">{% if c.n_cursos == 1 %}{{ c.cursos_resumen }}{% else %}{{ c.n_cursos }} cursos{% endif %}</span>
+        {% else %}<span class="texto-aviso">sin cursos</span>{% endif %}
+      </p>
+      <p class="tarjeta-listado__periodo">
+        <i data-lucide="calendar" aria-hidden="true"></i>
+        <time datetime="{{ c.fecha_apertura|date:'c' }}">{{ c.fecha_apertura|date:"j M" }}</time> →
+        <time datetime="{{ c.fecha_cierre|date:'c' }}">{{ c.fecha_cierre|date:"j M Y, H:i" }}</time>
+      </p>
+
+      <div class="tarjeta-listado__pie">
+        {% if c.n_intentos %}
+        <a class="participacion" href="{% if c.editable %}{% url 'reportes:intentos' c.id %}{% else %}{% url 'reportes:consultas' %}{% endif %}">
+          <span><strong>{{ c.n_intentos }}</strong> intento{{ c.n_intentos|pluralize }}</span>
+          <span>promedio <strong>{{ c.promedio|floatformat:1 }}</strong> / {{ c.calificacion_maxima|floatformat:0 }}</span>
+          <span><strong>{{ c.porcentaje_aprobacion }} %</strong> aprueba</span>
+        </a>
         {% else %}
-        <p class="texto-xs texto-suave">Lo gestiona la institución. Los resultados de tus estudiantes están en <a href="{% url 'reportes:consultas' %}">Consultas y reportes</a>.</p>
+        <p class="participacion participacion--vacia">{% if c.estado == 'borrador' %}Aún no está publicado{% else %}Nadie lo ha presentado todavía{% endif %}</p>
+        {% endif %}
+        {% if c.accion_publicar %}
+        <form method="POST" action="{% url 'cuestionarios:cambiar_estado' c.id %}" data-confirmar-titulo="¿Publicar «{{ c.nombre }}»?" data-confirmar="{{ c.accion_publicar.confirmar }}" data-confirmar-boton="Publicar" data-confirmar-tipo="primario">
+          {% csrf_token %}
+          <input type="hidden" name="accion" value="publicar">
+          <button type="submit" class="btn btn-primary btn-accion"><i data-lucide="send" class="icono-13" aria-hidden="true"></i> Publicar</button>
+        </form>
         {% endif %}
       </div>
     </article>
+    {% endwith %}
     {% empty %}
     <div class="card rejilla-cuestionarios__completa">
       {% componente "componentes/estado_vacio.html" icono="clipboard-x" titulo="No hay cuestionarios registrados" mensaje="Crea una evaluación y asígnale preguntas del banco." %}

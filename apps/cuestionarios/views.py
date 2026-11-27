@@ -1,6 +1,7 @@
 """Módulo C: configuración y previsualización de cuestionarios."""
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.db.models import Avg, Count, Q
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
@@ -12,19 +13,34 @@ from apps.banco_preguntas.models import Pregunta
 from apps.cuestionarios.models import Cuestionario
 from apps.cuestionarios import acceso, estados
 from apps.cuestionarios import services as servicio
+from apps.reportes.consultas import TERMINADOS
 
 
 @login_required
 @requiere_permiso("cuestionarios.gestionar")
 def cuestionarios_list(request):
+    # Participación: solo intentos terminados y calificados (los mismos que cuentan en reportes)
+    calificados = Q(intentos__estado__in=TERMINADOS, intentos__calificacion__isnull=False)
     cuestionarios = list(
         acceso.visibles_para_docente(request.user)
-        .select_related("creado_por").prefetch_related("cuestionario_preguntas", "intentos", "cursos__periodo")
+        .select_related("creado_por").prefetch_related("cuestionario_preguntas", "cursos__periodo")
+        .annotate(
+            n_intentos=Count("intentos", filter=calificados, distinct=True),
+            n_aprobados=Count("intentos", filter=calificados & Q(intentos__aprobado=True), distinct=True),
+            promedio=Avg("intentos__calificacion", filter=calificados),
+        )
         .order_by("-id")
     )
     for c in cuestionarios:
         c.editable = acceso.puede_editar(request.user, c)
-        c.acciones_estado = estados.acciones_disponibles(c) if c.editable else []
+        acciones = estados.acciones_disponibles(c) if c.editable else []
+        # «Publicar» va como botón visible en la tarjeta; el resto, en el menú «⋯»
+        c.accion_publicar = next((a for a in acciones if a.codigo == "publicar"), None)
+        c.acciones_menu = [a for a in acciones if a.codigo != "publicar"]
+        c.porcentaje_aprobacion = round(100 * c.n_aprobados / c.n_intentos) if c.n_intentos else None
+        cursos = list(c.cursos.all())
+        c.cursos_resumen = ", ".join(f"{curso.nombre} ({curso.periodo})" for curso in cursos)
+        c.n_cursos = len(cursos)
     return render(request, "cuestionarios/listado.html", {
         "cuestionarios": cuestionarios,
         "active_tab": "cuestionarios",

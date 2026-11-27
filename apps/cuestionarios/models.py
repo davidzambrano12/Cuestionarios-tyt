@@ -95,6 +95,32 @@ class Cuestionario(models.Model):
         return False
 
     @property
+    def resumen_estado(self):
+        """
+        Estado efectivo en una sola línea para las tarjetas: etiqueta, detalle
+        (tiempo o motivo, sin repetir la etiqueta) y tono del indicador.
+        """
+        estado = self.estado_temporal
+        info = self.tiempo_restante_info
+        etiquetas = {
+            "disponible": ("Disponible", "exito"), "programado": ("Programado", "info"),
+            "cerrado": ("Cerrado", "neutro"), "oculto": ("Oculto", "neutro"),
+            "archivado": ("Archivado", "neutro"), "borrador": ("Borrador", "aviso"),
+        }
+        etiqueta, tono = etiquetas.get(estado, (estado.capitalize(), "neutro"))
+        detalles = {
+            "borrador": "sin publicar",
+            "oculto": "los estudiantes no lo ven",
+            "archivado": "",
+            "cerrado": "por el docente" if info["texto"] == "Cerrado por el docente" else "plazo finalizado",
+        }
+        detalle = detalles.get(estado, info["texto"][:1].lower() + info["texto"][1:])
+        return {
+            "etiqueta": etiqueta, "detalle": detalle, "tono": tono,
+            "urgente": estado == "disponible" and info["urgencia"] in ("critica", "alta"),
+        }
+
+    @property
     def tiempo_restante_info(self):
         """Genera un diccionario semántico para los badges y alertas de tiempo."""
         if self.estado == self.BORRADOR:

@@ -147,6 +147,31 @@ class VistaCambiarEstadoTests(TestCase):
     def _url(self, c):
         return f"/cuestionarios/{c.id}/estado/"
 
+    def test_tarjeta_muestra_participacion_y_publicar_solo_en_borrador(self):
+        from decimal import Decimal
+
+        from apps.evaluaciones.models import Intento
+
+        publicado = crear_cuestionario(nombre="Con intentos")
+        for codigo, nota, aprobado in [("A", "4.00", True), ("B", "2.00", False), ("C", None, None)]:
+            Intento.objects.create(
+                cuestionario=publicado, participante_nombre=codigo, participante_codigo=codigo,
+                estado="finalizado" if nota else "en_progreso",
+                calificacion=Decimal(nota) if nota else None, aprobado=aprobado,
+            )
+        borrador = crear_cuestionario(nombre="Sin publicar", estado=C.BORRADOR)
+        self.client.force_login(self.admin)
+        r = self.client.get("/cuestionarios/")
+        tarjetas = {c.id: c for c in r.context["cuestionarios"]}
+        # Solo cuentan los intentos terminados y calificados
+        self.assertEqual(tarjetas[publicado.id].n_intentos, 2)
+        self.assertEqual(tarjetas[publicado.id].promedio, Decimal("3.00"))
+        self.assertEqual(tarjetas[publicado.id].porcentaje_aprobacion, 50)
+        self.assertIsNone(tarjetas[publicado.id].accion_publicar)
+        self.assertEqual(tarjetas[borrador.id].accion_publicar.codigo, "publicar")
+        self.assertNotIn("publicar", [a.codigo for a in tarjetas[borrador.id].acciones_menu])
+        self.assertContains(r, "Aún no está publicado")
+
     def test_admin_oculta_desde_el_listado(self):
         c = crear_cuestionario()
         self.client.force_login(self.admin)
