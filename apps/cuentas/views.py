@@ -5,6 +5,7 @@ from django.contrib.auth import authenticate, login, logout, update_session_auth
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.http import HttpResponseForbidden, JsonResponse
+from django.db.models import Count
 from django.shortcuts import get_object_or_404, redirect, render
 
 from apps.core.decorators import requiere_permiso
@@ -54,12 +55,17 @@ def logout_view(request):
 @requiere_permiso("roles.gestionar")
 def usuarios_roles_view(request):
     """Gestión de usuarios institucionales y roles/permisos configurables."""
-    usuarios = User.objects.all().select_related("perfil", "perfil__rol").order_by("-id")
-    roles = Rol.objects.all().prefetch_related("permisos").order_by("id")
+    # Activos primero y, dentro de cada grupo, por nombre: es un directorio de personas
+    usuarios = list(
+        User.objects.select_related("perfil", "perfil__rol")
+        .order_by("-is_active", "first_name", "last_name", "username")
+    )
+    roles = Rol.objects.prefetch_related("permisos").annotate(n_usuarios=Count("usuarios")).order_by("id")
     todos_permisos = PermisoSistema.objects.all().order_by("modulo", "nombre")
 
     return render(request, "cuentas/usuarios_roles.html", {
         "usuarios": usuarios,
+        "n_suspendidos": sum(1 for u in usuarios if not u.is_active),
         "roles": roles,
         "todos_permisos": todos_permisos,
     })

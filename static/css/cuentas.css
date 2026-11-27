@@ -5,6 +5,33 @@
 .rejilla-cuentas { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: var(--espacio-4); }
 .rejilla-cuentas__completa { grid-column: 1 / -1; }
 
+/* Directorio de usuarios */
+.tabla--usuarios { min-width: 860px; }
+.tabla--usuarios :where(td) { padding-top: 12px; padding-bottom: 12px; }
+.fila-usuario { transition: background-color 120ms ease-out; }
+.fila-usuario:hover { background: var(--color-superficie-tenue); }
+.fila-usuario--suspendido .persona__nombre, .fila-usuario--suspendido .persona__avatar { opacity: 0.6; }
+
+.persona { display: flex; align-items: center; gap: var(--espacio-3); min-width: 0; }
+.persona__avatar { width: 36px; height: 36px; flex-shrink: 0; font-size: var(--texto-xs); font-weight: var(--peso-bold); letter-spacing: 0.02em; }
+.persona__avatar--admin { background: var(--color-primario); color: var(--color-texto-invertido); }
+.persona__avatar--docente { background: var(--color-info-suave); color: var(--color-info-texto); }
+.persona__avatar--estudiante, .persona__avatar--ninguno { background: var(--color-superficie-hundida); color: var(--color-texto-suave); }
+.persona__datos { display: flex; flex-direction: column; min-width: 0; }
+.persona__nombre { font-weight: var(--peso-semibold); color: var(--color-texto); display: inline-flex; align-items: center; gap: var(--espacio-2); }
+.persona__correo { font-size: var(--texto-xs); color: var(--color-texto-suave); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 280px; }
+
+.rol-etiqueta { font-size: var(--texto-sm); font-weight: var(--peso-semibold); color: var(--color-texto); }
+
+.estado-punto { display: inline-flex; align-items: center; gap: 6px; font-size: var(--texto-sm); white-space: nowrap; }
+.estado-punto::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+.estado-punto--activo { color: var(--color-exito-texto); }
+.estado-punto--suspendido { color: var(--color-peligro); }
+
+.fila-usuario__acciones { display: flex; align-items: center; justify-content: flex-end; gap: var(--espacio-1); }
+.menu-tarjeta__hueco { width: 32px; flex-shrink: 0; }
+@media (prefers-reduced-motion: reduce) { .fila-usuario { transition: none; } }
+
 .tarjeta-cuenta { margin-bottom: 0; padding: var(--espacio-5); display: flex; flex-direction: column; gap: var(--espacio-3); }
 .tarjeta-cuenta__cabecera { display: flex; gap: var(--espacio-3); align-items: flex-start; }
 .tarjeta-cuenta__cabecera .user-avatar-circle { width: 44px; height: 44px; flex-shrink: 0; }
