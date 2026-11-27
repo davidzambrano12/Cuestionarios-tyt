@@ -1320,6 +1320,7 @@ a:hover {
   z-index: 30;
 }
 .menu-cuenta__lista[hidden] { display: none; }
+.menu-cuenta__lista--arriba { top: auto; bottom: calc(100% + var(--espacio-1)); }
 .menu-cuenta__item {
   display: flex;
   align-items: center;
