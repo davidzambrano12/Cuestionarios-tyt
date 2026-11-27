@@ -21,7 +21,7 @@ from apps.evaluaciones import services as evaluacion
 
 
 class SimulacroSerializer(serializers.ModelSerializer):
-    estado = serializers.CharField(source="estado_temporal", help_text="borrador, programado, disponible o cerrado (según fechas).")
+    estado = serializers.CharField(source="estado_temporal", help_text="Estado efectivo: borrador, programado, disponible, oculto, cerrado o archivado (combina el estado elegido por el docente con las fechas).")
     numero_preguntas = serializers.IntegerField(read_only=True)
 
     class Meta:
