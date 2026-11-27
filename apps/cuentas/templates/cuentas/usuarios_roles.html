@@ -1,5 +1,5 @@
 {% extends 'layouts/app_base.html' %}
-{% load static componentes %}
+{% load static componentes formato_tiempo %}
 
 {% block title %}Usuarios y roles - Simulador Saber TyT{% endblock %}
 {% block nav_title %}Usuarios y roles{% endblock %}
@@ -32,63 +32,102 @@
     <div class="barra-herramientas__fila" data-solo-pestana="usuarios">
       <div class="flex items-center gap-2 flex-wrap" role="group" aria-label="Filtrar por rol">
         <span class="texto-xs texto-suave peso-semibold">Rol:</span>
-        <button type="button" class="btn btn-outline chip-filtro active" data-filtro-rol="" aria-pressed="true">Todos</button>
-        {% for r in roles %}<button type="button" class="btn btn-outline chip-filtro" data-filtro-rol="{{ r.codigo }}" aria-pressed="false">{{ r.nombre }}</button>{% endfor %}
+        <button type="button" class="btn btn-outline chip-filtro active" data-filtro-rol="" aria-pressed="true">Todos <span class="chip-filtro__cuenta">{{ usuarios|length }}</span></button>
+        {% for r in roles %}<button type="button" class="btn btn-outline chip-filtro" data-filtro-rol="{{ r.codigo }}" aria-pressed="false">{{ r.nombre }} <span class="chip-filtro__cuenta">{{ r.n_usuarios }}</span></button>{% endfor %}
       </div>
       <div class="flex items-center gap-2 flex-wrap" role="group" aria-label="Filtrar por estado">
         <span class="texto-xs texto-suave peso-semibold">Estado:</span>
         <button type="button" class="btn btn-outline chip-filtro active" data-filtro-estado="" aria-pressed="true">Todos</button>
         <button type="button" class="btn btn-outline chip-filtro" data-filtro-estado="activo" aria-pressed="false">Activos</button>
-        <button type="button" class="btn btn-outline chip-filtro" data-filtro-estado="inactivo" aria-pressed="false">Suspendidos</button>
+        <button type="button" class="btn btn-outline chip-filtro" data-filtro-estado="inactivo" aria-pressed="false">Suspendidos <span class="chip-filtro__cuenta">{{ n_suspendidos }}</span></button>
       </div>
     </div>
   </div>
   <p class="texto-xs texto-suave mb-3" id="contador" aria-live="polite"></p>
 
-  <!-- Usuarios -->
-  <section id="panel-usuarios" role="tabpanel" aria-labelledby="tab-usuarios" class="rejilla-cuentas">
-    {% for u in usuarios %}
-    <article class="card tarjeta-cuenta" data-texto="{{ u.get_full_name|lower }} {{ u.username|lower }} {{ u.email|lower }} {{ u.perfil.codigo_institucional|default:''|lower }}" data-rol="{{ u.perfil.rol.codigo|default:'' }}" data-estado="{% if u.is_active %}activo{% else %}inactivo{% endif %}">
-      <div class="tarjeta-cuenta__cabecera">
-        <span class="user-avatar-circle">{{ u.first_name|default:u.username|slice:":2"|upper }}</span>
-        <div class="flex-1">
-          <h3 class="texto-md peso-extrabold">{{ u.get_full_name|default:u.username }}</h3>
-          <div class="texto-xs texto-suave">{{ u.email|default:"Sin correo" }}</div>
-          <div class="texto-xs texto-tenue">Cód: {{ u.perfil.codigo_institucional|default:u.username }} · {{ u.perfil.rol.nombre|default:"Sin rol" }}</div>
-        </div>
-        {% if u.is_active %}<span class="badge badge-success">Activo</span>{% else %}<span class="badge badge-danger"><i data-lucide="lock" class="icono-12"></i> Suspendido</span>{% endif %}
-      </div>
-      {% if u.perfil.modulo_asignado %}
-      <div class="tarjeta-cuenta__nota"><strong>Módulo asignado:</strong> {{ u.perfil.modulo_asignado }}</div>
-      {% endif %}
-      <div class="tarjeta-cuenta__acciones">
-        {% if u != user %}
-        <form method="POST" action="{% url 'cuentas:toggle_usuario_estado' u.id %}" class="flex-1"
-              {% if u.is_active %}data-confirmar-titulo="¿Suspender a {{ u.get_full_name|default:u.username }}?" data-confirmar="No podrá iniciar sesión hasta que lo reactives.&#10;Sus preguntas y cuestionarios se conservan." data-confirmar-boton="Suspender acceso" data-confirmar-tipo="peligro"{% endif %}>
-          {% csrf_token %}
-          {% if u.is_active %}
-            <button type="submit" class="btn btn-accion btn-peligro btn-full"><i data-lucide="user-x" class="icono-14"></i> Suspender</button>
-          {% else %}
-            <button type="submit" class="btn btn-outline btn-accion btn-full texto-exito"><i data-lucide="user-check" class="icono-14"></i> Reactivar acceso</button>
-          {% endif %}
-        </form>
-        {% endif %}
-        <button type="button" class="btn btn-primary btn-accion flex-1" data-editar-usuario="{{ u.id }}"
-                data-nombre="{{ u.first_name }}" data-apellido="{{ u.last_name }}" data-email="{{ u.email }}"
-                data-rol="{{ u.perfil.rol.id|default:'' }}" data-codigo="{{ u.perfil.codigo_institucional|default:'' }}">
-          <i data-lucide="edit-3" class="icono-14"></i> Editar
-        </button>
-      </div>
-    </article>
-    {% empty %}
-    <div class="card rejilla-cuentas__completa">{% componente "componentes/estado_vacio.html" icono="users" titulo="No hay usuarios registrados" %}{% fincomponente %}</div>
-    {% endfor %}
+  <!-- Usuarios: directorio en tabla -->
+  <section id="panel-usuarios" role="tabpanel" aria-labelledby="tab-usuarios" class="card tabla-contenedor">
+    {% if usuarios %}
+    <div class="tabla-desplazable">
+      <table class="tabla tabla--usuarios">
+        <caption class="sr-only">Usuarios del sistema</caption>
+        <thead>
+          <tr>
+            <th scope="col">Usuario</th>
+            <th scope="col">Código</th>
+            <th scope="col">Rol</th>
+            <th scope="col">Estado</th>
+            <th scope="col">Último acceso</th>
+            <th scope="col"><span class="sr-only">Acciones</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for u in usuarios %}
+          <tr class="fila-usuario{% if not u.is_active %} fila-usuario--suspendido{% endif %}" data-filtrable
+              data-texto="{{ u.get_full_name|lower }} {{ u.username|lower }} {{ u.email|lower }} {{ u.perfil.codigo_institucional|default:''|lower }}"
+              data-rol="{{ u.perfil.rol.codigo|default:'' }}" data-estado="{% if u.is_active %}activo{% else %}inactivo{% endif %}">
+            <td>
+              <div class="persona">
+                <span class="user-avatar-circle persona__avatar persona__avatar--{{ u.perfil.rol.codigo|default:'ninguno' }}" aria-hidden="true">{{ u.first_name|default:u.username|slice:":1"|upper }}{{ u.last_name|slice:":1"|upper }}</span>
+                <div class="persona__datos">
+                  <span class="persona__nombre">{{ u.get_full_name|default:u.username }}{% if u == user %} <span class="badge badge-neutro">Tú</span>{% endif %}</span>
+                  <span class="persona__correo">{{ u.email|default:"Sin correo" }}</span>
+                </div>
+              </div>
+            </td>
+            <td class="cifras texto-suave">{{ u.perfil.codigo_institucional|default:u.username }}</td>
+            <td>
+              <span class="rol-etiqueta">{{ u.perfil.rol.nombre|default:"Sin rol" }}</span>
+              {% if u.perfil.modulo_asignado %}<div class="texto-xs texto-suave">{{ u.perfil.modulo_asignado }}</div>{% endif %}
+            </td>
+            <td>
+              {% if u.is_active %}<span class="estado-punto estado-punto--activo">Activo</span>{% else %}<span class="estado-punto estado-punto--suspendido">Suspendido</span>{% endif %}
+            </td>
+            <td class="texto-suave nowrap">{% if u.last_login %}<time datetime="{{ u.last_login|date:'c' }}" title="{{ u.last_login|date:'j M Y, H:i' }}">{{ u.last_login|tiempo_relativo }}</time>{% else %}Nunca{% endif %}</td>
+            <td>
+              <div class="fila-usuario__acciones">
+                <button type="button" class="btn btn-outline btn-accion" data-editar-usuario="{{ u.id }}"
+                        data-nombre="{{ u.first_name }}" data-apellido="{{ u.last_name }}" data-email="{{ u.email }}"
+                        data-rol="{{ u.perfil.rol.id|default:'' }}" data-codigo="{{ u.perfil.codigo_institucional|default:'' }}"
+                        aria-label="Editar a {{ u.get_full_name|default:u.username }}">
+                  <i data-lucide="pencil" class="icono-14" aria-hidden="true"></i> Editar
+                </button>
+                {% if u != user %}
+                <div class="menu-tarjeta" data-menu-desplegable>
+                  <button type="button" class="boton-icono menu-tarjeta__boton" aria-haspopup="menu" aria-expanded="false" aria-controls="menu-usuario-{{ u.id }}" aria-label="Más acciones para {{ u.get_full_name|default:u.username }}">
+                    <i data-lucide="more-horizontal" aria-hidden="true"></i>
+                  </button>
+                  <div class="menu-cuenta__lista" id="menu-usuario-{{ u.id }}" role="menu" hidden>
+                    <form method="POST" action="{% url 'cuentas:toggle_usuario_estado' u.id %}"
+                          {% if u.is_active %}data-confirmar-titulo="¿Suspender a {{ u.get_full_name|default:u.username }}?" data-confirmar="No podrá iniciar sesión hasta que lo reactives.&#10;Sus preguntas y cuestionarios se conservan." data-confirmar-boton="Suspender acceso" data-confirmar-tipo="peligro"{% endif %}>
+                      {% csrf_token %}
+                      {% if u.is_active %}
+                      <button type="submit" role="menuitem" class="menu-cuenta__item menu-cuenta__item--peligro"><i data-lucide="user-x" aria-hidden="true"></i> Suspender acceso</button>
+                      {% else %}
+                      <button type="submit" role="menuitem" class="menu-cuenta__item"><i data-lucide="user-check" aria-hidden="true"></i> Reactivar acceso</button>
+                      {% endif %}
+                    </form>
+                  </div>
+                </div>
+                {% else %}
+                <span class="menu-tarjeta__hueco" aria-hidden="true"></span>
+                {% endif %}
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    {% componente "componentes/estado_vacio.html" icono="users" titulo="No hay usuarios registrados" %}{% fincomponente %}
+    {% endif %}
   </section>
 
   <!-- Roles -->
   <section id="panel-roles" role="tabpanel" aria-labelledby="tab-roles" class="rejilla-cuentas" hidden>
     {% for r in roles %}
-    <article class="card tarjeta-cuenta" data-texto="{{ r.nombre|lower }} {{ r.codigo|lower }} {{ r.descripcion|lower }}">
+    <article class="card tarjeta-cuenta" data-filtrable data-texto="{{ r.nombre|lower }} {{ r.codigo|lower }} {{ r.descripcion|lower }}">
       <div class="tarjeta-cuenta__cabecera">
         <span class="user-avatar-circle">{{ r.nombre|slice:":2"|upper }}</span>
         <div class="flex-1">
@@ -98,11 +137,11 @@
         {% if r.activo %}<span class="badge badge-success">Activo</span>{% else %}<span class="badge badge-danger">Inactivo</span>{% endif %}
       </div>
       <div class="tarjeta-cuenta__nota tarjeta-cuenta__nota--neutra">
-        <span><strong>{{ r.permisos.all|length }}</strong> permiso{{ r.permisos.all|length|pluralize }} habilitado{{ r.permisos.all|length|pluralize }}</span>
+        <span><strong>{{ r.permisos.all|length }}</strong> permiso{{ r.permisos.all|length|pluralize }} · <strong>{{ r.n_usuarios }}</strong> usuario{{ r.n_usuarios|pluralize }}</span>
         <span>Cód: {{ r.codigo }}{% if r.es_sistema %} · del sistema{% endif %}</span>
       </div>
       <div class="tarjeta-cuenta__acciones">
-        <button type="button" class="btn btn-secondary btn-accion flex-1" data-editar-permisos="{{ r.id }}" data-nombre="{{ r.nombre }}"><i data-lucide="shield" class="icono-15"></i> Editar permisos</button>
+        <button type="button" class="btn btn-outline btn-accion flex-1" data-editar-permisos="{{ r.id }}" data-nombre="{{ r.nombre }}"><i data-lucide="shield" class="icono-15"></i> Editar permisos</button>
         {% if not r.es_sistema %}
         <form method="POST" action="{% url 'cuentas:toggle_rol_estado' r.id %}" {% if r.activo %}data-confirmar-titulo="¿Desactivar el rol {{ r.nombre }}?" data-confirmar="Sus usuarios perderán esos permisos mientras el rol esté inactivo.&#10;Puedes volver a activarlo cuando quieras." data-confirmar-boton="Desactivar rol" data-confirmar-tipo="peligro"{% endif %}>
           {% csrf_token %}

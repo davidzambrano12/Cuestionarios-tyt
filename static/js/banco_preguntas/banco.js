@@ -1,5 +1,5 @@
 /**
- * Banco de preguntas: filtros, y un único modal para crear o editar.
+ * Banco de preguntas: envío de filtros y un único modal para crear o editar.
  * Datos: #banco[data-url-crear] y #banco[data-url-editar] (con id 0 de plantilla).
  * Abre el modal automáticamente con #nueva o ?editar=<id> en la URL.
  */
@@ -77,47 +77,19 @@
 
   /* ------------------------------------------------------------ Filtros */
 
-  const filtroTexto = document.getElementById('filtro-pregunta');
-  const filtroCategoria = document.getElementById('filtro-categoria');
-  const filtroTipo = document.getElementById('filtro-tipo');
-  const tarjetas = [...raiz.querySelectorAll('.pregunta-card')];
-  const sinResultados = document.getElementById('sin-resultados');
-  const contador = document.getElementById('contador-preguntas');
-
-  function filtrar() {
-    const texto = filtroTexto.value.toLowerCase().trim();
-    const categoria = filtroCategoria.value;
-    const tipo = filtroTipo.value;
-    let visibles = 0;
-    tarjetas.forEach((tarjeta) => {
-      const visible = (!texto || tarjeta.dataset.enunciado.includes(texto))
-        && (!categoria || tarjeta.dataset.cat === categoria)
-        && (!tipo || tarjeta.dataset.tipo === tipo);
-      tarjeta.hidden = !visible;
-      if (visible) visibles += 1;
-    });
-    const hayFiltro = Boolean(texto || categoria || tipo);
-    sinResultados.hidden = !(tarjetas.length && visibles === 0);
-    contador.textContent = hayFiltro ? `Mostrando ${visibles} de ${tarjetas.length} preguntas` : `${tarjetas.length} preguntas`;
-  }
-
-  [filtroTexto, filtroCategoria, filtroTipo].forEach((campo) => campo.addEventListener('input', filtrar));
+  // Los filtros viajan en la URL: al cambiar un selector se recarga el listado
+  document.querySelectorAll('[data-enviar-al-cambiar]').forEach((select) => {
+    select.addEventListener('change', () => select.form.requestSubmit());
+  });
 
   /* ------------------------------------------------------------ Acciones */
 
   raiz.addEventListener('click', (evento) => {
     const editar = evento.target.closest('[data-editar]');
     if (editar) { abrirEdicion(editar.dataset.editar); return; }
-    if (evento.target.closest('[data-accion="nueva"]')) { abrirNueva(); return; }
-    if (evento.target.closest('[data-accion="limpiar-filtros"]')) {
-      filtroTexto.value = '';
-      filtroCategoria.value = '';
-      filtroTipo.value = '';
-      filtrar();
-    }
+    if (evento.target.closest('[data-accion="nueva"]')) abrirNueva();
   });
 
-  filtrar();
   // Accesos directos desde otras pantallas
   const parametros = new URLSearchParams(location.search);
   if (location.hash === '#nueva') abrirNueva();

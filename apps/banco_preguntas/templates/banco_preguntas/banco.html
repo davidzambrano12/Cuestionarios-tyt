@@ -13,96 +13,134 @@
     <button type="button" class="btn btn-primary" data-accion="nueva"><i data-lucide="plus" class="icono-16"></i> Nueva pregunta</button>
   {% fincomponente %}
 
-  <!-- Búsqueda y filtros -->
-  <div class="card barra-herramientas">
+  <!-- Búsqueda y filtros (en la URL: se pueden compartir y sobreviven al paginar) -->
+  <form method="GET" class="card barra-herramientas" role="search">
     <div class="filtros-banco">
       <div class="buscador filtros-banco__texto">
-        <label for="filtro-pregunta" class="sr-only">Buscar por enunciado</label>
+        <label for="filtro-pregunta" class="sr-only">Buscar por enunciado o código</label>
         <i data-lucide="search" class="buscador__icono"></i>
-        <input type="search" id="filtro-pregunta" placeholder="Buscar por enunciado o palabra clave…" class="form-input" autocomplete="off">
+        <input type="search" id="filtro-pregunta" name="q" value="{{ filtros.q }}" placeholder="Buscar por enunciado o código (P-12)…" class="form-input" autocomplete="off">
       </div>
       <label class="sr-only" for="filtro-categoria">Competencia</label>
-      <select id="filtro-categoria" class="form-select">
+      <select id="filtro-categoria" name="categoria" class="form-select" data-enviar-al-cambiar>
         <option value="">Competencia: todas</option>
-        {% for cat in categorias %}<option value="{{ cat.id }}">{{ cat.nombre }}</option>{% endfor %}
+        {% for cat in categorias %}<option value="{{ cat.id }}"{% if cat.id == filtros.categoria %} selected{% endif %}>{{ cat.nombre }}</option>{% endfor %}
       </select>
       <label class="sr-only" for="filtro-tipo">Tipo de pregunta</label>
-      <select id="filtro-tipo" class="form-select">
+      <select id="filtro-tipo" name="tipo" class="form-select" data-enviar-al-cambiar>
         <option value="">Tipo: todos</option>
-        <option value="MULTIPLE">Selección múltiple</option>
-        <option value="V_F">Verdadero / Falso</option>
+        {% for valor, etiqueta in tipos %}<option value="{{ valor }}"{% if valor == filtros.tipo %} selected{% endif %}>{{ etiqueta }}</option>{% endfor %}
       </select>
+      <label class="sr-only" for="filtro-estado">Estado</label>
+      <select id="filtro-estado" name="estado" class="form-select" data-enviar-al-cambiar>
+        <option value="">Estado: todas</option>
+        <option value="activas"{% if filtros.estado == "activas" %} selected{% endif %}>Activas</option>
+        <option value="inactivas"{% if filtros.estado == "inactivas" %} selected{% endif %}>Inactivas</option>
+      </select>
+      <button type="submit" class="btn btn-outline">Buscar</button>
     </div>
-    <div class="texto-xs texto-suave mt-2" id="contador-preguntas" aria-live="polite"></div>
-  </div>
+  </form>
 
-  <!-- Lista de preguntas -->
-  <div id="contenedor-preguntas" class="flex flex-col gap-4">
-    {% for p in preguntas %}
-    <article class="card pregunta-card" data-enunciado="{{ p.enunciado|lower }}" data-cat="{{ p.categoria_id }}" data-tipo="{{ p.tipo }}">
-      <div class="flex justify-between items-center gap-2 flex-wrap mb-3">
-        <div class="flex items-center gap-2">
-          <span class="badge badge-info">{{ p.categoria.nombre }}</span>
-          <span class="texto-xs texto-suave peso-semibold">{{ p.get_tipo_display }}</span>
+  {% if pagina.object_list %}
+  <section class="card lista-preguntas" aria-labelledby="titulo-lista-preguntas">
+    <header class="lista-preguntas__cabecera">
+      <h2 id="titulo-lista-preguntas" class="lista-preguntas__titulo cifras">
+        {% if hay_filtros %}{{ pagina.paginator.count }} de {{ total_banco }} preguntas{% else %}{{ total_banco }} pregunta{{ total_banco|pluralize }}{% endif %}
+      </h2>
+      {% if hay_filtros %}<a href="{% url 'banco_preguntas:banco' %}" class="texto-xs peso-semibold">Limpiar filtros</a>{% endif %}
+    </header>
+
+    <ol class="lista-preguntas__items">
+      {% for p in pagina %}
+      <li class="fila-pregunta{% if not p.activa %} fila-pregunta--inactiva{% endif %}">
+        <div class="fila-pregunta__cuerpo">
+          <div class="fila-pregunta__meta">
+            <span class="fila-pregunta__codigo cifras">P-{{ p.id }}</span>
+            <span class="fila-pregunta__competencia">{{ p.categoria.nombre }}</span>
+            <span aria-hidden="true">·</span>
+            <span>{{ p.get_tipo_display }}</span>
+            {% if not p.activa %}<span class="badge badge-neutro">Inactiva</span>{% endif %}
+          </div>
+          <h3 class="fila-pregunta__enunciado">{{ p.enunciado }}</h3>
         </div>
-        <div class="flex items-center gap-2">
-          {% if p.activa %}<span class="badge badge-success">Activa</span>{% else %}<span class="badge badge-danger">Inactiva</span>{% endif %}
-          <span class="badge badge-neutro cifras">{{ p.puntaje }} pto</span>
+
+        <dl class="fila-pregunta__datos">
+          <div><dt class="sr-only">Puntaje</dt><dd class="cifras">{{ p.puntaje }} pto</dd></div>
+          <div>
+            <dt class="sr-only">Uso</dt>
+            <dd>{% if p.n_cuestionarios %}En {{ p.n_cuestionarios }} cuestionario{{ p.n_cuestionarios|pluralize }}{% else %}<span class="texto-tenue">Sin usar</span>{% endif %}</dd>
+          </div>
+        </dl>
+
+        <div class="fila-pregunta__acciones">
+          <button type="button" class="btn btn-outline btn-accion" data-editar="{{ p.id }}"><i data-lucide="pencil" class="icono-14" aria-hidden="true"></i> Editar</button>
+          <div class="menu-tarjeta" data-menu-desplegable>
+            <button type="button" class="boton-icono menu-tarjeta__boton" aria-haspopup="menu" aria-expanded="false" aria-controls="menu-pregunta-{{ p.id }}" aria-label="Más acciones para la pregunta P-{{ p.id }}">
+              <i data-lucide="more-horizontal" aria-hidden="true"></i>
+            </button>
+            <div class="menu-cuenta__lista" id="menu-pregunta-{{ p.id }}" role="menu" hidden>
+              <form method="POST" action="{% url 'banco_preguntas:toggle_estado' p.id %}"
+                    {% if p.activa %}data-confirmar-titulo="¿Desactivar la pregunta P-{{ p.id }}?" data-confirmar="Dejará de poder asignarse a cuestionarios nuevos.&#10;Los intentos y cuestionarios que ya la usan se conservan." data-confirmar-boton="Desactivar" data-confirmar-tipo="peligro"{% endif %}>
+                {% csrf_token %}
+                <input type="hidden" name="volver" value="{{ request.GET.urlencode }}">
+                {% if p.activa %}
+                <button type="submit" role="menuitem" class="menu-cuenta__item menu-cuenta__item--peligro"><i data-lucide="eye-off" aria-hidden="true"></i> Desactivar</button>
+                {% else %}
+                <button type="submit" role="menuitem" class="menu-cuenta__item"><i data-lucide="eye" aria-hidden="true"></i> Activar</button>
+                {% endif %}
+              </form>
+            </div>
+          </div>
         </div>
-      </div>
 
-      <div class="texto-xs texto-tenue peso-bold mb-1">Cód. P-{{ p.id }}</div>
-      <h3 class="pregunta-card__enunciado">{{ p.enunciado }}</h3>
-
-      {% if p.texto_base %}
-      <blockquote class="pregunta-card__contexto text-reading"><strong>Texto de apoyo:</strong> {{ p.texto_base|truncatewords:30 }}</blockquote>
-      {% endif %}
-
-      <div class="texto-xs peso-bold mb-2">Opciones de respuesta</div>
-      <ul class="pregunta-card__opciones">
-        {% for op in p.opciones.all %}
-        <li class="pregunta-card__opcion{% if op.es_correcta %} pregunta-card__opcion--correcta{% endif %}">
-          {% if op.es_correcta %}<i data-lucide="check" class="icono-14"></i><span class="sr-only">Correcta:</span>{% else %}<i data-lucide="circle" class="icono-12"></i>{% endif %}
-          <span>{{ op.texto }}</span>
-        </li>
-        {% endfor %}
-      </ul>
-
-      {% if p.retroalimentacion %}
-      <div class="pregunta-card__retro">
-        <i data-lucide="lightbulb" class="icono-14 shrink-0"></i>
-        <div><strong>Retroalimentación:</strong> {{ p.retroalimentacion }}</div>
-      </div>
-      {% endif %}
-
-      <div class="pregunta-card__pie">
-        <span class="texto-xs texto-tenue">Huella SHA-256 validada</span>
-        <div class="flex gap-2">
-          <button type="button" class="btn btn-secondary btn-accion" data-editar="{{ p.id }}"><i data-lucide="edit-3" class="icono-13"></i> Editar</button>
-          <form method="POST" action="{% url 'banco_preguntas:toggle_estado' p.id %}" class="inline-flex">
-            {% csrf_token %}
-            {% if p.activa %}
-              <button type="submit" class="btn btn-accion btn-peligro"><i data-lucide="eye-off" class="icono-13"></i> Desactivar</button>
-            {% else %}
-              <button type="submit" class="btn btn-outline btn-accion texto-exito"><i data-lucide="eye" class="icono-13"></i> Activar</button>
+        <!-- Detalle a demanda: ocupa todo el ancho de la fila, en secciones -->
+        <details class="fila-pregunta__detalle">
+          <summary>Ver {{ p.opciones.all|length }} opciones{% if p.retroalimentacion %} y retroalimentación{% endif %}</summary>
+          <div class="detalle-pregunta">
+            {% if p.texto_base %}
+            <section class="detalle-pregunta__seccion">
+              <h4 class="detalle-pregunta__titulo">Texto de apoyo</h4>
+              <p class="detalle-pregunta__apoyo text-reading">{{ p.texto_base|truncatewords:60 }}</p>
+            </section>
             {% endif %}
-          </form>
-        </div>
-      </div>
-    </article>
-    {% empty %}
-    <div class="card">
-      {% componente "componentes/estado_vacio.html" icono="library" titulo="El banco aún no tiene preguntas" mensaje="Crea una pregunta o importa varias desde la plantilla de Excel." %}
-        <button type="button" class="btn btn-primary" data-accion="nueva"><i data-lucide="plus"></i> Nueva pregunta</button>
-      {% fincomponente %}
-    </div>
-    {% endfor %}
-    <div class="card" id="sin-resultados" hidden>
-      {% componente "componentes/estado_vacio.html" icono="search-x" titulo="Ninguna pregunta coincide con los filtros" %}
-        <button type="button" class="btn btn-outline" data-accion="limpiar-filtros">Limpiar filtros</button>
-      {% fincomponente %}
-    </div>
+            <section class="detalle-pregunta__seccion">
+              <h4 class="detalle-pregunta__titulo">Opciones</h4>
+              <ol class="opciones-detalle">
+                {% for op in p.opciones.all %}
+                <li class="opciones-detalle__item{% if op.es_correcta %} opciones-detalle__item--correcta{% endif %}">
+                  <span class="opciones-detalle__texto">{{ op.texto }}</span>
+                  {% if op.es_correcta %}<span class="opciones-detalle__marca"><i data-lucide="check" aria-hidden="true"></i> Correcta</span>{% endif %}
+                </li>
+                {% endfor %}
+              </ol>
+            </section>
+            {% if p.retroalimentacion %}
+            <section class="detalle-pregunta__seccion">
+              <h4 class="detalle-pregunta__titulo">Retroalimentación</h4>
+              <p class="detalle-pregunta__retro">{{ p.retroalimentacion }}</p>
+            </section>
+            {% endif %}
+          </div>
+        </details>
+      </li>
+      {% endfor %}
+    </ol>
+
+    {% componente "componentes/paginacion.html" pagina=pagina nombre="preguntas" %}{% fincomponente %}
+  </section>
+  {% elif hay_filtros %}
+  <div class="card">
+    {% componente "componentes/estado_vacio.html" icono="search-x" titulo="Ninguna pregunta coincide con los filtros" mensaje="Prueba con otra palabra, competencia o tipo." %}
+      <a href="{% url 'banco_preguntas:banco' %}" class="btn btn-outline">Limpiar filtros</a>
+    {% fincomponente %}
   </div>
+  {% else %}
+  <div class="card">
+    {% componente "componentes/estado_vacio.html" icono="library" titulo="El banco aún no tiene preguntas" mensaje="Crea una pregunta o importa varias desde la plantilla de Excel." %}
+      <button type="button" class="btn btn-primary" data-accion="nueva"><i data-lucide="plus"></i> Nueva pregunta</button>
+    {% fincomponente %}
+  </div>
+  {% endif %}
 </div>
 
 {% include "banco_preguntas/_modal_pregunta.html" %}

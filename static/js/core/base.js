@@ -319,7 +319,13 @@
     const boton = menu.querySelector('[aria-haspopup]');
     const lista = menu.querySelector('[role="menu"]');
     boton.setAttribute('aria-expanded', 'true');
+    lista.classList.remove('menu-cuenta__lista--arriba');
     lista.hidden = false;
+    // Si un contenedor con desborde (tabla, lista) lo recortaría por abajo, se abre hacia arriba
+    const limite = menu.closest('.tabla-desplazable, .tabla-contenedor, .lista-preguntas');
+    if (limite && lista.getBoundingClientRect().bottom > limite.getBoundingClientRect().bottom) {
+      lista.classList.add('menu-cuenta__lista--arriba');
+    }
     const items = itemsDeMenu(menu);
     if (enfocar === 'primero' && items.length) items[0].focus();
     if (enfocar === 'ultimo' && items.length) items[items.length - 1].focus();

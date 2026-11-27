@@ -20,7 +20,7 @@
 
   function aplicarFiltros() {
     const panel = document.getElementById(`panel-${pestanaActual}`);
-    const tarjetas = [...panel.querySelectorAll('.tarjeta-cuenta')];
+    const tarjetas = [...panel.querySelectorAll('[data-filtrable]')];
     const q = buscador.value.toLowerCase().trim();
     let visibles = 0;
     tarjetas.forEach((tarjeta) => {
@@ -33,6 +33,9 @@
     const hayFiltro = q || (pestanaActual === 'usuarios' && (filtros.rol || filtros.estado));
     contador.textContent = hayFiltro ? `Mostrando ${visibles} de ${tarjetas.length}` : '';
     sinResultados.hidden = !(tarjetas.length && visibles === 0);
+    // En la tabla de usuarios se oculta también la cabecera cuando no queda ninguna fila
+    const tabla = panel.querySelector('.tabla-desplazable');
+    if (tabla) tabla.hidden = Boolean(tarjetas.length) && visibles === 0;
   }
 
   function marcarChip(grupo, valor) {

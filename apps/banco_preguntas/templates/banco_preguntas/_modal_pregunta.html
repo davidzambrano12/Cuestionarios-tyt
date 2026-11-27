@@ -16,6 +16,7 @@
 
     <form id="form-pregunta" method="POST" action="{% url 'banco_preguntas:crear' %}">
       {% csrf_token %}
+      <input type="hidden" name="volver" value="{{ request.GET.urlencode }}">
       <div class="grid-2">
         <div class="form-group">
           <label class="form-label" for="campo-categoria">Competencia</label>
