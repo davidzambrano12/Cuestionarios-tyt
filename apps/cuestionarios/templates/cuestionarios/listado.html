@@ -41,7 +41,7 @@
   <div class="rejilla-cuestionarios">
     {% for c in cuestionarios %}
     {% with r=c.resumen_estado %}
-    <article class="card tarjeta-listado" data-estado="{{ c.estado_temporal }}"{% if c.estado == 'archivado' %} hidden{% endif %} data-texto="{{ c.nombre|lower }} {{ c.descripcion|default:''|lower }}">
+    <article class="card tarjeta-listado tarjeta-listado--{{ r.tono }}" data-estado="{{ c.estado_temporal }}"{% if c.estado == 'archivado' %} hidden{% endif %} data-texto="{{ c.nombre|lower }} {{ c.descripcion|default:''|lower }}">
       <div class="tarjeta-listado__cabecera">
         <p class="linea-estado linea-estado--{{ r.tono }}{% if r.urgente %} linea-estado--urgente{% endif %}">
           <span class="linea-estado__punto" aria-hidden="true"></span>
