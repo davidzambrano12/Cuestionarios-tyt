@@ -76,8 +76,16 @@ def datos_desde_formulario(post, tipo_por_defecto=Pregunta.TIPO_MULTIPLE) -> Dat
 
 
 @transaction.atomic
-def guardar_pregunta(datos: DatosPregunta, pregunta: Pregunta | None = None) -> Pregunta:
-    """Crea o actualiza una pregunta con sus opciones. Lanza `PreguntaDuplicada`."""
+def guardar_pregunta(
+    datos: DatosPregunta, pregunta: Pregunta | None = None, *, reemplazar_opciones: bool = True,
+) -> Pregunta:
+    """
+    Crea o actualiza una pregunta con sus opciones. Lanza `PreguntaDuplicada`.
+
+    Con `reemplazar_opciones=False` (solo al editar) se conservan las opciones
+    actuales y sus ids, así las respuestas ya registradas siguen apuntando a
+    ellas; `datos.opciones` se usa entonces solo para calcular la huella.
+    """
     huella = calcular_huella(datos.enunciado, [texto for texto, _, _ in datos.opciones])
     duplicadas = Pregunta.objects.filter(huella_contenido=huella)
     if pregunta:
@@ -95,6 +103,8 @@ def guardar_pregunta(datos: DatosPregunta, pregunta: Pregunta | None = None) -> 
     pregunta.huella_contenido = huella
     pregunta.save()
 
+    if pregunta.pk and not reemplazar_opciones and pregunta.opciones.exists():
+        return pregunta
     pregunta.opciones.all().delete()
     OpcionRespuesta.objects.bulk_create([
         OpcionRespuesta(pregunta=pregunta, texto=texto, es_correcta=es_correcta, orden=orden)
