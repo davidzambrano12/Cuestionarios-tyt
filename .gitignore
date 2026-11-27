@@ -45,3 +45,9 @@ capturas_informe/
 plantilla_uniputumayo/
 capturar_todo.py
 generar_informe_word_pdf.py
+
+# Archivos estáticos generados por collectstatic
+staticfiles/
+
+# Vercel
+.vercel/

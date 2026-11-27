@@ -141,6 +141,19 @@ DATABASES = {
     }
 }
 
+# Conexión cifrada (TLS) para bases de datos en la nube. DB_SSL_CA es la ruta al
+# certificado de la autoridad que entrega el proveedor (relativa al proyecto);
+# si se omite, se usan las autoridades públicas de certifi.
+if os.environ.get("DB_SSL", "False").lower() == "true":
+    _ca = os.environ.get("DB_SSL_CA", "")
+    if _ca:
+        _ca = str(BASE_DIR / _ca) if not os.path.isabs(_ca) else _ca
+    else:
+        import certifi
+        _ca = certifi.where()
+    # Con "ca" PyMySQL exige certificado válido y verifica el nombre del servidor
+    DATABASES["default"]["OPTIONS"]["ssl"] = {"ca": _ca}
+
 
 # Password validation
 # https://docs.djangoproject.com/en/6.1/ref/settings/#auth-password-validators
@@ -178,9 +191,12 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
+# Destino de collectstatic; en Vercel se ejecuta solo durante el build y lo sirve su CDN
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
 MEDIA_URL = "media/"
-MEDIA_ROOT = BASE_DIR / "media"
+# En Vercel solo /tmp admite escritura: allí se fija con DJANGO_MEDIA_ROOT=/tmp/media
+MEDIA_ROOT = Path(os.environ.get("DJANGO_MEDIA_ROOT") or BASE_DIR / "media")
 
 
 # Email
