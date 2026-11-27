@@ -1,10 +1,16 @@
 from django.urls import path
-from rest_framework_simplejwt.views import TokenRefreshView
+from drf_spectacular.utils import extend_schema, extend_schema_view
+from rest_framework_simplejwt.views import TokenRefreshView as _TokenRefreshView
 
 from . import views
 from .jwt_auth import CustomTokenObtainPairView, LogoutView, UserProfileMeView
 
 app_name = "cuentas"
+
+TokenRefreshView = extend_schema_view(post=extend_schema(
+    tags=["Autenticación"], summary="Renovar token JWT", auth=[],
+    description="Entrega un `access` nuevo a partir de un `refresh` vigente.",
+))(_TokenRefreshView)
 
 urlpatterns = [
     # Gestión de Usuarios

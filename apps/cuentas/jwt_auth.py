@@ -1,4 +1,5 @@
-from rest_framework import status
+from drf_spectacular.utils import OpenApiResponse, extend_schema, extend_schema_view, inline_serializer
+from rest_framework import serializers, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
@@ -72,10 +73,30 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         return data
 
 
+@extend_schema_view(post=extend_schema(
+    tags=["Autenticación"],
+    summary="Obtener token JWT",
+    description=(
+        "Inicia sesión con usuario o correo institucional y contraseña. Devuelve `access` "
+        "(60 min) y `refresh` (1 día). Use `access` en el botón **Authorize**."
+    ),
+    auth=[],
+))
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
 
 
+_DETALLE = inline_serializer("Mensaje", {"detail": serializers.CharField()})
+
+
+@extend_schema(
+    tags=["Autenticación"],
+    summary="Cerrar sesión",
+    description="Revoca el refresh token (lista negra) y borra las cookies de sesión JWT.",
+    request=inline_serializer("CerrarSesion", {"refresh": serializers.CharField(required=False)}),
+    responses={200: _DETALLE},
+    auth=[],
+)
 class LogoutView(APIView):
     """
     Cierre de sesión que revoca el refresh token (blacklist)
@@ -98,6 +119,28 @@ class LogoutView(APIView):
         return response
 
 
+@extend_schema(
+    tags=["Autenticación"],
+    summary="Usuario autenticado",
+    description="Datos, rol y permisos del dueño del token. Sirve para verificar la autenticación.",
+    responses={
+        200: inline_serializer("UsuarioActual", {
+            "id": serializers.IntegerField(),
+            "username": serializers.CharField(),
+            "email": serializers.EmailField(),
+            "first_name": serializers.CharField(),
+            "last_name": serializers.CharField(),
+            "is_active": serializers.BooleanField(),
+            "rol": serializers.CharField(),
+            "rol_nombre": serializers.CharField(),
+            "codigo_institucional": serializers.CharField(),
+            "programa_academico": serializers.CharField(),
+            "semestre": serializers.CharField(),
+            "permisos": serializers.ListField(child=serializers.CharField()),
+        }),
+        401: OpenApiResponse(_DETALLE, description="Falta el token o expiró."),
+    },
+)
 class UserProfileMeView(APIView):
     """
     Endpoint para que la interfaz o cliente JWT verifique el token y sus permisos.

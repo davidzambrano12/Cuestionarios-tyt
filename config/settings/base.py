@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework_simplejwt",
     "rest_framework_simplejwt.token_blacklist",
+    "drf_spectacular",
     # Apps del proyecto (las dependencias van de arriba hacia abajo)
     "apps.core",
     "apps.cuentas",
@@ -40,15 +41,51 @@ INSTALLED_APPS = [
     "apps.importaciones",
     "apps.evaluaciones",
     "apps.reportes",
+    "apps.api",
     "apps.preguntas_legado",  # solo historial de migraciones; ver su apps.py
 ]
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
+        # La sesión del navegador permite probar la API en Swagger sin copiar el token
+        'rest_framework.authentication.SessionAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 20,
+}
+
+# Documentación OpenAPI / Swagger (drf-spectacular): /api/docs/ y /api/schema/
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'API Simulador Saber TyT',
+    'DESCRIPTION': (
+        'API REST del Simulador Saber TyT (Uniputumayo).\n\n'
+        '**Cómo autenticarse:** obtenga un token con `POST /api/auth/token/` (usuario o correo y '
+        'contraseña), pulse **Authorize** y pegue el valor de `access`. También funciona la '
+        'sesión iniciada en el navegador.\n\n'
+        'Los permisos son los mismos de la aplicación web: cada rol solo ve y modifica lo que '
+        'le corresponde.'
+    ),
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'SCHEMA_PATH_PREFIX': r'/api/',
+    'COMPONENT_SPLIT_REQUEST': True,
+    'TAGS': [
+        {'name': 'Autenticación', 'description': 'Tokens JWT de acceso.'},
+        {'name': 'Simulacros', 'description': 'Cuestionarios publicados.'},
+        {'name': 'Preguntas', 'description': 'Banco de preguntas (docentes y administradores).'},
+        {'name': 'Intentos', 'description': 'Presentar un simulacro (estudiantes).'},
+        {'name': 'Resultados', 'description': 'Calificaciones según el rol.'},
+        {'name': 'Reportes', 'description': 'Consultas filtradas por año, curso y eje temático.'},
+    ],
+    'SWAGGER_UI_SETTINGS': {
+        'persistAuthorization': True,
+        'displayRequestDuration': True,
+        'filter': True,
+    },
 }
 
 SIMPLE_JWT = {
@@ -104,6 +141,19 @@ DATABASES = {
     }
 }
 
+# Conexión cifrada (TLS) para bases de datos en la nube. DB_SSL_CA es la ruta al
+# certificado de la autoridad que entrega el proveedor (relativa al proyecto);
+# si se omite, se usan las autoridades públicas de certifi.
+if os.environ.get("DB_SSL", "False").lower() == "true":
+    _ca = os.environ.get("DB_SSL_CA", "")
+    if _ca:
+        _ca = str(BASE_DIR / _ca) if not os.path.isabs(_ca) else _ca
+    else:
+        import certifi
+        _ca = certifi.where()
+    # Con "ca" PyMySQL exige certificado válido y verifica el nombre del servidor
+    DATABASES["default"]["OPTIONS"]["ssl"] = {"ca": _ca}
+
 
 # Password validation
 # https://docs.djangoproject.com/en/6.1/ref/settings/#auth-password-validators
@@ -141,9 +191,12 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
+# Destino de collectstatic; en Vercel se ejecuta solo durante el build y lo sirve su CDN
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
 MEDIA_URL = "media/"
-MEDIA_ROOT = BASE_DIR / "media"
+# En Vercel solo /tmp admite escritura: allí se fija con DJANGO_MEDIA_ROOT=/tmp/media
+MEDIA_ROOT = Path(os.environ.get("DJANGO_MEDIA_ROOT") or BASE_DIR / "media")
 
 
 # Email
