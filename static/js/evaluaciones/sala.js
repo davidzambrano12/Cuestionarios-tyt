@@ -43,6 +43,12 @@
         headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrf },
         body: JSON.stringify({ pregunta_id: preguntaId, opcion_id: opcionId }),
       });
+      if (respuesta.status === 409) {
+        // El servidor cerró el intento por tiempo: se lleva al resultado
+        marcarGuardado('Tiempo agotado', 'error');
+        entregar();
+        return;
+      }
       const datos = await respuesta.json();
       if (datos.status === 'ok') marcarGuardado('Guardado', 'ok');
       else marcarGuardado('No se pudo guardar', 'error');

@@ -1,5 +1,5 @@
 {% extends 'layouts/app_base.html' %}
-{% load static componentes %}
+{% load static componentes formato_tiempo %}
 
 {% block title %}{% if cuestionario.pk %}Editar: {{ cuestionario.nombre }}{% else %}Crear cuestionario{% endif %} - Simulador Saber TyT{% endblock %}
 {% block nav_title %}{% if cuestionario.pk %}Configurar cuestionario{% else %}Crear cuestionario{% endif %}{% endblock %}
@@ -199,7 +199,7 @@
           <div><dt>Preguntas</dt><dd data-ref="r-preguntas">{{ reactivos_asignados|length }}</dd></div>
           <div><dt>Puntaje</dt><dd data-ref="r-puntaje">{{ puntaje_total }}</dd></div>
           <div><dt>Escala máxima</dt><dd data-ref="r-escala">{{ cuestionario.calificacion_maxima|default:"5,00" }}</dd></div>
-          <div class="ficha-resumen__nombre"><dt>Disponibilidad</dt><dd data-ref="r-fechas">{% if cuestionario.fecha_apertura and cuestionario.fecha_cierre %}{{ cuestionario.fecha_apertura|date:"d M Y H:i" }} → {{ cuestionario.fecha_cierre|date:"d M Y H:i" }}{% else %}Define las fechas en el paso 1{% endif %}</dd></div>
+          <div class="ficha-resumen__nombre"><dt>Disponibilidad</dt><dd data-ref="r-fechas">{% if cuestionario.fecha_apertura and cuestionario.fecha_cierre %}{{ cuestionario.fecha_apertura|date:"d M Y" }}, {{ cuestionario.fecha_apertura|hora }} → {{ cuestionario.fecha_cierre|date:"d M Y" }}, {{ cuestionario.fecha_cierre|hora }}{% else %}Define las fechas en el paso 1{% endif %}</dd></div>
         </dl>
         <div class="ficha-resumen__acciones">
           {% if cuestionario.pk and cuestionario.estado != 'borrador' %}

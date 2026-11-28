@@ -138,7 +138,7 @@ def libro_excel_intentos(cuestionario, q: str = ""):
         "Reprobado": (PatternFill("solid", fgColor="FEE2E2"), Font(bold=True, color="991B1B")),
     }
     fmt_nota = "0.00"
-    fmt_fecha = "dd/mm/yyyy hh:mm"
+    fmt_fecha = "dd/mm/yyyy h:mm AM/PM"
 
     def escribir_tabla(ws, cabeceras, filas, anchos, formatos, col_dictamen=None):
         ws.append(cabeceras)

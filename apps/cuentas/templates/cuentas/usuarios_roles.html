@@ -83,7 +83,7 @@
             <td>
               {% if u.is_active %}<span class="estado-punto estado-punto--activo">Activo</span>{% else %}<span class="estado-punto estado-punto--suspendido">Suspendido</span>{% endif %}
             </td>
-            <td class="texto-suave nowrap">{% if u.last_login %}<time datetime="{{ u.last_login|date:'c' }}" title="{{ u.last_login|date:'j M Y, H:i' }}">{{ u.last_login|tiempo_relativo }}</time>{% else %}Nunca{% endif %}</td>
+            <td class="texto-suave nowrap">{% if u.last_login %}<time datetime="{{ u.last_login|date:'c' }}" title="{{ u.last_login|date:'j M Y' }}, {{ u.last_login|hora }}">{{ u.last_login|tiempo_relativo }}</time>{% else %}Nunca{% endif %}</td>
             <td>
               <div class="fila-usuario__acciones">
                 <button type="button" class="btn btn-outline btn-accion" data-editar-usuario="{{ u.id }}"

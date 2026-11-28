@@ -197,6 +197,8 @@ def guardar_respuesta(intento: Intento, pregunta_id: int, opcion_id=None, marcad
     intento = Intento.objects.select_for_update().get(pk=intento.pk)
     if intento.estado != "en_progreso":
         raise ValueError("El examen ya no está activo.")
+    if excedio_tiempo(intento):
+        raise ValueError("El tiempo límite del examen ya venció.")
     pregunta = Pregunta.objects.get(id=pregunta_id)
     opcion = None
     if opcion_id:
@@ -229,11 +231,17 @@ def calificar_intento(intento: Intento, respuestas: dict, ahora=None) -> Intento
     Registra todas las respuestas (las omitidas con opción NULL, R09), aplica la
     fórmula institucional y cierra el intento como `finalizado`.
     `respuestas` es {pregunta_id: opcion_id} con claves str o int.
+
+    Una entrega que llega después del tiempo límite (más la ventana de gracia)
+    no se califica: el intento queda `vencido`. Un intento ya cerrado se
+    devuelve tal cual, sin volver a calificarlo.
     """
     intento = Intento.objects.select_for_update().get(pk=intento.pk)
-    if intento.estado == "finalizado":
+    if intento.estado != "en_progreso":
         return intento
     ahora = ahora or timezone.now()
+    if excedio_tiempo(intento, ahora):
+        return cerrar_como_vencido(intento, ahora)
     cuestionario = intento.cuestionario
     asignaciones = cuestionario.cuestionario_preguntas.select_related("pregunta").order_by("orden", "id")
 

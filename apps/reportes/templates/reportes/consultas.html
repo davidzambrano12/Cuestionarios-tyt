@@ -1,5 +1,5 @@
 {% extends 'layouts/app_base.html' %}
-{% load static componentes consultas %}
+{% load static componentes consultas formato_tiempo %}
 
 {% block title %}Consultas y reportes - Simulador Saber TyT{% endblock %}
 {% block nav_title %}Consultas y reportes{% endblock %}
@@ -159,7 +159,7 @@
             <td><span class="celda-linea peso-semibold" title="{{ i.participante_nombre }}">{{ i.participante_nombre }}</span><span class="celda-detalle">{{ i.participante_codigo }}</span></td>
             <td>{% if i.curso %}<span class="celda-linea" title="{{ i.curso.asignatura }}">{{ i.curso.asignatura }}</span><span class="celda-detalle">G{{ i.curso.grupo }} · {{ i.periodo|default:"Sin período" }}</span>{% else %}<span class="celda-linea texto-suave">Sin curso</span><span class="celda-detalle">{{ i.periodo|default:"Sin período" }}</span>{% endif %}</td>
             <td><span class="celda-linea" title="{{ i.cuestionario.nombre }}">{{ i.cuestionario.nombre }}</span><span class="celda-detalle">{% if i.cuestionario.es_institucional %}Institucional{% else %}De curso{% endif %}</span></td>
-            <td class="cifras"><span class="celda-linea">{{ i.fecha_inicio|date:"d/m/Y" }}</span><span class="celda-detalle">{{ i.fecha_inicio|date:"H:i" }}</span></td>
+            <td class="cifras"><span class="celda-linea">{{ i.fecha_inicio|date:"d/m/Y" }}</span><span class="celda-detalle">{{ i.fecha_inicio|hora }}</span></td>
             <td class="texto-derecha cifras peso-bold">{{ i.nota_5|nota }}</td>
             <td>{% if i.estado_texto == "Aprobado" %}<span class="badge badge-success">Aprobado</span>{% elif i.estado_texto == "No aprobado" %}<span class="badge badge-danger">No aprobado</span>{% else %}<span class="badge badge-neutro">{{ i.estado_texto }}</span>{% endif %}</td>
             <td class="texto-derecha"><a href="{% con_filtros filtros vista='historial' estudiante=i.participante_codigo %}" class="btn btn-outline btn-accion">Historial</a></td>
@@ -247,7 +247,7 @@
         <tbody>
           {% for i in historial %}
           <tr>
-            <td class="cifras"><span class="celda-linea">{{ i.fecha_inicio|date:"d/m/Y" }}</span><span class="celda-detalle">{{ i.fecha_inicio|date:"H:i" }}</span></td>
+            <td class="cifras"><span class="celda-linea">{{ i.fecha_inicio|date:"d/m/Y" }}</span><span class="celda-detalle">{{ i.fecha_inicio|hora }}</span></td>
             <td><span class="celda-linea" title="{{ i.cuestionario.nombre }}">{{ i.cuestionario.nombre }}</span></td>
             <td>{% if i.curso %}<span class="celda-linea" title="{{ i.curso.asignatura }}">{{ i.curso.asignatura }}</span><span class="celda-detalle">G{{ i.curso.grupo }} · {{ i.periodo|default:"—" }}</span>{% else %}<span class="celda-linea texto-suave">Sin curso</span><span class="celda-detalle">{{ i.periodo|default:"—" }}</span>{% endif %}</td>
             <td class="cifras"><span class="celda-linea">{{ i.aciertos }} de {{ i.respondidas }}</span><span class="celda-detalle">{{ i.errores }} error{{ i.errores|pluralize:"es" }}</span></td>
