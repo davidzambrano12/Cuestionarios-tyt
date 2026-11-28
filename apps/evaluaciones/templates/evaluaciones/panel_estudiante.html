@@ -1,5 +1,5 @@
 {% extends 'layouts/app_base.html' %}
-{% load static componentes %}
+{% load static componentes formato_tiempo %}
 
 {% block title %}Mi panel - Simulador Saber TyT{% endblock %}
 {% block nav_title %}Mi panel{% endblock %}
@@ -36,7 +36,7 @@
         <li><i data-lucide="clock" class="icono-14"></i> {{ c.tiempo_limite_minutos }} minutos</li>
         <li><i data-lucide="rotate-cw" class="icono-14"></i> Intentos: <strong>{{ c.intentos_hechos }} de {{ c.intentos_permitidos }}</strong></li>
         <li><i data-lucide="target" class="icono-14"></i> Apruebas con {{ c.calificacion_aprobacion }} / {{ c.calificacion_maxima }}</li>
-        <li><i data-lucide="calendar" class="icono-14"></i> Cierra el {{ c.fecha_cierre|date:"d M · H:i" }}</li>
+        <li><i data-lucide="calendar" class="icono-14"></i> Cierra el {{ c.fecha_cierre|date:"d M" }} · {{ c.fecha_cierre|hora }}</li>
       </ul>
       {% include "evaluaciones/_accion_cuestionario.html" with grande=True %}
     </section>
@@ -88,7 +88,7 @@
         </div>
         <h3 class="texto-lg peso-extrabold mb-2">{{ c.nombre }}</h3>
         <p class="nota-programada">
-          <span class="inline-flex items-center gap-2"><i data-lucide="calendar" class="icono-14"></i> Abre el <strong>{{ c.fecha_apertura|date:"d M Y · H:i" }}</strong></span>
+          <span class="inline-flex items-center gap-2"><i data-lucide="calendar" class="icono-14"></i> Abre el <strong>{{ c.fecha_apertura|date:"d M Y" }} · {{ c.fecha_apertura|hora }}</strong></span>
           <span class="inline-flex items-center gap-2"><i data-lucide="clock" class="icono-14"></i> {{ c.tiempo_limite_minutos }} minutos · {{ c.cuestionario_preguntas.all|length }} preguntas</span>
         </p>
       </article>
@@ -108,7 +108,7 @@
             {% else %}<span class="badge badge-neutro">Vencido sin entregar</span>{% endif %}
             <h3 class="texto-lg peso-extrabold mt-2">{{ intento.cuestionario.nombre }}</h3>
           </div>
-          <span class="texto-xs texto-suave cifras">{{ intento.fecha_inicio|date:"d M Y · H:i" }}</span>
+          <span class="texto-xs texto-suave cifras">{{ intento.fecha_inicio|date:"d M Y" }} · {{ intento.fecha_inicio|hora }}</span>
         </div>
         {% if intento.dictamen == 'Aprobado' or intento.dictamen == 'Reprobado' %}
         <div class="resumen-nota">
