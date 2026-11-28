@@ -94,7 +94,7 @@
         </div>
 
         <!-- Detalle a demanda: ocupa todo el ancho de la fila, en secciones -->
-        <details class="fila-pregunta__detalle">
+        <details class="fila-pregunta__detalle"{% if request.GET.ver == p.id|stringformat:"d" %} open{% endif %}>
           <summary>Ver {{ p.opciones.all|length }} opciones{% if p.retroalimentacion %} y retroalimentación{% endif %}</summary>
           <div class="detalle-pregunta">
             {% if p.texto_base %}

@@ -92,7 +92,7 @@
       <p class="pregunta-importada__nota">
         <i data-lucide="info" aria-hidden="true"></i>
         {% if fila.duplicada_de_id %}
-          Ya existe una pregunta idéntica en el banco. <a href="{% url 'banco_preguntas:editar' fila.duplicada_de_id %}" target="_blank" rel="noopener">Ver la pregunta del banco<span class="sr-only"> (se abre en otra pestaña)</span> <i data-lucide="external-link" aria-hidden="true"></i></a>
+          Ya existe una pregunta idéntica en el banco. <a href="{% url 'banco_preguntas:banco' %}?q=P-{{ fila.duplicada_de_id }}&amp;ver={{ fila.duplicada_de_id }}" target="_blank" rel="noopener">Ver la pregunta del banco<span class="sr-only"> (se abre en otra pestaña)</span> <i data-lucide="external-link" aria-hidden="true"></i></a>
         {% else %}
           Es igual a la <a href="#fila-{{ fila.duplicada_de_fila }}">fila {{ fila.duplicada_de_fila }}</a> de este archivo; solo se guarda una vez.
         {% endif %}

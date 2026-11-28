@@ -199,7 +199,12 @@ class RevisionImportacionTests(TestCase):
         self._subir(FILA_VALIDA)
         r = self.client.get(self.URL)
         self.assertEqual(r.context["resultado"].duplicadas[0].duplicada_de_id, existente.id)
-        self.assertContains(r, f'href="/preguntas/{existente.id}/editar/"')
+        # Lleva al banco filtrado por su código y con el detalle abierto (no al JSON del editor)
+        enlace = f"/preguntas/?q=P-{existente.id}&amp;ver={existente.id}"
+        self.assertContains(r, f'href="{enlace}"')
+        banco = self.client.get(f"/preguntas/?q=P-{existente.id}&ver={existente.id}")
+        self.assertEqual([p.id for p in banco.context["pagina"]], [existente.id])
+        self.assertContains(banco, '<details class="fila-pregunta__detalle" open>')
 
     def test_editar_vuelve_a_la_misma_fila(self):
         self._subir(FILA_VALIDA, FILA_ERROR)
