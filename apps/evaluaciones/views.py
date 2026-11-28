@@ -83,6 +83,8 @@ def guardar_respuesta_ajax(request, intento_id):
         return JsonResponse({"error": "No autorizado"}, status=403)
     if intento.estado != "en_progreso":
         return JsonResponse({"error": "El examen ya no está activo"}, status=400)
+    if servicio.cerrar_si_vencio(intento):
+        return JsonResponse({"error": "El tiempo límite del examen ya venció"}, status=409)
 
     try:
         data = json.loads(request.body)
@@ -102,9 +104,9 @@ def finalizar_evaluacion(request, intento_id):
     intento = get_object_or_404(Intento.objects.select_related("cuestionario"), id=intento_id)
     if not _puede_operar(request.user, intento):
         return HttpResponseForbidden("Acceso denegado a este intento.")
-    if intento.estado == "finalizado" or request.method != "POST":
+    if intento.estado != "en_progreso" or request.method != "POST":
         return redirect(
-            "evaluaciones:resultado" if intento.estado == "finalizado" else "evaluaciones:sala",
+            "evaluaciones:sala" if intento.estado == "en_progreso" else "evaluaciones:resultado",
             intento_id=intento.id,
         )
 
@@ -114,6 +116,12 @@ def finalizar_evaluacion(request, intento_id):
         respuestas = {}
     intento = servicio.calificar_intento(intento, respuestas if isinstance(respuestas, dict) else {})
 
+    if intento.estado == "vencido":
+        messages.warning(
+            request,
+            "El tiempo límite venció antes de la entrega: el intento se cerró sin calificar.",
+        )
+        return redirect("evaluaciones:resultado", intento_id=intento.id)
     messages.success(
         request,
         f"¡Evaluación completada! Calificación obtenida: {localize(intento.calificacion)} / {localize(intento.cuestionario.calificacion_maxima)}",

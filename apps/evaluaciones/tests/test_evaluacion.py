@@ -118,6 +118,43 @@ class EvaluacionTests(TestCase):
         intento.refresh_from_db()
         self.assertEqual(intento.estado, "vencido")
 
+    def _retrasar(self, intento, segundos_extra):
+        """Lleva el inicio del intento al pasado: límite + `segundos_extra`."""
+        limite = self.cuestionario.tiempo_limite_minutos * 60
+        Intento.objects.filter(id=intento.id).update(
+            fecha_inicio=timezone.now() - timedelta(seconds=limite + segundos_extra)
+        )
+
+    def test_entrega_tardia_queda_vencida_sin_calificar(self):
+        self._iniciar()
+        intento = Intento.objects.get()
+        self._retrasar(intento, 3 * 3600)
+        r = self._finalizar(intento, respuestas_correctas(self.cuestionario))
+        self.assertRedirects(r, f"/evaluacion/{intento.id}/resultado/", fetch_redirect_response=False)
+        intento.refresh_from_db()
+        self.assertEqual(intento.estado, "vencido")
+        self.assertIsNone(intento.calificacion)
+        self.assertFalse(intento.respuestas.filter(es_correcta=True).exists())
+
+    def test_entregar_un_intento_ya_vencido_no_lo_califica(self):
+        self._iniciar()
+        intento = Intento.objects.get()
+        self._retrasar(intento, 3600)
+        self.client.get(f"/evaluacion/{intento.id}/")  # la sala lo cierra como vencido
+        self._finalizar(intento, respuestas_correctas(self.cuestionario))
+        intento.refresh_from_db()
+        self.assertEqual(intento.estado, "vencido")
+        self.assertIsNone(intento.calificacion)
+
+    def test_entrega_dentro_de_la_ventana_de_gracia_se_califica(self):
+        self._iniciar()
+        intento = Intento.objects.get()
+        self._retrasar(intento, 10)  # 10 s tarde: dentro de la tolerancia de red
+        self._finalizar(intento, respuestas_correctas(self.cuestionario))
+        intento.refresh_from_db()
+        self.assertEqual(intento.estado, "finalizado")
+        self.assertEqual(intento.calificacion, Decimal("5.00"))
+
     # --- Guardado automático -----------------------------------------------------
 
     def test_autoguardado_de_respuesta(self):
@@ -133,6 +170,21 @@ class EvaluacionTests(TestCase):
         respuesta = RespuestaIntento.objects.get(intento=intento)
         self.assertTrue(respuesta.es_correcta)
         self.assertEqual(respuesta.opcion_seleccionada_id, opcion_id)
+
+    def test_autoguardado_rechazado_cuando_el_tiempo_vencio(self):
+        self._iniciar()
+        intento = Intento.objects.get()
+        self._retrasar(intento, 3600)
+        pregunta_id, opcion_id = next(iter(respuestas_correctas(self.cuestionario).items()))
+        r = self.client.post(
+            f"/evaluacion/{intento.id}/guardar-respuesta/",
+            data=json.dumps({"pregunta_id": pregunta_id, "opcion_id": opcion_id}),
+            content_type="application/json",
+        )
+        self.assertEqual(r.status_code, 409)
+        self.assertFalse(RespuestaIntento.objects.filter(intento=intento).exists())
+        intento.refresh_from_db()
+        self.assertEqual(intento.estado, "vencido")
 
     # --- Calificación (fórmula institucional) --------------------------------------
 
