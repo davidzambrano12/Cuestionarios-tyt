@@ -1,0 +1,15 @@
+.git
+.venv
+env
+venv
+__pycache__
+**/__pycache__
+.env
+.env.*
+env.vercel
+docs
+pruebas_e2e
+**/tests
+media
+staticfiles
+*.log

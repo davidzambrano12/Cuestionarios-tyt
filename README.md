@@ -83,4 +83,6 @@ Vercel detecta el proyecto Django por `manage.py` y usa `WSGI_APPLICATION` (`con
 
 En producción `DEBUG` es siempre `False`, las cookies son seguras, se fuerza HTTPS y las credenciales nunca están en el código: todo se lee de variables de entorno.
 
-**Limitación conocida:** en Vercel solo `/tmp` admite escritura y no se comparte entre instancias, por lo que la importación desde Excel (que guarda el archivo entre pasos) puede fallar ahí. El resto de la aplicación no escribe en disco.
+Las importaciones pendientes de Excel se guardan en la base de datos, vinculadas al usuario y a su sesión. La previsualización, las correcciones y la confirmación funcionan entre distintas instancias de Vercel. El archivo se elimina al confirmar, cancelar o reemplazar la carga. Las cargas vencidas se limpian al subir otro archivo.
+
+Al actualizar desde una versión anterior, ejecutar `python manage.py migrate` antes de desplegar para crear la tabla `importaciones_pendientes`. Las cargas anteriores en disco se recuperan si su archivo todavía existe. Si Vercel ya eliminó ese archivo temporal, es necesario subirlo nuevamente.

@@ -348,7 +348,7 @@ def _guardar_resultado(resultado: ResultadoImportacion, cuestionario_id: int | N
     resultado.importacion_id = importacion.id
 
 
-def actualizar_fila_excel(ruta_archivo: str, fila_excel: int, nuevos_valores: dict) -> None:
+def actualizar_fila_excel(ruta_archivo, fila_excel: int, nuevos_valores: dict, *, destino=None) -> None:
     """Actualiza una fila en el archivo Excel con las correcciones introducidas por el usuario."""
     wb = openpyxl.load_workbook(ruta_archivo)
     ws = wb["preguntas"] if "preguntas" in wb.sheetnames else wb.active
@@ -367,6 +367,6 @@ def actualizar_fila_excel(ruta_archivo: str, fila_excel: int, nuevos_valores: di
                 val = str(val).strip()
             ws.cell(row=fila_excel, column=col_idx, value=val)
 
-    wb.save(ruta_archivo)
+    wb.save(destino if destino is not None else ruta_archivo)
     wb.close()
 

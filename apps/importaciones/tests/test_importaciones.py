@@ -2,14 +2,17 @@
 import io
 import shutil
 import tempfile
+from datetime import timedelta
+from unittest.mock import patch
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase, override_settings
+from django.utils import timezone
 from openpyxl import Workbook
 
 from apps.banco_preguntas.models import Pregunta
 from apps.cuestionarios.models import CuestionarioPregunta
-from apps.importaciones.models import Importacion
+from apps.importaciones.models import Importacion, ImportacionPendiente
 from apps.importaciones.services import COLUMNAS
 from apps.core.tests.factories import crear_cuestionario, crear_usuario, sembrar_roles
 
@@ -110,6 +113,66 @@ class ImportacionExcelTests(TestCase):
         r = self.client.post("/preguntas/importar/confirmar/")
         self.assertEqual(Pregunta.objects.count(), 0)
         self.assertEqual(r.status_code, 302)
+
+    def test_cambio_de_instancia_conserva_archivo_correcciones_y_exclusiones(self):
+        self._subir(excel(FILA_VALIDA, FILA_ERROR, FILA_VF))
+        with tempfile.TemporaryDirectory() as otra_instancia:
+            with override_settings(MEDIA_ROOT=otra_instancia):
+                self.assertEqual(self.client.get("/preguntas/importar/previsualizar/").status_code, 200)
+                datos = dict(zip(COLUMNAS, FILA_VF))
+                datos.update(fila_excel=3, pregunta="Pregunta corregida en otra instancia")
+                self.client.post("/preguntas/importar/corregir/", datos)
+                self.client.post("/preguntas/importar/excluir/", {"fila_excel": 4})
+        resultado = self.client.get("/preguntas/importar/previsualizar/").context["resultado"]
+        self.assertEqual(len(resultado.validas), 2)
+        self.assertEqual(len(resultado.excluidas), 1)
+        self.client.post("/preguntas/importar/confirmar/")
+        self.assertTrue(Pregunta.objects.filter(enunciado="Pregunta corregida en otra instancia").exists())
+        self.assertEqual(Pregunta.objects.count(), 2)
+        self.assertFalse(ImportacionPendiente.objects.exists())
+        self.client.post("/preguntas/importar/confirmar/")
+        self.assertEqual(Importacion.objects.count(), 1)
+
+    def test_archivo_pendiente_solo_es_accesible_por_su_usuario(self):
+        self._subir(excel(FILA_VALIDA))
+        identificador = self.client.session["importacion_pendiente"]
+        otro = crear_usuario("otro_docente", "docente")
+        self.client.force_login(otro)
+        sesion = self.client.session
+        sesion["importacion_pendiente"] = identificador
+        sesion.save()
+        self.assertRedirects(self.client.get("/preguntas/importar/previsualizar/"), "/preguntas/importar/")
+        self.client.get("/preguntas/importar/cancelar/")
+        self.assertEqual(ImportacionPendiente.objects.count(), 1)
+
+    def test_confirmacion_fallida_conserva_el_archivo_y_revierte_las_preguntas(self):
+        self._subir(excel(FILA_VALIDA))
+        with patch("apps.importaciones.services.Importacion.objects.create", side_effect=RuntimeError("Fallo simulado")):
+            with self.assertRaises(RuntimeError):
+                self.client.post("/preguntas/importar/confirmar/")
+        self.assertTrue(ImportacionPendiente.objects.exists())
+        self.assertFalse(Pregunta.objects.exists())
+        self.client.post("/preguntas/importar/confirmar/")
+        self.assertEqual(Importacion.objects.count(), 1)
+
+    def test_pendiente_vencida_no_se_importa(self):
+        self._subir(excel(FILA_VALIDA))
+        ImportacionPendiente.objects.update(vence=timezone.now() - timedelta(seconds=1))
+        self.client.post("/preguntas/importar/confirmar/")
+        self.assertFalse(Pregunta.objects.exists())
+
+    def test_carga_anterior_en_disco_se_recupera_en_base_de_datos(self):
+        from django.core.files.storage import default_storage
+
+        ruta = default_storage.save("importaciones_tmp/anterior.xlsx", excel(FILA_VALIDA))
+        sesion = self.client.session
+        sesion["importacion_pendiente"] = {"ruta": ruta, "nombre_archivo": "anterior.xlsx"}
+        sesion.save()
+        self.assertEqual(self.client.get("/preguntas/importar/previsualizar/").status_code, 200)
+        with tempfile.TemporaryDirectory() as otra_instancia:
+            with override_settings(MEDIA_ROOT=otra_instancia):
+                self.client.post("/preguntas/importar/confirmar/")
+        self.assertEqual(Pregunta.objects.count(), 1)
 
 
 class RevisionImportacionTests(TestCase):

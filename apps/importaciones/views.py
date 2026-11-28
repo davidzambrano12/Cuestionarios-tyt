@@ -1,31 +1,63 @@
 """Módulo B: importación de preguntas desde Excel (subir, previsualizar, corregir, confirmar)."""
 import uuid
+from io import BytesIO
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.files.storage import default_storage
+from django.db import transaction
 from django.shortcuts import redirect, render
+from django.utils import timezone
 from django.urls import reverse
 
 from apps.core.decorators import requiere_permiso
 from apps.importaciones.forms import ImportarPreguntasForm
+from apps.importaciones.models import ImportacionPendiente
 from apps.cuestionarios.models import Cuestionario
 from apps.importaciones.services import COLUMNAS, _validar_fila, actualizar_fila_excel, procesar_archivo
 
-CARPETA_TEMPORAL = "importaciones_tmp"
 CLAVE_SESION = "importacion_pendiente"
 
 
-def _pendiente(request):
-    """Importación en curso guardada en sesión, solo si su archivo sigue existiendo."""
-    pendiente = request.session.get(CLAVE_SESION)
-    if pendiente and default_storage.exists(pendiente.get("ruta", "")):
-        return pendiente
-    return None
+def _pendiente(request, *, bloquear=False):
+    """Recupera el archivo compartido, restringido al usuario y a la sesión."""
+    datos = request.session.get(CLAVE_SESION)
+    if not datos:
+        return None
+    # Conserva las cargas anteriores cuando su archivo local aún está disponible.
+    if "ruta" in datos:
+        ruta = datos["ruta"]
+        if not default_storage.exists(ruta):
+            request.session.pop(CLAVE_SESION, None)
+            return None
+        with default_storage.open(ruta, "rb") as archivo:
+            pendiente, _ = ImportacionPendiente.objects.get_or_create(
+                id=uuid.uuid5(uuid.NAMESPACE_URL, f"{request.user.pk}:{ruta}"),
+                defaults={
+                    "usuario": request.user, "archivo": archivo.read(),
+                    "nombre_archivo": datos["nombre_archivo"],
+                    "cuestionario_id": datos.get("cuestionario_id"),
+                    "excluidas": datos.get("excluidas", []),
+                    "vence": request.session.get_expiry_date(),
+                },
+            )
+        datos = {"id": str(pendiente.pk)}
+        request.session[CLAVE_SESION] = datos
+    try:
+        identificador = uuid.UUID(str(datos.get("id", "")))
+    except ValueError:
+        request.session.pop(CLAVE_SESION, None)
+        return None
+    consulta = ImportacionPendiente.objects.filter(
+        pk=identificador, usuario=request.user, vence__gt=timezone.now(),
+    )
+    if bloquear:
+        consulta = consulta.select_for_update()
+    return consulta.first()
 
 
 def _excluidas(pendiente) -> frozenset[int]:
-    return frozenset(pendiente.get("excluidas", []))
+    return frozenset(pendiente.excluidas)
 
 
 def _volver_a_fila(fila_excel: int):
@@ -41,13 +73,15 @@ def _fila_del_post(request) -> int:
 
 
 def _descartar_pendiente(request):
-    pendiente = request.session.pop(CLAVE_SESION, None)
-    if pendiente and default_storage.exists(pendiente.get("ruta", "")):
-        default_storage.delete(pendiente["ruta"])
+    pendiente = _pendiente(request, bloquear=True)
+    if pendiente:
+        pendiente.delete()
+    request.session.pop(CLAVE_SESION, None)
 
 
 @login_required
 @requiere_permiso("preguntas.importar")
+@transaction.atomic
 def importar_preguntas(request):
     """Paso 1: subida del archivo."""
     if request.method == "POST":
@@ -56,20 +90,19 @@ def importar_preguntas(request):
             archivo = form.cleaned_data["archivo"]
             cuestionario = form.cleaned_data.get("cuestionario")
             _descartar_pendiente(request)
-            ruta = default_storage.save(f"{CARPETA_TEMPORAL}/{uuid.uuid4().hex}.xlsx", archivo)
-            request.session[CLAVE_SESION] = {
-                "ruta": ruta,
-                "nombre_archivo": archivo.name,
-                "cuestionario_id": cuestionario.id if cuestionario else None,
-                "cuestionario_nombre": cuestionario.nombre if cuestionario else None,
-            }
+            ImportacionPendiente.objects.filter(vence__lte=timezone.now()).delete()
+            pendiente = ImportacionPendiente.objects.create(
+                usuario=request.user, archivo=archivo.read(), nombre_archivo=archivo.name,
+                cuestionario=cuestionario, vence=request.session.get_expiry_date(),
+            )
+            request.session[CLAVE_SESION] = {"id": str(pendiente.pk)}
             return redirect("importaciones:previsualizar")
     else:
         form = ImportarPreguntasForm(usuario=request.user)
 
     return render(request, "importaciones/importar.html", {
         "form": form,
-        "pendiente": request.session.get(CLAVE_SESION),
+        "pendiente": _pendiente(request),
     })
 
 
@@ -83,12 +116,12 @@ def previsualizar_importacion(request):
         return redirect("importaciones:importar")
 
     resultado = procesar_archivo(
-        default_storage.path(pendiente["ruta"]), pendiente["nombre_archivo"],
+        BytesIO(bytes(pendiente.archivo)), pendiente.nombre_archivo,
         commit=False, excluidas=_excluidas(pendiente),
     )
     cuestionario = None
-    if pendiente.get("cuestionario_id"):
-        cuestionario = Cuestionario.objects.filter(id=pendiente["cuestionario_id"]).first()
+    if pendiente.cuestionario_id:
+        cuestionario = Cuestionario.objects.filter(id=pendiente.cuestionario_id).first()
     return render(request, "importaciones/previsualizar.html", {
         "resultado": resultado,
         "cuestionario": cuestionario,
@@ -97,11 +130,12 @@ def previsualizar_importacion(request):
 
 @login_required
 @requiere_permiso("preguntas.importar")
+@transaction.atomic
 def corregir_fila_importacion(request):
-    """Corrige en el archivo temporal los datos de una fila con error."""
+    """Guarda las correcciones del Excel en la base de datos compartida."""
     if request.method != "POST":
         return redirect("importaciones:importar")
-    pendiente = _pendiente(request)
+    pendiente = _pendiente(request, bloquear=True)
     if not pendiente:
         messages.error(request, "No hay ninguna importación en curso.")
         return redirect("importaciones:importar")
@@ -121,7 +155,10 @@ def corregir_fila_importacion(request):
     nuevos_valores["respuesta_correcta"] = nuevos_valores["respuesta_correcta"].upper()
     nuevos_valores["puntaje"] = nuevos_valores["puntaje"] or "1.0"
 
-    actualizar_fila_excel(default_storage.path(pendiente["ruta"]), fila_excel, nuevos_valores)
+    corregido = BytesIO()
+    actualizar_fila_excel(BytesIO(bytes(pendiente.archivo)), fila_excel, nuevos_valores, destino=corregido)
+    pendiente.archivo = corregido.getvalue()
+    pendiente.save(update_fields=["archivo"])
     fila = _validar_fila(nuevos_valores)
     if fila.estado == "valida":
         messages.success(request, f"Fila {fila_excel} guardada. Ya es válida para importar.")
@@ -132,11 +169,12 @@ def corregir_fila_importacion(request):
 
 @login_required
 @requiere_permiso("preguntas.importar")
+@transaction.atomic
 def excluir_fila_importacion(request):
     """Marca una fila para no importarla, o la vuelve a incluir."""
     if request.method != "POST":
         return redirect("importaciones:previsualizar")
-    pendiente = _pendiente(request)
+    pendiente = _pendiente(request, bloquear=True)
     if not pendiente:
         messages.error(request, "No hay ninguna importación en curso.")
         return redirect("importaciones:importar")
@@ -146,35 +184,37 @@ def excluir_fila_importacion(request):
         messages.error(request, "La fila indicada no es válida.")
         return redirect("importaciones:previsualizar")
 
-    excluidas = set(pendiente.get("excluidas", []))
+    excluidas = set(pendiente.excluidas)
     if request.POST.get("accion") == "incluir":
         excluidas.discard(fila_excel)
         messages.info(request, f"La fila {fila_excel} se volvió a incluir en la importación.")
     else:
         excluidas.add(fila_excel)
         messages.info(request, f"La fila {fila_excel} no se importará.")
-    pendiente["excluidas"] = sorted(excluidas)
-    request.session[CLAVE_SESION] = pendiente
+    pendiente.excluidas = sorted(excluidas)
+    pendiente.save(update_fields=["excluidas"])
     return _volver_a_fila(fila_excel)
 
 
 @login_required
 @requiere_permiso("preguntas.importar")
+@transaction.atomic
 def confirmar_importacion(request):
     """Paso 4: guarda las filas válidas en una transacción y registra la bitácora."""
     if request.method != "POST":
         return redirect("importaciones:importar")
-    pendiente = _pendiente(request)
+    pendiente = _pendiente(request, bloquear=True)
     if not pendiente:
         messages.error(request, "No hay una importación pendiente por confirmar.")
         return redirect("importaciones:importar")
 
     resultado = procesar_archivo(
-        default_storage.path(pendiente["ruta"]), pendiente["nombre_archivo"],
-        commit=True, cuestionario_id=pendiente.get("cuestionario_id"),
+        BytesIO(bytes(pendiente.archivo)), pendiente.nombre_archivo,
+        commit=True, cuestionario_id=pendiente.cuestionario_id,
         excluidas=_excluidas(pendiente),
     )
-    _descartar_pendiente(request)
+    pendiente.delete()
+    request.session.pop(CLAVE_SESION, None)
 
     messages.success(
         request,
@@ -188,6 +228,7 @@ def confirmar_importacion(request):
 
 
 @login_required
+@transaction.atomic
 def cancelar_importacion(request):
     _descartar_pendiente(request)
     messages.info(request, "Se ha cancelado la importación y liberado el archivo temporal.")
