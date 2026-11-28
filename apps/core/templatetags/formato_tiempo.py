@@ -42,3 +42,21 @@ def tiempo_relativo(momento):
     if dias < 30:
         return f"Hace {dias} días"
     return date_format(timezone.localtime(momento), "j M Y")
+
+
+def hora_12(momento) -> str:
+    """Hora local en formato de 12 horas: '2:30 p. m.', '9:05 a. m.'."""
+    from django.utils import timezone
+
+    if timezone.is_aware(momento):
+        momento = timezone.localtime(momento)
+    sufijo = "a. m." if momento.hour < 12 else "p. m."
+    return f"{(momento.hour % 12) or 12}:{momento.minute:02d} {sufijo}"
+
+
+@register.filter
+def hora(momento):
+    """Filtro de plantilla para `hora_12`: la hora siempre en 12 horas en toda la app."""
+    if not momento:
+        return ""
+    return hora_12(momento)

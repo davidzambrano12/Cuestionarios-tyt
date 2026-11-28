@@ -28,6 +28,7 @@ from openpyxl import Workbook
 from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 from openpyxl.utils import get_column_letter
 
+from apps.core.templatetags.formato_tiempo import hora_12
 from apps.reportes import consultas as c
 
 AZUL = "18668F"
@@ -35,7 +36,7 @@ GRIS = "595957"
 FMT_NOTA = "0.00"
 FMT_PCT = "0.0%"
 FMT_ENTERO = "0"
-FMT_FECHA = "dd/mm/yyyy hh:mm"
+FMT_FECHA = "dd/mm/yyyy h:mm AM/PM"
 FILA_TABLA = 4
 
 REPORTES = {
@@ -51,6 +52,12 @@ REGLAS_COMUNES = [
     "Se aprueba con la nota mínima de cada simulacro.",
 ]
 SIN_REGISTROS = "Sin registros para los filtros aplicados."
+
+
+def _ahora_legible() -> str:
+    """Fecha y hora de generación del reporte, con la hora en 12 horas."""
+    ahora = timezone.localtime()
+    return f"{ahora:%d/%m/%Y}, {hora_12(ahora)}"
 
 
 def _fecha_local(valor):
@@ -96,7 +103,7 @@ class Col:
 def _linea_filtros(filtros: c.Filtros) -> str:
     activos = filtros.activos
     texto = " · ".join(f"{n}: {v}" for n, v in activos) if activos else "sin filtros (todos los registros)"
-    return f"Generado el {timezone.localtime().strftime('%d/%m/%Y %H:%M')} · Filtros: {texto}"
+    return f"Generado el {_ahora_legible()} · Filtros: {texto}"
 
 
 ESTILO_ESTADO = {
@@ -174,7 +181,7 @@ def hoja_acerca(wb, titulo: str, filtros: c.Filtros, reglas: list[str]):
     ws.column_dimensions["B"].width = 95
     ws["A1"] = titulo
     ws["A1"].font = Font(bold=True, size=14, color=AZUL)
-    filas = [("Generado", timezone.localtime().strftime("%d/%m/%Y %H:%M")), ("", ""), ("Filtros aplicados", "")]
+    filas = [("Generado", _ahora_legible()), ("", ""), ("Filtros aplicados", "")]
     filas += list(filtros.descripcion)
     filas += [("", ""), ("Cómo se calcula", "")] + [("", regla) for regla in reglas]
     for i, (a, b) in enumerate(filas, start=3):

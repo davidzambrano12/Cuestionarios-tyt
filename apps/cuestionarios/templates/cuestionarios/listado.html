@@ -1,5 +1,5 @@
 {% extends 'layouts/app_base.html' %}
-{% load static componentes %}
+{% load static componentes formato_tiempo %}
 
 {% block title %}Cuestionarios - Simulador Saber TyT{% endblock %}
 {% block nav_title %}Cuestionarios{% endblock %}
@@ -75,7 +75,7 @@
       <p class="tarjeta-listado__periodo">
         <i data-lucide="calendar" aria-hidden="true"></i>
         <time datetime="{{ c.fecha_apertura|date:'c' }}">{{ c.fecha_apertura|date:"j M" }}</time> →
-        <time datetime="{{ c.fecha_cierre|date:'c' }}">{{ c.fecha_cierre|date:"j M Y, H:i" }}</time>
+        <time datetime="{{ c.fecha_cierre|date:'c' }}">{{ c.fecha_cierre|date:"j M Y" }}, {{ c.fecha_cierre|hora }}</time>
       </p>
 
       <div class="tarjeta-listado__pie">

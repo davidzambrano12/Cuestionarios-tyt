@@ -14,7 +14,7 @@
       {% else %}
       <a href="{% url 'evaluaciones:panel_estudiante' %}" class="btn btn-outline"><i data-lucide="arrow-left" class="icono-15"></i> Volver a mi panel</a>
       {% endif %}
-      {% if intento.fecha_fin %}<span class="texto-xs texto-suave peso-semibold">Entregado el {{ intento.fecha_fin|date:"d/m/Y H:i" }}</span>{% endif %}
+      {% if intento.fecha_fin %}<span class="texto-xs texto-suave peso-semibold">Entregado el {{ intento.fecha_fin|date:"d/m/Y" }}, {{ intento.fecha_fin|hora }}</span>{% endif %}
     </div>
 
     <!-- Resumen de la calificación -->

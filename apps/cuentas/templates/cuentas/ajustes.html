@@ -1,5 +1,5 @@
 {% extends 'layouts/app_base.html' %}
-{% load static componentes %}
+{% load static componentes formato_tiempo %}
 
 {% block title %}Ajustes del sistema - {{ config.nombre_sistema }}{% endblock %}
 {% block nav_title %}Ajustes del sistema{% endblock %}
@@ -44,7 +44,7 @@
 
     {% if puede_editar %}
     <div class="flex justify-between items-center gap-3 flex-wrap">
-      <span class="texto-xs texto-suave">{% if configuracion.actualizado_por %}Última modificación: {{ configuracion.actualizado_en|date:"d M Y · H:i" }} por {{ configuracion.actualizado_por.get_full_name|default:configuracion.actualizado_por.username }}{% endif %}</span>
+      <span class="texto-xs texto-suave">{% if configuracion.actualizado_por %}Última modificación: {{ configuracion.actualizado_en|date:"d M Y" }} · {{ configuracion.actualizado_en|hora }} por {{ configuracion.actualizado_por.get_full_name|default:configuracion.actualizado_por.username }}{% endif %}</span>
       <button type="submit" class="btn btn-primary"><i data-lucide="save" class="icono-16"></i> Guardar ajustes</button>
     </div>
     {% endif %}
