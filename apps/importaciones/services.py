@@ -36,6 +36,24 @@ TIPOS_VALIDOS = {"MULTIPLE", "V_F"}
 LETRAS_OPCION = ["A", "B", "C", "D"]
 
 
+class ArchivoExcelInvalido(ValueError):
+    pass
+
+
+def abrir_excel(archivo, *, data_only=True):
+    """Convierte los fallos del parser de archivos no confiables en un error de usuario."""
+    try:
+        libro = openpyxl.load_workbook(archivo, data_only=data_only)
+        if libro.active is None:
+            libro.close()
+            raise ValueError("El libro no contiene hojas de cálculo.")
+        return libro
+    except Exception as error:
+        raise ArchivoExcelInvalido(
+            "El archivo Excel está dañado o no es válido. Guarda una copia nueva e inténtalo otra vez."
+        ) from error
+
+
 def _texto(valor) -> str:
     if valor is None:
         return ""
@@ -261,7 +279,7 @@ def procesar_archivo(ruta_archivo: str, nombre_archivo: str, *, commit: bool = F
     `excluidas` son filas de Excel que el usuario decidió no importar: se
     validan y se muestran, pero no se guardan ni cuentan para detectar
     duplicadas dentro del archivo."""
-    wb = openpyxl.load_workbook(ruta_archivo, data_only=True)
+    wb = abrir_excel(ruta_archivo)
     ws = wb["preguntas"] if "preguntas" in wb.sheetnames else wb.active
 
     resultado = ResultadoImportacion(nombre_archivo=nombre_archivo)
@@ -350,7 +368,7 @@ def _guardar_resultado(resultado: ResultadoImportacion, cuestionario_id: int | N
 
 def actualizar_fila_excel(ruta_archivo, fila_excel: int, nuevos_valores: dict, *, destino=None) -> None:
     """Actualiza una fila en el archivo Excel con las correcciones introducidas por el usuario."""
-    wb = openpyxl.load_workbook(ruta_archivo)
+    wb = abrir_excel(ruta_archivo, data_only=False)
     ws = wb["preguntas"] if "preguntas" in wb.sheetnames else wb.active
 
     for col_idx, col_name in enumerate(COLUMNAS, start=1):

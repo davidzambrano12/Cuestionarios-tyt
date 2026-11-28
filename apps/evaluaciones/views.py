@@ -137,6 +137,9 @@ def resultado_evaluacion(request, intento_id):
     if not es_dueno_del_intento(request.user, intento) and not es_auditor:
         return HttpResponseForbidden("Acceso denegado a este reporte.")
 
+    if intento.estado == "en_progreso" and not es_auditor:
+        return redirect("evaluaciones:sala", intento_id=intento.id)
+
     permitir_revision = intento.cuestionario.permitir_revision or es_auditor or request.user.is_staff
     return render(request, "evaluaciones/resultado.html", {
         "intento": intento,

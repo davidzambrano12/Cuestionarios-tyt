@@ -4,6 +4,7 @@ import shutil
 import tempfile
 from datetime import timedelta
 from unittest.mock import patch
+from zipfile import ZipFile
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase, override_settings
@@ -105,6 +106,42 @@ class ImportacionExcelTests(TestCase):
         r = self._subir(archivo)
         self.assertEqual(r.status_code, 200)
         self.assertTrue(r.context["form"].errors)
+
+    def test_excel_corrupto_se_rechaza_sin_perder_una_carga_anterior(self):
+        self._subir(excel(FILA_VALIDA))
+        pendiente = self.client.session["importacion_pendiente"]
+        original = excel(FILA_VALIDA).read()
+        corrupto = io.BytesIO()
+        with ZipFile(io.BytesIO(original)) as origen, ZipFile(corrupto, "w") as destino:
+            for parte in origen.infolist():
+                contenido = b"<xml sin cerrar" if parte.filename == "xl/worksheets/sheet1.xml" else origen.read(parte)
+                destino.writestr(parte, contenido)
+        for datos in (b"esto no es un Excel", corrupto.getvalue()):
+            with self.subTest(contenedor_valido=datos.startswith(b"PK")):
+                respuesta = self._subir(SimpleUploadedFile("corrupto.xlsx", datos))
+                self.assertEqual(respuesta.status_code, 200)
+                self.assertIn("archivo", respuesta.context["form"].errors)
+                self.assertContains(respuesta, "El archivo Excel está dañado o no es válido.")
+                self.assertEqual(self.client.session["importacion_pendiente"], pendiente)
+        self.assertEqual(self.client.get("/preguntas/importar/previsualizar/").status_code, 200)
+
+    def test_carga_corrupta_anterior_muestra_un_error_en_los_pasos_del_flujo(self):
+        self._subir(excel(FILA_VALIDA))
+        ImportacionPendiente.objects.update(archivo=b"archivo antiguo corrupto")
+        datos = dict(zip(COLUMNAS, FILA_VALIDA))
+        datos["fila_excel"] = 2
+        peticiones = (
+            (self.client.get, "/preguntas/importar/previsualizar/", {}),
+            (self.client.post, "/preguntas/importar/corregir/", datos),
+            (self.client.post, "/preguntas/importar/confirmar/", {}),
+        )
+        for metodo, ruta, parametros in peticiones:
+            with self.subTest(ruta=ruta):
+                respuesta = metodo(ruta, parametros, follow=True)
+                self.assertEqual(respuesta.status_code, 200)
+                self.assertContains(respuesta, "El archivo Excel está dañado o no es válido.")
+        self.assertFalse(Pregunta.objects.exists())
+        self.assertFalse(Importacion.objects.exists())
 
     def test_cancelar_libera_la_importacion(self):
         self._subir(excel(FILA_VALIDA))

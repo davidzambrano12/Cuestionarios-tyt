@@ -227,6 +227,35 @@ class EvaluacionTests(TestCase):
         self.assertEqual(len(r.context["detalles_respuestas"]), 2)
         self.assertEqual(r.context["total_correctas"], 1)
 
+    def test_resultado_en_progreso_regresa_a_la_sala_sin_mostrar_claves(self):
+        self._iniciar()
+        intento = Intento.objects.get()
+        pregunta_id, opcion_id = next(iter(respuestas_correctas(self.cuestionario).items()))
+        self.client.post(
+            f"/evaluacion/{intento.pk}/guardar-respuesta/",
+            json.dumps({"pregunta_id": pregunta_id, "opcion_id": opcion_id}),
+            content_type="application/json",
+        )
+        respuesta = self.client.get(f"/evaluacion/{intento.pk}/resultado/")
+        self.assertRedirects(respuesta, f"/evaluacion/{intento.pk}/", fetch_redirect_response=False)
+        intento.refresh_from_db()
+        self.assertEqual(intento.estado, "en_progreso")
+        self.assertNotIn(b"Explicaci", respuesta.content)
+
+    def test_autoguardado_rechaza_preguntas_de_otro_cuestionario(self):
+        ajeno = crear_cuestionario(num_preguntas=1, visibilidad="privado", creado_por=self.docente)
+        pregunta_id, opcion_id = next(iter(respuestas_correctas(ajeno).items()))
+        self._iniciar()
+        intento = Intento.objects.get()
+        respuesta = self.client.post(
+            f"/evaluacion/{intento.pk}/guardar-respuesta/",
+            json.dumps({"pregunta_id": pregunta_id, "opcion_id": opcion_id}),
+            content_type="application/json",
+        )
+        self.assertEqual(respuesta.status_code, 400)
+        self.assertIn("no pertenece", respuesta.json()["mensaje"])
+        self.assertFalse(intento.respuestas.exists())
+
     def test_resultado_oculta_revision_si_no_esta_permitida(self):
         self.cuestionario.permitir_revision = False
         self.cuestionario.save()

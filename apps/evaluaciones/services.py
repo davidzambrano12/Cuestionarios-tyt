@@ -199,12 +199,16 @@ def guardar_respuesta(intento: Intento, pregunta_id: int, opcion_id=None, marcad
         raise ValueError("El examen ya no está activo.")
     if excedio_tiempo(intento):
         raise ValueError("El tiempo límite del examen ya venció.")
-    pregunta = Pregunta.objects.get(id=pregunta_id)
+    cp = CuestionarioPregunta.objects.select_related("pregunta").filter(
+        cuestionario=intento.cuestionario, pregunta_id=pregunta_id,
+    ).first()
+    if cp is None:
+        raise ValueError("La pregunta no pertenece a este examen.")
+    pregunta = cp.pregunta
     opcion = None
     if opcion_id:
         opcion = OpcionRespuesta.objects.filter(id=int(opcion_id), pregunta=pregunta).first()
     es_correcta = bool(opcion and opcion.es_correcta)
-    cp = CuestionarioPregunta.objects.filter(cuestionario=intento.cuestionario, pregunta=pregunta).first()
 
     respuesta, _ = RespuestaIntento.objects.update_or_create(
         intento=intento,

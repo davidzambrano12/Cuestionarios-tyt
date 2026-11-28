@@ -14,7 +14,7 @@ from apps.core.decorators import requiere_permiso
 from apps.importaciones.forms import ImportarPreguntasForm
 from apps.importaciones.models import ImportacionPendiente
 from apps.cuestionarios.models import Cuestionario
-from apps.importaciones.services import COLUMNAS, _validar_fila, actualizar_fila_excel, procesar_archivo
+from apps.importaciones.services import ArchivoExcelInvalido, COLUMNAS, _validar_fila, actualizar_fila_excel, procesar_archivo
 
 CLAVE_SESION = "importacion_pendiente"
 
@@ -115,10 +115,14 @@ def previsualizar_importacion(request):
         messages.warning(request, "No hay ningún archivo cargado pendiente por validar.")
         return redirect("importaciones:importar")
 
-    resultado = procesar_archivo(
-        BytesIO(bytes(pendiente.archivo)), pendiente.nombre_archivo,
-        commit=False, excluidas=_excluidas(pendiente),
-    )
+    try:
+        resultado = procesar_archivo(
+            BytesIO(bytes(pendiente.archivo)), pendiente.nombre_archivo,
+            commit=False, excluidas=_excluidas(pendiente),
+        )
+    except ArchivoExcelInvalido as error:
+        messages.error(request, str(error))
+        return redirect("importaciones:importar")
     cuestionario = None
     if pendiente.cuestionario_id:
         cuestionario = Cuestionario.objects.filter(id=pendiente.cuestionario_id).first()
@@ -156,7 +160,11 @@ def corregir_fila_importacion(request):
     nuevos_valores["puntaje"] = nuevos_valores["puntaje"] or "1.0"
 
     corregido = BytesIO()
-    actualizar_fila_excel(BytesIO(bytes(pendiente.archivo)), fila_excel, nuevos_valores, destino=corregido)
+    try:
+        actualizar_fila_excel(BytesIO(bytes(pendiente.archivo)), fila_excel, nuevos_valores, destino=corregido)
+    except ArchivoExcelInvalido as error:
+        messages.error(request, str(error))
+        return redirect("importaciones:importar")
     pendiente.archivo = corregido.getvalue()
     pendiente.save(update_fields=["archivo"])
     fila = _validar_fila(nuevos_valores)
@@ -208,11 +216,15 @@ def confirmar_importacion(request):
         messages.error(request, "No hay una importación pendiente por confirmar.")
         return redirect("importaciones:importar")
 
-    resultado = procesar_archivo(
-        BytesIO(bytes(pendiente.archivo)), pendiente.nombre_archivo,
-        commit=True, cuestionario_id=pendiente.cuestionario_id,
-        excluidas=_excluidas(pendiente),
-    )
+    try:
+        resultado = procesar_archivo(
+            BytesIO(bytes(pendiente.archivo)), pendiente.nombre_archivo,
+            commit=True, cuestionario_id=pendiente.cuestionario_id,
+            excluidas=_excluidas(pendiente),
+        )
+    except ArchivoExcelInvalido as error:
+        messages.error(request, str(error))
+        return redirect("importaciones:importar")
     pendiente.delete()
     request.session.pop(CLAVE_SESION, None)
 

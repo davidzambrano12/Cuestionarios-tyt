@@ -1,6 +1,7 @@
 from django.core.exceptions import ValidationError
 from django import forms
 from apps.cuestionarios.models import Cuestionario
+from apps.importaciones.services import ArchivoExcelInvalido, abrir_excel
 
 EXTENSIONES_VALIDAS = (".xlsx", ".xlsm")
 
@@ -34,5 +35,14 @@ class ImportarPreguntasForm(forms.Form):
         limite_mb = 5
         if archivo.size > limite_mb * 1024 * 1024:
             raise ValidationError(f"El archivo supera el límite de {limite_mb} MB.")
+        libro = None
+        try:
+            libro = abrir_excel(archivo)
+        except ArchivoExcelInvalido as error:
+            raise ValidationError(str(error)) from error
+        finally:
+            if libro is not None:
+                libro.close()
+            archivo.seek(0)
         return archivo
 
