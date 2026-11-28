@@ -118,12 +118,12 @@
               {% with ult=est.ultimo_intento %}
                 {% if est.tiene_activo %}
                   <div class="texto-principal peso-semibold">Presentando ahora</div>
-                  <div class="texto-suave">Inició {{ ult.fecha_inicio|date:"d M · H:i" }}</div>
+                  <div class="texto-suave">Inició {{ ult.fecha_inicio|date:"d M" }} · {{ ult.fecha_inicio|hora }}</div>
                 {% elif ult.fecha_fin %}
-                  <div class="texto-principal peso-semibold nowrap">{{ ult.fecha_fin|date:"d M Y · H:i" }}</div>
+                  <div class="texto-principal peso-semibold nowrap">{{ ult.fecha_fin|date:"d M Y" }} · {{ ult.fecha_fin|hora }}</div>
                   <div class="texto-suave">Duración: {{ ult.duracion_segundos|duracion }}</div>
                 {% else %}
-                  <div class="texto-suave nowrap">Inició {{ ult.fecha_inicio|date:"d M · H:i" }}</div>
+                  <div class="texto-suave nowrap">Inició {{ ult.fecha_inicio|date:"d M" }} · {{ ult.fecha_inicio|hora }}</div>
                 {% endif %}
               {% endwith %}
             </td>
@@ -153,7 +153,7 @@
                   <li class="detalle-intentos__item">
                     <div class="flex items-center gap-3 flex-wrap">
                       <span class="badge badge-oscuro">Intento {{ forloop.revcounter }}</span>
-                      <span class="cifras inline-flex items-center gap-1"><i data-lucide="calendar" aria-hidden="true" class="icono-12 texto-suave"></i> {{ it.fecha_inicio|date:"d M Y · H:i" }}</span>
+                      <span class="cifras inline-flex items-center gap-1"><i data-lucide="calendar" aria-hidden="true" class="icono-12 texto-suave"></i> {{ it.fecha_inicio|date:"d M Y" }} · {{ it.fecha_inicio|hora }}</span>
                       {% if it.duracion_segundos %}
                         <span class="cifras texto-suave inline-flex items-center gap-1"><i data-lucide="timer" aria-hidden="true" class="icono-12"></i> {{ it.duracion_segundos|duracion }}</span>
                       {% endif %}
@@ -231,8 +231,8 @@
               <div class="texto-xs texto-suave">Código: <strong class="cifras texto-primario">{{ i.participante_codigo }}</strong></div>
             </td>
             <td class="cifras texto-sm">
-              <div>{{ i.fecha_inicio|date:"d M Y · H:i" }}</div>
-              {% if i.fecha_fin %}<div class="texto-xs texto-suave">Entregó {{ i.fecha_fin|date:"H:i" }}</div>{% endif %}
+              <div>{{ i.fecha_inicio|date:"d M Y" }} · {{ i.fecha_inicio|hora }}</div>
+              {% if i.fecha_fin %}<div class="texto-xs texto-suave">Entregó {{ i.fecha_fin|hora }}</div>{% endif %}
             </td>
             <td class="cifras texto-sm texto-centro">{{ i.duracion_segundos|duracion }}</td>
             <td class="cifras texto-centro">
