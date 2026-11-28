@@ -88,8 +88,15 @@
 
   /* ------------------------------------------------------------ Ficha resumen */
 
+  // Igual que la plantilla: «27 Nov 2026, 2:30 p. m.» (hora de 12 horas en toda la app)
+  const MESES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
   function formatoFecha(valor) {
-    return valor ? valor.replace('T', ' ') : '';
+    const partes = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(valor || '');
+    if (!partes) return '';
+    const [, anio, mes, dia, hh, mm] = partes;
+    const hora = Number(hh);
+    const sufijo = hora < 12 ? 'a. m.' : 'p. m.';
+    return `${dia} ${MESES[Number(mes) - 1]} ${anio}, ${hora % 12 || 12}:${mm} ${sufijo}`;
   }
 
   function actualizarResumen() {
